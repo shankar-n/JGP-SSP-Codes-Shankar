@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: shankar-draft.aux
+Reallocating 'name_of_file' (item size: 1) to 9 items.
+The style file: plainnat.bst
+Reallocating 'name_of_file' (item size: 1) to 14 items.
+Database file #1: shankar-draft.bib
+Warning--I didn't find a database entry for "Xia2024"
+Warning--can't use both volume and number fields in Sun2022
+You've used 19 entries,
+            2773 wiz_defined-function locations,
+            739 strings with 8426 characters,
+and the built_in function-call counts, 9272 in all, are:
+= -- 852
+> -- 503
+< -- 11
++ -- 169
+- -- 150
+* -- 805
+:= -- 1403
+add.period$ -- 57
+call.type$ -- 19
+change.case$ -- 107
+chr.to.int$ -- 19
+cite$ -- 39
+duplicate$ -- 403
+empty$ -- 770
+format.name$ -- 183
+if$ -- 1927
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 19
+newline$ -- 103
+num.names$ -- 76
+pop$ -- 183
+preamble$ -- 1
+purify$ -- 88
+quote$ -- 0
+skip$ -- 310
+stack$ -- 0
+substring$ -- 481
+swap$ -- 33
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 209
+warning$ -- 1
+while$ -- 93
+width$ -- 0
+write$ -- 254
+(There were 2 warnings)
