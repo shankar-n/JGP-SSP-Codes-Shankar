@@ -1,0 +1,116 @@
+\relax 
+\providecommand\babel@aux[2]{}
+\@nameuse{bbl@beforestart}
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{Tang1988}
+\babel@aux{english}{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\citation{Crama1994}
+\citation{Catanzaro2015}
+\citation{Crama1994}
+\citation{Tang1988}
+\citation{Crama1994}
+\@writefile{toc}{\contentsline {section}{\numberline {2}The Colares-Wagler Non-Compact Formulation}{2}{section.2}\protected@file@percent }
+\citation{Catanzaro2015,Laporte2004}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces An incidence matrix for a 5-job, 7-tool instance. The machine magazine has a capacity $b = 4$. Assuming the sequence $j_1 \to j_2 \to j_3 \to j_4 \to j_5$, tool $t_1$ is required by jobs $j_1$, $j_4$, and $j_5$, but not by $j_2$ and $j_3$. This gap of non-requirement represents a 0-block for $t_1$. Because $b = 4$ is large enough to accommodate the transition tool requirements, the optimal policy evaluates whether to ``flip'' this 0-block by retaining $t_1$ through jobs $j_2$ and $j_3$ to avoid redundant setups.}}{3}{figure.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:incidence_matrix}{{1}{3}{An incidence matrix for a 5-job, 7-tool instance. The machine magazine has a capacity $b = 4$. Assuming the sequence $j_1 \to j_2 \to j_3 \to j_4 \to j_5$, tool $t_1$ is required by jobs $j_1$, $j_4$, and $j_5$, but not by $j_2$ and $j_3$. This gap of non-requirement represents a 0-block for $t_1$. Because $b = 4$ is large enough to accommodate the transition tool requirements, the optimal policy evaluates whether to ``flip'' this 0-block by retaining $t_1$ through jobs $j_2$ and $j_3$ to avoid redundant setups}{figure.caption.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Illustrative Example: Magazine State Evolution}{3}{subsection.2.1}\protected@file@percent }
+\citation{Tang1988}
+\citation{Colares2026}
+\citation{Colares2026}
+\citation{Tang1988}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces State-space timeline of the tool magazine. Here, tool $t_1$ is safely retained across its 0-block (strictly during jobs $j_2$ and $j_3$) because the magazine capacity is large enough to accommodate the transition tools. This flips the 0-block to 1s in the state space, avoiding redundant unloading and reloading operations.}}{4}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:state_space_timeline}{{2}{4}{State-space timeline of the tool magazine. Here, tool $t_1$ is safely retained across its 0-block (strictly during jobs $j_2$ and $j_3$) because the magazine capacity is large enough to accommodate the transition tools. This flips the 0-block to 1s in the state space, avoiding redundant unloading and reloading operations}{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Definitions, Variables, and Maximal Configurations}{4}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Mathematical Model and Correctness}{5}{subsection.2.3}\protected@file@percent }
+\newlabel{eq:obj}{{2}{5}{Mathematical Model and Correctness}{equation.2.2}{}}
+\newlabel{eq:cover}{{3}{5}{Mathematical Model and Correctness}{equation.2.3}{}}
+\newlabel{eq:flow_out}{{4}{5}{Mathematical Model and Correctness}{equation.2.4}{}}
+\newlabel{eq:flow_in}{{5}{5}{Mathematical Model and Correctness}{equation.2.5}{}}
+\newlabel{eq:subtour}{{6}{5}{Mathematical Model and Correctness}{equation.2.6}{}}
+\newlabel{eq:x_bin}{{7}{5}{Mathematical Model and Correctness}{equation.2.7}{}}
+\newlabel{eq:y_bin}{{8}{5}{Mathematical Model and Correctness}{equation.2.8}{}}
+\citation{Lien1993}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Graph Transformations and Complexity}{7}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Formal Definition of Instances}{7}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}State-Space Transformation: From SSP to GTSP}{7}{subsection.3.2}\protected@file@percent }
+\citation{Lien1993}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The Intersecting-to-Nonintersecting (I-N) transformation. A configuration $C$ capable of satisfying both Job 1 and Job 2 is duplicated into job-specific replicas $v_{C,1}$ and $v_{C,2}$ in strictly disjoint clusters, connected by a zero-cost edge.}}{8}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:in_transform}{{3}{8}{The Intersecting-to-Nonintersecting (I-N) transformation. A configuration $C$ capable of satisfying both Job 1 and Job 2 is duplicated into job-specific replicas $v_{C,1}$ and $v_{C,2}$ in strictly disjoint clusters, connected by a zero-cost edge}{figure.caption.3}{}}
+\citation{Tang1988}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Theoretical Equivalence and Structural Subsumption}{9}{subsection.3.3}\protected@file@percent }
+\citation{Colares2026}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces The theoretical restricted reverse construction. By generating disjoint dummy tools for specific configurations, the SSP transition metric $b - |C_u \cap C_v|$ can be engineered to match integer GTSP edge weights. This construction requires exponential time to encode a full graph.}}{10}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:dummy_tools}{{4}{10}{The theoretical restricted reverse construction. By generating disjoint dummy tools for specific configurations, the SSP transition metric $b - |C_u \cap C_v|$ can be engineered to match integer GTSP edge weights. This construction requires exponential time to encode a full graph}{figure.caption.4}{}}
+\citation{Noon1993}
+\citation{Helsgaun2015}
+\citation{Sun2022}
+\citation{Sun2022}
+\citation{Crama1994}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Algorithmic Implications of the Complexity Space}{11}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Relationship with the Job Grouping Problem (JGP)}{11}{section.4}\protected@file@percent }
+\citation{Tang1988}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces The complexity space of solving the SSP. Tractable instances can be reduced to ATSP and solved via highly optimized routing solvers. Massive instances bypass the exponential bottleneck via a Branch-and-Price framework, where the NP-hard pricing oracle is solved dynamically using metaheuristics or Machine Learning \citep  {Sun2022}.}}{12}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:complexity_flowchart}{{5}{12}{The complexity space of solving the SSP. Tractable instances can be reduced to ATSP and solved via highly optimized routing solvers. Massive instances bypass the exponential bottleneck via a Branch-and-Price framework, where the NP-hard pricing oracle is solved dynamically using metaheuristics or Machine Learning \citep {Sun2022}}{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Conceptual Distinction and Suboptimality of JGP}{12}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Approximation Bounds from JGP to SSP}{13}{subsection.4.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Graph-theoretic contrast between the Job Grouping Problem (JGP) and the Tool Switching Problem (SSP). The JGP acts as a Set Covering problem, mapping jobs to rigid, independent configuration nodes separated by full machine stops. The SSP models a continuous routing path, evaluating dynamic edge costs between individual jobs and allowing specific tools (such as $t_1$) to flow seamlessly across the sequence.}}{14}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:jgp_vs_ssp}{{6}{14}{Graph-theoretic contrast between the Job Grouping Problem (JGP) and the Tool Switching Problem (SSP). The JGP acts as a Set Covering problem, mapping jobs to rigid, independent configuration nodes separated by full machine stops. The SSP models a continuous routing path, evaluating dynamic edge costs between individual jobs and allowing specific tools (such as $t_1$) to flow seamlessly across the sequence}{figure.caption.6}{}}
+\citation{Privault1995}
+\citation{Crama1994}
+\citation{Mecler2021}
+\citation{Beezao2017}
+\citation{Helsgaun2015}
+\citation{Tang1988}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Tightening the Bounds: From Heuristics to Exact Methods}{15}{subsection.4.3}\protected@file@percent }
+\citation{Laporte2004}
+\citation{Fischetti1997}
+\citation{Crama1994}
+\citation{Crama1994}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Tool-Dependent Setup Times and Lexicographical Minimization}{16}{subsection.4.4}\protected@file@percent }
+\citation{Adjiashvili2015}
+\citation{Adjiashvili2015}
+\@writefile{toc}{\contentsline {section}{\numberline {5}The Pricing Oracle and the Set Union Knapsack Problem}{17}{section.5}\protected@file@percent }
+\citation{Goldschmidt1994}
+\citation{Goldschmidt1994}
+\citation{Noon1993}
+\citation{Helsgaun2015}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Exact Routing for Tractable Instances}{18}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Dynamic Node Generation and the True Pricing Bottleneck}{19}{section.7}\protected@file@percent }
+\newlabel{eq:reduced_cost}{{17}{19}{Dynamic Node Generation and the True Pricing Bottleneck}{equation.7.17}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Machine Learning Interventions}{20}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Pricing Graph Pruning via GNNs}{20}{subsection.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Reinforcement Learning for Column Selection}{20}{subsection.8.2}\protected@file@percent }
+\citation{Xia2024}
+\citation{Vaclavik2018}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Feasibility Checking via Sequence Models}{21}{subsection.8.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.4}Regression for Bound Prediction}{21}{subsection.8.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Experimental Roadmap}{21}{section.9}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Experimental Roadmap for ML-Accelerated Exact Branch-and-Price.}}{21}{table.caption.7}\protected@file@percent }
+\newlabel{tab:roadmap}{{1}{21}{Experimental Roadmap for ML-Accelerated Exact Branch-and-Price}{table.caption.7}{}}
+\bibstyle{plainnat}
+\bibdata{shankar-draft}
+\bibcite{Adjiashvili2015}{{1}{2015}{{Adjiashvili et~al.}}{{Adjiashvili, Bosio, and Zemmer}}}
+\bibcite{Beezao2017}{{2}{2017}{{Beez{\~a}o et~al.}}{{Beez{\~a}o, Cordeau, Laporte, and Yanasse}}}
+\bibcite{Belady1966}{{3}{1966}{{Belady}}{{}}}
+\bibcite{Catanzaro2015}{{4}{2015}{{Catanzaro et~al.}}{{Catanzaro, Gouveia, and Labb{\'e}}}}
+\@writefile{toc}{\contentsline {section}{\numberline {10}Conclusion}{22}{section.10}\protected@file@percent }
+\bibcite{Colares2026}{{5}{2026}{{Colares and Wagler}}{{}}}
+\bibcite{Crama1994}{{6}{1994}{{Crama and Oerlemans}}{{}}}
+\bibcite{Fischetti1997}{{7}{1997}{{Fischetti et~al.}}{{Fischetti, Salazar-Gonz{\'a}lez, and Toth}}}
+\bibcite{Furrer2017}{{8}{2017}{{Furrer and M{\"u}tze}}{{}}}
+\bibcite{Goldschmidt1994}{{9}{1994}{{Goldschmidt et~al.}}{{Goldschmidt, Nehme, and Yu}}}
+\bibcite{Helsgaun2015}{{10}{2015}{{Helsgaun}}{{}}}
+\bibcite{Laporte2004}{{11}{2004}{{Laporte et~al.}}{{Laporte, Salazar-Gonz{\'a}lez, and Semet}}}
+\bibcite{Lien1993}{{12}{1993}{{Lien et~al.}}{{Lien, Ma, and Wah}}}
+\bibcite{Mecler2021}{{13}{2021}{{Mecler et~al.}}{{Mecler, Subramanian, and Vidal}}}
+\bibcite{Noon1993}{{14}{1993}{{Noon and Bean}}{{}}}
+\bibcite{Privault1995}{{15}{1995}{{Privault and Finke}}{{}}}
+\bibcite{Privault2000}{{16}{2000}{{Privault and Finke}}{{}}}
+\bibcite{Sun2022}{{17}{2022}{{Shen et~al.}}{{Shen, Sun, Li, Eberhard, and Ernst}}}
+\bibcite{Tang1988}{{18}{1988}{{Tang and Denardo}}{{}}}
+\bibcite{Vaclavik2018}{{19}{2018}{{V{\'a}clav{\'\i }k et~al.}}{{V{\'a}clav{\'\i }k, Nov{\'a}k, {\v {S}}{\r {u}}cha, and Hanz{\'a}lek}}}
+\gdef \@abspage@last{24}
