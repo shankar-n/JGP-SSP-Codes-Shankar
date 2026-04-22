@@ -5,47 +5,47 @@ Reallocating 'name_of_file' (item size: 1) to 9 items.
 The style file: plainnat.bst
 Reallocating 'name_of_file' (item size: 1) to 14 items.
 Database file #1: shankar-draft.bib
+Warning--I didn't find a database entry for "Muter2013"
 Warning--I didn't find a database entry for "Xia2024"
-Warning--can't use both volume and number fields in Sun2022
-You've used 19 entries,
+You've used 13 entries,
             2773 wiz_defined-function locations,
-            739 strings with 8426 characters,
-and the built_in function-call counts, 9272 in all, are:
-= -- 852
-> -- 503
-< -- 11
-+ -- 169
-- -- 150
-* -- 805
-:= -- 1403
-add.period$ -- 57
-call.type$ -- 19
-change.case$ -- 107
-chr.to.int$ -- 19
-cite$ -- 39
-duplicate$ -- 403
-empty$ -- 770
-format.name$ -- 183
-if$ -- 1927
+            696 strings with 7373 characters,
+and the built_in function-call counts, 6249 in all, are:
+= -- 571
+> -- 352
+< -- 6
++ -- 118
+- -- 105
+* -- 550
+:= -- 959
+add.period$ -- 39
+call.type$ -- 13
+change.case$ -- 74
+chr.to.int$ -- 13
+cite$ -- 26
+duplicate$ -- 266
+empty$ -- 512
+format.name$ -- 128
+if$ -- 1286
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 19
-newline$ -- 103
-num.names$ -- 76
-pop$ -- 183
+missing$ -- 13
+newline$ -- 73
+num.names$ -- 52
+pop$ -- 125
 preamble$ -- 1
-purify$ -- 88
+purify$ -- 61
 quote$ -- 0
-skip$ -- 310
+skip$ -- 202
 stack$ -- 0
-substring$ -- 481
-swap$ -- 33
-text.length$ -- 2
+substring$ -- 308
+swap$ -- 13
+text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 209
-warning$ -- 1
-while$ -- 93
+type$ -- 143
+warning$ -- 0
+while$ -- 63
 width$ -- 0
-write$ -- 254
+write$ -- 175
 (There were 2 warnings)
