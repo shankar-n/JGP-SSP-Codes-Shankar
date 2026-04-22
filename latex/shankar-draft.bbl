@@ -1,29 +1,17 @@
-\begin{thebibliography}{19}
+\begin{thebibliography}{13}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
-\bibitem[Adjiashvili et~al.(2015)Adjiashvili, Bosio, and
-  Zemmer]{Adjiashvili2015}
-David Adjiashvili, Sandro Bosio, and Kevin Zemmer.
-\newblock Minimizing the number of switch instances on a flexible machine in
-  polynomial time.
-\newblock \emph{Operations Research Letters}, 43\penalty0 (3):\penalty0
-  317--322, 2015.
-
-\bibitem[Beez{\~a}o et~al.(2017)Beez{\~a}o, Cordeau, Laporte, and
-  Yanasse]{Beezao2017}
-A.~C. Beez{\~a}o, J.-F. Cordeau, G.~Laporte, and H.~H. Yanasse.
-\newblock Scheduling identical parallel machines with tooling constraints.
-\newblock \emph{European Journal of Operational Research}, 257\penalty0
-  (3):\penalty0 834--844, 2017.
-
-\bibitem[Belady(1966)]{Belady1966}
-L{\'a}szl{\'o}~A. Belady.
-\newblock A study of replacement algorithms for a virtual-storage computer.
-\newblock \emph{IBM Systems journal}, 5\penalty0 (2):\penalty0 78--101, 1966.
+\bibitem[Barnhart et~al.(1998)Barnhart, Johnson, Nemhauser, Savelsbergh, and
+  Vance]{Barnhart1998}
+Cynthia Barnhart, Ellis~L. Johnson, George~L. Nemhauser, Martin W.~P.
+  Savelsbergh, and Pamela~H. Vance.
+\newblock Branch-and-price: Column generation for solving huge integer
+  programs.
+\newblock \emph{Operations Research}, 46\penalty0 (3):\penalty0 316--329, 1998.
 
 \bibitem[Catanzaro et~al.(2015)Catanzaro, Gouveia, and
   Labb{\'e}]{Catanzaro2015}
@@ -52,13 +40,6 @@ Matteo Fischetti, Juan~Jos{\'e} Salazar-Gonz{\'a}lez, and Paolo Toth.
   salesman problem.
 \newblock \emph{Operations Research}, 45\penalty0 (3):\penalty0 378--394, 1997.
 
-\bibitem[Furrer and M{\"u}tze(2017)]{Furrer2017}
-M.~Furrer and T.~M{\"u}tze.
-\newblock An algorithmic framework for tool switching problems with multiple
-  objectives.
-\newblock \emph{European Journal of Operational Research}, 259\penalty0
-  (3):\penalty0 1003--1016, 2017.
-
 \bibitem[Goldschmidt et~al.(1994)Goldschmidt, Nehme, and Yu]{Goldschmidt1994}
 O.~Goldschmidt, D.~Nehme, and G.~Yu.
 \newblock Note on the set-union knapsack problem.
@@ -86,12 +67,6 @@ Yao-Nan Lien, Eva Ma, and Benjamin W.~S. Wah.
 \newblock \emph{Information Sciences}, 74\penalty0 (1-2):\penalty0 177--189,
   1993.
 
-\bibitem[Mecler et~al.(2021)Mecler, Subramanian, and Vidal]{Mecler2021}
-Jordana Mecler, Anand Subramanian, and Thibaut Vidal.
-\newblock A simple and effective hybrid genetic search for the job sequencing
-  and tool switching problem.
-\newblock \emph{Computers \& Operations Research}, 127:\penalty0 105153, 2021.
-
 \bibitem[Noon and Bean(1993)]{Noon1993}
 Charles~E. Noon and James~C. Bean.
 \newblock An efficient transformation of the generalized traveling salesman
@@ -104,20 +79,6 @@ Caroline Privault and Gerd Finke.
 \newblock Modelling a tool switching problem on a single nc-machine.
 \newblock \emph{Journal of Intelligent Manufacturing}, 6\penalty0 (2):\penalty0
   87--94, 1995.
-
-\bibitem[Privault and Finke(2000)]{Privault2000}
-Caroline Privault and Gerd Finke.
-\newblock K-server problems with bulk requests: An application to tool
-  switching in manufacturing.
-\newblock \emph{Annals of Operations Research}, 96\penalty0 (1/4):\penalty0
-  255--269, 2000.
-
-\bibitem[Shen et~al.(2022)Shen, Sun, Li, Eberhard, and Ernst]{Sun2022}
-Yunzhuang Shen, Yuan Sun, Xiaodong Li, Andrew Eberhard, and Andreas Ernst.
-\newblock Enhancing column generation by a machine-learning-based pricing
-  heuristic for graph coloring.
-\newblock In \emph{Proceedings of the AAAI Conference on Artificial
-  Intelligence}, volume~36, pages 9926--9934, 2022.
 
 \bibitem[Tang and Denardo(1988)]{Tang1988}
 Christopher~S. Tang and Eric~V. Denardo.
