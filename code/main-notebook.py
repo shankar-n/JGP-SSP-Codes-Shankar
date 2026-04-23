@@ -1,6 +1,13 @@
+# /// script
+# requires-python = ">=3.13"
+# dependencies = [
+#     "marimo>=0.23.2",
+# ]
+# ///
+
 import marimo
 
-__generated_with = "0.23.1"
+__generated_with = "0.23.2"
 app = marimo.App(width="medium")
 
 
@@ -146,49 +153,49 @@ def _(Model, itertools, quicksum):
     def solve_ssp_gtsp_disjoint(num_jobs, num_tools, b, A, T_j):
             print("\n--- Starting Disjoint GTSP Solver (Path Formulation) ---")
             print(f"Jobs: {num_jobs}, Tools: {num_tools}, Capacity: {b}")
- 
+
             # 1. Generate all valid configurations of size b
             all_tools = list(range(num_tools))
             all_configs = list(itertools.combinations(all_tools, b))
- 
+
             # 2. Apply the I-N Transformation (Creating Disjoint Clusters)
             # Add a dummy job to break the tour into an open path
             dummy_job = num_jobs
             num_nodes = num_jobs + 1
- 
+
             V_j = {j: [] for j in range(num_nodes)}
- 
+
             # Populate actual jobs with valid configurations
             for conf in all_configs:
                 c_set = set(conf)
                 for j in range(num_jobs):
                     if set(T_j[j]).issubset(c_set):
                         V_j[j].append(conf) 
- 
+
             # SAFETY CHECK: Ensure all actual jobs can be processed
             for j in range(num_jobs):
                 if not V_j[j]:
                     print(f"CRITICAL ERROR: Job {j} requires more tools than capacity b={b}!")
                     return 0, []
- 
+
             # Populate the dummy job with a single artificial configuration
             V_j[dummy_job].append("DUMMY_CONFIG")
- 
+
             # Distance metric: 0 cost to/from the dummy job to break the cycle
             def edge_cost(Cu, i, Cv, j):
                 if i == dummy_job or j == dummy_job:
                     return 0
                 return b - len(set(Cu).intersection(set(Cv)))
- 
+
             # 3. Model Setup
             model = Model("SSP_GTSP_Path")
- 
+
             # Variables
             y = {}
             for j in range(num_nodes):
                 for C in V_j[j]:
                     y[C, j] = model.addVar(vtype="B", name=f"y_{C}_{j}")
- 
+
             x = {}
             for i in range(num_nodes):
                 for j in range(num_nodes):
@@ -196,7 +203,7 @@ def _(Model, itertools, quicksum):
                         for Cu in V_j[i]:
                             for Cv in V_j[j]:
                                 x[Cu, i, Cv, j] = model.addVar(vtype="B", name=f"x_{Cu}_{i}_{Cv}_{j}")
- 
+
             # Objective
             model.setObjective(
                 quicksum(edge_cost(Cu, i, Cv, j) * x[Cu, i, Cv, j] 
@@ -204,11 +211,11 @@ def _(Model, itertools, quicksum):
                          for Cu in V_j[i] for Cv in V_j[j]), 
                 "minimize"
             )
- 
+
             # Constraint 1: Exact Covering
             for j in range(num_nodes):
                 model.addCons(quicksum(y[C, j] for C in V_j[j]) == 1, f"Cover_{j}")
- 
+
             # Constraint 2 & 3: Flow Conservation
             for i in range(num_nodes):
                 for Cu in V_j[i]:
@@ -220,7 +227,7 @@ def _(Model, itertools, quicksum):
                         quicksum(x[Cv, j, Cu, i] for j in range(num_nodes) if j != i for Cv in V_j[j]) == y[Cu, i], 
                         f"FlowIn_{Cu}_{i}"
                     )
- 
+
             # Constraint 4: Static GSECs over disjoint clusters
             nodes_set = set(range(num_nodes))
             for r in range(2, num_nodes):
@@ -229,35 +236,35 @@ def _(Model, itertools, quicksum):
                                               for i in S for j in S if i != j 
                                               for Cu in V_j[i] for Cv in V_j[j])
                     model.addCons(edges_internal <= len(S) - 1, f"GSEC_{S}")
- 
+
             # 4. Optimize
             print("Model built successfully. Starting optimization...")
             model.optimize()
- 
+
             status = model.getStatus()
             print(f"Solver Status Finished As: {status}")
- 
+
             # 5. Extract Optimal Sequence
             obj_val = 0
             ssp_route = []
- 
+
             if model.getStatus() == "optimal":
                 obj_val = model.getObjVal()
                 print(f"Objective Value (Minimum Switches) Found: {obj_val}")
- 
+
                 # Extract active edges: format is ((Cu, i), (Cv, j))
                 active_edges = [((Cu, i), (Cv, j)) 
                                 for i in range(num_nodes) for j in range(num_nodes) if i != j 
                                 for Cu in V_j[i] for Cv in V_j[j] 
                                 if model.getVal(x[Cu, i, Cv, j]) == 1.0]
- 
+
                 if active_edges:
                     start_edge = active_edges[0]
                     curr_edge = start_edge
                     while True:
                         # Append the (Configuration, Job_Index) tuple of the starting node
                         ssp_route.append(curr_edge) 
-    
+
                         # Find the edge that starts where the current edge ends
                         next_edge = next((e for e in active_edges if e[0] == curr_edge[1]), None)
                         if next_edge is None or next_edge == active_edges[0]:
@@ -265,7 +272,7 @@ def _(Model, itertools, quicksum):
                         curr_edge = next_edge 
             else:
                 print("WARNING: Optimal solution was found by the solver.")
- 
+
             return obj_val, ssp_route
 
     return (solve_ssp_gtsp_disjoint,)
@@ -629,9 +636,12 @@ def _(ListedColormap, np, plt, sns):
         # Unpack the I-N transformation tuples
         for step, edge in enumerate(ssp_route):
             (config, job_idx) = edge[0]
-            for t in config:
-                ssp_matrix[t, step] = 1
-            # Label precisely which job this configuration replica is serving
+            if(config == "DUMMY_CONFIG"):
+                ssp_matrix[-1, step] = 1
+            else:
+                for t in config:
+                    ssp_matrix[t, step] = 1
+                # Label precisely which job this configuration replica is serving
             x_labels.append(f"Job {job_idx+1}\n(C_{step+1})")
 
         sns.heatmap(ssp_matrix, cmap=cmap, cbar=False, linewidths=2, linecolor='white', ax=axes[1])
