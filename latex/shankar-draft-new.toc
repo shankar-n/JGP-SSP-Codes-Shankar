@@ -1,0 +1,34 @@
+\babel@toc {english}{}\relax 
+\contentsline {section}{\numberline {1}Introduction and Motivation}{4}{section.1}%
+\contentsline {paragraph}{Roadmap.}{4}{section*.2}%
+\contentsline {section}{\numberline {2}Problem Preliminaries}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Basic Definitions}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}The Tang--Denardo Decomposition and KTNS}{5}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Configuration-Based Reformulation}{6}{section.3}%
+\contentsline {subsection}{\numberline {3.1}0-Blocks and Why They Create Symmetry}{6}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}The Configuration-Based MILP}{7}{subsection.3.2}%
+\contentsline {paragraph}{Variables.}{7}{section*.4}%
+\contentsline {paragraph}{Formulation.}{7}{section*.5}%
+\contentsline {section}{\numberline {4}GTSP Equivalence via the I-N Transformation}{7}{section.4}%
+\contentsline {subsection}{\numberline {4.1}The Generalised Traveling Salesman Problem}{7}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}The I-N Transformation}{8}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}The Bijection Theorem}{8}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Correctness Conditions and Limitations}{10}{section.5}%
+\contentsline {section}{\numberline {6}Bounds and Approximations Framework}{10}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Lower Bounds}{10}{subsection.6.1}%
+\contentsline {subsubsection}{\numberline {6.1.1}LB1: The Job Grouping Problem}{10}{subsubsection.6.1.1}%
+\contentsline {subsubsection}{\numberline {6.1.2}LB2: LP Relaxation of the Configuration MILP}{12}{subsubsection.6.1.2}%
+\contentsline {subsubsection}{\numberline {6.1.3}LB3: Configuration Dominance Bound}{12}{subsubsection.6.1.3}%
+\contentsline {subsection}{\numberline {6.2}Upper Bounds}{12}{subsection.6.2}%
+\contentsline {subsubsection}{\numberline {6.2.1}UB1: JGP-Seeded Warm-Start}{12}{subsubsection.6.2.1}%
+\contentsline {subsubsection}{\numberline {6.2.2}UB2: Greedy First-Fit Decreasing}{13}{subsubsection.6.2.2}%
+\contentsline {subsubsection}{\numberline {6.2.3}UB3: 2-Opt Local Search}{13}{subsubsection.6.2.3}%
+\contentsline {subsection}{\numberline {6.3}Gap Analysis}{13}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Time-Dependent Tool Switching}{14}{section.7}%
+\contentsline {section}{\numberline {8}Ryan--Foster Inequality and Subtour Tightening}{15}{section.8}%
+\contentsline {section}{\numberline {9}Branch-and-Price Framework}{16}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Restricted Master Problem (RMP)}{16}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Pricing Subproblem (PSP)}{16}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Solution Approaches for the Pricing Subproblem}{17}{subsection.9.3}%
+\contentsline {section}{\numberline {10}Computational Results}{17}{section.10}%
+\contentsline {section}{\numberline {11}Conclusion}{17}{section.11}%

@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.8.25)  27 APR 2026 10:19
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.8.25)  27 APR 2026 10:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**./shankar-draft.tex
-(shankar-draft.tex
+**./draft-4.tex
+(draft-4.tex
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-07-20>
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
@@ -606,35 +606,16 @@ File: tikzlibrarybackgrounds.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgf@layerboxsaved@background=\box86
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/t
-ikz/libraries\tikzlibrarydecorations.pathreplacing.code.tex
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/t
-ikz/libraries\tikzlibrarydecorations.code.tex
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodu
-ledecorations.code.tex
-\pgfdecoratedcompleteddistance=\dimen268
-\pgfdecoratedremainingdistance=\dimen269
-\pgfdecoratedinputsegmentcompleteddistance=\dimen270
-\pgfdecoratedinputsegmentremainingdistance=\dimen271
-\pgf@decorate@distancetomove=\dimen272
-\pgf@decorate@repeatstate=\count306
-\pgfdecorationsegmentamplitude=\dimen273
-\pgfdecorationsegmentlength=\dimen274
-)
-\tikz@lib@dec@box=\box87
-)
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/decor
-ations\pgflibrarydecorations.pathreplacing.code.tex))
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/t
 ikz/libraries\tikzlibrarypositioning.code.tex
 File: tikzlibrarypositioning.code.tex 2023-01-15 v3.1.10 (3.1.10)
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgfli
 braryarrows.meta.code.tex
 File: pgflibraryarrows.meta.code.tex 2023-01-15 v3.1.10 (3.1.10)
-\pgfarrowinset=\dimen275
-\pgfarrowlength=\dimen276
-\pgfarrowwidth=\dimen277
-\pgfarrowlinewidth=\dimen278
+\pgfarrowinset=\dimen268
+\pgfarrowlength=\dimen269
+\pgfarrowwidth=\dimen270
+\pgfarrowlinewidth=\dimen271
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/t
 ikz/libraries\tikzlibrarycalc.code.tex
@@ -649,18 +630,18 @@ Package: caption 2023/08/05 v3.6o Customizing captions (AR)
 
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption3.sty
 Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
-\caption@tempdima=\dimen279
-\captionmargin=\dimen280
-\caption@leftmargin=\dimen281
-\caption@rightmargin=\dimen282
-\caption@width=\dimen283
-\caption@indent=\dimen284
-\caption@parindent=\dimen285
-\caption@hangindent=\dimen286
+\caption@tempdima=\dimen272
+\captionmargin=\dimen273
+\caption@leftmargin=\dimen274
+\caption@rightmargin=\dimen275
+\caption@width=\dimen276
+\caption@indent=\dimen277
+\caption@parindent=\dimen278
+\caption@hangindent=\dimen279
 Package caption Info: Standard document class detected.
 )
-\c@caption@flags=\count307
-\c@continuedfloat=\count308
+\c@caption@flags=\count306
+\c@continuedfloat=\count307
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/setspace\setspace.sty
 Package: setspace 2022/12/04 v6.7b set line spacing
@@ -668,37 +649,37 @@ Package: setspace 2022/12/04 v6.7b set line spacing
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/enumitem\enumitem.sty
 Package: enumitem 2019/06/20 v3.9 Customized lists
 \labelindent=\skip57
-\enit@outerparindent=\dimen287
+\enit@outerparindent=\dimen280
 \enit@toks=\toks44
-\enit@inbox=\box88
-\enit@count@id=\count309
-\enitdp@description=\count310
+\enit@inbox=\box87
+\enit@count@id=\count308
+\enitdp@description=\count309
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
-\heavyrulewidth=\dimen288
-\lightrulewidth=\dimen289
-\cmidrulewidth=\dimen290
-\belowrulesep=\dimen291
-\belowbottomsep=\dimen292
-\aboverulesep=\dimen293
-\abovetopsep=\dimen294
-\cmidrulesep=\dimen295
-\cmidrulekern=\dimen296
-\defaultaddspace=\dimen297
-\@cmidla=\count311
-\@cmidlb=\count312
-\@aboverulesep=\dimen298
-\@belowrulesep=\dimen299
-\@thisruleclass=\count313
-\@lastruleclass=\count314
-\@thisrulewidth=\dimen300
+\heavyrulewidth=\dimen281
+\lightrulewidth=\dimen282
+\cmidrulewidth=\dimen283
+\belowrulesep=\dimen284
+\belowbottomsep=\dimen285
+\aboverulesep=\dimen286
+\abovetopsep=\dimen287
+\cmidrulesep=\dimen288
+\cmidrulekern=\dimen289
+\defaultaddspace=\dimen290
+\@cmidla=\count310
+\@cmidlb=\count311
+\@aboverulesep=\dimen291
+\@belowrulesep=\dimen292
+\@thisruleclass=\count312
+\@lastruleclass=\count313
+\@thisrulewidth=\dimen293
 ) (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/natbib\natbib.sty
 Package: natbib 2010/09/13 8.31b (PWD, AO)
 \bibhang=\skip58
 \bibsep=\skip59
 LaTeX Info: Redefining \cite on input line 694.
-\c@NAT@ctr=\count315
+\c@NAT@ctr=\count314
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
 Package: hyperref 2024-07-10 v7.01j Hypertext links for LaTeX
@@ -748,20 +729,20 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 ty
 Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 ))
-\c@section@level=\count316
+\c@section@level=\count315
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
 Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count317
+\etb@tempcnta=\count316
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc
 .sty
 Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO
 )
 )
-\@linkdim=\dimen301
-\Hy@linkcounter=\count318
-\Hy@pagecounter=\count319
+\@linkdim=\dimen294
+\Hy@linkcounter=\count317
+\Hy@pagecounter=\count318
 
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
 File: pd1enc.def 2024-07-10 v7.01j Hyperref: PDFDocEncoding definition (HO)
@@ -771,7 +752,7 @@ Now handling font encoding PD1 ...
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty
 Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 )
-\Hy@SavedSpaceFactor=\count320
+\Hy@SavedSpaceFactor=\count319
  (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def
 File: puenc.def 2024-07-10 v7.01j Hyperref: PDF Unicode definition (HO)
 Now handling font encoding PU ...
@@ -784,13 +765,13 @@ Package hyperref Info: Plain pages OFF on input line 4172.
 Package hyperref Info: Backreferencing OFF on input line 4177.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4424.
-\c@Hy@tempcnt=\count321
+\c@Hy@tempcnt=\count320
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty
 \Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 4763.
-\XeTeXLinkMargin=\dimen302
+\XeTeXLinkMargin=\dimen295
 
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
@@ -800,9 +781,9 @@ lc.sty
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
 )
 ))
-\Fld@menulength=\count322
-\Field@Width=\dimen303
-\Fld@charsize=\dimen304
+\Fld@menulength=\count321
+\Field@Width=\dimen296
+\Fld@charsize=\dimen297
 Package hyperref Info: Hyper figures OFF on input line 6042.
 Package hyperref Info: Link nesting OFF on input line 6047.
 Package hyperref Info: Hyper index ON on input line 6050.
@@ -815,9 +796,9 @@ Package hyperref Info: PDF/A mode OFF on input line 6072.
 Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
 package with kernel methods
 )
-\Hy@abspage=\count323
-\c@Item=\count324
-\c@Hfootnote=\count325
+\Hy@abspage=\count322
+\c@Item=\count323
+\c@Hfootnote=\count324
 )
 Package hyperref Info: Driver (autodetected): hpdftex.
 
@@ -830,8 +811,8 @@ Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atveryend pac
 kage
 with kernel methods
 )
-\Fld@listcount=\count326
-\c@bookmark@seq@number=\count327
+\Fld@listcount=\count325
+\c@bookmark@seq@number=\count326
 
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunf
 ilecheck.sty
@@ -846,38 +827,38 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 )
 \Hy@SectionHShift=\skip60
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 23.
-\c@theorem=\count328
-\c@definition=\count329
-\c@example=\count330
-\c@proposition=\count331
+Package hyperref Info: Option `colorlinks' set `true' on input line 24.
+\c@theorem=\count327
+\c@definition=\count328
+\c@example=\count329
+\c@proposition=\count330
 
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-p
 dftex.def
 File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count332
-\l__pdf_internal_box=\box89
-) (shankar-draft.aux)
-\openout1 = `shankar-draft.aux'.
+\l__color_backend_stack_int=\count331
+\l__pdf_internal_box=\box88
+) (draft-4.aux)
+\openout1 = `draft-4.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -917,16 +898,16 @@ LaTeX Font Info:    ... okay on input line 35.
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.
 mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count333
-\scratchdimen=\dimen305
-\scratchbox=\box90
-\nofMPsegments=\count334
-\nofMParguments=\count335
+\scratchcounter=\count332
+\scratchdimen=\dimen298
+\scratchbox=\box89
+\nofMPsegments=\count333
+\nofMParguments=\count334
 \everyMPshowfont=\toks45
-\MPscratchCnt=\count336
-\MPscratchDim=\dimen306
-\MPnumerator=\count337
-\makeMPintoPDFobject=\count338
+\MPscratchCnt=\count335
+\MPscratchDim=\dimen299
+\MPnumerator=\count336
+\makeMPintoPDFobject=\count337
 \everyMPtoPDFconversion=\toks46
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf
@@ -942,10 +923,10 @@ File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: hyperref package is loaded.
 Package caption Info: End \AtBeginDocument code.
-Package hyperref Info: Link coloring ON on input line 35.
- (shankar-draft.out) (shankar-draft.out)
+Package hyperref Info: Link coloring ON on input line 36.
+ (draft-4.out) (draft-4.out)
 \@outlinefile=\write4
-\openout4 = `shankar-draft.out'.
+\openout4 = `draft-4.out'.
 
 LaTeX Font Info:    Trying to load font information for U+msa on input line 43.
 
@@ -965,37 +946,56 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 {C:/Users/Shankar/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
 
 [2]
+Overfull \hbox (80.28706pt too wide) in paragraph at lines 170--171
+ [][] 
+ []
+
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 
 
 [3]
-Overfull \hbox (3.65947pt too wide) in paragraph at lines 146--147
- [][] 
- []
-
-
 
 [4]
 
 [5]
+Overfull \hbox (91.29721pt too wide) in paragraph at lines 230--232
+\OT1/cmr/m/n/12 However, con-straint [] strictly bounds the sum of the edges fr
+om above, de-mand-ing $[][] [][] \OML/cmm/m/it/12 x\OT1/cmr/m/n/12 (\OML/cmm/m/
+it/12 u; v\OT1/cmr/m/n/12 ) \OMS/cmsy/m/n/12 ^^T
+ []
+
+
 
 [6]
+Overfull \hbox (34.4085pt too wide) in paragraph at lines 248--249
+[]\OT1/cmr/m/n/12 We de-fine an in-stance of the GTSP us-ing stan-dard graph no
+-ta-tion as $\OMS/cmsy/m/n/12 I[] \OT1/cmr/m/n/12 = \OMS/cmsy/m/n/12 h\OML/cmm/
+m/it/12 V; E; d; \OMS/cmsy/m/n/12 f\OML/cmm/m/it/12 V[]\OMS/cmsy/m/n/12 g[]i$\O
+T1/cmr/m/n/12 .
+ []
+
+
 
 [7]
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-
 
 [8]
 
 [9]
 
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+
 [10]
 
 [11]
+Overfull \hbox (1.66475pt too wide) in paragraph at lines 480--480
+[]\OT1/cmr/bx/n/17.28 Dynamic Node Gen-er-a-tion and the True Pric-ing Bot-
+ []
+
+
 
 [12]
 
@@ -1005,121 +1005,55 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 [15]
 
-[16]
-
-Package natbib Warning: Citation `Muter2013' on page 17 undefined on input line
- 573.
-
-
+[16] (draft-4.bbl
 
 [17]
 
-[18]
+[18])
 
-[19]
-
-[20]
-Overfull \hbox (15.63312pt too wide) in paragraph at lines 726--727
-[]\OT1/cmr/m/n/12 This de-duc-tion proves that any JGP op-ti-mal so-lu-tion wil
-l al-ways pro-vide an $\OML/cmm/m/it/12 $\OT1/cmr/m/n/12 -approximation
- []
-
-
-
-[21]
-
-[22]
-
-[23]
-
-[24]
-Overfull \hbox (1.66475pt too wide) in paragraph at lines 795--795
-[]\OT1/cmr/bx/n/17.28 Dynamic Node Gen-er-a-tion and the True Pric-ing Bot-
- []
-
-
-
-[25]
-
-[26]
-
-Package natbib Warning: Citation `Xia2024' on page 27 undefined on input line 8
-27.
-
-
-
-[27]
-Underfull \hbox (badness 10000) in paragraph at lines 848--848
-[]\OT1/cmr/m/n/12 Multi-Start
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 848--848
-[]\OT1/cmr/m/n/12 Best from
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 848--848
-[]\OT1/cmr/m/n/12 Best from
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 848--848
-[]\OT1/cmr/m/n/12 Best from
- []
-
-
-
-[28] (shankar-draft.bbl
-
-[29])
-
-Package natbib Warning: There were undefined citations.
-
-
-
-[30] (shankar-draft.aux)
+[19] (draft-4.aux)
  ***********
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-07-20>
  ***********
-Package rerunfilecheck Info: File `shankar-draft.out' has not changed.
-(rerunfilecheck)             Checksum: CABEFB58221F67CF1EC716C4E40E6BEF;8349.
+Package rerunfilecheck Info: File `draft-4.out' has not changed.
+(rerunfilecheck)             Checksum: 494402A40A69E44487BCE3962BBAC3CF;5175.
  ) 
 Here is how much of TeX's memory you used:
- 27482 strings out of 473899
- 541655 string characters out of 5725556
- 1948960 words of memory out of 5000000
- 49756 multiletter control sequences out of 15000+600000
- 575649 words of font info for 99 fonts, out of 8000000 for 9000
+ 26849 strings out of 473899
+ 523191 string characters out of 5725556
+ 1950960 words of memory out of 5000000
+ 49174 multiletter control sequences out of 15000+600000
+ 577116 words of font info for 105 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 102i,11n,107p,1101b,868s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 102i,10n,107p,1035b,861s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\Shankar\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tc
 rm1200.pk><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/am
 sfonts/cm/cmbx10.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type
 1/public/amsfonts/cm/cmbx12.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX
-/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/Shankar/AppData/Local/Prog
-rams/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Shankar/AppData
-/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/Shan
-kar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/
+/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/Shankar/AppData/Local/Progr
+ams/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/Shankar/AppData/
+Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Shank
+ar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/
 Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi
 6.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
 ts/cm/cmmi7.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/pub
 lic/amsfonts/cm/cmmi8.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts
 /type1/public/amsfonts/cm/cmr10.pfb><C:/Users/Shankar/AppData/Local/Programs/Mi
 KTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/Shankar/AppData/Local/P
-rograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/Shankar/AppDa
-ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Shan
-kar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/U
-sers/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.
-pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts
-/cm/cmsy10.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/publ
-ic/amsfonts/cm/cmsy8.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/
-type1/public/amsfonts/cm/cmti12.pfb><C:/Users/Shankar/AppData/Local/Programs/Mi
-KTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on shankar-draft.pdf (30 pages, 421394 bytes).
+rograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Shankar/AppDat
+a/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/Shank
+ar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Us
+ers/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10
+.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfont
+s/cm/cmsy6.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/publ
+ic/amsfonts/cm/cmsy7.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/
+type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/Shankar/AppData/Local/Programs/MiK
+TeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/Shankar/AppData/Local/P
+rograms/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on draft-4.pdf (19 pages, 357606 bytes).
 PDF statistics:
- 573 PDF objects out of 1000 (max. 8388607)
- 132 named destinations out of 1000 (max. 500000)
- 261 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 432 PDF objects out of 1000 (max. 8388607)
+ 96 named destinations out of 1000 (max. 500000)
+ 181 words of extra memory for PDF output out of 10000 (max. 10000000)
 

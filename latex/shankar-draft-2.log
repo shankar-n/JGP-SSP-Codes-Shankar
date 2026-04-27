@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.8.25)  2 APR 2026 10:35
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.8.25)  27 APR 2026 10:33
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**./main2.tex
-(main2.tex
+**./shankar-draft-2.tex
+(shankar-draft-2.tex
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-07-20>
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
@@ -606,16 +606,35 @@ File: tikzlibrarybackgrounds.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgf@layerboxsaved@background=\box86
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/t
+ikz/libraries\tikzlibrarydecorations.pathreplacing.code.tex
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/t
+ikz/libraries\tikzlibrarydecorations.code.tex
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodu
+ledecorations.code.tex
+\pgfdecoratedcompleteddistance=\dimen268
+\pgfdecoratedremainingdistance=\dimen269
+\pgfdecoratedinputsegmentcompleteddistance=\dimen270
+\pgfdecoratedinputsegmentremainingdistance=\dimen271
+\pgf@decorate@distancetomove=\dimen272
+\pgf@decorate@repeatstate=\count306
+\pgfdecorationsegmentamplitude=\dimen273
+\pgfdecorationsegmentlength=\dimen274
+)
+\tikz@lib@dec@box=\box87
+)
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/decor
+ations\pgflibrarydecorations.pathreplacing.code.tex))
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/t
 ikz/libraries\tikzlibrarypositioning.code.tex
 File: tikzlibrarypositioning.code.tex 2023-01-15 v3.1.10 (3.1.10)
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgfli
 braryarrows.meta.code.tex
 File: pgflibraryarrows.meta.code.tex 2023-01-15 v3.1.10 (3.1.10)
-\pgfarrowinset=\dimen268
-\pgfarrowlength=\dimen269
-\pgfarrowwidth=\dimen270
-\pgfarrowlinewidth=\dimen271
+\pgfarrowinset=\dimen275
+\pgfarrowlength=\dimen276
+\pgfarrowwidth=\dimen277
+\pgfarrowlinewidth=\dimen278
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/t
 ikz/libraries\tikzlibrarycalc.code.tex
@@ -630,18 +649,18 @@ Package: caption 2023/08/05 v3.6o Customizing captions (AR)
 
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption3.sty
 Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
-\caption@tempdima=\dimen272
-\captionmargin=\dimen273
-\caption@leftmargin=\dimen274
-\caption@rightmargin=\dimen275
-\caption@width=\dimen276
-\caption@indent=\dimen277
-\caption@parindent=\dimen278
-\caption@hangindent=\dimen279
+\caption@tempdima=\dimen279
+\captionmargin=\dimen280
+\caption@leftmargin=\dimen281
+\caption@rightmargin=\dimen282
+\caption@width=\dimen283
+\caption@indent=\dimen284
+\caption@parindent=\dimen285
+\caption@hangindent=\dimen286
 Package caption Info: Standard document class detected.
 )
-\c@caption@flags=\count306
-\c@continuedfloat=\count307
+\c@caption@flags=\count307
+\c@continuedfloat=\count308
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/setspace\setspace.sty
 Package: setspace 2022/12/04 v6.7b set line spacing
@@ -649,35 +668,56 @@ Package: setspace 2022/12/04 v6.7b set line spacing
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/enumitem\enumitem.sty
 Package: enumitem 2019/06/20 v3.9 Customized lists
 \labelindent=\skip57
-\enit@outerparindent=\dimen280
+\enit@outerparindent=\dimen287
 \enit@toks=\toks44
-\enit@inbox=\box87
-\enit@count@id=\count308
-\enitdp@description=\count309
+\enit@inbox=\box88
+\enit@count@id=\count309
+\enitdp@description=\count310
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
-\heavyrulewidth=\dimen281
-\lightrulewidth=\dimen282
-\cmidrulewidth=\dimen283
-\belowrulesep=\dimen284
-\belowbottomsep=\dimen285
-\aboverulesep=\dimen286
-\abovetopsep=\dimen287
-\cmidrulesep=\dimen288
-\cmidrulekern=\dimen289
-\defaultaddspace=\dimen290
-\@cmidla=\count310
-\@cmidlb=\count311
-\@aboverulesep=\dimen291
-\@belowrulesep=\dimen292
-\@thisruleclass=\count312
-\@lastruleclass=\count313
-\@thisrulewidth=\dimen293
+\heavyrulewidth=\dimen288
+\lightrulewidth=\dimen289
+\cmidrulewidth=\dimen290
+\belowrulesep=\dimen291
+\belowbottomsep=\dimen292
+\aboverulesep=\dimen293
+\abovetopsep=\dimen294
+\cmidrulesep=\dimen295
+\cmidrulekern=\dimen296
+\defaultaddspace=\dimen297
+\@cmidla=\count311
+\@cmidlb=\count312
+\@aboverulesep=\dimen298
+\@belowrulesep=\dimen299
+\@thisruleclass=\count313
+\@lastruleclass=\count314
+\@thisrulewidth=\dimen300
+) (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/natbib\natbib.sty
+Package: natbib 2010/09/13 8.31b (PWD, AO)
+\bibhang=\skip58
+\bibsep=\skip59
+LaTeX Info: Redefining \cite on input line 694.
+\c@NAT@ctr=\count315
 )
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.sty
-Package: biblatex 2024/03/21 v3.20 programmable bibliographies (PK/MW)
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+Package: hyperref 2024-07-10 v7.01j Hypertext links for LaTeX
 
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.s
+ty
+Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
+)
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefi
+nekeys.sty
+Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
+)
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape
+.sty
+Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
+
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty
+Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
+)
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcm
 ds.sty
 Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO
@@ -687,316 +727,186 @@ Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO
 .sty
 Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
 )
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty
-Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
-)
 Package pdftexcmds Info: \pdf@primitive is available.
 Package pdftexcmds Info: \pdf@ifprimitive is available.
 Package pdftexcmds Info: \pdfdraftmode found.
+))
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty
+Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
 )
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
-Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count314
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+Package: nameref 2023-11-26 v2.56 Cross-referencing by name of section
+
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty
+Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 )
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gett
+itlestring.sty
+Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
+
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.s
 ty
 Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
-
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.s
-ty
-Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
 ))
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.sty
-Package: logreq 2010/08/04 v1.0 xml request logger
-\lrq@indent=\count315
-
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.def
-File: logreq.def 2010/08/04 v1.0 logreq spec v1.0
-))
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty
-Package: ifthen 2024/03/16 v1.1e Standard LaTeX ifthen package (DPC)
+\c@section@level=\count316
 )
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
+Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count317
+)
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc
+.sty
+Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO
+)
+)
+\@linkdim=\dimen301
+\Hy@linkcounter=\count318
+\Hy@pagecounter=\count319
+
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
+File: pd1enc.def 2024-07-10 v7.01j Hyperref: PDFDocEncoding definition (HO)
+Now handling font encoding PD1 ...
+... no UTF-8 mapping file for font encoding PD1
+)
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty
+Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
+)
+\Hy@SavedSpaceFactor=\count320
+ (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def
+File: puenc.def 2024-07-10 v7.01j Hyperref: PDF Unicode definition (HO)
+Now handling font encoding PU ...
+... no UTF-8 mapping file for font encoding PU
+)
+Package hyperref Info: Hyper figures OFF on input line 4157.
+Package hyperref Info: Link nesting OFF on input line 4162.
+Package hyperref Info: Hyper index ON on input line 4165.
+Package hyperref Info: Plain pages OFF on input line 4172.
+Package hyperref Info: Backreferencing OFF on input line 4177.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4424.
+\c@Hy@tempcnt=\count321
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty
 \Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
-\c@tabx@nest=\count316
-\c@listtotal=\count317
-\c@listcount=\count318
-\c@liststart=\count319
-\c@liststop=\count320
-\c@citecount=\count321
-\c@citetotal=\count322
-\c@multicitecount=\count323
-\c@multicitetotal=\count324
-\c@instcount=\count325
-\c@maxnames=\count326
-\c@minnames=\count327
-\c@maxitems=\count328
-\c@minitems=\count329
-\c@citecounter=\count330
-\c@maxcitecounter=\count331
-\c@savedcitecounter=\count332
-\c@uniquelist=\count333
-\c@uniquename=\count334
-\c@refsection=\count335
-\c@refsegment=\count336
-\c@maxextratitle=\count337
-\c@maxextratitleyear=\count338
-\c@maxextraname=\count339
-\c@maxextradate=\count340
-\c@maxextraalpha=\count341
-\c@abbrvpenalty=\count342
-\c@highnamepenalty=\count343
-\c@lownamepenalty=\count344
-\c@maxparens=\count345
-\c@parenlevel=\count346
-\blx@tempcnta=\count347
-\blx@tempcntb=\count348
-\blx@tempcntc=\count349
-\c@blx@maxsection=\count350
-\blx@maxsegment@0=\count351
-\blx@notetype=\count352
-\blx@parenlevel@text=\count353
-\blx@parenlevel@foot=\count354
-\blx@sectionciteorder@0=\count355
-\blx@sectionciteorderinternal@0=\count356
-\blx@entrysetcounter=\count357
-\blx@biblioinstance=\count358
-\labelnumberwidth=\skip58
-\labelalphawidth=\skip59
-\biblabelsep=\skip60
-\bibitemsep=\skip61
-\bibnamesep=\skip62
-\bibinitsep=\skip63
-\bibparsep=\skip64
-\bibhang=\skip65
-\blx@bcfin=\read4
-\blx@bcfout=\write4
-\blx@langwohyphens=\language80
-\c@mincomprange=\count359
-\c@maxcomprange=\count360
-\c@mincompwidth=\count361
-Package biblatex Info: Trying to load biblatex default data model...
-Package biblatex Info: ... file 'blx-dm.def' found.
+LaTeX Info: Redefining \url on input line 4763.
+\XeTeXLinkMargin=\dimen302
 
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-dm.def
-File: blx-dm.def 2024/03/21 v3.20 biblatex datamodel (PK/MW)
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
+
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintca
+lc.sty
+Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
 )
-Package biblatex Info: Trying to load biblatex style data model...
-Package biblatex Info: ... file 'chicago-authordate.dbx' not found.
-Package biblatex Info: Trying to load biblatex custom data model...
-Package biblatex Info: ... file 'biblatex-dm.cfg' not found.
-\c@afterword=\count362
-\c@savedafterword=\count363
-\c@annotator=\count364
-\c@savedannotator=\count365
-\c@author=\count366
-\c@savedauthor=\count367
-\c@bookauthor=\count368
-\c@savedbookauthor=\count369
-\c@commentator=\count370
-\c@savedcommentator=\count371
-\c@editor=\count372
-\c@savededitor=\count373
-\c@editora=\count374
-\c@savededitora=\count375
-\c@editorb=\count376
-\c@savededitorb=\count377
-\c@editorc=\count378
-\c@savededitorc=\count379
-\c@foreword=\count380
-\c@savedforeword=\count381
-\c@holder=\count382
-\c@savedholder=\count383
-\c@introduction=\count384
-\c@savedintroduction=\count385
-\c@namea=\count386
-\c@savednamea=\count387
-\c@nameb=\count388
-\c@savednameb=\count389
-\c@namec=\count390
-\c@savednamec=\count391
-\c@translator=\count392
-\c@savedtranslator=\count393
-\c@shortauthor=\count394
-\c@savedshortauthor=\count395
-\c@shorteditor=\count396
-\c@savedshorteditor=\count397
-\c@labelname=\count398
-\c@savedlabelname=\count399
-\c@institution=\count400
-\c@savedinstitution=\count401
-\c@lista=\count402
-\c@savedlista=\count403
-\c@listb=\count404
-\c@savedlistb=\count405
-\c@listc=\count406
-\c@savedlistc=\count407
-\c@listd=\count408
-\c@savedlistd=\count409
-\c@liste=\count410
-\c@savedliste=\count411
-\c@listf=\count412
-\c@savedlistf=\count413
-\c@location=\count414
-\c@savedlocation=\count415
-\c@organization=\count416
-\c@savedorganization=\count417
-\c@origlocation=\count418
-\c@savedoriglocation=\count419
-\c@origpublisher=\count420
-\c@savedorigpublisher=\count421
-\c@publisher=\count422
-\c@savedpublisher=\count423
-\c@language=\count424
-\c@savedlanguage=\count425
-\c@origlanguage=\count426
-\c@savedoriglanguage=\count427
-\c@pageref=\count428
-\c@savedpageref=\count429
-\shorthandwidth=\skip66
-\shortjournalwidth=\skip67
-\shortserieswidth=\skip68
-\shorttitlewidth=\skip69
-\shortauthorwidth=\skip70
-\shorteditorwidth=\skip71
-\locallabelnumberwidth=\skip72
-\locallabelalphawidth=\skip73
-\localshorthandwidth=\skip74
-\localshortjournalwidth=\skip75
-\localshortserieswidth=\skip76
-\localshorttitlewidth=\skip77
-\localshortauthorwidth=\skip78
-\localshorteditorwidth=\skip79
-Package biblatex Info: Trying to load compatibility code...
-Package biblatex Info: ... file 'blx-compat.def' found.
-
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-compat.d
-ef
-File: blx-compat.def 2024/03/21 v3.20 biblatex compatibility (PK/MW)
-)
-Package biblatex Info: Trying to load generic definitions...
-Package biblatex Info: ... file 'biblatex.def' found.
-
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.def
-File: biblatex.def 2024/03/21 v3.20 biblatex compatibility (PK/MW)
-\c@textcitecount=\count430
-\c@textcitetotal=\count431
-\c@textcitemaxnames=\count432
-\c@biburlbigbreakpenalty=\count433
-\c@biburlbreakpenalty=\count434
-\c@biburlnumpenalty=\count435
-\c@biburlucpenalty=\count436
-\c@biburllcpenalty=\count437
-\biburlbigskip=\muskip19
-\biburlnumskip=\muskip20
-\biburlucskip=\muskip21
-\biburllcskip=\muskip22
-\c@smartand=\count438
-)
-Package biblatex Info: Trying to load bibliography style 'chicago-authordate'..
-.
-Package biblatex Info: ... file 'chicago-authordate.bbx' found.
-
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/biblatex-chicago\chic
-ago-authordate.bbx
-File: chicago-authordate.bbx 2022/11/17 v 3.18b biblatex bibliography style
-\lositemsep=\skip80
-Package biblatex Info: Delimiter 'revsdnamedelim' in context '' already defined
-, overwriting.
-\cms@tempcnta=\count439
-\cms@tempcntb=\count440
-\c@bbx:relatedcount=\count441
-\c@bbx:relatedtotal=\count442
-)
-Package biblatex Info: Trying to load citation style 'chicago-authordate'...
-Package biblatex Info: ... file 'chicago-authordate.cbx' found.
-
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/biblatex-chicago\chic
-ago-authordate.cbx
-File: chicago-authordate.cbx 2022/07/02 v 3.18 biblatex citation style
-Package biblatex Info: Trying to load citation style 'chicago-dates-common'...
-Package biblatex Info: ... file 'chicago-dates-common.cbx' found.
-
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/biblatex-chicago\chic
-ago-dates-common.cbx
-File: chicago-dates-common.cbx 2024/04/15 v 3.20 biblatex citation style
-Package biblatex Info: Redefining '\cite'.
-Package biblatex Info: Redefining '\parencite'.
-Package biblatex Info: Redefining '\footcite'.
-Package biblatex Info: Redefining '\footcitetext'.
-Package biblatex Info: Redefining '\citetitle'.
-Package biblatex Info: Redefining '\footfullcite'.
-Package biblatex Info: Redefining '\fullcite'.
-Package biblatex Info: Redefining '\textcite'.
-Package biblatex Info: Redefining '\textcites'.
-Package biblatex Info: Redefining '\cites'.
-Package biblatex Info: Redefining '\parencites'.
-Package biblatex Info: Redefining '\footcites'.
-Package biblatex Info: Redefining '\footcitetexts'.
-\c@cms@punct=\count443
-Package biblatex Info: Delimiter 'dateeradelim' in context '' already defined, 
-overwriting.
 ))
-Package biblatex Info: Trying to load configuration file...
-Package biblatex Info: ... file 'biblatex.cfg' found.
+\Fld@menulength=\count322
+\Field@Width=\dimen303
+\Fld@charsize=\dimen304
+Package hyperref Info: Hyper figures OFF on input line 6042.
+Package hyperref Info: Link nesting OFF on input line 6047.
+Package hyperref Info: Hyper index ON on input line 6050.
+Package hyperref Info: backreferencing OFF on input line 6057.
+Package hyperref Info: Link coloring OFF on input line 6062.
+Package hyperref Info: Link coloring with OCG OFF on input line 6067.
+Package hyperref Info: PDF/A mode OFF on input line 6072.
 
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.cfg
-File: biblatex.cfg 
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/base\atbegshi-ltx.sty
+Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
+package with kernel methods
 )
-Package biblatex Info: Input encoding 'utf8' detected.
-Package biblatex Info: Document encoding is UTF8 ....
- (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/l3kernel\expl3.sty
-Package: expl3 2024-07-20 L3 programming layer (loader) 
+\Hy@abspage=\count323
+\c@Item=\count324
+\c@Hfootnote=\count325
+)
+Package hyperref Info: Driver (autodetected): hpdftex.
 
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+File: hpdftex.def 2024-07-10 v7.01j Hyperref driver for pdfTeX
+
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/base\atveryend-ltx.st
+y
+Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atveryend pac
+kage
+with kernel methods
+)
+\Fld@listcount=\count326
+\c@bookmark@seq@number=\count327
+
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunf
+ilecheck.sty
+Package: rerunfilecheck 2022-07-10 v1.10 Rerun checks for auxiliary files (HO)
+
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniqu
+ecounter.sty
+Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
+)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
+85.
+)
+\Hy@SectionHShift=\skip60
+)
+Package hyperref Info: Option `colorlinks' set `true' on input line 22.
+\c@theorem=\count328
+\c@definition=\count329
+\c@example=\count330
+\c@proposition=\count331
+
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcolorbox.s
+ty
+Package: tcolorbox 2024/07/10 version 6.3.0 text color boxes
+ (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/tools\verbatim.sty
+Package: verbatim 2024-01-22 v1.5x LaTeX2e package for verbatim enhancements
+\every@verbatim=\toks45
+\verbatim@line=\toks46
+\verbatim@in@stream=\read4
+) (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/environ\environ.sty
+Package: environ 2014/05/04 v0.3 A new way to define environments
+
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/trimspaces\trimspaces
+.sty
+Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
+))
+\tcb@titlebox=\box89
+\tcb@upperbox=\box90
+\tcb@lowerbox=\box91
+\tcb@phantombox=\box92
+\c@tcbbreakpart=\count332
+\c@tcblayer=\count333
+\c@tcolorbox@number=\count334
+\l__tcobox_tmpa_box=\box93
+\l__tcobox_tmpa_dim=\dimen305
+\tcb@temp=\box94
+\tcb@temp=\box95
+\tcb@temp=\box96
+\tcb@temp=\box97
+)
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-p
 dftex.def
 File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count444
-\l__pdf_internal_box=\box88
-))
-Package biblatex Info: ... and expl3
-(biblatex)             2024-07-20 L3 programming layer (loader) 
-(biblatex)             is new enough (at least 2020/04/06),
-(biblatex)             setting 'casechanger=expl3'.
+\l__color_backend_stack_int=\count335
+\l__pdf_internal_box=\box98
+) (shankar-draft-2.aux)
+\openout1 = `shankar-draft-2.aux'.
 
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\blx-case-exp
-l3.sty
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/l3packages/xparse\xpa
-rse.sty
-Package: xparse 2024-05-08 L3 Experimental document command parser
-)
-Package: blx-case-expl3 2024/03/21 v3.20 expl3 case changing code for biblatex
-))
-\c@theorem=\count445
-\c@definition=\count446
-\c@example=\count447
-\c@proposition=\count448
-
-
-Package biblatex Warning: 'babel/polyglossia' detected but 'csquotes' missing.
-(biblatex)                Loading 'csquotes' recommended.
-
-\@quotelevel=\count449
-\@quotereset=\count450
-(main2.aux)
-\openout1 = `main2.aux'.
-
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 27.
-LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -1036,17 +946,17 @@ LaTeX Font Info:    ... okay on input line 27.
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.
 mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count451
-\scratchdimen=\dimen294
-\scratchbox=\box89
-\nofMPsegments=\count452
-\nofMParguments=\count453
-\everyMPshowfont=\toks45
-\MPscratchCnt=\count454
-\MPscratchDim=\dimen295
-\MPnumerator=\count455
-\makeMPintoPDFobject=\count456
-\everyMPtoPDFconversion=\toks46
+\scratchcounter=\count336
+\scratchdimen=\dimen306
+\scratchbox=\box99
+\nofMPsegments=\count337
+\nofMParguments=\count338
+\everyMPshowfont=\toks47
+\MPscratchCnt=\count339
+\MPscratchDim=\dimen307
+\MPnumerator=\count340
+\makeMPintoPDFobject=\count341
+\everyMPtoPDFconversion=\toks48
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf
 -base.sty
@@ -1059,68 +969,37 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 ))
 Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: hyperref package is loaded.
 Package caption Info: End \AtBeginDocument code.
-Package biblatex Info: Trying to load language 'english'...
-Package biblatex Info: ... file 'english.lbx' found.
+Package hyperref Info: Link coloring ON on input line 38.
+ (shankar-draft-2.out) (shankar-draft-2.out)
+\@outlinefile=\write4
+\openout4 = `shankar-draft-2.out'.
 
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/lbx\english.
-lbx
-File: english.lbx 2024/03/21 v3.20 biblatex localization (PK/MW)
-)
-Package biblatex Info: Input encoding 'utf8' detected.
-Package biblatex Info: Automatic encoding selection.
-(biblatex)             Assuming data encoding 'utf8'.
-\openout4 = `main2.bcf'.
-
-Package biblatex Info: Trying to load bibliographic data...
-Package biblatex Info: ... file 'main2.bbl' found.
- (main2.bbl)
-Package biblatex Info: Reference section=0 on input line 27.
-Package biblatex Info: Reference segment=0 on input line 27.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 33.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 46.
 
 
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 33.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 46.
 
 
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
+Overfull \hbox (3.7085pt too wide) in paragraph at lines 48--49
+\OT1/cmr/m/n/10.95 configuration-based SSP for-mu-la-tions and GTSP via the Int
+ersecting-to-Nonintersecting
+ []
+
+(shankar-draft-2.toc
 
 [1
 
-{C:/Users/Shankar/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
-
-LaTeX Warning: Citation 'Tang1988' on page 2 undefined on input line 43.
-
-
-LaTeX Warning: Citation 'Crama1994' on page 2 undefined on input line 47.
-
-
-LaTeX Warning: Citation 'Catanzaro2015' on page 2 undefined on input line 48.
-
-
-LaTeX Warning: Citation 'Catanzaro2015' on page 2 undefined on input line 55.
-
-
-LaTeX Warning: Citation 'Laporte2004' on page 2 undefined on input line 55.
-
-
-LaTeX Warning: Citation 'Colares2026' on page 2 undefined on input line 57.
-
-LaTeX Font Info:    Trying to load font information for OML+cmr on input line 5
-7.
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/base\omlcmr.fd
-File: omlcmr.fd 2023/04/13 v2.5m Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OML/cmr/bx/n' in size <12> not available
-(Font)              Font shape `OML/cmm/b/it' tried instead on input line 57.
-
-
-LaTeX Warning: Citation '' on page 2 undefined on input line 57.
+{C:/Users/Shankar/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}])
+\tf@toc=\write5
+\openout5 = `shankar-draft-2.toc'.
 
 
 
@@ -1128,159 +1007,80 @@ LaTeX Warning: Citation '' on page 2 undefined on input line 57.
 
 [3]
 
-LaTeX Warning: Citation 'Pop2024' on page 4 undefined on input line 90.
+[4]
 
-
-Overfull \hbox (34.4085pt too wide) in paragraph at lines 90--91
-[]\OT1/cmr/m/n/12 We de-fine an in-stance of the GTSP us-ing stan-dard graph no
--ta-tion as $\OMS/cmsy/m/n/12 I[] \OT1/cmr/m/n/12 = \OMS/cmsy/m/n/12 h\OML/cmm/
-m/it/12 V; E; d; \OMS/cmsy/m/n/12 f\OML/cmm/m/it/12 V[]\OMS/cmsy/m/n/12 g[]i$\O
-T1/cmr/m/n/12 .
+[5]
+Overfull \hbox (0.22234pt too wide) in paragraph at lines 187--188
+[]\OT1/cmr/bx/n/12 SSP $\OMS/cmsy/m/n/12 !$ \OT1/cmr/bx/n/12 GTSP\OT1/cmr/m/n/1
+2 : Given SSP se-quence $\OML/cmm/m/it/12 ^^[$ \OT1/cmr/m/n/12 with KTNS-determ
+ined con-figs $\OML/cmm/m/it/12 C[]; C[]; [] ; C[]$\OT1/cmr/m/n/12 ,
  []
 
 
-LaTeX Warning: Citation 'Lien1993' on page 4 undefined on input line 94.
-
-
-LaTeX Warning: Citation 'Noon1993' on page 4 undefined on input line 94.
-
-
-
-[4]
-
-LaTeX Warning: Citation 'Catanzaro2015' on page 5 undefined on input line 109.
-
-
-LaTeX Warning: Citation 'Crama1994' on page 5 undefined on input line 109.
-
-
-LaTeX Warning: Citation 'Lien1993' on page 5 undefined on input line 115.
-
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-
-
-[5]
 
 [6]
 
-LaTeX Warning: Citation 'Noon1993' on page 7 undefined on input line 252.
-
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-
-
 [7]
 
-LaTeX Warning: Citation 'Noon1993' on page 8 undefined on input line 294.
-
-
-LaTeX Warning: Citation 'Helsgaun2015' on page 8 undefined on input line 299.
-
-
-LaTeX Warning: Citation 'Helsgaun2015' on page 8 undefined on input line 299.
-
-
-LaTeX Warning: Citation 'Applegate2006' on page 8 undefined on input line 299.
-
-
-
 [8]
-Overfull \hbox (1.66475pt too wide) in paragraph at lines 304--304
-[]\OT1/cmr/bx/n/17.28 Dynamic Node Gen-er-a-tion and the True Pric-ing Bot-
- []
 
-
-LaTeX Warning: Citation 'Barnhart1998' on page 9 undefined on input line 306.
-
-
-LaTeX Warning: Citation 'Crama1994' on page 9 undefined on input line 314.
+Package natbib Warning: Citation `Johnson1973' on page 9 undefined on input lin
+e 293.
 
 
 
 [9]
 
-LaTeX Warning: Citation 'Karimi2022' on page 10 undefined on input line 322.
-
-
-LaTeX Warning: Citation 'Chi2022' on page 10 undefined on input line 325.
-
-
-
 [10]
-
-LaTeX Warning: Citation 'Chi2022' on page 11 undefined on input line 327.
-
-
-LaTeX Warning: Citation 'Chi2022' on page 11 undefined on input line 330.
-
-
-LaTeX Warning: Citation 'Yuan2023' on page 11 undefined on input line 332.
-
-
-LaTeX Warning: Citation 'Vaclavik2018' on page 11 undefined on input line 335.
-
-
 
 [11]
 
-LaTeX Warning: Empty bibliography on input line 343.
+[12] (shankar-draft-2.bbl)
+
+Package natbib Warning: There were undefined citations.
 
 
 
-[12] (main2.aux)
+[13] (shankar-draft-2.aux)
  ***********
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-07-20>
  ***********
-
-
-LaTeX Warning: There were undefined references.
-
-
-Package biblatex Warning: Please (re)run Biber on the file:
-(biblatex)                main2
-(biblatex)                and rerun LaTeX afterwards.
-
-Package logreq Info: Writing requests to 'main2.run.xml'.
-\openout1 = `main2.run.xml'.
-
+Package rerunfilecheck Info: File `shankar-draft-2.out' has not changed.
+(rerunfilecheck)             Checksum: 9402C3688B36E060A7355FE9E310EDF3;5921.
  ) 
 Here is how much of TeX's memory you used:
- 29177 strings out of 473899
- 607115 string characters out of 5725556
- 1950960 words of memory out of 5000000
- 51621 multiletter control sequences out of 15000+600000
- 574918 words of font info for 97 fonts, out of 8000000 for 9000
+ 29015 strings out of 473899
+ 587610 string characters out of 5725556
+ 1939960 words of memory out of 5000000
+ 51321 multiletter control sequences out of 15000+600000
+ 574447 words of font info for 94 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 102i,10n,107p,1154b,1740s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/c
-m/cmbx10.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public
-/amsfonts/cm/cmbx12.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/t
-ype1/public/amsfonts/cm/cmex10.pfb><C:/Users/Shankar/AppData/Local/Programs/MiK
-TeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Shankar/AppData/Local/P
-rograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/Shankar/AppD
-ata/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/Sh
-ankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C
+ 102i,10n,107p,863b,614s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ <C:\Users\Shankar\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tc
+rm1200.pk><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/am
+sfonts/cm/cmbx10.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type
+1/public/amsfonts/cm/cmbx12.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX
+/fonts/type1/public/amsfonts/cm/cmbxti10.pfb><C:/Users/Shankar/AppData/Local/Pr
+ograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/Shankar/AppDa
+ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/Sh
+ankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C
 :/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
 mi8.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsf
-onts/cm/cmmib10.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1
-/public/amsfonts/cm/cmr10.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/f
-onts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/Shankar/AppData/Local/Program
-s/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Shankar/AppData/Loca
-l/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/Shankar/App
-Data/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/Sh
-ankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><
-C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/c
-msy7.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
-fonts/cm/cmsy8.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/
-public/amsfonts/cm/cmti12.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/f
-onts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main2.pdf (12 pages, 272902 bytes).
+onts/cm/cmr10.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/amsfonts/cm/cmr12.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fon
+ts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/Shankar/AppData/Local/Programs/
+MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Shankar/AppData/Local/
+Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/Shankar/AppDa
+ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/Sh
+ankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C
+:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
+ti12.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
+fonts/cm/cmti8.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/
+public/amsfonts/symbols/msbm10.pfb>
+Output written on shankar-draft-2.pdf (13 pages, 288136 bytes).
 PDF statistics:
- 139 PDF objects out of 1000 (max. 8388607)
- 0 named destinations out of 1000 (max. 500000)
- 13 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 371 PDF objects out of 1000 (max. 8388607)
+ 87 named destinations out of 1000 (max. 500000)
+ 237 words of extra memory for PDF output out of 10000 (max. 10000000)
 
