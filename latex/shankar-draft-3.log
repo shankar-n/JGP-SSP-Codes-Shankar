@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.8.25)  27 APR 2026 10:19
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.8.25)  27 APR 2026 10:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**./shankar-draft.tex
-(shankar-draft.tex
+**./shankar-draft-3.tex
+(shankar-draft-3.tex
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-07-20>
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
@@ -846,38 +846,67 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 )
 \Hy@SectionHShift=\skip60
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 23.
+Package hyperref Info: Option `colorlinks' set `true' on input line 28.
 \c@theorem=\count328
 \c@definition=\count329
 \c@example=\count330
 \c@proposition=\count331
 
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcolorbox.s
+ty
+Package: tcolorbox 2024/07/10 version 6.3.0 text color boxes
+ (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/tools\verbatim.sty
+Package: verbatim 2024-01-22 v1.5x LaTeX2e package for verbatim enhancements
+\every@verbatim=\toks45
+\verbatim@line=\toks46
+\verbatim@in@stream=\read4
+) (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/environ\environ.sty
+Package: environ 2014/05/04 v0.3 A new way to define environments
+
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/trimspaces\trimspaces
+.sty
+Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
+))
+\tcb@titlebox=\box89
+\tcb@upperbox=\box90
+\tcb@lowerbox=\box91
+\tcb@phantombox=\box92
+\c@tcbbreakpart=\count332
+\c@tcblayer=\count333
+\c@tcolorbox@number=\count334
+\l__tcobox_tmpa_box=\box93
+\l__tcobox_tmpa_dim=\dimen305
+\tcb@temp=\box94
+\tcb@temp=\box95
+\tcb@temp=\box96
+\tcb@temp=\box97
+)
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-p
 dftex.def
 File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count332
-\l__pdf_internal_box=\box89
-) (shankar-draft.aux)
-\openout1 = `shankar-draft.aux'.
+\l__color_backend_stack_int=\count335
+\l__pdf_internal_box=\box98
+) (shankar-draft-3.aux)
+\openout1 = `shankar-draft-3.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 44.
+LaTeX Font Info:    ... okay on input line 44.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -917,17 +946,17 @@ LaTeX Font Info:    ... okay on input line 35.
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.
 mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count333
-\scratchdimen=\dimen305
-\scratchbox=\box90
-\nofMPsegments=\count334
-\nofMParguments=\count335
-\everyMPshowfont=\toks45
-\MPscratchCnt=\count336
-\MPscratchDim=\dimen306
-\MPnumerator=\count337
-\makeMPintoPDFobject=\count338
-\everyMPtoPDFconversion=\toks46
+\scratchcounter=\count336
+\scratchdimen=\dimen306
+\scratchbox=\box99
+\nofMPsegments=\count337
+\nofMParguments=\count338
+\everyMPshowfont=\toks47
+\MPscratchCnt=\count339
+\MPscratchDim=\dimen307
+\MPnumerator=\count340
+\makeMPintoPDFobject=\count341
+\everyMPtoPDFconversion=\toks48
 )
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf
 -base.sty
@@ -942,58 +971,77 @@ File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: hyperref package is loaded.
 Package caption Info: End \AtBeginDocument code.
-Package hyperref Info: Link coloring ON on input line 35.
- (shankar-draft.out) (shankar-draft.out)
+Package hyperref Info: Link coloring ON on input line 44.
+ (shankar-draft-3.out) (shankar-draft-3.out)
 \@outlinefile=\write4
-\openout4 = `shankar-draft.out'.
+\openout4 = `shankar-draft-3.out'.
 
-LaTeX Font Info:    Trying to load font information for U+msa on input line 43.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 52.
 
 
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 43.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 52.
 
 
 (C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
+Overfull \hbox (3.7085pt too wide) in paragraph at lines 54--55
+\OT1/cmr/m/n/10.95 configuration-based SSP for-mu-la-tions and GTSP via the Int
+ersecting-to-Nonintersecting
+ []
+
+(shankar-draft-3.toc
 
 [1
 
-{C:/Users/Shankar/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
+{C:/Users/Shankar/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}])
+\tf@toc=\write5
+\openout5 = `shankar-draft-3.toc'.
+
+
 
 [2]
 
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-
-
 [3]
-Overfull \hbox (3.65947pt too wide) in paragraph at lines 146--147
- [][] 
- []
-
-
 
 [4]
 
 [5]
 
 [6]
+Overfull \hbox (0.22234pt too wide) in paragraph at lines 237--238
+[]\OT1/cmr/bx/n/12 SSP $\OMS/cmsy/m/n/12 !$ \OT1/cmr/bx/n/12 GTSP\OT1/cmr/m/n/1
+2 : Given SSP se-quence $\OML/cmm/m/it/12 ^^[$ \OT1/cmr/m/n/12 with KTNS-determ
+ined con-figs $\OML/cmm/m/it/12 C[]; C[]; [] ; C[]$\OT1/cmr/m/n/12 ,
+ []
 
-[7]
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 
 
+[7]
+
 [8]
 
 [9]
 
+Package natbib Warning: Citation `Johnson1973' on page 10 undefined on input li
+ne 369.
+
+
+
 [10]
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
 
 [11]
 
@@ -1001,125 +1049,52 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 [13]
 
-[14]
-
-[15]
-
-[16]
-
-Package natbib Warning: Citation `Muter2013' on page 17 undefined on input line
- 573.
-
-
-
-[17]
-
-[18]
-
-[19]
-
-[20]
-Overfull \hbox (15.63312pt too wide) in paragraph at lines 726--727
-[]\OT1/cmr/m/n/12 This de-duc-tion proves that any JGP op-ti-mal so-lu-tion wil
-l al-ways pro-vide an $\OML/cmm/m/it/12 $\OT1/cmr/m/n/12 -approximation
- []
-
-
-
-[21]
-
-[22]
-
-[23]
-
-[24]
-Overfull \hbox (1.66475pt too wide) in paragraph at lines 795--795
-[]\OT1/cmr/bx/n/17.28 Dynamic Node Gen-er-a-tion and the True Pric-ing Bot-
- []
-
-
-
-[25]
-
-[26]
-
-Package natbib Warning: Citation `Xia2024' on page 27 undefined on input line 8
-27.
-
-
-
-[27]
-Underfull \hbox (badness 10000) in paragraph at lines 848--848
-[]\OT1/cmr/m/n/12 Multi-Start
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 848--848
-[]\OT1/cmr/m/n/12 Best from
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 848--848
-[]\OT1/cmr/m/n/12 Best from
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 848--848
-[]\OT1/cmr/m/n/12 Best from
- []
-
-
-
-[28] (shankar-draft.bbl
-
-[29])
+[14] (shankar-draft-3.bbl)
 
 Package natbib Warning: There were undefined citations.
 
 
 
-[30] (shankar-draft.aux)
+[15] (shankar-draft-3.aux)
  ***********
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-07-20>
  ***********
-Package rerunfilecheck Info: File `shankar-draft.out' has not changed.
-(rerunfilecheck)             Checksum: CABEFB58221F67CF1EC716C4E40E6BEF;8349.
+Package rerunfilecheck Info: File `shankar-draft-3.out' has not changed.
+(rerunfilecheck)             Checksum: E149134D6B7555DAB170FCE25CDD0B4D;6862.
  ) 
 Here is how much of TeX's memory you used:
- 27482 strings out of 473899
- 541655 string characters out of 5725556
- 1948960 words of memory out of 5000000
- 49756 multiletter control sequences out of 15000+600000
- 575649 words of font info for 99 fonts, out of 8000000 for 9000
+ 29200 strings out of 473899
+ 590729 string characters out of 5725556
+ 1943960 words of memory out of 5000000
+ 51493 multiletter control sequences out of 15000+600000
+ 574447 words of font info for 94 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 102i,11n,107p,1101b,868s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 102i,10n,107p,863b,784s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\Shankar\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tc
 rm1200.pk><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/am
 sfonts/cm/cmbx10.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type
 1/public/amsfonts/cm/cmbx12.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX
-/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/Shankar/AppData/Local/Prog
-rams/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Shankar/AppData
-/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/Shan
-kar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/
-Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi
-6.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
-ts/cm/cmmi7.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/pub
-lic/amsfonts/cm/cmmi8.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts
-/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/Shankar/AppData/Local/Programs/Mi
-KTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/Shankar/AppData/Local/P
-rograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/Shankar/AppDa
-ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Shan
-kar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/U
-sers/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.
-pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts
-/cm/cmsy10.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/publ
-ic/amsfonts/cm/cmsy8.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/
-type1/public/amsfonts/cm/cmti12.pfb><C:/Users/Shankar/AppData/Local/Programs/Mi
-KTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on shankar-draft.pdf (30 pages, 421394 bytes).
+/fonts/type1/public/amsfonts/cm/cmbxti10.pfb><C:/Users/Shankar/AppData/Local/Pr
+ograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/Shankar/AppDa
+ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/Sh
+ankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C
+:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
+mi8.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsf
+onts/cm/cmr10.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/amsfonts/cm/cmr12.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fon
+ts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/Shankar/AppData/Local/Programs/
+MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/Shankar/AppData/Local/
+Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/Shankar/AppDa
+ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/Sh
+ankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C
+:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
+ti12.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
+fonts/cm/cmti8.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/
+public/amsfonts/symbols/msbm10.pfb>
+Output written on shankar-draft-3.pdf (15 pages, 300928 bytes).
 PDF statistics:
- 573 PDF objects out of 1000 (max. 8388607)
- 132 named destinations out of 1000 (max. 500000)
- 261 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 412 PDF objects out of 1000 (max. 8388607)
+ 100 named destinations out of 1000 (max. 500000)
+ 277 words of extra memory for PDF output out of 10000 (max. 10000000)
 

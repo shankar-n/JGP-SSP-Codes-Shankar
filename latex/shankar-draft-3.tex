@@ -11,6 +11,12 @@
 \usepackage{booktabs} 
 \usepackage[round]{natbib}
 
+\usepackage{xcolor}
+
+\definecolor{lightgreen}{rgb}{0.56, 0.93, 0.56}
+\definecolor{salmon}{rgb}{0.98, 0.5, 0.45}
+\definecolor{coral}{rgb}{1.0, 0.5, 0.31}
+
 % Hyperref for clickable Table of Contents and citations 
 \usepackage{hyperref} 
 \hypersetup{ 
@@ -75,7 +81,7 @@
 	
 	\subsection{The Tang--Denardo Decomposition}
 	
-	\begin{begin}{intuitionbox}
+	\begin{intuitionbox}
 		Once you fix a job sequence, loading tools optimally becomes easy: use a greedy \\``keep what you'll need soonest'' strategy. This insight separates hard (sequencing) from easy (tooling).
 	\end{intuitionbox}
 	
@@ -265,21 +271,21 @@
 			\draw[thick, ->] (0, 0) -- (0, 6) node[above] {Cost};
 			
 			% Bounds regions (simplified)
-			\draw[fill=green!20] (1, 1) rectangle (2, 1.5) node[midpoint, anchor=center, font=\small] {JGP LB};
-			\draw[fill=lightgreen!20] (1, 1.5) rectangle (2, 2) node[midpoint, anchor=center, font=\small] {LP LB};
-			\draw[fill=blue!20] (1, 2) rectangle (2, 2.5) node[midpoint, anchor=center, font=\small] {OPT*};
-			\draw[fill=salmon!20] (1, 2.5) rectangle (2, 3.5) node[midpoint, anchor=center, font=\small] {UB WS};
-			\draw[fill=coral!20] (1, 3.5) rectangle (2, 4.5) node[midpoint, anchor=center, font=\small] {UB Greedy};
+			\draw[fill=green!20] (1, 1) rectangle (2, 1.5) node[midway, anchor=center, font=\small] {JGP LB};
+			\draw[fill=lightgreen!20] (1, 1.5) rectangle (2, 2) node[midway, anchor=center, font=\small] {LP LB};
+			\draw[fill=blue!20] (1, 2) rectangle (2, 2.5) node[midway, anchor=center, font=\small] {OPT*};
+			\draw[fill=salmon!20] (1, 2.5) rectangle (2, 3.5) node[midway, anchor=center, font=\small] {UB WS};
+			\draw[fill=coral!20] (1, 3.5) rectangle (2, 4.5) node[midway, anchor=center, font=\small] {UB Greedy};
 			
 			% Tightening as solver improves
-			\draw[dashed, gray] (2, 1) -- (9, 1.2) node[midpoint, above, font=\small] {JGP improves};
-			\draw[dashed, gray] (2, 2) -- (9, 2.3) node[midpoint, above, font=\small] {OPT found};
-			\draw[dashed, gray] (2, 3.5) -- (9, 3.7) node[midpoint, above, font=\small] {UB tightens};
+			\draw[dashed, gray] (2, 1) -- (9, 1.2) node[midway, above, font=\small] {JGP improves};
+			\draw[dashed, gray] (2, 2) -- (9, 2.3) node[midway, above, font=\small] {OPT found};
+			\draw[dashed, gray] (2, 3.5) -- (9, 3.7) node[midway, above, font=\small] {UB tightens};
 			
 			% Gap arrow
-			\draw[<->, red, thick] (0.5, 1) -- (0.5, 3.5) node[midpoint, left, font=\small, red] {Gap};
+			\draw[<->, red, thick] (0.5, 1) -- (0.5, 3.5) node[midway, left, font=\small, red] {Gap};
 		\end{tikzpicture}
-		\caption{Bounds hierarchy: LB ≤ OPT* ≤ UB. As algorithms tighten bounds, gap shrinks, reducing uncertainty about optimal value.}
+		\caption{Bounds hierarchy: LB $\le$ OPT* $\le$ UB. As algorithms tighten bounds, gap shrinks, reducing uncertainty about optimal value.}
 		\label{fig:bounds_hierarchy}
 	\end{figure}
 	
@@ -426,7 +432,7 @@
 		\centering
 		\caption{Computational Results: Bounds Performance on Benchmark Instances}
 		\label{tab:computational_results}
-		\begin{tabular}{@{}lrrrrrr@{}}
+		\begin{tabular}{@{}lrrrrrrr@{}}
 			\toprule
 			Instance & Jobs & Tools & Mag. Size & JGP LB & LP LB & OPT* & Gap (\%) \\
 			\midrule
@@ -515,61 +521,61 @@
 	
 	(To be filled with experimental data after implementation)
 	
-	\begin{figure}[h!]
-		\centering
-		\begin{tikzpicture}[node distance=2cm, auto]
-			% Start
-			\node [startstop] (start) {Start: SSP Instance};
-			
-			% Initialize RMP
-			\node [process, below of=start] (init) {Initialize RMP with warm-start columns};
-			
-			% Solve RMP
-			\node [process, below of=init] (solve_rmp) {Solve RMP (LP relaxation)};
-			
-			% Get duals
-			\node [process, below of=solve_rmp] (get_duals) {Extract dual variables $\pi_j$};
-			
-			% Pricing
-			\node [decision, below of=get_duals] (pricing) {Solve SUKP Pricing Subproblem};
-			
-			% Negative reduced cost?
-			\node [decision, right of=pricing, xshift=3cm] (negative) {Negative reduced cost?};
-			
-			% Add column
-			\node [process, below of=negative] (add_column) {Add new configuration column to RMP};
-			
-			% Converged?
-			\node [decision, below of=add_column] (converged) {RMP converged?};
-			
-			% Integer phase
-			\node [process, right of=converged, xshift=3cm] (integer) {Branch on fractional variables};
-			
-			% Optimal
-			\node [startstop, below of=integer] (optimal) {Optimal SSP Solution};
-			
-			% Edges
-			\draw [arrow] (start) -- (init);
-			\draw [arrow] (init) -- (solve_rmp);
-			\draw [arrow] (solve_rmp) -- (get_duals);
-			\draw [arrow] (get_duals) -- (pricing);
-			\draw [arrow] (pricing) -- (negative);
-			\draw [arrow] (negative) -- node[anchor=east] {Yes} (add_column);
-			\draw [arrow] (add_column) -- (converged);
-			\draw [arrow] (converged) -- node[anchor=east] {Yes} (integer);
-			\draw [arrow] (integer) -- (optimal);
-			\draw [arrow] (negative) -- node[anchor=south] {No} (converged);
-			\draw [arrow] (converged) -- node[anchor=south] {No} (solve_rmp);
-			
-			% Style definitions
-			\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=red!30]
-			\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
-			\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
-			\tikzstyle{arrow} = [thick, ->, >=stealth]
-		\end{tikzpicture}
-		\caption{Branch-and-Price algorithm flowchart: Column generation with SUKP pricing subproblem for exact SSP solution.}
-		\label{fig:bp_flowchart}
-	\end{figure}
+%	\begin{figure}[h!]
+%		\centering
+%		\begin{tikzpicture}[node distance=2cm, auto]
+%			% Start
+%			\node [startstop] (start) {Start: SSP Instance};
+%			
+%			% Initialize RMP
+%			\node [process, below of=start] (init) {Initialize RMP with warm-start columns};
+%			
+%			% Solve RMP
+%			\node [process, below of=init] (solve_rmp) {Solve RMP (LP relaxation)};
+%			
+%			% Get duals
+%			\node [process, below of=solve_rmp] (get_duals) {Extract dual variables $\pi_j$};
+%			
+%			% Pricing
+%			\node [decision, below of=get_duals] (pricing) {Solve SUKP Pricing Subproblem};
+%			
+%			% Negative reduced cost?
+%			\node [decision, right of=pricing, xshift=3cm] (negative) {Negative reduced cost?};
+%			
+%			% Add column
+%			\node [process, below of=negative] (add_column) {Add new configuration column to RMP};
+%			
+%			% Converged?
+%			\node [decision, below of=add_column] (converged) {RMP converged?};
+%			
+%			% Integer phase
+%			\node [process, right of=converged, xshift=3cm] (integer) {Branch on fractional variables};
+%			
+%			% Optimal
+%			\node [startstop, below of=integer] (optimal) {Optimal SSP Solution};
+%			
+%			% Edges
+%			\draw [arrow] (start) -- (init);
+%			\draw [arrow] (init) -- (solve_rmp);
+%			\draw [arrow] (solve_rmp) -- (get_duals);
+%			\draw [arrow] (get_duals) -- (pricing);
+%			\draw [arrow] (pricing) -- (negative);
+%			\draw [arrow] (negative) -- node[anchor=east] {Yes} (add_column);
+%			\draw [arrow] (add_column) -- (converged);
+%			\draw [arrow] (converged) -- node[anchor=east] {Yes} (integer);
+%			\draw [arrow] (integer) -- (optimal);
+%			\draw [arrow] (negative) -- node[anchor=south] {No} (converged);
+%			\draw [arrow] (converged) -- node[anchor=south] {No} (solve_rmp);
+%			
+%			% Style definitions
+%			\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=red!30]
+%			\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
+%			\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+%			\tikzstyle{arrow} = [thick, ->, >=stealth]
+%		\end{tikzpicture}
+%		\caption{Branch-and-Price algorithm flowchart: Column generation with SUKP pricing subproblem for exact SSP solution.}
+%		\label{fig:bp_flowchart}
+%	\end{figure}
 	
 	\section{Extensions and Future Work}
 	
