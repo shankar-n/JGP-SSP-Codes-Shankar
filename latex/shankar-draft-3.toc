@@ -1,0 +1,34 @@
+\babel@toc {english}{}\relax 
+\contentsline {section}{\numberline {1}Introduction and Motivation}{3}{section.1}%
+\contentsline {section}{\numberline {2}Problem Preliminaries and Fundamentals}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Basic Definitions}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}The Tang--Denardo Decomposition}{3}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Configuration Graph Reformulation}{4}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Why Configuration-Based?}{4}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}The MILP Formulation}{4}{subsection.3.2}%
+\contentsline {section}{\numberline {4}GTSP Equivalence}{5}{section.4}%
+\contentsline {subsection}{\numberline {4.1}The Generalized Traveling Salesman Problem}{5}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}The Intersecting-to-Nonintersecting Transformation}{6}{subsection.4.2}%
+\contentsline {section}{\numberline {5}Correctness Conditions and Limitations}{7}{section.5}%
+\contentsline {section}{\numberline {6}Bounds and Approximations Framework}{7}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Lower Bounds}{8}{subsection.6.1}%
+\contentsline {subsubsection}{\numberline {6.1.1}Lower Bound 1: Job Grouping Problem (JGP)}{8}{subsubsection.6.1.1}%
+\contentsline {subsubsection}{\numberline {6.1.2}Lower Bound 2: LP Relaxation}{8}{subsubsection.6.1.2}%
+\contentsline {subsubsection}{\numberline {6.1.3}Lower Bound 3: Configuration Dominance}{9}{subsubsection.6.1.3}%
+\contentsline {subsection}{\numberline {6.2}Upper Bounds}{9}{subsection.6.2}%
+\contentsline {subsubsection}{\numberline {6.2.1}Upper Bound 1: JGP Warm-Start}{9}{subsubsection.6.2.1}%
+\contentsline {subsubsection}{\numberline {6.2.2}Upper Bound 2: Greedy First-Fit Decreasing (FFD)}{10}{subsubsection.6.2.2}%
+\contentsline {subsubsection}{\numberline {6.2.3}Upper Bound 3: Local Search (2-Opt)}{10}{subsubsection.6.2.3}%
+\contentsline {subsection}{\numberline {6.3}Gap Analysis and Bounds Hierarchy}{10}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Time-Dependent Tool Switching}{10}{section.7}%
+\contentsline {section}{\numberline {8}Ryan Foster Inequality and Subtour Tightening}{11}{section.8}%
+\contentsline {section}{\numberline {9}Computational Results}{11}{section.9}%
+\contentsline {section}{\numberline {10}Branch-and-Price Framework Design}{12}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Master Problem (RMP)}{13}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Pricing Subproblem (PSP)}{13}{subsection.10.2}%
+\contentsline {section}{\numberline {11}Computational Results}{13}{section.11}%
+\contentsline {section}{\numberline {12}Extensions and Future Work}{13}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Time-Dependent Extensions}{13}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}Machine Learning Acceleration}{14}{subsection.12.2}%
+\contentsline {subsection}{\numberline {12.3}Parallel Machine Extensions}{14}{subsection.12.3}%
+\contentsline {section}{\numberline {13}Conclusion}{14}{section.13}%

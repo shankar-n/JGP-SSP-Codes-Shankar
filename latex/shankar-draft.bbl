@@ -1,9 +1,17 @@
-\begin{thebibliography}{13}
+\begin{thebibliography}{16}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Adjiashvili et~al.(2015)Adjiashvili, Bosio, and
+  Zemmer]{Adjiashvili2015}
+David Adjiashvili, Sandro Bosio, and Kevin Zemmer.
+\newblock Minimizing the number of switch instances on a flexible machine in
+  polynomial time.
+\newblock \emph{Operations Research Letters}, 43\penalty0 (3):\penalty0
+  317--322, 2015.
 
 \bibitem[Barnhart et~al.(1998)Barnhart, Johnson, Nemhauser, Savelsbergh, and
   Vance]{Barnhart1998}
@@ -12,6 +20,13 @@ Cynthia Barnhart, Ellis~L. Johnson, George~L. Nemhauser, Martin W.~P.
 \newblock Branch-and-price: Column generation for solving huge integer
   programs.
 \newblock \emph{Operations Research}, 46\penalty0 (3):\penalty0 316--329, 1998.
+
+\bibitem[Beez{\~a}o et~al.(2017)Beez{\~a}o, Cordeau, Laporte, and
+  Yanasse]{Beezao2017}
+A.~C. Beez{\~a}o, J.-F. Cordeau, G.~Laporte, and H.~H. Yanasse.
+\newblock Scheduling identical parallel machines with tooling constraints.
+\newblock \emph{European Journal of Operational Research}, 257\penalty0
+  (3):\penalty0 834--844, 2017.
 
 \bibitem[Catanzaro et~al.(2015)Catanzaro, Gouveia, and
   Labb{\'e}]{Catanzaro2015}
@@ -66,6 +81,12 @@ Yao-Nan Lien, Eva Ma, and Benjamin W.~S. Wah.
   standard traveling-salesman problem.
 \newblock \emph{Information Sciences}, 74\penalty0 (1-2):\penalty0 177--189,
   1993.
+
+\bibitem[Mecler et~al.(2021)Mecler, Subramanian, and Vidal]{Mecler2021}
+Jordana Mecler, Anand Subramanian, and Thibaut Vidal.
+\newblock A simple and effective hybrid genetic search for the job sequencing
+  and tool switching problem.
+\newblock \emph{Computers \& Operations Research}, 127:\penalty0 105153, 2021.
 
 \bibitem[Noon and Bean(1993)]{Noon1993}
 Charles~E. Noon and James~C. Bean.

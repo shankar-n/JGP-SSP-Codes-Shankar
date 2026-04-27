@@ -1,0 +1,90 @@
+\relax 
+\providecommand\babel@aux[2]{}
+\@nameuse{bbl@beforestart}
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\babel@aux{english}{}
+\citation{Tang1988}
+\citation{Crama1994}
+\citation{Catanzaro2015}
+\citation{Catanzaro2015,Laporte2004}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{2}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}The Colares-Wagler Non-Compact Formulation}{2}{section.2}\protected@file@percent }
+\citation{Tang1988}
+\citation{Colares2026}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces An incidence matrix for a 5-job, 7-tool instance. The machine magazine has a capacity $b=4$. Assuming the sequence $1 \to 2 \to 3 \to 4 \to 5$, Tool 1 is required by Jobs 1, 4, and 5. Because $b=4$ is large enough to accommodate the transition tool requirements without ejecting Tool 1, it can be retained through Jobs 2 and 3. This retention interval is known as a 0-block, as it avoids redundant unloading and reloading operations.}}{3}{figure.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:incidence_matrix}{{1}{3}{An incidence matrix for a 5-job, 7-tool instance. The machine magazine has a capacity $b=4$. Assuming the sequence $1 \to 2 \to 3 \to 4 \to 5$, Tool 1 is required by Jobs 1, 4, and 5. Because $b=4$ is large enough to accommodate the transition tool requirements without ejecting Tool 1, it can be retained through Jobs 2 and 3. This retention interval is known as a 0-block, as it avoids redundant unloading and reloading operations}{figure.caption.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Illustrative Example: Magazine State Evolution}{3}{subsection.2.1}\protected@file@percent }
+\citation{Colares2026}
+\citation{Tang1988}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces State-space timeline of the tool magazine. Because tool $t_4$ is required for $j_2$, it is preemptively loaded in the free slot during $j_1$, preventing a switch. Most importantly, tool $t_1$ is required for jobs $j_1$ and $j_4$, but not for $j_2$ and $j_3$. Because the magazine capacity is large enough to accommodate the transition tools without evicting $t_1$, it is safely retained across the 0-block, avoiding redundant unloading and reloading operations.}}{4}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:magazine_timeline}{{2}{4}{State-space timeline of the tool magazine. Because tool $t_4$ is required for $j_2$, it is preemptively loaded in the free slot during $j_1$, preventing a switch. Most importantly, tool $t_1$ is required for jobs $j_1$ and $j_4$, but not for $j_2$ and $j_3$. Because the magazine capacity is large enough to accommodate the transition tools without evicting $t_1$, it is safely retained across the 0-block, avoiding redundant unloading and reloading operations}{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Definitions, Variables, and Maximal Configurations}{4}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Mathematical Model and Correctness}{5}{subsection.2.3}\protected@file@percent }
+\newlabel{eq:nc_obj}{{2}{5}{Mathematical Model and Correctness}{equation.2.2}{}}
+\newlabel{eq:nc_cover}{{3}{5}{Mathematical Model and Correctness}{equation.2.3}{}}
+\newlabel{eq:nc_flowin}{{4}{5}{Mathematical Model and Correctness}{equation.2.4}{}}
+\newlabel{eq:nc_flowout}{{5}{5}{Mathematical Model and Correctness}{equation.2.5}{}}
+\newlabel{eq:nc_sec}{{6}{5}{Mathematical Model and Correctness}{equation.2.6}{}}
+\newlabel{eq:nc_varx}{{7}{5}{Mathematical Model and Correctness}{equation.2.7}{}}
+\newlabel{eq:nc_vary}{{8}{5}{Mathematical Model and Correctness}{equation.2.8}{}}
+\citation{Pop2024}
+\citation{Lien1993,Noon1993}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Equivalence Between the SSP and the GTSP}{7}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Formal Definition of Instances}{7}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Reduction 1: SSP to GTSP (Forward Mapping)}{7}{subsection.3.2}\protected@file@percent }
+\citation{Lien1993}
+\citation{Catanzaro2015}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Forward Mapping (SSP $\rightarrow $ GTSP). A single configuration $C_1$ covering three jobs is duplicated into mutually exclusive replicas connected by zero-cost edges, establishing a bijective mapping to the optimal SSP tool retention logic.}}{9}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:forward_mapping}{{3}{9}{Forward Mapping (SSP $\rightarrow $ GTSP). A single configuration $C_1$ covering three jobs is duplicated into mutually exclusive replicas connected by zero-cost edges, establishing a bijective mapping to the optimal SSP tool retention logic}{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Reduction 2: GTSP to SSP (Reverse Mapping)}{9}{subsection.3.3}\protected@file@percent }
+\citation{Noon1993}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Algorithmic Implications of the Complexity Space}{10}{subsection.3.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Reverse Mapping (GTSP $\rightarrow $ SSP). Dummy tools enforce the Disjointness Condition, ensuring that no single valid tool configuration can cover multiple jobs, collapsing the SSP back into a GTSP.}}{11}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:reverse_reduction}{{4}{11}{Reverse Mapping (GTSP $\rightarrow $ SSP). Dummy tools enforce the Disjointness Condition, ensuring that no single valid tool configuration can cover multiple jobs, collapsing the SSP back into a GTSP}{figure.caption.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces The complexity space of solving the SSP. Tractable instances can be reduced to ATSP and solved via highly optimized routing heuristics, while massive instances bypass the exponential bottleneck via dynamic node generation in a Branch-and-Price framework.}}{11}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:complexity_flowchart}{{5}{11}{The complexity space of solving the SSP. Tractable instances can be reduced to ATSP and solved via highly optimized routing heuristics, while massive instances bypass the exponential bottleneck via dynamic node generation in a Branch-and-Price framework}{figure.caption.5}{}}
+\citation{Noon1993}
+\citation{Helsgaun2015}
+\citation{Applegate2006}
+\citation{Barnhart1998}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Exact Routing for Tractable Instances}{12}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}The Noon-Bean Transformation}{12}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Highly Optimized Routing Solvers}{12}{subsection.4.2}\protected@file@percent }
+\citation{Crama1994,Goldschmidt1994}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Dynamic Node Generation and the True Pricing Bottleneck}{13}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}The Restricted Master Problem}{13}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}The Complexity of the SSP Pricing Oracle}{13}{subsection.5.2}\protected@file@percent }
+\citation{Bernardo2024}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Strategies for Accelerating Branch-and-Price}{14}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Operations Research Enhancements}{14}{subsection.6.1}\protected@file@percent }
+\citation{Otiai2024}
+\citation{Lu2020}
+\citation{Chi2022,Yuan2022}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Machine Learning for Column Generation}{15}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Planned Experiments and Benchmarking}{16}{section.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Experimental Roadmap for ML-Accelerated Exact Branch-and-Price}}{16}{table.caption.6}\protected@file@percent }
+\newlabel{tab:experiments}{{1}{16}{Experimental Roadmap for ML-Accelerated Exact Branch-and-Price}{table.caption.6}{}}
+\bibstyle{plainnat}
+\bibdata{shankar-draft}
+\bibcite{Applegate2006}{{1}{2006}{{Applegate et~al.}}{{Applegate, Bixby, Chv{\'a}tal, and Cook}}}
+\bibcite{Barnhart1998}{{2}{1998}{{Barnhart et~al.}}{{Barnhart, Johnson, Nemhauser, Savelsbergh, and Vance}}}
+\bibcite{Catanzaro2015}{{3}{2015}{{Catanzaro et~al.}}{{Catanzaro, Gouveia, and Labb{\'e}}}}
+\bibcite{Chi2022}{{4}{2022}{{Chi et~al.}}{{Chi, Aboussalah, Khalil, Wang, and Sherkat-Masoumi}}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{17}{section.8}\protected@file@percent }
+\bibcite{Colares2026}{{5}{2026}{{Colares and Wagler}}{{}}}
+\bibcite{Crama1994}{{6}{1994}{{Crama and Oerlemans}}{{}}}
+\bibcite{Goldschmidt1994}{{7}{1994}{{Goldschmidt et~al.}}{{Goldschmidt, Nehme, and Yu}}}
+\bibcite{Helsgaun2015}{{8}{2015}{{Helsgaun}}{{}}}
+\bibcite{Laporte2004}{{9}{2004}{{Laporte et~al.}}{{Laporte, Salazar-Gonz{\'a}lez, and Semet}}}
+\bibcite{Lien1993}{{10}{1993}{{Lien et~al.}}{{Lien, Ma, and Wah}}}
+\bibcite{Lu2020}{{11}{2020}{{Lu et~al.}}{{Lu, Zhang, and Yang}}}
+\bibcite{Bernardo2024}{{12}{2026}{{Moreira}}{{}}}
+\bibcite{Noon1993}{{13}{1993}{{Noon and Bean}}{{}}}
+\bibcite{Otiai2024}{{14}{2024}{{Otiai}}{{}}}
+\bibcite{Pop2024}{{15}{2024}{{Pop et~al.}}{{Pop, Cosma, Sabo, and Pop~Sitar}}}
+\bibcite{Tang1988}{{16}{1988}{{Tang and Denardo}}{{}}}
+\bibcite{Yuan2022}{{17}{2022}{{Yuan et~al.}}{{Yuan, Jiang, and Song}}}
+\gdef \@abspage@last{19}
