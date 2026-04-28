@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.8.25)  27 APR 2026 16:43
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.8.25)  28 APR 2026 09:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -764,20 +764,39 @@ Package hyperref Info: Link coloring OFF on input line 24.
 
 Chapter 1.
 
-LaTeX Warning: Citation `TangDenardo1988' on page 1 undefined on input line 30.
+LaTeX Warning: Citation `Tang1988' on page 1 undefined on input line 30.
 
 
-
-LaTeX Warning: Citation `CramaOerlemans1994' on page 1 undefined on input line 
-30.
+LaTeX Warning: Citation `Crama1994' on page 1 undefined on input line 30.
 
 
-LaTeX Warning: Citation `LaporteEtAl2004' on page 1 undefined on input line 32.
+LaTeX Warning: Citation `Crama1994' on page 1 undefined on input line 32.
 
 
+LaTeX Warning: Citation `Tang1988' on page 1 undefined on input line 32.
 
-LaTeX Warning: Citation `CatanzaroEtAl2015' on page 1 undefined on input line 3
-4.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 36.
+
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 36.
+
+
+(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+Overfull \hbox (3.6552pt too wide) in paragraph at lines 36--37
+\OT1/cmr/m/n/10.95 Let $\OML/cmm/m/it/10.95 J \OT1/cmr/m/n/10.95 = \OMS/cmsy/m/
+n/10.95 f\OT1/cmr/m/n/10.95 1\OML/cmm/m/it/10.95 ; \OT1/cmr/m/n/10.95 2\OML/cmm
+/m/it/10.95 ; [] ; n\OMS/cmsy/m/n/10.95 g$ \OT1/cmr/m/n/10.95 de-note the set o
+f re-quired jobs, and let $\OML/cmm/m/it/10.95 T \OT1/cmr/m/n/10.95 = \OMS/cmsy
+/m/n/10.95 f\OT1/cmr/m/n/10.95 1\OML/cmm/m/it/10.95 ; \OT1/cmr/m/n/10.95 2\OML/
+cmm/m/it/10.95 ; [] ; m\OMS/cmsy/m/n/10.95 g$
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
@@ -786,84 +805,65 @@ LaTeX Warning: Citation `CatanzaroEtAl2015' on page 1 undefined on input line 3
 
 {C:/Users/Shankar/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
 
-LaTeX Warning: Citation `Crama1994' on page 2 undefined on input line 38.
 
-LaTeX Font Info:    Trying to load font information for U+msa on input line 40.
-
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-LaTeX Font Info:    Trying to load font information for U+msb on input line 40.
-
-
-(C:\Users\Shankar\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
-
-
-Overfull \hbox (164.42975pt too wide) has occurred while \output is active
-\OT1/cmr/m/n/10.95 2 \OT1/cmr/m/sl/10.95 CHAPTER 1.  PROBLEM PRELIMINARIES, COM
-PLEXITY, AND THE TANG-DENARDO PARADIGM
+Overfull \hbox (112.87222pt too wide) has occurred while \output is active
+\OT1/cmr/m/n/10.95 2 \OT1/cmr/m/sl/10.95 CHAPTER 1.  COMBINATORIAL FOUNDATIONS 
+AND THE TANG-DENARDO PARADIGM
  []
 
 [2]
-Overfull \hbox (1.00444pt too wide) in paragraph at lines 69--70
-\OT1/cmr/m/it/10.95 any valid U-SSP in-stance, an op-er-a-tional se-quence con-
-tain-ing a non-maximal
- []
-
-
 
 [3]
-Overfull \hbox (6.18532pt too wide) in paragraph at lines 79--80
-\OT1/cmr/m/n/10.95 u-ra-tion $\OML/cmm/m/it/10.95 C[]$\OT1/cmr/m/n/10.95 . The 
-orig-i-nal re-quired num-ber of tool in-ser-tions is $\OML/cmm/m/it/10.95 d\OT1
-/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 C[]; C[]\OT1/cmr/m/n/10.95 ) =
+Overfull \hbox (1.28143pt too wide) in paragraph at lines 97--98
+[]\OT1/cmr/m/n/10.95 By it-er-a-tively ap-ply-ing this greedy padding logic acr
+oss all $\OML/cmm/m/it/10.95 k \OMS/cmsy/m/n/10.95 2 f\OT1/cmr/m/n/10.95 1\OML/
+cmm/m/it/10.95 ; [] ; n\OMS/cmsy/m/n/10.95 g$\OT1/cmr/m/n/10.95 ,
  []
 
 
-LaTeX Warning: Citation `Tang1988' on page 4 undefined on input line 95.
+LaTeX Warning: Citation `Tang1988' on page 4 undefined on input line 104.
 
 
-LaTeX Warning: Citation `Crama1994' on page 4 undefined on input line 95.
-
-
-LaTeX Warning: Citation `Laporte2004' on page 4 undefined on input line 95.
+LaTeX Warning: Citation `Tang1988' on page 4 undefined on input line 108.
 
 
 
 
-Overfull \hbox (164.42975pt too wide) has occurred while \output is active
-\OT1/cmr/m/n/10.95 4 \OT1/cmr/m/sl/10.95 CHAPTER 1.  PROBLEM PRELIMINARIES, COM
-PLEXITY, AND THE TANG-DENARDO PARADIGM
+Overfull \hbox (112.87222pt too wide) has occurred while \output is active
+\OT1/cmr/m/n/10.95 4 \OT1/cmr/m/sl/10.95 CHAPTER 1.  COMBINATORIAL FOUNDATIONS 
+AND THE TANG-DENARDO PARADIGM
  []
 
 [4]
-Overfull \hbox (41.75116pt too wide) in paragraph at lines 118--119
-\OML/cmm/m/it/10.95 k \OMS/cmsy/m/n/10.95 2 f\OT1/cmr/m/n/10.95 1\OML/cmm/m/it/
-10.95 ; [] ; n\OMS/cmsy/m/n/10.95 g$\OT1/cmr/m/it/10.95 , find an op-ti-mal se-
-quence of mag-a-zine con-fig-u-ra-tions $\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.9
-5 W[]; W[]; [] ; W[]\OT1/cmr/m/n/10.95 )$
- []
+
+LaTeX Warning: Citation `Tang1988' on page 5 undefined on input line 131.
 
 
 
 [5]
 
-LaTeX Warning: Citation `Tang1988' on page 6 undefined on input line 130.
 
-
-LaTeX Warning: Citation `Crama1994' on page 6 undefined on input line 130.
-
-
-
-
-Overfull \hbox (164.42975pt too wide) has occurred while \output is active
-\OT1/cmr/m/n/10.95 6 \OT1/cmr/m/sl/10.95 CHAPTER 1.  PROBLEM PRELIMINARIES, COM
-PLEXITY, AND THE TANG-DENARDO PARADIGM
+Overfull \hbox (112.87222pt too wide) has occurred while \output is active
+\OT1/cmr/m/n/10.95 6 \OT1/cmr/m/sl/10.95 CHAPTER 1.  COMBINATORIAL FOUNDATIONS 
+AND THE TANG-DENARDO PARADIGM
  []
 
 [6]
+Overfull \hbox (0.95209pt too wide) in paragraph at lines 168--169
+[]\OT1/cmr/m/n/10.95 Operationally, a 0-block rep-re-sents an idle tem-po-ral i
+n-ter-val dur-ing which
+ []
+
+
+LaTeX Warning: Citation `Crama1994' on page 7 undefined on input line 172.
+
+
+LaTeX Warning: Citation `Tang1988' on page 7 undefined on input line 172.
+
+
+LaTeX Warning: Citation `Tang1988' on page 7 undefined on input line 177.
+
+
 
 
 Overfull \hbox (99.63623pt too wide) has occurred while \output is active
@@ -872,32 +872,17 @@ TNS) POLICY \OT1/cmr/m/n/10.95 7
  []
 
 [7]
-Overfull \hbox (0.95209pt too wide) in paragraph at lines 166--167
-[]\OT1/cmr/m/n/10.95 Operationally, a 0-block rep-re-sents an idle tem-po-ral i
-n-ter-val dur-ing which
- []
-
-
-LaTeX Warning: Citation `Crama1994' on page 8 undefined on input line 170.
-
-
-LaTeX Warning: Citation `Tang1988' on page 8 undefined on input line 170.
-
-
-LaTeX Warning: Citation `Tang1988' on page 8 undefined on input line 175.
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
+put line 188.
 
 
 
-
-Overfull \hbox (164.42975pt too wide) has occurred while \output is active
-\OT1/cmr/m/n/10.95 8 \OT1/cmr/m/sl/10.95 CHAPTER 1.  PROBLEM PRELIMINARIES, COM
-PLEXITY, AND THE TANG-DENARDO PARADIGM
+Overfull \hbox (112.87222pt too wide) has occurred while \output is active
+\OT1/cmr/m/n/10.95 8 \OT1/cmr/m/sl/10.95 CHAPTER 1.  COMBINATORIAL FOUNDATIONS 
+AND THE TANG-DENARDO PARADIGM
  []
 
 [8]
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 186.
-
 
 
 Overfull \hbox (99.63623pt too wide) has occurred while \output is active
@@ -906,19 +891,19 @@ TNS) POLICY \OT1/cmr/m/n/10.95 9
  []
 
 [9]
-
-
-Overfull \hbox (169.90475pt too wide) has occurred while \output is active
-\OT1/cmr/m/n/10.95 10 \OT1/cmr/m/sl/10.95 CHAPTER 1.  PROBLEM PRELIMINARIES, CO
-MPLEXITY, AND THE TANG-DENARDO PARADIGM
- []
-
-[10]
-Overfull \hbox (107.3882pt too wide) in paragraph at lines 335--336
+Overfull \hbox (107.3882pt too wide) in paragraph at lines 337--338
  [][] 
  []
 
 
+
+
+Overfull \hbox (118.34723pt too wide) has occurred while \output is active
+\OT1/cmr/m/n/10.95 10 \OT1/cmr/m/sl/10.95 CHAPTER 1.  COMBINATORIAL FOUNDATIONS
+ AND THE TANG-DENARDO PARADIGM
+ []
+
+[10]
 
 
 Overfull \hbox (105.11124pt too wide) has occurred while \output is active
@@ -929,21 +914,21 @@ TNS) POLICY \OT1/cmr/m/n/10.95 11
 [11]
 
 
-Overfull \hbox (169.90475pt too wide) has occurred while \output is active
-\OT1/cmr/m/n/10.95 12 \OT1/cmr/m/sl/10.95 CHAPTER 1.  PROBLEM PRELIMINARIES, CO
-MPLEXITY, AND THE TANG-DENARDO PARADIGM
+Overfull \hbox (118.34723pt too wide) has occurred while \output is active
+\OT1/cmr/m/n/10.95 12 \OT1/cmr/m/sl/10.95 CHAPTER 1.  COMBINATORIAL FOUNDATIONS
+ AND THE TANG-DENARDO PARADIGM
  []
 
-[12]
-Chapter 2.
-
-LaTeX Warning: Citation `Tang1988' on page 13 undefined on input line 354.
-
-
-
-[13
+[12
 
 ]
+Chapter 2.
+
+LaTeX Warning: Citation `Tang1988' on page 13 undefined on input line 356.
+
+
+
+[13]
 
 
 Overfull \hbox (91.88472pt too wide) has occurred while \output is active
@@ -953,7 +938,7 @@ NS AND THE SYMMETRY MENACE
 
 [14]
 
-LaTeX Warning: Citation `Laporte2004' on page 15 undefined on input line 384.
+LaTeX Warning: Citation `Laporte2004' on page 15 undefined on input line 386.
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -961,13 +946,13 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 [15]
-Overfull \hbox (8.29858pt too wide) in paragraph at lines 412--412
+Overfull \hbox (8.29858pt too wide) in paragraph at lines 414--414
 []\OT1/cmr/bx/n/12 Objective Lift-ing and Poly-he-dral Strength-en-ing In-equal
 -
  []
 
 
-LaTeX Warning: Citation `Laporte2004' on page 16 undefined on input line 414.
+LaTeX Warning: Citation `Laporte2004' on page 16 undefined on input line 416.
 
 
 
@@ -978,7 +963,7 @@ NS AND THE SYMMETRY MENACE
  []
 
 [16]
-Overfull \hbox (1.614pt too wide) in paragraph at lines 421--423
+Overfull \hbox (1.614pt too wide) in paragraph at lines 423--425
 \OT1/cmr/m/n/10.95 This in-equal-ity acts as a lifted ob-jec-tive bound. It pro
 -vides a strict, sequence-
  []
@@ -987,7 +972,7 @@ Overfull \hbox (1.614pt too wide) in paragraph at lines 421--423
 
 [17]
 
-LaTeX Warning: Citation `Catanzaro2015' on page 18 undefined on input line 438.
+LaTeX Warning: Citation `Catanzaro2015' on page 18 undefined on input line 440.
 
 
 
@@ -1000,7 +985,7 @@ NS AND THE SYMMETRY MENACE
 
 [18]
 
-LaTeX Warning: Citation `Catanzaro2015' on page 19 undefined on input line 462.
+LaTeX Warning: Citation `Catanzaro2015' on page 19 undefined on input line 464.
 
 
 
@@ -1015,10 +1000,10 @@ NS AND THE SYMMETRY MENACE
 
 [20]
 
-LaTeX Warning: Citation `Laporte2004' on page 21 undefined on input line 498.
+LaTeX Warning: Citation `Laporte2004' on page 21 undefined on input line 500.
 
 
-LaTeX Warning: Citation `Catanzaro2015' on page 21 undefined on input line 498.
+LaTeX Warning: Citation `Catanzaro2015' on page 21 undefined on input line 500.
 
 
 
@@ -1055,11 +1040,11 @@ NS AND THE SYMMETRY MENACE
 
 [24]
 
-LaTeX Warning: Citation `Catanzaro2015' on page 25 undefined on input line 592.
+LaTeX Warning: Citation `Catanzaro2015' on page 25 undefined on input line 594.
 
 
 
-LaTeX Warning: Citation `Laporte2004' on page 25 undefined on input line 592.
+LaTeX Warning: Citation `Laporte2004' on page 25 undefined on input line 594.
 
 
 
@@ -1085,10 +1070,10 @@ Chapter 3.
 
 ]
 
-LaTeX Warning: Citation `Colares2026' on page 28 undefined on input line 630.
+LaTeX Warning: Citation `Colares2026' on page 28 undefined on input line 632.
 
 
-LaTeX Warning: Citation `Colares2026' on page 28 undefined on input line 631.
+LaTeX Warning: Citation `Colares2026' on page 28 undefined on input line 633.
 
 
 
@@ -1100,43 +1085,43 @@ ON-COMPACT CONFIGURATION SPACE
 
 [28]
 
-LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 633.
-
-
 LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 635.
-
-
-LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 636.
 
 
 LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 637.
 
 
+LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 638.
+
+
 LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 639.
 
 
-LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 640.
+LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 641.
 
 
-LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 650.
+LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 642.
 
 
-LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 651.
+LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 652.
 
 
-LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 661.
+LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 653.
+
+
+LaTeX Warning: Citation `Colares2026' on page 29 undefined on input line 663.
 
 
 
 [29]
 
-LaTeX Warning: Citation `Colares2026' on page 30 undefined on input line 681.
+LaTeX Warning: Citation `Colares2026' on page 30 undefined on input line 683.
 
 
-LaTeX Warning: Citation `Colares2026' on page 30 undefined on input line 686.
+LaTeX Warning: Citation `Colares2026' on page 30 undefined on input line 688.
 
 
-LaTeX Warning: Citation `Colares2026' on page 30 undefined on input line 692.
+LaTeX Warning: Citation `Colares2026' on page 30 undefined on input line 694.
 
 
 
@@ -1148,13 +1133,13 @@ ON-COMPACT CONFIGURATION SPACE
 
 [30]
 
-LaTeX Warning: Citation `Colares2026' on page 31 undefined on input line 699.
-
-
 LaTeX Warning: Citation `Colares2026' on page 31 undefined on input line 701.
 
 
-LaTeX Warning: Citation `Colares2026' on page 31 undefined on input line 720.
+LaTeX Warning: Citation `Colares2026' on page 31 undefined on input line 703.
+
+
+LaTeX Warning: Citation `Colares2026' on page 31 undefined on input line 722.
 
 
 
@@ -1166,33 +1151,27 @@ N \OT1/cmr/m/n/10.95 31
 
 [31]
 
-LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 723.
+LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 725.
 
 
-Overfull \hbox (6.36665pt too wide) in paragraph at lines 726--726
+Overfull \hbox (6.36665pt too wide) in paragraph at lines 728--728
 []\OT1/cmr/bx/n/12 Generalized Sub-tour Elim-i-na-tion and Over-lap-ping Clus-
  []
-
-
-LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 728.
 
 
 LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 730.
 
 
-LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 736.
-
-
-LaTeX Warning: Citation `Pop2024' on page 32 undefined on input line 737.
+LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 732.
 
 
 LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 738.
 
 
+LaTeX Warning: Citation `Pop2024' on page 32 undefined on input line 739.
+
+
 LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 740.
-
-
-LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 741.
 
 
 LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 742.
@@ -1202,6 +1181,12 @@ LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 743.
 
 
 LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 744.
+
+
+LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 745.
+
+
+LaTeX Warning: Citation `Colares2026' on page 32 undefined on input line 746.
 
 
 
@@ -1234,13 +1219,13 @@ Chapter 4.
 
 
 [35]
-Overfull \hbox (19.40273pt too wide) in paragraph at lines 765--767
+Overfull \hbox (19.40273pt too wide) in paragraph at lines 767--769
 \OT1/cmr/m/n/10.95 lence to the GTSP, we ap-ply an adap-ta-tion of the Intersec
 ting-to-Nonintersecting
  []
 
 
-Overfull \hbox (35.47804pt too wide) in paragraph at lines 768--769
+Overfull \hbox (35.47804pt too wide) in paragraph at lines 770--771
 []\OT1/cmr/m/n/10.95 Let the orig-i-nal U-SSP in-stance be de-fined by the tu-p
 le $\OMS/cmsy/m/n/10.95 I[] \OT1/cmr/m/n/10.95 = \OMS/cmsy/m/n/10.95 h\OML/cmm/
 m/it/10.95 J; T; b; \OMS/cmsy/m/n/10.95 f\OML/cmm/m/it/10.95 T[]\OMS/cmsy/m/n/1
@@ -1257,12 +1242,12 @@ O GENERALIZED ROUTING PROBLEMS
 
 [36]
 
-LaTeX Warning: Citation `Lien1993' on page 37 undefined on input line 850.
+LaTeX Warning: Citation `Lien1993' on page 37 undefined on input line 852.
 
 
 
 [37]
-Overfull \hbox (3.23293pt too wide) in paragraph at lines 873--873
+Overfull \hbox (3.23293pt too wide) in paragraph at lines 875--875
 []\OT1/cmr/bx/n/14.4 Topological Thresh-olds: The Dis-joint-ness Con-
  []
 
@@ -1283,7 +1268,7 @@ T1/cmr/m/n/10.95 39
  []
 
 [39]
-Overfull \hbox (16.73799pt too wide) in paragraph at lines 941--941
+Overfull \hbox (16.73799pt too wide) in paragraph at lines 943--943
 []\OT1/cmr/bx/n/14.4 Reverse Equiv-a-lence Map-ping (Re-stricted GTSP
  []
 
@@ -1312,7 +1297,7 @@ O GENERALIZED ROUTING PROBLEMS
  []
 
 [42]
-Overfull \hbox (1.29634pt too wide) in paragraph at lines 1006--1008
+Overfull \hbox (1.29634pt too wide) in paragraph at lines 1008--1010
 []\OT1/cmr/m/n/10.95 By struc-turally prov-ing that $\OML/cmm/m/it/10.95 d\OT1/
 cmr/m/n/10.95 (\OML/cmm/m/it/10.95 C[]; C[]\OT1/cmr/m/n/10.95 )$ acts as a lowe
 r bound to $\OML/cmm/m/it/10.95 d\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 C[]; C
@@ -1320,7 +1305,7 @@ r bound to $\OML/cmm/m/it/10.95 d\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 C[]; C
  []
 
 
-Overfull \hbox (62.55183pt too wide) in paragraph at lines 1044--1045
+Overfull \hbox (62.55183pt too wide) in paragraph at lines 1046--1047
  [][] 
  []
 
@@ -1352,15 +1337,15 @@ Chapter 5.
 ]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1087.
+(hyperref)                removing `math shift' on input line 1089.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\alpha' on input line 1087.
+(hyperref)                removing `\alpha' on input line 1089.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1087.
+(hyperref)                removing `math shift' on input line 1089.
 
 
 
@@ -1371,7 +1356,7 @@ TINUOUS ROUTING (THE JGP)
  []
 
 [46]
-Overfull \hbox (5.70152pt too wide) in paragraph at lines 1122--1123
+Overfull \hbox (5.70152pt too wide) in paragraph at lines 1124--1125
 [][]\OT1/cmr/bx/n/10.95 Theorem 5.2 \OT1/cmr/m/n/10.95 (The Con-tin-u-ous Lower
  Bound)\OT1/cmr/bx/n/10.95 . []\OT1/cmr/m/it/10.95 For any uni-form Tool Switch
 -
@@ -1388,13 +1373,13 @@ TINUOUS ROUTING (THE JGP)
  []
 
 [48]
-Overfull \hbox (1.13454pt too wide) in paragraph at lines 1162--1163
+Overfull \hbox (1.13454pt too wide) in paragraph at lines 1164--1165
 []\OT1/cmr/m/n/10.95 Consequently, in en-vi-ron-ments char-ac-ter-ized by highl
 y over-lap-ping, cycli-
  []
 
 
-Overfull \hbox (53.36476pt too wide) in paragraph at lines 1224--1225
+Overfull \hbox (53.36476pt too wide) in paragraph at lines 1226--1227
  [][] 
  []
 
@@ -1404,7 +1389,7 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 [49]
-Overfull \hbox (0.96132pt too wide) in paragraph at lines 1230--1230
+Overfull \hbox (0.96132pt too wide) in paragraph at lines 1232--1232
 []\OT1/cmr/bx/n/14.4 Heuristic Bridges: Break-ing Batch Bound-aries 
  []
 
@@ -1429,7 +1414,7 @@ TINUOUS ROUTING (THE JGP)
 [52]
 Chapter 6.
 
-Overfull \hbox (7.01942pt too wide) in paragraph at lines 1280--1280
+Overfull \hbox (7.01942pt too wide) in paragraph at lines 1282--1282
 []\OT1/cmr/bx/n/12 Tool-Dependent Dy-nam-ics and the Break-down of KTNS 
  []
 
@@ -1465,14 +1450,14 @@ Chapter 7.
 [57
 
 ]
-Overfull \hbox (51.24065pt too wide) detected at line 1392
+Overfull \hbox (51.24065pt too wide) detected at line 1394
 []
  []
 
 
 
 [58]
-Overfull \hbox (0.2829pt too wide) in paragraph at lines 1414--1415
+Overfull \hbox (0.2829pt too wide) in paragraph at lines 1416--1417
 []\OT1/cmr/m/n/10.95 Instead, the frame-work uti-lizes the Ryan-Foster branch-i
 ng logic, uniquely
  []
@@ -1502,7 +1487,7 @@ Chapter 8.
 [65
 
 ]
-Overfull \hbox (19.04628pt too wide) in paragraph at lines 1557--1557
+Overfull \hbox (19.04628pt too wide) in paragraph at lines 1559--1559
 []\OT1/cmr/bx/n/14.4 Hypergraph Neu-ral Net-works for H-SUKP Prun-
  []
 
@@ -1517,7 +1502,7 @@ ENERATION ARCHITECTURES
 [66]
 
 [67]
-Overfull \hbox (24.04626pt too wide) in paragraph at lines 1598--1598
+Overfull \hbox (24.04626pt too wide) in paragraph at lines 1600--1600
 []\OT1/cmr/bx/n/14.4 Regression Bound-ing and Ex-per-i-men-tal Roadmap 
  []
 
@@ -1549,16 +1534,16 @@ L3 programming layer <2024-07-20>
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `shankar-draft-new.out' has not changed.
-(rerunfilecheck)             Checksum: 958A1F265F765669982705C9E447E2B2;25740.
+(rerunfilecheck)             Checksum: 20F90A966AF48E8A21079C5CE5A8E96F;25102.
  ) 
 Here is how much of TeX's memory you used:
- 22835 strings out of 473899
- 428613 string characters out of 5725556
+ 22829 strings out of 473899
+ 428530 string characters out of 5725556
  1953960 words of memory out of 5000000
- 45017 multiletter control sequences out of 15000+600000
- 576300 words of font info for 102 fonts, out of 8000000 for 9000
+ 45014 multiletter control sequences out of 15000+600000
+ 575599 words of font info for 100 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 102i,10n,107p,1001b,926s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 102i,10n,107p,944b,926s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\Shankar\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tc
 rm1095.pk><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type1/public/am
 sfonts/cm/cmbx10.pfb><C:/Users/Shankar/AppData/Local/Programs/MiKTeX/fonts/type
@@ -1594,9 +1579,9 @@ rams/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy9.pfb><C:/Users/Shankar/AppData/
 Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/Shank
 ar/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb
 >
-Output written on shankar-draft-new.pdf (70 pages, 705273 bytes).
+Output written on shankar-draft-new.pdf (70 pages, 702636 bytes).
 PDF statistics:
- 1059 PDF objects out of 1200 (max. 8388607)
- 309 named destinations out of 1000 (max. 500000)
- 693 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1055 PDF objects out of 1200 (max. 8388607)
+ 308 named destinations out of 1000 (max. 500000)
+ 685 words of extra memory for PDF output out of 10000 (max. 10000000)
 

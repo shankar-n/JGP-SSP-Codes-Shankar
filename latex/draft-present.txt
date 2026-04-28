@@ -23,113 +23,111 @@
 
 \begin{document}
 	
-	\chapter{Combinatorial Foundations and the Tang-Denardo Paradigm}
+	\chapter{Problem Preliminaries, Complexity, and the Tang-Denardo Paradigm}
 	
 	\section{Industrial Context and the Uniform SSP (U-SSP)}
 	
-	The Job Sequencing and Tool Switching Problem (SSP) emerges as a fundamental optimization challenge within the operational management of Flexible Manufacturing Systems (FMS) and Computer Numerical Control (CNC) machines \cite{Tang1988}. In these highly automated manufacturing environments, a single versatile machine is tasked with sequentially processing a batch of diverse jobs, where each job requires a specific, predetermined subset of specialized tools to be simultaneously loaded into the machine's tool magazine \cite{Crama1994}. Because the physical tool magazine attached to the CNC machine possesses a strictly finite capacity that is typically much smaller than the total number of available tools in the manufacturing facility, tools must be continually and mechanically swapped into and out of the magazine as the production sequence progresses.
+	The paradigm shift toward Flexible Manufacturing Systems (FMS) has revolutionized modern production environments, enabling facilities to process a diverse array of parts with high autonomy. Central to these advanced systems are Computer Numerical Control (CNC) machines, which operate utilizing automated tool changers and finite-capacity tool magazines. While CNC machinery provides the mechanical versatility necessary for high-mix, low-volume manufacturing, it introduces a critical operational bottleneck: the non-productive downtime incurred by continuous cutting tool replacements \cite{TangDenardo1988, CramaOerlemans1994}. 
 	
-	In the Uniform SSP (U-SSP), the core operational assumption is that the mechanical effort, temporal delay, or financial penalty required to insert or evict any individual tool is completely identical and sequence-independent \cite{Crama1994}. The global objective of the U-SSP is to simultaneously determine the optimal linear permutation of jobs and the optimal dynamic tool-replacement policy that strictly minimizes the total number of sequential tool switches required to process the entire production batch \cite{Tang1988}.
+	Because the physical capacity of a tool magazine is strictly bounded, the machine can only hold a restricted subset of all available tools at any given moment. When a scheduled job requires a tool that is not currently present in the magazine, an automated tool switch must occur. This operation necessitates halting the active production process, extracting a resident tool from the magazine to free a slot, and inserting the newly required tool. In industrial environments where the processing times of individual jobs are relatively short, the cumulative temporal delay caused by these mechanical tool switches can severely degrade the overall machine throughput, neutralizing the theoretical efficiency gains of the FMS \cite{LaporteEtAl2004}. Furthermore, excessive tool switching accelerates the physical wear on the automated tool changer's robotic arm, leading to elevated maintenance costs and higher probabilities of mechanical failure.
 	
-	\subsection{Formal Problem Definition}
+	The computational challenge of determining the optimal operational sequence to mitigate these systemic inefficiencies is formalized as the Job Sequencing and Tool Switching Problem (SSP). The fundamental objective of the SSP is to identify a processing permutation for a given set of jobs, concurrently with a corresponding dynamic tool allocation policy, such that the total number of tool switches is strictly minimized \cite{CatanzaroEtAl2015}. Resolving this problem requires coordinating two distinct but highly interdependent decision spaces: the combinatorial sequencing of the jobs and the polyhedral allocation of tools within the finite magazine capacity over discrete time steps.
 	
-	Let $J = \{1, 2, \dots, n\}$ denote the set of required jobs, and let $T = \{1, 2, \dots, m\}$ denote the complete set of available tools. The physical limitation of the CNC machine is defined by the magazine capacity $b \in \mathbb{Z}^+$, where $b < m$. 
+	\subsection{Mathematical Parameter Definitions}
 	
-	Each job $j \in J$ requires a specific, static subset of tools $T_j \subseteq T$ to be simultaneously present in the magazine for the job to be successfully processed. A problem instance is strictly valid if and only if no single job violates the hardware capacity limit, meaning $|T_j| \le b$ for all $j \in J$. 
+	To formally establish the Uniform Job Sequencing and Tool Switching Problem (U-SSP), we must first define the algebraic sets and scalar parameters that dictate the machine's operational environment \cite{Crama1994}. 
 	
-	The structural relationship between the jobs and their requisite tools is formally captured by the job-tool incidence matrix $\mathbf{A} \in \{0,1\}^{m \times n}$, where each element $a_{tj}$ is defined as:
+	Let $J = \{1, \dots, n\}$ define the finite set of jobs that must be sequentially processed, and let $T = \{1, \dots, m\}$ represent the global set of all available cutting tools in the facility. The CNC machine is equipped with a primary tool magazine of strict integer capacity $b \in \mathbb{Z}^+$, representing the absolute maximum number of tools that can be held simultaneously within the machine's automated carousel. We naturally impose the foundational condition that $m > b$; if this strict inequality did not hold, the entirety of the tool set $T$ could reside in the magazine concurrently, rendering the switching problem trivially solvable with zero continuous transitions.
+	
+	Each job $j \in J$ requires a specific, predefined subset of tools, denoted as $T_j \subseteq T$, for its successful execution. It is a strict physical prerequisite that the cardinality of each requirement subset does not exceed the magazine capacity, ensuring $|T_j| \le b$ for all $j \in J$. If this condition were violated, the corresponding job could not be processed without a mid-operation machine halt to exchange tools, a scenario that violates the continuous processing assumptions of standard FMS operational models.
+	
+	The complete topological map of tool requirements for the entire job set $J$ is conventionally encoded within a sparse binary tool-job incidence matrix $\mathbf{A} \in \{0,1\}^{m \times n}$. The individual elements of this matrix, $a_{tj}$, are mathematically defined as follows:
 	\begin{equation}
-		a_{tj} = 
-		\begin{cases} 
-			1 & \text{if tool } t \text{ is required by job } j \text{ (i.e., } t \in T_j) \\
-			0 & \text{otherwise.}
+		a_{tj} =
+		\begin{cases}
+			1, & \text{if tool } t \text{ is required by job } j \text{ (i.e., } t \in T_j \text{)}, \\
+			0, & \text{otherwise}.
 		\end{cases}
 	\end{equation}
 	
-	A valid operational state of the machine at any discrete processing step $k \in \{1, \dots, n\}$ is defined by the specific subset of tools currently loaded in the magazine, denoted as $M_k \subseteq T$. The chronological sequence of magazine states $\mathcal{M} = (M_1, M_2, \dots, M_n)$ is deemed mathematically feasible for a given job permutation $\sigma \in \Sigma_n$ (where $\Sigma_n$ is the symmetric group of all permutations of $n$ elements) if and only if two conditions hold simultaneously for every step $k$:
-	\begin{enumerate}
-		\item \textbf{Capacity Constraint:} $|M_k| \le b \quad \forall k \in \{1, \dots, n\}$.
-		\item \textbf{Processing Constraint:} $T_{\sigma(k)} \subseteq M_k \quad \forall k \in \{1, \dots, n\}$.
-	\end{enumerate}
+	The incidence matrix $\mathbf{A}$ acts as the fundamental data structure governing the SSP. Structurally, the sum of any column $j$ in $\mathbf{A}$ precisely yields the requirement cardinality $|T_j|$ of that specific job, which is strictly bounded from above by $b$. Conversely, the row sums indicate the global frequency of use for each specific tool across the entire production horizon.
 	
-	The physical transition from magazine state $M_{k-1}$ to the subsequent state $M_k$ necessitates the mechanical eviction of unneeded tools to make room for newly required tools. Because the machine begins state $M_k$ with the tools retained from $M_{k-1}$, the absolute number of physical tool insertions required at step $k$ is evaluated mathematically via the cardinality of the asymmetric set difference:
-	\begin{equation}
-		\text{Cost}(M_{k-1} \to M_k) = |M_k \setminus M_{k-1}|.
-	\end{equation}
 	
-	The global objective of the U-SSP is to find the job permutation $\sigma^*$ and the corresponding sequence of magazine states $\mathcal{M}^*$ that minimize the sum of all transition costs across the entire processing horizon.
+	\subsection{Feasible versus Maximal Configurations and Dummy Tool Padding}
 	
-	\subsection{Maximal Configurations and Dummy Tool Padding}
+	At any discrete operational step during the processing of a job sequence, the state of the CNC machine is entirely characterized by the specific subset of tools currently loaded in its magazine. We formally define a \textit{magazine configuration} (or simply a configuration) as a subset $C \subseteq T$. 
 	
-	In industrial practice, a job $j$ frequently requires strictly fewer tools than the maximum magazine capacity ($|T_j| < b$). To simplify the polyhedral geometry of the state space, operations research frameworks frequently impose an operational restriction: the magazine must be continuously saturated, meaning the machine always operates at maximal configurations of size exactly $b$. 
+	\begin{definition}
+		A configuration $C$ is considered \textbf{feasible} for a given job $j \in J$ if and only if two conditions are strictly met: it must contain all tools required to process the job, and its cardinality must respect the physical constraints of the machine. Mathematically, $C$ is feasible for job $j$ if $T_j \subseteq C$ and $|C| \le b$.
+	\end{definition}
 	
-	If a job does not naturally fill the magazine, the remaining slots are saturated using "dummy tools" or simply filled by arbitrarily retaining unrequired tools from $T \setminus T_j$. We must rigorously prove that restricting the operational state space exclusively to maximal configurations preserves the global integer optimum, ensuring no loss of generality.
+	By this definition, a feasible configuration is permitted to hold fewer tools than the magazine's total capacity (i.e., $|C| < b$). However, in both practical operational scheduling and theoretical graph modeling, it is structurally advantageous to restrict the state space such that the magazine is assumed to be operating at full capacity at all times. We formalize this by defining a \textit{maximal configuration} as a feasible configuration where the magazine is entirely full, satisfying the strict equality $|C| = b$.
 	
-	\begin{lemma}[Optimality of Dummy Tool Padding]
-		For any feasible sequence of magazine states $\mathcal{M} = (M_1, M_2, \dots, M_n)$ processing a job sequence $\sigma$, there exists a corresponding sequence of maximal configurations $\mathcal{C} = (C_1, C_2, \dots, C_n)$ such that $|C_k| = b$ and $T_{\sigma(k)} \subseteq C_k$ for all $k$, and the total switching cost of $\mathcal{C}$ is strictly less than or equal to the total switching cost of $\mathcal{M}$.
+	To mathematically justify restricting the U-SSP state space exclusively to maximal configurations, we introduce the concept of \textit{dummy tool padding}. We prove that any under-capacity state can be artificially padded with unused tools without ever deteriorating the global objective function.
+	
+	\begin{lemma}[Configuration Maximization via Dummy Tool Padding]
+		For any valid U-SSP instance, an operational sequence containing a non-maximal feasible configuration $C$ (where $|C| < b$) is strictly dominated by, or mathematically equivalent in cost to, a sequence where $C$ is replaced by a padded maximal configuration $C'$ (where $C \subset C'$ and $|C'| = b$).
 	\end{lemma}
 	
 	\begin{proof}
-		Assume there exists an optimal sequence of magazine states $\mathcal{M}^*$ containing at least one state $M_k$ where $|M_k| < b$. Let $\delta = b - |M_k| > 0$ be the integer deficit of available slots. We can systematically eliminate this deficit by padding $M_k$ to full capacity $b$ without incurring any additional switching penalties.
+		Let $S = (\dots, C_{k-1}, C_k, C_{k+1}, \dots)$ represent a sequence of magazine configurations servicing a given permutation of jobs. Assume the intermediate configuration $C_k$ is feasible for the $k$-th job in the sequence but is strictly non-maximal, meaning $|C_k| < b$. Let $d(u,v)$ denote the uniform transition cost (the number of required tool insertions) to change the magazine state from configuration $u$ to configuration $v$. Under the uniform cost assumption, this transition metric is defined by the set difference: $d(u,v) = |C_v \setminus C_u|$.
 		
-		To pad $M_k$ by one tool, we define a candidate pool of tools prioritizing those that are already present in the preceding state $M_{k-1}$ or the succeeding state $M_{k+1}$. We systematically evaluate the following cases:
+		Because $|C_k| < b$, there exist exactly $b - |C_k|$ unoccupied slots in the magazine during the processing of the $k$-th job. Let $T_{vacant} \subseteq T \setminus C_k$ be an arbitrary subset of unused tools such that $|T_{vacant}| = b - |C_k|$. We define the padded maximal configuration as $C'_k = C_k \cup T_{vacant}$, ensuring that the strict capacity equality $|C'_k| = b$ holds.
 		
-		\textbf{Case 1: Retaining a previously loaded tool.}
-		Assume there exists a tool $t \in M_{k-1} \setminus M_k$ (a tool present in the previous state but dropped in the current state). We define a new, padded state $M'_k = M_k \cup \{t\}$. 
-		We evaluate the marginal change in transition costs across the local sub-sequence $(M_{k-1} \to M'_k \to M_{k+1})$:
-		\begin{itemize}
-			\item \textit{Inflow Transition into $k$:} The cost to enter $M'_k$ is evaluated as $|M'_k \setminus M_{k-1}|$. By substitution, this is $|(M_k \cup \{t\}) \setminus M_{k-1}|$. Because we specifically selected $t \in M_{k-1}$, the element $t$ is mathematically canceled by the set difference operator. Thus, $|M'_k \setminus M_{k-1}| = |M_k \setminus M_{k-1}|$. The transition cost into step $k$ remains exactly identical.
-			\item \textit{Outflow Transition into $k+1$:} The cost to enter $M_{k+1}$ is evaluated as $|M_{k+1} \setminus M'_k|$. Because $M'_k$ is a strict superset of $M_k$, the resulting set difference must strictly monotonically decrease or remain constant. Specifically, if the padded tool $t$ is required in the next state ($t \in M_{k+1}$), the transition cost decreases by exactly 1. If $t \notin M_{k+1}$, the cost remains unchanged. Thus, $|M_{k+1} \setminus M'_k| \le |M_{k+1} \setminus M_k|$.
-		\end{itemize}
-		The net change in the total sequential switching cost is therefore $\le 0$.
+		Consider the local transition costs into and out of this updated configuration. The transition cost into the padded configuration from the preceding state $C_{k-1}$ is $d(C_{k-1}, C'_k) = |C'_k \setminus C_{k-1}|$. Because $C'_k$ is formed merely by filling empty, unutilized slots with tools from $T_{vacant}$, no previously required tools are forcibly evicted to make room. The setup cost reflects solely the insertion of tools.
 		
-		\textbf{Case 2: Pre-loading a future tool.}
-		If the intersection $M_{k-1} \setminus M_k$ is empty, it mathematically implies that $M_{k-1} \subseteq M_k$. We then select a tool $t \in M_{k+1} \setminus M_k$. We define $M'_k = M_k \cup \{t\}$.
-		\begin{itemize}
-			\item \textit{Inflow Transition into $k$:} The cost evaluates to $|(M_k \cup \{t\}) \setminus M_{k-1}|$. Because $t \notin M_{k-1}$, this cost increases by exactly 1: $|M_k \setminus M_{k-1}| + 1$.
-			\item \textit{Outflow Transition into $k+1$:} The cost evaluates to $|M_{k+1} \setminus (M_k \cup \{t\})|$. Because we selected $t \in M_{k+1}$, this tool is already pre-loaded, avoiding an insertion at $k+1$. The cost strictly decreases by 1: $|M_{k+1} \setminus M_k| - 1$.
-		\end{itemize}
-		The net change in the total sequential switching cost is $(+1) + (-1) = 0$.
+		More critically, we must examine the transition to the subsequent configuration $C_{k+1}$. The original required number of tool insertions is $d(C_k, C_{k+1}) = |C_{k+1} \setminus C_k|$. By substituting $C_k$ with the padded configuration $C'_k$, the new transition cost becomes $d(C'_k, C_{k+1}) = |C_{k+1} \setminus C'_k|$. 
 		
-		\textbf{Case 3: Arbitrary saturation.}
-		If both adjacent relative complements are empty, then $M_{k-1} \subseteq M_k$ and $M_{k+1} \subseteq M_k$. Any arbitrary tool $t \in T \setminus M_k$ can be added. The $+1$ inflow cost perfectly cancels the $-1$ outflow cost when the tool is eventually evicted, or if never evicted, it spans the entire sequence without adding penalty.
+		From fundamental set theory, since $C_k \subset C'_k$, it strictly follows that the elements in $C_{k+1}$ missing from $C'_k$ must be a subset of the elements in $C_{k+1}$ missing from $C_k$. That is:
+		\begin{equation}
+			(C_{k+1} \setminus C'_k) \subseteq (C_{k+1} \setminus C_k).
+		\end{equation}
+		Taking the cardinality of both sides yields the inequality:
+		\begin{equation}
+			|C_{k+1} \setminus C'_k| \le |C_{k+1} \setminus C_k| \implies d(C'_k, C_{k+1}) \le d(C_k, C_{k+1}).
+		\end{equation}
 		
-		By iteratively applying this greedy padding logic across all $k \in \{1, \dots, n\}$, we can saturate every state to cardinality $b$ without ever increasing the objective function. Consequently, the optimal search space is strictly bounded to the evaluation of maximal configurations.
+		Thus, the localized routing cost $d(C_{k-1}, C'_k) + d(C'_k, C_{k+1})$ is strictly less than or equal to $d(C_{k-1}, C_k) + d(C_k, C_{k+1})$. Artificially padding the configuration with dummy tools up to the strict capacity limit $b$ never degrades the sequence's overall switching cost. It either preserves the exact original cost or strictly improves it by coincidentally loading a tool that satisfies a requirement in $C_{k+1}$ or beyond. Consequently, the entire state space of the U-SSP can be restricted to maximal configurations ($|C|=b$) without any loss of global optimality.
 	\end{proof}
 	
-	\section{The Tang-Denardo Decomposition}
+	\section{The Tang-Denardo Decomposition Framework}
 	
-	Because the U-SSP necessitates the simultaneous optimization of both the discrete permutation of jobs and the dynamic combinatorial contents of the tool magazine, explicit mathematical formulations modeled over the unified domain rapidly become computationally intractable. The bounded operational state space of the problem scales as $\mathcal{O}\left(n! \cdot \binom{m}{b}^n\right)$, representing an astronomically large, non-convex hyper-surface.
+	The fundamental breakthrough in the mathematical analysis of the Uniform SSP was established by Tang and Denardo \cite{Tang1988}, who rigorously demonstrated that the overarching problem naturally and optimally partitions into two nested subproblems: the Sequencing Problem (SP) and the Tooling Problem (TP). This decomposition isolates the distinct combinatorial and polynomial domains of the SSP, providing the foundational architecture for all modern exact and heuristic resolution methods \cite{Crama1994, Laporte2004}.
 	
-	To structurally conquer this complexity, Tang and Denardo \cite{Tang1988} established a foundational decomposition paradigm. They proved that the global U-SSP can be rigorously partitioned into two dependent but mathematically distinct subproblems: the Sequencing Problem (SP) and the Tooling Problem (TP).
+	\subsection{Formal Definition of the Sequencing Problem (SP)}
 	
-	\subsection{Formalization of the Subproblems}
+	The Sequencing Problem (SP) governs the discrete temporal ordering in which the set of jobs $J$ is processed by the CNC machine. Mathematically, the SP is defined as the search over the discrete permutation space to minimize the total operational transition costs.
 	
-	The Tang-Denardo decomposition posits that an exact global equilibrium can be achieved by isolating the operational variables \cite{Tang1988}.
+	Let $S_n$ denote the symmetric group encompassing all possible permutations of the job set $J$. A valid job sequence is represented as a bijective mapping $\sigma \in S_n$, where $\sigma = (\sigma_1, \sigma_2, \dots, \sigma_n)$, and $\sigma_k \in J$ indicates the specific job processed at the $k$-th discrete time step. The objective of the SP is to identify a global optimal sequence $\sigma^*$ that minimizes the total number of required tool switches, operating under the strict assumption that the tool magazine is managed optimally for whichever sequence is chosen.
 	
-	\begin{definition}[The Sequencing Problem (SP)]
-		The SP defines the macroscopic combinatorial routing objective. It seeks to find a strict permutation $\sigma^* \in \Sigma_n$ that maps the $n$ jobs into a linear processing sequence:
-		\begin{equation}
-			\sigma^* = \left( j_{\sigma(1)}, j_{\sigma(2)}, \dots, j_{\sigma(n)} \right)
-		\end{equation}
-		such that the chosen sequence minimizes the downstream tooling penalty evaluated by the inner subproblem.
+	\begin{definition}[The Sequencing Problem]
+		Given the job set $J$, the tool requirement subsets $T_j$ for all $j \in J$, and the magazine capacity $b$, find an optimal sequence $\sigma^* \in S_n$ that minimizes the objective function $Z(\sigma)$, where $Z(\sigma)$ denotes the minimal number of tool insertions required to process the sequence $\sigma$.
 	\end{definition}
 	
-	\begin{definition}[The Tooling Problem (TP)]
-		The TP represents a deterministic inner subproblem. Given a strictly fixed, static job sequence $\sigma$, the TP seeks to find the optimal dynamic sequence of valid magazine states $\mathcal{M}_\sigma = (M_1, M_2, \dots, M_n)$ that minimizes the marginal tool switches required to support $\sigma$:
+	The SP represents the core combinatorial bottleneck of the SSP and has been formally classified as strongly NP-hard. The complexity of the SP can be intuitively understood through its structural reduction to routing problems. Consider a highly restrictive instance of the SSP where every job requires full magazine capacity, meaning $|T_j| = b$ for all $j \in J$. In this scenario, the transition cost between any two sequentially processed jobs $\sigma_k$ and $\sigma_{k+1}$ is strictly defined by the required tool insertions, calculated precisely as $b - |T_{\sigma_k} \cap T_{\sigma_{k+1}}|$. 
+	
+	Under this uniform maximum-capacity condition, the SP collapses directly into a classical Traveling Salesman Problem (TSP) over a complete graph, where the distance metric between any two nodes is exactly the set difference of their tool requirements. Because the TSP is a well-established NP-hard problem in combinatorial optimization, the more generalized Sequencing Problem—where requirement cardinalities can vary and tools can be retained across multiple jobs—is at least as computationally intractable.
+	
+	\subsection{Formal Definition of the Tooling Problem (TP)}
+	
+	While the Sequencing Problem addresses the combinatorial arrangement of the jobs, the Tooling Problem (TP) focuses exclusively on the dynamic management of the tool magazine for a \textit{fixed} job sequence $\sigma$. Once the permutation $\sigma \in S_n$ is established, the temporal requirements for every tool become strictly deterministic. The objective of the TP is to determine the optimal sequence of magazine configurations that satisfies the tool requirements of $\sigma$ at every step while strictly minimizing the total number of tool switches.
+	
+	Let $W_k \subseteq T$ denote the tool magazine configuration at the discrete time step $k$, precisely when job $\sigma_k$ is being processed. 
+	
+	\begin{definition}[The Tooling Problem]
+		Given a fixed job sequence $\sigma = (\sigma_1, \sigma_2, \dots, \sigma_n)$ and the corresponding tool requirement subsets $T_{\sigma_k}$ for all $k \in \{1, \dots, n\}$, find an optimal sequence of magazine configurations $(W_1, W_2, \dots, W_n)$ that minimizes the total number of tool insertions:
 		\begin{equation}
-			TP(\sigma) = \min_{\mathcal{M}_\sigma} \sum_{k=1}^{n-1} |M_{k+1} \setminus M_k|
+			Z_{TP}(\sigma) = \sum_{k=1}^{n} |W_k \setminus W_{k-1}|
 		\end{equation}
-		subject to the physical capacity and processing constraints: $|M_k| = b$ and $T_{\sigma(k)} \subseteq M_k$ for all $k \in \{1, \dots, n\}$.
+		subject to the structural constraints:
+		\begin{align}
+			T_{\sigma_k} & \subseteq W_k \quad \forall k \in \{1, \dots, n\} \quad \text{(Job coverage condition)} \\
+			|W_k| & = b \quad \forall k \in \{1, \dots, n\} \quad \text{(Magazine capacity condition)}
+		\end{align}
+		where $W_0$ defines the initial state of the magazine prior to the processing of the first job.
 	\end{definition}
 	
-	The profound structural implication of this decomposition is that the global U-SSP objective function can be algebraically rewritten as a hierarchical minimization:
-	\begin{equation}
-		Z_{SSP}^* = \min_{\sigma \in \Sigma_n} \Big[ TP(\sigma) \Big].
-	\end{equation}
-	
-	By establishing that the inner tooling evaluation $TP(\sigma)$ must be solved dynamically for any proposed routing sequence, Tang and Denardo \cite{Tang1988} identified a critical divergence from classical routing. The U-SSP cannot be modeled accurately as a standard Traveling Salesman Problem (TSP) using static, pre-computed distances between jobs. The transition costs between any two jobs $i$ and $j$ are not fixed scalars; they are inherently sequence-dependent, entirely governed by the history of the magazine state at the exact moment the transition occurs. Conquering the U-SSP therefore mandates an exact, highly efficient algorithm to solve the internal Tooling Problem for any arbitrary permutation, acting as the foundational evaluation mechanism for the overarching sequence optimization.
-	
+	In stark contrast to the strongly NP-hard Sequencing Problem, the Tooling Problem operates within a highly structured deterministic domain and belongs to the class of problems solvable in polynomial time \cite{Tang1988}. Because the exact sequence of required tool subsets is known \textit{a priori}, the problem fundamentally reduces to an interval selection task. At any discrete transition from $W_{k-1}$ to $W_k$ where $|T_{\sigma_k} \setminus W_{k-1}| > 0$, the decision-maker must identify exactly which resident tools to evict from the magazine to accommodate the new requirements. As demonstrated by Crama et al. \cite{Crama1994}, the structural properties of this deterministic sequence allow for greedy look-ahead strategies to achieve strict global optimality for the fixed sequence $\sigma$.
 	
 	\subsection{Structural Interdependence and Algorithmic Complexity}
 	
