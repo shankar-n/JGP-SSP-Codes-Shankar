@@ -7,45 +7,45 @@ Reallocating 'name_of_file' (item size: 1) to 14 items.
 Database file #1: shankar-draft.bib
 Warning--I didn't find a database entry for "Muter2013"
 Warning--I didn't find a database entry for "Xia2024"
-You've used 13 entries,
+You've used 16 entries,
             2773 wiz_defined-function locations,
-            696 strings with 7373 characters,
-and the built_in function-call counts, 6249 in all, are:
-= -- 571
-> -- 352
+            718 strings with 7961 characters,
+and the built_in function-call counts, 7790 in all, are:
+= -- 707
+> -- 451
 < -- 6
-+ -- 118
-- -- 105
-* -- 550
-:= -- 959
-add.period$ -- 39
-call.type$ -- 13
-change.case$ -- 74
-chr.to.int$ -- 13
-cite$ -- 26
-duplicate$ -- 266
-empty$ -- 512
-format.name$ -- 128
-if$ -- 1286
++ -- 151
+- -- 135
+* -- 695
+:= -- 1197
+add.period$ -- 48
+call.type$ -- 16
+change.case$ -- 93
+chr.to.int$ -- 16
+cite$ -- 32
+duplicate$ -- 329
+empty$ -- 633
+format.name$ -- 161
+if$ -- 1602
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 13
-newline$ -- 73
-num.names$ -- 52
-pop$ -- 125
+missing$ -- 16
+newline$ -- 88
+num.names$ -- 64
+pop$ -- 157
 preamble$ -- 1
-purify$ -- 61
+purify$ -- 77
 quote$ -- 0
-skip$ -- 202
+skip$ -- 248
 stack$ -- 0
-substring$ -- 308
-swap$ -- 13
+substring$ -- 382
+swap$ -- 16
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 143
+type$ -- 176
 warning$ -- 0
-while$ -- 63
+while$ -- 77
 width$ -- 0
-write$ -- 175
+write$ -- 214
 (There were 2 warnings)

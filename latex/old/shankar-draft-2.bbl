@@ -1,0 +1,19 @@
+\begin{thebibliography}{2}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Goldschmidt et~al.(1994)Goldschmidt, Nehme, and Yu]{Goldschmidt1994}
+Olivier Goldschmidt, David Nehme, and Gang Yu.
+\newblock Note on the set-union knapsack problem.
+\newblock \emph{Naval Research Logistics}, 41:\penalty0 833--842, 1994.
+
+\bibitem[Tang and Denardo(1988)]{Tang1988}
+Christopher~S. Tang and Eric~V. Denardo.
+\newblock Models arising from a flexible manufacturing machine, part i:
+  Minimization of the number of tool switches.
+\newblock \emph{Operations Research}, 36\penalty0 (5):\penalty0 767--777, 1988.
+
+\end{thebibliography}
