@@ -590,175 +590,175 @@ Let $y_j \in \{0,1\}$ be a binary variable indicating whether job $j \in J$ is c
 
 The objective (\ref{eq:sukp_obj}) maximizes the collected dual variables associated with the covered jobs [8]. Constraint (\ref{eq:sukp_cap}) strictly enforces the maximal configuration property under the U-SSP assumption by filling the magazine capacity $b$ [8]. The logical linking constraints (\ref{eq:sukp_link}) ensure that a job $j$ can only be claimed as covered ($y_j = 1$) if every single tool $t$ required by that job ($t \in T_j$) is currently loaded in the magazine ($z_t = 1$) [8].
 
-%\section{Relationship with the Job Grouping Problem (JGP)}
-%
-%To fully contextualize the non-compact formulation and the necessity of dynamic column generation for the SSP, it is critical to establish its relationship with the Job Grouping Problem (JGP). Historically, Column Generation in flexible manufacturing was pioneered to solve the JGP by treating it as a Set Covering problem, where each generated column represents a feasible tool configuration capable of processing a subset of jobs \citep{Crama1994}. 
-%
-%While the SSP's Restricted Master Problem (RMP) utilizes these exact same generated configurations as its vertices, the fundamental objectives and transition mechanics of the two problems differ significantly, which justifies why a pure JGP solution is insufficient for the SSP.
-%
-%\subsection{Conceptual Distinction and Suboptimality of JGP}
-%
-%The JGP aims to partition a set of jobs into the minimum number of feasible groups such that all jobs within a group can be processed with a single setup of the tool magazine. It assumes the machine is completely halted between groups to allow for simultaneous, batch tool swaps. In contrast, the SSP seeks to determine a continuous processing sequence that minimizes individual tool switches, dynamically retaining unneeded tools across transitions via policies such as the Keep Tool Needed Soonest (KTNS) rule \citep{Tang1988}.
-%
-%Because the JGP forces jobs into rigid batches, it locks the magazine configuration for the duration of the group. This rigidity can temporarily choke the magazine capacity and force the unnecessary eviction of tools that will be required shortly after, leading to strict suboptimality when evaluated under continuous transitions.
-%
-%To prove this, consider an instance with a magazine capacity of $b = 3$, containing 6 jobs and 6 tools that form a cyclical requirement ring:
-%\begin{itemize}[noitemsep]
-%	\item $T_1 = \{t_1, t_2\}$
-%	\item $T_2 = \{t_2, t_3\}$
-%	\item $T_3 = \{t_3, t_4\}$
-%	\item $T_4 = \{t_4, t_5\}$
-%	\item $T_5 = \{t_5, t_6\}$
-%	\item $T_6 = \{t_6, t_1\}$
-%\end{itemize}
-%
-%The strict objective of the JGP is to partition the jobs into a minimum number of feasible groups. Because every 3 consecutive jobs require 4 distinct tools (e.g., $T_1 \cup T_2 \cup T_3 = \{t_1, t_2, t_3, t_4\}$), no 3 jobs can fit into a single group. The absolute minimum number of groups is 3 batches of 2 jobs each:
-%\begin{enumerate}[noitemsep]
-%	\item \textbf{Group 1 (Jobs 1 \& 2):} Requires configuration $\{t_1, t_2, t_3\}$.
-%	\item \textbf{Group 2 (Jobs 3 \& 4):} Requires configuration $\{t_3, t_4, t_5\}$.
-%	\item \textbf{Group 3 (Jobs 5 \& 6):} Requires configuration $\{t_1, t_5, t_6\}$.
-%\end{enumerate}
-%
-%Evaluating the continuous transition cost between these rigid JGP batches:
-%\begin{itemize}[noitemsep]
-%	\item \textbf{G1 $\to$ G2:} The magazine transitions from $\{t_1, t_2, t_3\}$ to $\{t_3, t_4, t_5\}$. Tools $t_1$ and $t_2$ are dropped to load $t_4$ and $t_5$ (2 switches).
-%	\item \textbf{G2 $\to$ G3:} The magazine transitions from $\{t_3, t_4, t_5\}$ to $\{t_1, t_5, t_6\}$. Tools $t_3$ and $t_4$ are dropped to load $t_1$ and $t_6$ (2 switches).
-%\end{itemize}
-%The total cost of the JGP grouping is \textbf{4 tool switches}. During the transition from G1 to G2, the rigid batch requirement of Group 2 completely fills the magazine, forcing tool $t_1$ out, even though it is required for Group 3.
-%
-%Conversely, if the SSP processes the same sequence of jobs sequentially using the dynamic KTNS policy, the configuration shifts continuously:
-%\begin{itemize}[noitemsep]
-%	\item \textbf{Job 1 to Job 2:} Magazine remains $\{t_1, t_2, t_3\}$ (0 switches).
-%	\item \textbf{Job 3:} The magazine drops $t_2$ (never needed again) and loads $t_4$. Magazine becomes $\{t_1, t_3, t_4\}$ (1 switch). Tool $t_1$ is safely retained.
-%	\item \textbf{Job 4:} Drops $t_3$, loads $t_5$. Magazine becomes $\{t_1, t_4, t_5\}$ (1 switch).
-%	\item \textbf{Job 5:} Drops $t_4$, loads $t_6$. Magazine becomes $\{t_1, t_5, t_6\}$ (1 switch).
-%	\item \textbf{Job 6:} Magazine is already $\{t_1, t_5, t_6\}$. Requirements are met (0 switches).
-%\end{itemize}
-%The total SSP cost is \textbf{3 tool switches}. By dynamically shifting the configuration and safely retaining tool $t_1$ in the corner of the magazine, the SSP bypasses the rigid capacity choke of the JGP, proving that $Cost_{switches}(SSP) \le Cost_{switches}(JGP)$.
-%
-%
-%\begin{figure}[h!]
-%	\centering
-%	\begin{tikzpicture}[
-%		jobnode/.style={draw, circle, fill=blue!10, minimum size=0.9cm, font=\bfseries},
-%		confignode/.style={draw, rectangle, rounded corners, fill=red!10, minimum width=2.2cm, minimum height=1cm, align=center, font=\footnotesize\bfseries},
-%		arrow/.style={-Stealth, thick},
-%		swap/.style={-Stealth, thick, red},
-%		flow/.style={-Stealth, thick, blue!80, dashed}
-%		]
-%		
-%		% ----- JGP: Set Covering -----
-%		\node[font=\large\bfseries, anchor=west] at (-1, 3.5) {Job Grouping Problem: Rigid Set Covering};
-%		
-%		% Config Nodes
-%		\node[confignode] (c1) at (1.5, 2) {Batch 1 \\ $\{t_1, t_2, t_3\}$};
-%		\node[confignode] (c2) at (5.5, 2) {Batch 2 \\ $\{t_3, t_4, t_5\}$};
-%		\node[confignode] (c3) at (9.5, 2) {Batch 3 \\ $\{t_1, t_5, t_6\}$};
-%		
-%		% Job Nodes
-%		\node[jobnode] (j1) at (0.5, 0.5) {$j_1$};
-%		\node[jobnode] (j2) at (2.5, 0.5) {$j_2$};
-%		\draw[arrow] (c1) -- (j1); \draw[arrow] (c1) -- (j2);
-%		
-%		\node[jobnode] (j3) at (4.5, 0.5) {$j_3$};
-%		\node[jobnode] (j4) at (6.5, 0.5) {$j_4$};
-%		\draw[arrow] (c2) -- (j3); \draw[arrow] (c2) -- (j4);
-%		
-%		\node[jobnode] (j5) at (8.5, 0.5) {$j_5$};
-%		\node[jobnode] (j6) at (10.5, 0.5) {$j_6$};
-%		\draw[arrow] (c3) -- (j5); \draw[arrow] (c3) -- (j6);
-%		
-%		% Stop Indicators
-%		\draw[swap] (c1) -- (c2) node[midway, above, font=\scriptsize] {Full Stop (2 Sw)};
-%		\draw[swap] (c2) -- (c3) node[midway, above, font=\scriptsize] {Full Stop (2 Sw)};
-%		\node[red, font=\footnotesize\bfseries] at (3.5, 1.2) {$t_1$ Evicted!};
-%		
-%		% ----- SSP: Routing -----
-%		\node[font=\large\bfseries, anchor=west] at (-1, -1.5) {Tool Switching Problem: Continuous Routing};
-%		
-%		% Job Nodes sequence
-%		\node[jobnode] (s1) at (0.5, -3) {$j_1$};
-%		\node[jobnode] (s2) at (2.5, -3) {$j_2$};
-%		\node[jobnode] (s3) at (4.5, -3) {$j_3$};
-%		\node[jobnode] (s4) at (6.5, -3) {$j_4$};
-%		\node[jobnode] (s5) at (8.5, -3) {$j_5$};
-%		\node[jobnode] (s6) at (10.5, -3) {$j_6$};
-%		
-%		% Edges
-%		\draw[arrow] (s1) -- (s2) node[midway, below, font=\scriptsize] {0 Sw};
-%		\draw[arrow] (s2) -- (s3) node[midway, below, font=\scriptsize, align=center] {1 Sw\\$+t_4, -t_2$};
-%		\draw[arrow] (s3) -- (s4) node[midway, below, font=\scriptsize, align=center] {1 Sw\\$+t_5, -t_3$};
-%		\draw[arrow] (s4) -- (s5) node[midway, below, font=\scriptsize, align=center] {1 Sw\\$+t_6, -t_4$};
-%		\draw[arrow] (s5) -- (s6) node[midway, below, font=\scriptsize] {0 Sw};
-%		
-%		% Tool flow
-%		\draw[flow, out=30, in=150] (s1.north) to node[above, font=\footnotesize\bfseries, text=blue] {Tool $t_1$ flows continuously across transitions (0 Sw)} (s6.north);
-%		
-%	\end{tikzpicture}
-%	\caption{Graph-theoretic contrast between the Job Grouping Problem (JGP) and the Tool Switching Problem (SSP). The JGP acts as a Set Covering problem, mapping jobs to rigid, independent configuration nodes separated by full machine stops. The SSP models a continuous routing path, evaluating dynamic edge costs between individual jobs and allowing specific tools (such as $t_1$) to flow seamlessly across the sequence.}
-%	\label{fig:jgp_vs_ssp}
-%\end{figure}
-%
-%\subsection{Approximation Bounds from JGP to SSP}
-%
-%While an optimal JGP solution cannot guarantee an optimal SSP sequence, it provides a strict and reliable theoretical bound. We can mathematically establish that the optimal JGP solution yields an $\alpha$-approximation for the SSP, where $\alpha = b$ (the magazine capacity).
-%
-%Let $S_{SSP}$ be the optimal number of tool switches in the SSP. Let $g_{JGP}$ be the optimal (minimum) number of groups in the JGP.
-%
-%\textbf{Step 1: Bounding JGP groups using SSP switches.}
-%In an optimal SSP schedule, the magazine state changes exactly $S_{SSP}$ times, creating a timeline of $S_{SSP} + 1$ distinct magazine configurations. Because every job is processed entirely within one of these configurations, and every configuration strictly respects the magazine capacity $b$, these $S_{SSP} + 1$ configurations represent a valid JGP grouping. Since $g_{JGP}$ is the absolute minimum number of feasible groups required, it must mathematically hold that:
-%\begin{equation}
-%	g_{JGP} \le S_{SSP} + 1 \implies g_{JGP} - 1 \le S_{SSP}
-%\end{equation}
-%
-%\textbf{Step 2: Bounding JGP switch cost using JGP groups.}
-%In the absolute worst-case scenario, transitioning between two completely disjoint JGP groups requires a complete machine stop and a total flush of the magazine, costing exactly $b$ tool switches. Because there are $g_{JGP}$ groups, there are exactly $g_{JGP} - 1$ transitions. Therefore, the maximum possible number of tool switches forced by the JGP solution is:
-%\begin{equation}
-%	Cost_{switches}(JGP) \le (g_{JGP} - 1) \times b
-%\end{equation}
-%
-%\textbf{Step 3: The Approximation Bound.}
-%Substituting the inequality from Step 1 into Step 2 yields $Cost_{switches}(JGP) \le S_{SSP} \times b$. Dividing both sides by $S_{SSP}$ establishes the final bound:
-%\begin{equation}
-%	\frac{Cost_{switches}(JGP)}{S_{SSP}} \le b
-%\end{equation}
-%
-%This deduction proves that any JGP optimal solution will always provide an $\alpha$-approximation for the SSP strictly bounded by the size of the tool magazine $b$. Consequently, the JGP Set Covering formulations serve as a highly effective initial construction phase. Modern solution frameworks can initialize their Branch-and-Price structures using these JGP configurations (columns), subsequently refining them via GTSP routing logic and metaheuristic improvement strategies to close the optimality gap.
-%
-%\subsection{Tightening the Bounds: From Heuristics to Exact Methods}
-%
-%While the $\alpha$-approximation establishes a theoretical worst-case guarantee, solving the SSP in practice requires aggressively closing the gap between the JGP batching formulation and the continuous SSP routing sequence. In a Branch-and-Price framework, algorithmic efficiency dictates that we establish tight upper bounds (primal bounds) to prune the search tree, and tight lower bounds (dual bounds) to prove optimality. 
-%
-%\textbf{Heuristic Upper Bounds.} Because a valid JGP batching solution can be flattened into a linear job sequence, evaluating that sequence using the KTNS policy inherently provides a valid upper bound for the SSP. However, owing to the rigid batch boundaries of the JGP, this naive upper bound is rarely tight. To overcome this, early research proposed using JGP solutions merely as an initial construction phase, which is subsequently refined by improvement heuristics. Methods such as the ``Super Task'' heuristic \citep{Privault1995} and global 2-opt local search \citep{Crama1994} were deployed to break the rigid JGP batch boundaries, allowing the algorithm to rearrange jobs and exploit overlapping tool requirements. 
-%
-%However, pure local search is highly susceptible to local optima. To establish the tightest heuristic upper bounds, the current state-of-the-art relies on hybrid population-based metaheuristics, such as Hybrid Genetic Search (HGS) \citep{Mecler2021} and Adaptive Large Neighborhood Search (ALNS) \citep{Beezao2017}. Alternatively, by mapping the configurations to a GTSP, highly optimized routing heuristics such as LKH-3 \citep{Helsgaun2015} can be applied to find near-optimal continuous sequences. Injecting these high-quality sequences as initial primal bounds drastically reduces the size of the exact search tree.
-%
-%\textbf{Strengthening Lower Bounds.} Historically, establishing tight lower bounds for the SSP has been a severe computational bottleneck. The original Integer Linear Programming (ILP) formulations, such as those proposed by \citet{Tang1988}, suffered from notoriously weak linear relaxations. The ``zero-bound'' LP relaxation of early compact models forced branch-and-bound algorithms into nearly complete enumeration. 
-%
-%Subsequent literature sought to overcome this by introducing valid inequalities. \citet{Laporte2004} significantly tightened the lower bound by adding subtour elimination constraints, alongside look-ahead capacity and spanning tree bounds. By projecting the SSP entirely onto a GTSP configuration graph, the non-compact formulation inherently bypasses the weak linear relaxations of classical models. Furthermore, it allows the Branch-and-Price framework to exploit the tight bounds of the GTSP polytope. As demonstrated by \citet{Fischetti1997}, separating and adding Generalized Subtour Elimination Constraints (GSECs) can push the lower bound extremely close to the optimal integer solution at the root node.
-%
-%\textbf{The Pricing Bottleneck.} The synthesis of JGP-derived columns, metaheuristic upper bounds, and GTSP-based lower bounds provides a robust Branch-and-Price framework capable of exact SSP resolution. However, a critical barrier remains. While the JGP's pure Set Covering oracle can be solved dynamically, the pricing oracle for the continuous SSP must simultaneously maximize dual variable collection while accounting for sequence-dependent transition costs. This renders the oracle strongly NP-hard. Solving this exact pricing problem at every column generation iteration dominates the computation time, necessitating the integration of Machine Learning to intelligently accelerate column generation.
-%
-%
-%\subsection{Tool-Dependent Setup Times and Lexicographical Minimization}
-%
-%In the preceding sections, we established that the Job Grouping Problem (JGP) is structurally rigid and provides only an upper bound ($\alpha$-approximation) for the uniform SSP. However, the operational reality of flexible manufacturing often involves \textit{tool-dependent setup times} (the non-uniform SSP variant), where different tools require significantly different amounts of time or human effort to load into the magazine. 
-%
-%\textbf{The Failure of KTNS:}
-%In the uniform SSP, sequence evaluation is solved in $O(mn)$ time via the greedy Keep Tool Needed Soonest (KTNS) policy. However, as proved by \cite{Crama1994}, when setup times $b_k$ are tool-dependent, the greedy optimal substructure of KTNS collapses. Instead, the tooling subproblem must be formulated as a 0-1 Linear Program to maximize the saved setup costs of retained tools. Because the constraint matrix exhibits the consecutive ones property, it forms an \textit{interval matrix}. While interval matrices are totally unimodular and solvable in polynomial time via linear relaxation \cite{Crama1994}, executing a full LP for \textit{every} continuous sequence transition during routing renders the continuous SSP computationally devastating.
-%
-%\textbf{Operational Reality and Lexicographical Minimization:}
-%To overcome this computational barrier, we look to practical manufacturing operations: when tool load times are highly variable, it is most efficient to halt the machine entirely and execute all necessary tool changes simultaneously in parallel. 
-%
-%Let $c_{switch}$ be the average operational cost of an individual tool switch, and let $C_{stop}$ be the fixed penalty of halting the machine to execute a batch of tool swaps. Because tools are swapped in parallel during a machine halt, the duration of the halt is bounded by the maximum individual load time ($\max_k b_k$) rather than the sum of load times ($\sum b_k$). This heavily inflates the value of $C_{stop}$ relative to $c_{switch}$. 
-%
-%If $C_{stop} \gg c_{switch} \times b$, the objective function transitions into a \textbf{Lexicographical Minimization} framework \cite{Adjiashvili2015}:
-%\begin{enumerate}[noitemsep]
-%	\item \textbf{Primary Objective:} Minimize the total number of full machine stops (the exact JGP Set Covering objective).
-%	\item \textbf{Secondary Objective:} Minimize the individual tool switches within those defined boundaries (the SSP routing objective).
-%\end{enumerate}
-%
-%Recent literature proves that any optimal JGP stop plan can be mapped directly to a feasible, optimal tool switching plan for this primary objective \cite{Adjiashvili2015}. Therefore, when $C_{stop}$ dominates due to tool-dependent setup times, generating maximal configurations via the JGP is not merely a heuristic relaxation for the uniform SSP; it becomes the exact mathematical bound and optimal operational strategy for the non-uniform variant. 
+\section{Relationship with the Job Grouping Problem (JGP)}
+
+To fully contextualize the non-compact formulation and the necessity of dynamic column generation for the SSP, it is critical to establish its relationship with the Job Grouping Problem (JGP). Historically, Column Generation in flexible manufacturing was pioneered to solve the JGP by treating it as a Set Covering problem, where each generated column represents a feasible tool configuration capable of processing a subset of jobs \citep{Crama1994}. 
+
+While the SSP's Restricted Master Problem (RMP) utilizes these exact same generated configurations as its vertices, the fundamental objectives and transition mechanics of the two problems differ significantly, which justifies why a pure JGP solution is insufficient for the SSP.
+
+\subsection{Conceptual Distinction and Suboptimality of JGP}
+
+The JGP aims to partition a set of jobs into the minimum number of feasible groups such that all jobs within a group can be processed with a single setup of the tool magazine. It assumes the machine is completely halted between groups to allow for simultaneous, batch tool swaps. In contrast, the SSP seeks to determine a continuous processing sequence that minimizes individual tool switches, dynamically retaining unneeded tools across transitions via policies such as the Keep Tool Needed Soonest (KTNS) rule \citep{Tang1988}.
+
+Because the JGP forces jobs into rigid batches, it locks the magazine configuration for the duration of the group. This rigidity can temporarily choke the magazine capacity and force the unnecessary eviction of tools that will be required shortly after, leading to strict suboptimality when evaluated under continuous transitions.
+
+To prove this, consider an instance with a magazine capacity of $b = 3$, containing 6 jobs and 6 tools that form a cyclical requirement ring:
+\begin{itemize}[noitemsep]
+	\item $T_1 = \{t_1, t_2\}$
+	\item $T_2 = \{t_2, t_3\}$
+	\item $T_3 = \{t_3, t_4\}$
+	\item $T_4 = \{t_4, t_5\}$
+	\item $T_5 = \{t_5, t_6\}$
+	\item $T_6 = \{t_6, t_1\}$
+\end{itemize}
+
+The strict objective of the JGP is to partition the jobs into a minimum number of feasible groups. Because every 3 consecutive jobs require 4 distinct tools (e.g., $T_1 \cup T_2 \cup T_3 = \{t_1, t_2, t_3, t_4\}$), no 3 jobs can fit into a single group. The absolute minimum number of groups is 3 batches of 2 jobs each:
+\begin{enumerate}[noitemsep]
+	\item \textbf{Group 1 (Jobs 1 \& 2):} Requires configuration $\{t_1, t_2, t_3\}$.
+	\item \textbf{Group 2 (Jobs 3 \& 4):} Requires configuration $\{t_3, t_4, t_5\}$.
+	\item \textbf{Group 3 (Jobs 5 \& 6):} Requires configuration $\{t_1, t_5, t_6\}$.
+\end{enumerate}
+
+Evaluating the continuous transition cost between these rigid JGP batches:
+\begin{itemize}[noitemsep]
+	\item \textbf{G1 $\to$ G2:} The magazine transitions from $\{t_1, t_2, t_3\}$ to $\{t_3, t_4, t_5\}$. Tools $t_1$ and $t_2$ are dropped to load $t_4$ and $t_5$ (2 switches).
+	\item \textbf{G2 $\to$ G3:} The magazine transitions from $\{t_3, t_4, t_5\}$ to $\{t_1, t_5, t_6\}$. Tools $t_3$ and $t_4$ are dropped to load $t_1$ and $t_6$ (2 switches).
+\end{itemize}
+The total cost of the JGP grouping is \textbf{4 tool switches}. During the transition from G1 to G2, the rigid batch requirement of Group 2 completely fills the magazine, forcing tool $t_1$ out, even though it is required for Group 3.
+
+Conversely, if the SSP processes the same sequence of jobs sequentially using the dynamic KTNS policy, the configuration shifts continuously:
+\begin{itemize}[noitemsep]
+	\item \textbf{Job 1 to Job 2:} Magazine remains $\{t_1, t_2, t_3\}$ (0 switches).
+	\item \textbf{Job 3:} The magazine drops $t_2$ (never needed again) and loads $t_4$. Magazine becomes $\{t_1, t_3, t_4\}$ (1 switch). Tool $t_1$ is safely retained.
+	\item \textbf{Job 4:} Drops $t_3$, loads $t_5$. Magazine becomes $\{t_1, t_4, t_5\}$ (1 switch).
+	\item \textbf{Job 5:} Drops $t_4$, loads $t_6$. Magazine becomes $\{t_1, t_5, t_6\}$ (1 switch).
+	\item \textbf{Job 6:} Magazine is already $\{t_1, t_5, t_6\}$. Requirements are met (0 switches).
+\end{itemize}
+The total SSP cost is \textbf{3 tool switches}. By dynamically shifting the configuration and safely retaining tool $t_1$ in the corner of the magazine, the SSP bypasses the rigid capacity choke of the JGP, proving that $Cost_{switches}(SSP) \le Cost_{switches}(JGP)$.
+
+
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[
+		jobnode/.style={draw, circle, fill=blue!10, minimum size=0.9cm, font=\bfseries},
+		confignode/.style={draw, rectangle, rounded corners, fill=red!10, minimum width=2.2cm, minimum height=1cm, align=center, font=\footnotesize\bfseries},
+		arrow/.style={-Stealth, thick},
+		swap/.style={-Stealth, thick, red},
+		flow/.style={-Stealth, thick, blue!80, dashed}
+		]
+		
+		% ----- JGP: Set Covering -----
+		\node[font=\large\bfseries, anchor=west] at (-1, 3.5) {Job Grouping Problem: Rigid Set Covering};
+		
+		% Config Nodes
+		\node[confignode] (c1) at (1.5, 2) {Batch 1 \\ $\{t_1, t_2, t_3\}$};
+		\node[confignode] (c2) at (5.5, 2) {Batch 2 \\ $\{t_3, t_4, t_5\}$};
+		\node[confignode] (c3) at (9.5, 2) {Batch 3 \\ $\{t_1, t_5, t_6\}$};
+		
+		% Job Nodes
+		\node[jobnode] (j1) at (0.5, 0.5) {$j_1$};
+		\node[jobnode] (j2) at (2.5, 0.5) {$j_2$};
+		\draw[arrow] (c1) -- (j1); \draw[arrow] (c1) -- (j2);
+		
+		\node[jobnode] (j3) at (4.5, 0.5) {$j_3$};
+		\node[jobnode] (j4) at (6.5, 0.5) {$j_4$};
+		\draw[arrow] (c2) -- (j3); \draw[arrow] (c2) -- (j4);
+		
+		\node[jobnode] (j5) at (8.5, 0.5) {$j_5$};
+		\node[jobnode] (j6) at (10.5, 0.5) {$j_6$};
+		\draw[arrow] (c3) -- (j5); \draw[arrow] (c3) -- (j6);
+		
+		% Stop Indicators
+		\draw[swap] (c1) -- (c2) node[midway, above, font=\scriptsize] {Full Stop (2 Sw)};
+		\draw[swap] (c2) -- (c3) node[midway, above, font=\scriptsize] {Full Stop (2 Sw)};
+		\node[red, font=\footnotesize\bfseries] at (3.5, 1.2) {$t_1$ Evicted!};
+		
+		% ----- SSP: Routing -----
+		\node[font=\large\bfseries, anchor=west] at (-1, -1.5) {Tool Switching Problem: Continuous Routing};
+		
+		% Job Nodes sequence
+		\node[jobnode] (s1) at (0.5, -3) {$j_1$};
+		\node[jobnode] (s2) at (2.5, -3) {$j_2$};
+		\node[jobnode] (s3) at (4.5, -3) {$j_3$};
+		\node[jobnode] (s4) at (6.5, -3) {$j_4$};
+		\node[jobnode] (s5) at (8.5, -3) {$j_5$};
+		\node[jobnode] (s6) at (10.5, -3) {$j_6$};
+		
+		% Edges
+		\draw[arrow] (s1) -- (s2) node[midway, below, font=\scriptsize] {0 Sw};
+		\draw[arrow] (s2) -- (s3) node[midway, below, font=\scriptsize, align=center] {1 Sw\\$+t_4, -t_2$};
+		\draw[arrow] (s3) -- (s4) node[midway, below, font=\scriptsize, align=center] {1 Sw\\$+t_5, -t_3$};
+		\draw[arrow] (s4) -- (s5) node[midway, below, font=\scriptsize, align=center] {1 Sw\\$+t_6, -t_4$};
+		\draw[arrow] (s5) -- (s6) node[midway, below, font=\scriptsize] {0 Sw};
+		
+		% Tool flow
+		\draw[flow, out=30, in=150] (s1.north) to node[above, font=\footnotesize\bfseries, text=blue] {Tool $t_1$ flows continuously across transitions (0 Sw)} (s6.north);
+		
+	\end{tikzpicture}
+	\caption{Graph-theoretic contrast between the Job Grouping Problem (JGP) and the Tool Switching Problem (SSP). The JGP acts as a Set Covering problem, mapping jobs to rigid, independent configuration nodes separated by full machine stops. The SSP models a continuous routing path, evaluating dynamic edge costs between individual jobs and allowing specific tools (such as $t_1$) to flow seamlessly across the sequence.}
+	\label{fig:jgp_vs_ssp}
+\end{figure}
+
+\subsection{Approximation Bounds from JGP to SSP}
+
+While an optimal JGP solution cannot guarantee an optimal SSP sequence, it provides a strict and reliable theoretical bound. We can mathematically establish that the optimal JGP solution yields an $\alpha$-approximation for the SSP, where $\alpha = b$ (the magazine capacity).
+
+Let $S_{SSP}$ be the optimal number of tool switches in the SSP. Let $g_{JGP}$ be the optimal (minimum) number of groups in the JGP.
+
+\textbf{Step 1: Bounding JGP groups using SSP switches.}
+In an optimal SSP schedule, the magazine state changes exactly $S_{SSP}$ times, creating a timeline of $S_{SSP} + 1$ distinct magazine configurations. Because every job is processed entirely within one of these configurations, and every configuration strictly respects the magazine capacity $b$, these $S_{SSP} + 1$ configurations represent a valid JGP grouping. Since $g_{JGP}$ is the absolute minimum number of feasible groups required, it must mathematically hold that:
+\begin{equation}
+	g_{JGP} \le S_{SSP} + 1 \implies g_{JGP} - 1 \le S_{SSP}
+\end{equation}
+
+\textbf{Step 2: Bounding JGP switch cost using JGP groups.}
+In the absolute worst-case scenario, transitioning between two completely disjoint JGP groups requires a complete machine stop and a total flush of the magazine, costing exactly $b$ tool switches. Because there are $g_{JGP}$ groups, there are exactly $g_{JGP} - 1$ transitions. Therefore, the maximum possible number of tool switches forced by the JGP solution is:
+\begin{equation}
+	Cost_{switches}(JGP) \le (g_{JGP} - 1) \times b
+\end{equation}
+
+\textbf{Step 3: The Approximation Bound.}
+Substituting the inequality from Step 1 into Step 2 yields $Cost_{switches}(JGP) \le S_{SSP} \times b$. Dividing both sides by $S_{SSP}$ establishes the final bound:
+\begin{equation}
+	\frac{Cost_{switches}(JGP)}{S_{SSP}} \le b
+\end{equation}
+
+This deduction proves that any JGP optimal solution will always provide an $\alpha$-approximation for the SSP strictly bounded by the size of the tool magazine $b$. Consequently, the JGP Set Covering formulations serve as a highly effective initial construction phase. Modern solution frameworks can initialize their Branch-and-Price structures using these JGP configurations (columns), subsequently refining them via GTSP routing logic and metaheuristic improvement strategies to close the optimality gap.
+
+\subsection{Tightening the Bounds: From Heuristics to Exact Methods}
+
+While the $\alpha$-approximation establishes a theoretical worst-case guarantee, solving the SSP in practice requires aggressively closing the gap between the JGP batching formulation and the continuous SSP routing sequence. In a Branch-and-Price framework, algorithmic efficiency dictates that we establish tight upper bounds (primal bounds) to prune the search tree, and tight lower bounds (dual bounds) to prove optimality. 
+
+\textbf{Heuristic Upper Bounds.} Because a valid JGP batching solution can be flattened into a linear job sequence, evaluating that sequence using the KTNS policy inherently provides a valid upper bound for the SSP. However, owing to the rigid batch boundaries of the JGP, this naive upper bound is rarely tight. To overcome this, early research proposed using JGP solutions merely as an initial construction phase, which is subsequently refined by improvement heuristics. Methods such as the ``Super Task'' heuristic \citep{Privault1995} and global 2-opt local search \citep{Crama1994} were deployed to break the rigid JGP batch boundaries, allowing the algorithm to rearrange jobs and exploit overlapping tool requirements. 
+
+However, pure local search is highly susceptible to local optima. To establish the tightest heuristic upper bounds, the current state-of-the-art relies on hybrid population-based metaheuristics, such as Hybrid Genetic Search (HGS) \citep{Mecler2021} and Adaptive Large Neighborhood Search (ALNS) \citep{Beezao2017}. Alternatively, by mapping the configurations to a GTSP, highly optimized routing heuristics such as LKH-3 \citep{Helsgaun2015} can be applied to find near-optimal continuous sequences. Injecting these high-quality sequences as initial primal bounds drastically reduces the size of the exact search tree.
+
+\textbf{Strengthening Lower Bounds.} Historically, establishing tight lower bounds for the SSP has been a severe computational bottleneck. The original Integer Linear Programming (ILP) formulations, such as those proposed by \citet{Tang1988}, suffered from notoriously weak linear relaxations. The ``zero-bound'' LP relaxation of early compact models forced branch-and-bound algorithms into nearly complete enumeration. 
+
+Subsequent literature sought to overcome this by introducing valid inequalities. \citet{Laporte2004} significantly tightened the lower bound by adding subtour elimination constraints, alongside look-ahead capacity and spanning tree bounds. By projecting the SSP entirely onto a GTSP configuration graph, the non-compact formulation inherently bypasses the weak linear relaxations of classical models. Furthermore, it allows the Branch-and-Price framework to exploit the tight bounds of the GTSP polytope. As demonstrated by \citet{Fischetti1997}, separating and adding Generalized Subtour Elimination Constraints (GSECs) can push the lower bound extremely close to the optimal integer solution at the root node.
+
+\textbf{The Pricing Bottleneck.} The synthesis of JGP-derived columns, metaheuristic upper bounds, and GTSP-based lower bounds provides a robust Branch-and-Price framework capable of exact SSP resolution. However, a critical barrier remains. While the JGP's pure Set Covering oracle can be solved dynamically, the pricing oracle for the continuous SSP must simultaneously maximize dual variable collection while accounting for sequence-dependent transition costs. This renders the oracle strongly NP-hard. Solving this exact pricing problem at every column generation iteration dominates the computation time, necessitating the integration of Machine Learning to intelligently accelerate column generation.
+
+
+\subsection{Tool-Dependent Setup Times and Lexicographical Minimization}
+
+In the preceding sections, we established that the Job Grouping Problem (JGP) is structurally rigid and provides only an upper bound ($\alpha$-approximation) for the uniform SSP. However, the operational reality of flexible manufacturing often involves \textit{tool-dependent setup times} (the non-uniform SSP variant), where different tools require significantly different amounts of time or human effort to load into the magazine. 
+
+\textbf{The Failure of KTNS:}
+In the uniform SSP, sequence evaluation is solved in $O(mn)$ time via the greedy Keep Tool Needed Soonest (KTNS) policy. However, as proved by \cite{Crama1994}, when setup times $b_k$ are tool-dependent, the greedy optimal substructure of KTNS collapses. Instead, the tooling subproblem must be formulated as a 0-1 Linear Program to maximize the saved setup costs of retained tools. Because the constraint matrix exhibits the consecutive ones property, it forms an \textit{interval matrix}. While interval matrices are totally unimodular and solvable in polynomial time via linear relaxation \cite{Crama1994}, executing a full LP for \textit{every} continuous sequence transition during routing renders the continuous SSP computationally devastating.
+
+\textbf{Operational Reality and Lexicographical Minimization:}
+To overcome this computational barrier, we look to practical manufacturing operations: when tool load times are highly variable, it is most efficient to halt the machine entirely and execute all necessary tool changes simultaneously in parallel. 
+
+Let $c_{switch}$ be the average operational cost of an individual tool switch, and let $C_{stop}$ be the fixed penalty of halting the machine to execute a batch of tool swaps. Because tools are swapped in parallel during a machine halt, the duration of the halt is bounded by the maximum individual load time ($\max_k b_k$) rather than the sum of load times ($\sum b_k$). This heavily inflates the value of $C_{stop}$ relative to $c_{switch}$. 
+
+If $C_{stop} \gg c_{switch} \times b$, the objective function transitions into a \textbf{Lexicographical Minimization} framework \cite{Adjiashvili2015}:
+\begin{enumerate}[noitemsep]
+	\item \textbf{Primary Objective:} Minimize the total number of full machine stops (the exact JGP Set Covering objective).
+	\item \textbf{Secondary Objective:} Minimize the individual tool switches within those defined boundaries (the SSP routing objective).
+\end{enumerate}
+
+Recent literature proves that any optimal JGP stop plan can be mapped directly to a feasible, optimal tool switching plan for this primary objective \cite{Adjiashvili2015}. Therefore, when $C_{stop}$ dominates due to tool-dependent setup times, generating maximal configurations via the JGP is not merely a heuristic relaxation for the uniform SSP; it becomes the exact mathematical bound and optimal operational strategy for the non-uniform variant. 
 
 
 \section{The Pricing Oracle and the Set Union Knapsack Problem}

@@ -1,0 +1,123 @@
+\begin{thebibliography}{17}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Applegate et~al.(2006)Applegate, Bixby, Chv{\'a}tal, and
+  Cook]{Applegate2006}
+David~L. Applegate, Robert~E. Bixby, Va{\v{s}}ek Chv{\'a}tal, and William~J.
+  Cook.
+\newblock \emph{The Traveling Salesman Problem: A Computational Study}.
+\newblock Princeton University Press, 2006.
+
+\bibitem[Barnhart et~al.(1998)Barnhart, Johnson, Nemhauser, Savelsbergh, and
+  Vance]{Barnhart1998}
+Cynthia Barnhart, Ellis~L. Johnson, George~L. Nemhauser, Martin W.~P.
+  Savelsbergh, and Pamela~H. Vance.
+\newblock Branch-and-price: Column generation for solving huge integer
+  programs.
+\newblock \emph{Operations Research}, 46\penalty0 (3):\penalty0 316--329, 1998.
+
+\bibitem[Catanzaro et~al.(2015)Catanzaro, Gouveia, and
+  Labb{\'e}]{Catanzaro2015}
+Daniele Catanzaro, Luis Gouveia, and Martine Labb{\'e}.
+\newblock Improved integer linear programming formulations for the job
+  sequencing and tool switching problem.
+\newblock \emph{European Journal of Operational Research}, 244\penalty0
+  (3):\penalty0 766--777, 2015.
+
+\bibitem[Chi et~al.(2022)Chi, Aboussalah, Khalil, Wang, and
+  Sherkat-Masoumi]{Chi2022}
+Cheng Chi, Amine~Mohamed Aboussalah, Elias~Boutros Khalil, Juyoung Wang, and
+  Zoha Sherkat-Masoumi.
+\newblock A deep reinforcement learning framework for column generation.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, volume~35, pages 9633--9644, 2022.
+
+\bibitem[Colares and Wagler(2026)]{Colares2026}
+Rafael Colares and Annegret Wagler.
+\newblock Exact formulations for the job sequencing and tool switching problem.
+\newblock \emph{Working Paper}, 2026.
+
+\bibitem[Crama and Oerlemans(1994)]{Crama1994}
+Yves Crama and A.~G. Oerlemans.
+\newblock A column generation approach to job grouping for flexible
+  manufacturing systems.
+\newblock \emph{European Journal of Operational Research}, 78\penalty0
+  (1):\penalty0 58--80, 1994.
+
+\bibitem[Goldschmidt et~al.(1994)Goldschmidt, Nehme, and Yu]{Goldschmidt1994}
+O.~Goldschmidt, D.~Nehme, and G.~Yu.
+\newblock Note on the set-union knapsack problem.
+\newblock \emph{Naval Research Logistics (NRL)}, 41\penalty0 (6):\penalty0
+  833--842, 1994.
+
+\bibitem[Helsgaun(2015)]{Helsgaun2015}
+Keld Helsgaun.
+\newblock Solving the equality generalized traveling salesman problem using the
+  lin--kernighan--helsgaun algorithm.
+\newblock \emph{Mathematical Programming Computation}, 7\penalty0 (3):\penalty0
+  269--287, 2015.
+
+\bibitem[Laporte et~al.(2004)Laporte, Salazar-Gonz{\'a}lez, and
+  Semet]{Laporte2004}
+Gilbert Laporte, Juan~Jos{\'e} Salazar-Gonz{\'a}lez, and Fr{\'e}d{\'e}ric
+  Semet.
+\newblock Exact algorithms for the job sequencing and tool switching problem.
+\newblock \emph{IIE Transactions}, 36\penalty0 (1):\penalty0 37--45, 2004.
+
+\bibitem[Lien et~al.(1993)Lien, Ma, and Wah]{Lien1993}
+Yao-Nan Lien, Eva Ma, and Benjamin W.~S. Wah.
+\newblock Transformation of the generalized traveling-salesman problem into the
+  standard traveling-salesman problem.
+\newblock \emph{Information Sciences}, 74\penalty0 (1-2):\penalty0 177--189,
+  1993.
+
+\bibitem[Lu et~al.(2020)Lu, Zhang, and Yang]{Lu2020}
+Hao Lu, Xingwen Zhang, and Shuang Yang.
+\newblock A learning-based iterative method for solving vehicle routing
+  problems.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2020.
+
+\bibitem[Moreira(2026)]{Bernardo2024}
+Bernardo Bastos~Pereira Moreira.
+\newblock A new combinatorial approach to solve the job sequencing and tool
+  switching problem.
+\newblock Master's thesis, Universidade Federal de Minas Gerais (UFMG), 2026.
+
+\bibitem[Noon and Bean(1993)]{Noon1993}
+Charles~E. Noon and James~C. Bean.
+\newblock An efficient transformation of the generalized traveling salesman
+  problem.
+\newblock \emph{INFOR: Information Systems and Operational Research},
+  31\penalty0 (1):\penalty0 39--44, 1993.
+
+\bibitem[Otiai(2024)]{Otiai2024}
+Felipe~Shoei Otiai.
+\newblock Efficient tool management in flexible manufacturing: A branch and
+  price approach to the job grouping problem.
+\newblock Master's thesis, ISIMA, Clermont Auvergne INP, 2024.
+
+\bibitem[Pop et~al.(2024)Pop, Cosma, Sabo, and Pop~Sitar]{Pop2024}
+Petric{\u{a}}~C. Pop, Ovidiu Cosma, Cosmin Sabo, and Corina Pop~Sitar.
+\newblock The generalized traveling salesman problem: A comprehensive review.
+\newblock \emph{European Journal of Operational Research}, 314\penalty0
+  (3):\penalty0 819--835, 2024.
+
+\bibitem[Tang and Denardo(1988)]{Tang1988}
+Christopher~S. Tang and Eric~V. Denardo.
+\newblock Models arising from a flexible manufacturing machine, part i:
+  Minimization of the number of tool switches.
+\newblock \emph{Operations Research}, 36\penalty0 (5):\penalty0 767--777, 1988.
+
+\bibitem[Yuan et~al.(2022)Yuan, Jiang, and Song]{Yuan2022}
+H.~Yuan, P.~Jiang, and S.~Song.
+\newblock The neural-prediction based acceleration algorithm of column
+  generation for graph-based set covering problems.
+\newblock In \emph{2022 IEEE International Conference on Systems, Man, and
+  Cybernetics (SMC)}, pages 1115--1120. IEEE, 2022.
+
+\end{thebibliography}
