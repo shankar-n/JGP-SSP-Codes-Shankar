@@ -1,0 +1,56 @@
+\documentclass[12pt]{article} 
+\usepackage[utf8]{inputenc} 
+\usepackage[english]{babel} 
+\usepackage{amsmath, amssymb, amsthm, bm} 
+\usepackage{geometry} 
+\usepackage{tikz} 
+\usetikzlibrary{shapes, backgrounds, decorations.pathreplacing, positioning, arrows.meta, calc, fit} 
+\usepackage{caption} 
+\usepackage{setspace} 
+\usepackage{enumitem} 
+\usepackage{booktabs} 
+%\usepackage[backend=biber,style=chicago-authordate]{biblatex}
+\usepackage[round]{natbib}
+
+% Hyperref for clickable Table of Contents and citations 
+\usepackage{hyperref} 
+\hypersetup{ 
+	colorlinks=true, 
+	linkcolor=blue, 
+	filecolor=magenta,
+	urlcolor=cyan, 
+	citecolor=red, 
+}
+
+% Custom theorem styles 
+\newtheorem{theorem}{Theorem}[section] 
+\newtheorem{lemma}[theorem]{Lemma} 
+\newtheorem{definition}{Definition}[section] 
+\newtheorem{example}{Example}[section] 
+\newtheorem{proposition}{Proposition}[section]
+
+\geometry{letterpaper, margin=1in} 
+\onehalfspacing
+
+\begin{document}
+	
+	\title{A Non-Compact Formulation for the Tool Switching Problem}
+	\author{Shankar Narayanan \\
+		\textit{Internship Report} \\
+		Advisors: Prof. Rafael Colares and Prof. Annegret Wagler}
+	\date{March 30, 2026}
+	\maketitle
+	
+%	\begin{abstract}
+%		The management of tool configurations in Flexible Manufacturing Systems (FMS) is a well-studied NP-hard combinatorial optimization challenge. This report provides a mathematical analysis of the sequential Tool Switching Problem (SSP) by evaluating its non-compact formulation. We systematically establish the structural equivalences of the SSP to classical optimization frameworks, specifically mapping its continuous routing to the Generalized Traveling Salesman Problem (GTSP) and its configuration bounds to the Job Grouping Problem (JGP). Furthermore, we establish a strict distinction between the Uniform SSP (U-SSP) and the Tool-Dependent SSP (TD-SSP), proving that the JGP serves as the exact operational objective for the latter via Lexicographical Minimization. Finally, we demonstrate that the dynamic generation of these configurations within an exact Branch-and-Price framework is mathematically equivalent to the Set Union Knapsack Problem (SUKP), explicitly necessitating Machine Learning interventions to accelerate the NP-hard pricing oracle.
+%	\end{abstract}
+	
+	
+
+	
+	
+%	
+%	\bibliographystyle{plainnat}
+%	\bibliography{shankar-draft}
+%	
+\end{document}

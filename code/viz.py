@@ -1,12 +1,10 @@
-import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import seaborn as sns
-import networkx as nx
 from matplotlib.colors import ListedColormap
-from matplotlib.patches import FancyArrowPatch
 import numpy as np
-from util import compute_ktns_cost
+from utils import compute_ktns, compute_switch_cost
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
  # Global plot style
 plt.rcParams.update({
@@ -239,7 +237,7 @@ def plot_timedep_costs(sequence, tool_req, cap, tau_values=None):
         We fix the SSP sequence and vary τ (idle time between jobs).
         Cost under w(τ) = baseline_cost × w(τ).
         """
-        baseline = compute_ktns_cost(sequence, tool_req, cap)
+        baseline = compute_ktns(sequence, tool_req, cap)[0]
         if tau_values is None:
             tau_values = np.linspace(0, 5, 100)
 
@@ -272,3 +270,444 @@ def plot_timedep_costs(sequence, tool_req, cap, tau_values=None):
         ax_td.grid(alpha=0.3, linestyle='--')
         plt.tight_layout()
         return fig_td
+
+def visualize_ssp_jgp_solution(job_sequence: list, 
+                               T_j: dict, 
+                               magazine_states: list, 
+                               b: int, 
+                               jgp_batches: list = None,
+                               title: str = "Interactive SSP/JGP Configuration"):
+    """
+    Visualizes job sequencing, tool overlaps, and magazine capacity.
+    
+    Parameters:
+    - job_sequence: List of Job IDs in the order they are processed.
+    - T_j: Dictionary mapping Job ID to a list/set of required Tool IDs.
+    - magazine_states: List of lists. magazine_states[i] contains all tools 
+                       loaded in the magazine during job_sequence[i].
+    - b: Integer, the tool magazine capacity.
+    - jgp_batches: (Optional) List of sequence indices where a new JGP batch begins.
+                   Draws vertical lines to separate independent groups.
+    """
+    num_steps = len(job_sequence)
+    all_tools = sorted({tool for tools in T_j.values() for tool in tools})
+    
+    # Create subplots: Top for capacity tracking, Bottom for tool overlaps
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
+                        vertical_spacing=0.05, row_heights=[0.2, 0.8])
+
+    # --- 1. Top Plot: Magazine Capacity Tracker ---
+    tools_loaded_counts = [len(state) for state in magazine_states]
+    x_steps = list(range(1, num_steps + 1))
+    
+    fig.add_trace(go.Scatter(
+        x=x_steps, y=tools_loaded_counts, 
+        mode='lines+markers', name='Tools in Magazine',
+        line=dict(color='firebrick', width=2),
+        marker=dict(size=8),
+        hovertemplate="Step: %{x}<br>Tools Loaded: %{y}<extra></extra>"
+    ), row=1, col=1)
+
+    # Add maximum capacity boundary line
+    fig.add_trace(go.Scatter(
+        x=[1, num_steps], y=[b, b], 
+        mode='lines', name=f'Capacity Limit (b={b})',
+        line=dict(color='black', width=2, dash='dash'),
+        hoverinfo='skip'
+    ), row=1, col=1)
+
+    # --- 2. Bottom Plot: Tool Loading Heatmap / Overlaps ---
+    req_x, req_y, req_text = [], [], []
+    carry_x, carry_y, carry_text = [], [], []
+
+    for step_idx, (job_id, loaded_tools) in enumerate(zip(job_sequence, magazine_states)):
+        step = step_idx + 1
+        required_tools = set(T_j[job_id])
+        
+        for tool in loaded_tools:
+            hover_info = f"Sequence Step: {step}<br>Job ID: {job_id}<br>Tool ID: {tool}"
+            if tool in required_tools:
+                # Tool is actively required by the job
+                req_x.append(step)
+                req_y.append(tool)
+                req_text.append(hover_info + "<br>Status: <b>Required</b>")
+            else:
+                # Tool is stored in magazine for future/past jobs (Overlap)
+                carry_x.append(step)
+                carry_y.append(tool)
+                carry_text.append(hover_info + "<br>Status: <i>Stored (KTNS)</i>")
+
+    # Trace for Required Tools
+    fig.add_trace(go.Scatter(
+        x=req_x, y=req_y, mode='markers', name='Required Tool',
+        marker=dict(symbol='square', size=24, color='#1f77b4', line=dict(width=1, color='DarkSlateGrey')),
+        text=req_text, hoverinfo='text'
+    ), row=2, col=1)
+
+    # Trace for Carried-over Tools (Overlaps)
+    fig.add_trace(go.Scatter(
+        x=carry_x, y=carry_y, mode='markers', name='Stored Tool (Overlap)',
+        marker=dict(symbol='square', size=24, color='#aec7e8', opacity=0.7),
+        text=carry_text, hoverinfo='text'
+    ), row=2, col=1)
+
+    # --- 3. JGP Batch Separators (Optional) ---
+    if jgp_batches:
+        for batch_start in jgp_batches:
+            if batch_start > 1: # Don't draw line at the very beginning
+                fig.add_vline(x=batch_start - 0.5, line_width=2, line_dash="dash", line_color="green")
+                # Add annotation for the batch
+                fig.add_annotation(x=batch_start - 0.5, y=max(all_tools) + 1, 
+                                   text="Batch Split", showarrow=False, 
+                                   xanchor="left", yanchor="bottom", font=dict(color="green"))
+
+    # --- 4. Layout & Aesthetics ---
+    x_tick_labels = [f"Step {i+1}<br>(Job {job})" for i, job in enumerate(job_sequence)]
+    
+    fig.update_layout(
+        title=title,
+        xaxis2=dict(
+            tickmode='array',
+            tickvals=x_steps,
+            ticktext=x_tick_labels,
+            title="Processing Sequence",
+            showgrid=True,
+            gridcolor='lightgrey'
+        ),
+        yaxis=dict(title="Usage", range=[0, b + 1]),
+        yaxis2=dict(
+            title="Tool ID", 
+            tickmode='array', 
+            tickvals=all_tools,
+            showgrid=True,
+            gridcolor='lightgrey'
+        ),
+        plot_bgcolor='white',
+        hovermode='closest',
+        height=700
+    )
+
+    fig.show()
+
+# ============================================================
+# 2D VISUALIZATION (FIXED: hyperedges shown as regions)
+# ============================================================
+
+def visualize_2d(configurations, hyperedges):
+    n = len(configurations)
+
+    # simple circular layout (stable, interpretable)
+    angles = np.linspace(0, 2*np.pi, n, endpoint=False)
+    pos = {i: (np.cos(a), np.sin(a)) for i, a in enumerate(angles)}
+
+    fig = go.Figure()
+
+    # --- draw nodes (configs) ---
+    x = [pos[i][0] for i in range(n)]
+    y = [pos[i][1] for i in range(n)]
+
+    fig.add_trace(go.Scatter(
+        x=x, y=y,
+        mode='markers+text',
+        text=[str(c) for c in configurations],
+        textposition="top center",
+        marker=dict(size=10),
+        name="Configurations"
+    ))
+
+    # --- draw hyperedges as polygons ---
+    for j, nodes in hyperedges.items():
+        if len(nodes) < 3:
+            continue
+
+        hx = [pos[i][0] for i in nodes] + [pos[nodes[0]][0]]
+        hy = [pos[i][1] for i in nodes] + [pos[nodes[0]][1]]
+
+        fig.add_trace(go.Scatter(
+            x=hx, y=hy,
+            fill="toself",
+            opacity=0.15,
+            mode='lines',
+            name=f"Job {j}"
+        ))
+
+    fig.update_layout(title="2D Hypergraph (Jobs as Hyperedges)")
+    fig.show()
+
+
+# ============================================================
+# Metrics
+# ============================================================
+
+def compute_config_job_coverage(hyperedges, num_configs):
+    coverage = [0] * num_configs
+    job_list = [[] for _ in range(num_configs)]
+
+    for j, configs in hyperedges.items():
+        for c in configs:
+            coverage[c] += 1
+            job_list[c].append(j)
+
+    return coverage, job_list
+
+
+def compute_avg_switch_cost(configurations, capacity):
+    n = len(configurations)
+    avg_cost = []
+
+    for i in range(n):
+        total = 0
+        for j in range(n):
+            if i != j:
+                total += compute_switch_cost(configurations[i], configurations[j], capacity)
+        avg_cost.append(total / (n - 1))
+
+    return avg_cost
+
+
+def compute_pareto_frontier(coverage, avg_cost):
+    n = len(coverage)
+    pareto = [True] * n
+
+    for i in range(n):
+        for j in range(n):
+            if (coverage[j] >= coverage[i] and avg_cost[j] <= avg_cost[i]) and \
+               (coverage[j] > coverage[i] or avg_cost[j] < avg_cost[i]):
+                pareto[i] = False
+                break
+
+    return pareto
+
+# ============================================================
+# Embedding
+# ============================================================
+
+def embed_configurations_3d(configurations, capacity):
+    n = len(configurations)
+    D = np.zeros((n, n))
+
+    for i in range(n):
+        for j in range(n):
+            D[i, j] = compute_switch_cost(configurations[i], configurations[j], capacity)
+
+    H = np.eye(n) - np.ones((n, n)) / n
+    B = -0.5 * H @ (D ** 2) @ H
+
+    eigvals, eigvecs = np.linalg.eigh(B)
+    idx = np.argsort(eigvals)[::-1][:3]
+    coords = eigvecs[:, idx] * np.sqrt(np.maximum(eigvals[idx], 0))
+    return coords
+
+# ============================================================
+# Visualization
+# ============================================================
+
+def visualize_3d(configurations, coords, hyperedges, capacity, solutions=None,
+                 show_edges=False, edge_threshold=1):
+
+    x, y, z = coords[:, 0], coords[:, 1], coords[:, 2]
+
+    coverage, job_list = compute_config_job_coverage(hyperedges, len(configurations))
+    avg_switch = compute_avg_switch_cost(configurations, capacity)
+    pareto = compute_pareto_frontier(coverage, avg_switch)
+
+    max_cov = max(coverage) if max(coverage) > 0 else 1
+
+    colors = [c / max_cov for c in coverage]
+    sizes = [6 + 10 * (c / max_cov) for c in coverage]
+
+    # --- always-visible labels ---
+    labels = [f"{configurations[i]}\n({coverage[i]})" for i in range(len(configurations))]
+
+    hover_text = []
+    for i, cfg in enumerate(configurations):
+        hover_text.append(
+            f"Config: {cfg}<br>"
+            f"Jobs: {job_list[i]}<br>"
+            f"Coverage: {coverage[i]}<br>"
+            f"Avg switch cost: {round(avg_switch[i], 2)}<br>"
+            f"Pareto: {pareto[i]}"
+        )
+
+    fig = go.Figure()
+
+    # --- configs ---
+    fig.add_trace(go.Scatter3d(
+        x=x, y=y, z=z,
+        mode='markers+text',
+        text=labels,
+        textposition='top center',
+        marker=dict(
+            size=sizes,
+            color=colors,
+            colorscale='Viridis',
+            colorbar=dict(
+                title="#Jobs Covered",
+                orientation='h',
+                x=0.5,
+                xanchor='center',
+                y=-0.2
+            ),
+            opacity=0.9
+        ),
+        hovertext=hover_text,
+        hoverinfo='text',
+        name="Configurations"
+    ))
+
+    # # --- pareto ---
+    # fig.add_trace(go.Scatter3d(
+    #     x=[x[i] for i in range(len(x)) if pareto[i]],
+    #     y=[y[i] for i in range(len(y)) if pareto[i]],
+    #     z=[z[i] for i in range(len(z)) if pareto[i]],
+    #     mode='markers',
+    #     marker=dict(size=12, symbol='diamond'),
+    #     name='Pareto Frontier'
+    # ))
+
+    # --- hyperedges per job (FIXED legend visibility) ---
+    for j, nodes in hyperedges.items():
+        if len(nodes) >= 3:
+            fig.add_trace(go.Mesh3d(
+                x=[x[i] for i in nodes],
+                y=[y[i] for i in nodes],
+                z=[z[i] for i in nodes],
+                opacity=0.08,
+                name=f"Job {j}",
+                hovertext=f"Job {j} covers configs: {[configurations[i] for i in nodes]}",
+                hoverinfo='text',
+                # visible='legendonly'
+            ))
+        elif len(nodes) == 2:
+            fig.add_trace(go.Scatter3d(
+                x=[x[nodes[0]], x[nodes[1]]],
+                y=[y[nodes[0]], y[nodes[1]]],
+                z=[z[nodes[0]], z[nodes[1]]],
+                mode='lines',
+                fill="toself",
+                line=dict(width=4),
+                name=f"Job {j}",
+                hovertext=f"Job {j} covers configs: {[configurations[i] for i in nodes]}",
+                hoverinfo='text',
+                # visible='legendonly'
+            ))
+
+    # --- OPTIONAL sparse edges (recommended OFF by default) ---
+    if show_edges:
+        ex, ey, ez, etext = [], [], [], []
+
+        for i in range(len(configurations)):
+            for j in range(i+1, len(configurations)):
+                w = compute_switch_cost(configurations[i], configurations[j], capacity)
+                if w <= edge_threshold:
+                    ex += [x[i], x[j], None]
+                    ey += [y[i], y[j], None]
+                    ez += [z[i], z[j], None]
+                    etext.append(f"cost={w}")
+
+        fig.add_trace(go.Scatter3d(
+            x=ex, y=ey, z=ez,
+            mode='lines',
+            line=dict(width=1, color='gray'),
+            opacity=0.2,
+            hovertext=etext,
+            hoverinfo='text',
+            name='Switch edges'
+        ))
+
+    # --- solutions ---
+    if solutions:
+        config_index = {tuple(c): i for i, c in enumerate(configurations)}
+
+        for idx, sol in enumerate(solutions):
+            px, py, pz = [], [], []
+
+            for (_, c1), (_, c2) in zip(sol[:-1], sol[1:]):
+                i1 = config_index[tuple(c1)]
+                i2 = config_index[tuple(c2)]
+
+                px += [x[i1], x[i2], None]
+                py += [y[i1], y[i2], None]
+                pz += [z[i1], z[i2], None]
+
+            fig.add_trace(go.Scatter3d(
+                x=px, y=py, z=pz,
+                mode='lines',
+                line=dict(width=5),
+                name=f"Solution {idx+1}"
+            ))
+
+    fig.update_layout(
+        title="3D SSP Visualization",
+        scene=dict(
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False),
+            zaxis=dict(visible=False),
+            dragmode='orbit'
+        ),
+        margin=dict(l=0, r=0, b=60, t=40),
+        legend=dict(itemsizing='constant')
+    )
+
+    fig.show(config={'scrollZoom': True, 'showLink': False, 'displayModeBar': True})
+
+
+
+# ============================================================
+# ANIMATION (FIXED: actual SSP trajectory in config space)
+# ============================================================
+
+def animate_solution(configurations, coords, solution, capacity):
+    config_index = {tuple(c): i for i, c in enumerate(configurations)}
+
+    x, y, z = coords[:, 0], coords[:, 1], coords[:, 2]
+
+    frames = []
+
+    for step in range(1, len(solution)):
+        px, py, pz = [], [], []
+
+        for (j1, c1), (j2, c2) in zip(solution[:step], solution[1:step+1]):
+            i1 = config_index[tuple(c1)]
+            i2 = config_index[tuple(c2)]
+
+            px += [x[i1], x[i2], None]
+            py += [y[i1], y[i2], None]
+            pz += [z[i1], z[i2], None]
+
+        frames.append(go.Frame(data=[go.Scatter3d(
+            x=px, y=py, z=pz,
+            mode='lines',
+            line=dict(width=6)
+        )]))
+
+    fig = go.Figure(
+        data=[go.Scatter3d(x=x, y=y, z=z, mode='markers')],
+        frames=frames
+    )
+
+    fig.update_layout(
+        title="SSP Solution Trajectory",
+        updatemenus=[{
+            "type": "buttons",
+            "buttons": [{"label": "Play", "method": "animate", "args": [None]}]
+        }]
+    )
+
+    fig.show()
+
+
+def my_plot(configs, H_j, capacity):
+
+    visualize_2d(configs, H_j)
+
+    coords = embed_configurations_3d(configs, capacity)
+
+    # Example: multiple solutions
+    sol1 = [(1, configs[0]), (2, configs[1]), (3, configs[2])]
+    sol2 = [(1, configs[2]), (2, configs[3]), (3, configs[1])]
+
+    visualize_3d(configs, coords, H_j, capacity,
+                 solutions=[sol1, sol2])
+
+    # animate_solution(configs, coords, sol1, capacity)
