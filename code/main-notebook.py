@@ -30,6 +30,7 @@ def _():
     from SCIP_formulation_solvers import solve_jgp_arf, solve_ssp_gtsp
     from solution_validators import validate_jgp, validate_ssp
     from porta import run_jgp_porta, read_porta_output, run_ssp_porta, convert_ieq_to_ine
+    from concorde_util import solve_hamiltonian_path
     import subprocess
     import os
     import tempfile
@@ -39,13 +40,11 @@ def _():
     return (
         compute_ktns,
         compute_ssp_cost,
-        convert_ieq_to_ine,
         detect_0blocks,
         itertools,
         load_ssp_instance,
         mo,
         np,
-        os,
         pd,
         plot_active_config_network,
         plot_magazine_timeline,
@@ -55,10 +54,9 @@ def _():
         read_porta_output,
         run_brute_force_TSP_on_configs,
         run_ssp_porta,
+        solve_hamiltonian_path,
         solve_jgp_arf,
         solve_ssp_gtsp,
-        subprocess,
-        tempfile,
         tqdm,
         validate_jgp,
         validate_ssp,
@@ -459,8 +457,8 @@ app._unparsable_cell(
 
 
 @app.cell
-def _(convert_ieq_to_ine):
-    convert_ieq_to_ine('shankar-example-ssp.ieq', 'shankar-example-ssp.ine')
+def _():
+    # convert_ieq_to_ine('shankar-example-ssp.ieq', 'shankar-example-ssp.ine')
     return
 
 
@@ -500,33 +498,14 @@ def _(optimal_ssp_df):
 
 
 @app.cell
-def _(os, subprocess, tempfile):
-    def solve_tsp_concorde(coords, concorde_path):
-        # 1. Create a temporary TSPLIB file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.tsp', delete=False) as f:
-            f.write(f"NAME: temp\nTYPE: TSP\nDIMENSION: {len(coords)}\n")
-            f.write("EDGE_WEIGHT_TYPE: EUC_2D\nNODE_COORD_SECTION\n")
-            for i, (x, y) in enumerate(coords):
-                f.write(f"{i+1} {x} {y}\n")
-            f.write("EOF\n")
-            temp_tsp = f.name
+def _(solve_hamiltonian_path):
+    configurations = [[0,1,1],[1,1,0],[1,1,1],[0,0,1],[1,0,1],[1,1,1]]
+    path_indices = solve_hamiltonian_path(configurations)
 
-        # 2. Run Concorde
-        # -s: silent; -o: output filename
-        sol_file = temp_tsp.replace('.tsp', '.sol')
-        subprocess.run([concorde_path, "-o", sol_file, temp_tsp], capture_output=True)
-
-        # 3. Read Solution
-        with open(sol_file, 'r') as f:
-            # Concorde .sol format: first line is node count, then nodes
-            data = f.read().split()
-            tour = [int(x) for x in data[1:]]
-
-        # Cleanup
-        os.remove(temp_tsp)
-        os.remove(sol_file)
-        return tour
-
+    print("Optimal Path Order (Indices):", path_indices)
+    print("Optimal Path Order (Nodes):")
+    for idx in path_indices:
+        print(f" Node {idx}: {configurations[idx]}")
     return
 
 
