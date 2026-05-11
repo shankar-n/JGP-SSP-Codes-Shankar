@@ -3,4 +3,5 @@ __pycache__/
 concorde/
 *.pyc
 
+temp_con*
 ssp_feasible_solutions.csv
