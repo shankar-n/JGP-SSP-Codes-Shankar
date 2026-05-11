@@ -42,13 +42,11 @@ from scipy.optimize import linprog
 from fractions import Fraction
 
 
-# ── Platform-agnostic path to PORTA binaries ─────────────────────────────────
-# Override this with an absolute path to your PORTA installation if needed.
-# On Windows: "porta-1.4.1\\win32\\bin\\"
-# On Linux/Mac: "/usr/local/bin/"  (or wherever traf/fmel/vint live)
-PORTA_BIN = ""   # empty → assume PORTA commands are on $PATH
 
 PORTA_BIN = "porta-1.4.1\\win32\\bin\\"
+
+if os.name != 'nt':
+    PORTA_BIN = "porta-1.4.1/win32/bin"
 
 def _porta_path(file_name: str) -> str:
     """Return the full path used when calling PORTA: bin_dir + file_name."""

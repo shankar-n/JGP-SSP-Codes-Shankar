@@ -13,7 +13,7 @@
 
 import marimo
 
-__generated_with = "0.23.0"
+__generated_with = "0.23.1"
 app = marimo.App(width="medium")
 
 
@@ -52,7 +52,6 @@ def _():
         plot_zero_blocks,
         plt,
         read_porta_output,
-        run_brute_force_TSP_on_configs,
         run_ssp_porta,
         solve_hamiltonian_path,
         solve_jgp_arf,
@@ -415,26 +414,22 @@ def _(jgp_bfs, np):
     jgp_optimal_solutions = jgp_bfs[optimal_jgp_indices,:]
 
     selected_jgp_bfs = jgp_bfs[num_groups < 10,:]
-    return (selected_jgp_bfs,)
+    return
 
 
 @app.cell
-def _(all_configs, pd, run_brute_force_TSP_on_configs, selected_jgp_bfs, tqdm):
+def _(all_configs, jgp_bfs, pd, solve_hamiltonian_path, tqdm):
     jgp_df = pd.DataFrame(columns=['#','Group Configurations', 'Num groups', 'Min Cost Ham Path', 'Ham Path Opt. Routes']);
     jgp_df_row_id = 0
 
-    for bfs in tqdm(selected_jgp_bfs): # or jgp_optimal_solutions
+    for bfs in tqdm(jgp_bfs): # or jgp_optimal_solutions
         selected_configs = all_configs[bfs == 1]
-        (min_c, min_routes) = run_brute_force_TSP_on_configs(selected_configs)
+        # (min_c, min_routes) = run_brute_force_TSP_on_configs(selected_configs)
+        min_c, min_routes = solve_hamiltonian_path(selected_configs)
         jgp_df.loc[jgp_df_row_id, : ] = [jgp_df_row_id+1, selected_configs, sum(bfs == 1), min_c, min_routes]
-        jgp_df_row_id += 1 
-    return (jgp_df,)
+        jgp_df_row_id += 1
 
-
-@app.cell
-def _(jgp_df):
-    jgp_df.head()
-    jgp_df.to_csv("jgp_selected_solutions_atmost_10_groups.csv",index=False)
+    jgp_df.to_csv("jgp_bfs_analysis.csv",index=False)
     return
 
 
@@ -494,18 +489,6 @@ def _(np, optimal_ssp_df):
 @app.cell
 def _(optimal_ssp_df):
     min(optimal_ssp_df["Num Unique Configs"])
-    return
-
-
-@app.cell
-def _(solve_hamiltonian_path):
-    configurations = [[0,1,1],[1,1,0],[1,1,1],[0,0,1],[1,0,1],[1,1,1]]
-    path_indices = solve_hamiltonian_path(configurations)
-
-    print("Optimal Path Order (Indices):", path_indices)
-    print("Optimal Path Order (Nodes):")
-    for idx in path_indices:
-        print(f" Node {idx}: {configurations[idx]}")
     return
 
 

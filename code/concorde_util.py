@@ -3,7 +3,7 @@ import subprocess
 from utils import compute_switch_cost
 import os
 
-CONCORDE_EXE = "Concorde\\concorde.exe"
+CONCORDE_EXE = "./concorde/TSP/concorde"
 
 def generate_distance_matrix(configs):
     n = len(configs)
@@ -54,8 +54,7 @@ def solve_hamiltonian_path(configs):
 
     # 3. Run Concorde
     try:
-        # -s: silent; -o: output
-        result = subprocess.run([CONCORDE_EXE, "-o", sol_file, temp_tsp], shell=True, check=True,capture_output=True, text=True)
+        result = subprocess.run([CONCORDE_EXE, temp_tsp], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, text=True)
         if result.returncode != 0:
             print("Concorde Error Output:", result.stderr)
             print("Concorde Standard Output:", result.stdout)
@@ -64,7 +63,7 @@ def solve_hamiltonian_path(configs):
         # 4. Parse Solution
         with open(sol_file, 'r') as f:
             data = f.read().split()
-            # The first number is the node count, followed by the tour
+            min_cost1 = int(data[0])
             full_tour = [int(x) for x in data[1:]]
             
         # 5. Convert Cycle to Path
@@ -73,11 +72,18 @@ def solve_hamiltonian_path(configs):
         # Shift the tour so the dummy is at the end, then remove it
         ham_path = full_tour[dummy_idx+1:] + full_tour[:dummy_idx]
         
-        return ham_path
+        min_cost = 0
+        for i in range(len(ham_path)-1):
+            min_cost += compute_switch_cost(configs[ham_path[i]],configs[ham_path[i+1]], len(configs[ham_path[i]]))
+
+        return (min_cost,ham_path)
 
     finally:
         # Cleanup
-        for ext in ['.tsp', '.sol', '.res']: # Concorde generates extra files
+        for ext in ['.tsp', '.sol', '.res', '.pul', '.sav', '.mas']: # Concorde generates extra files
             path = temp_tsp.replace('.tsp', ext)
+            if os.path.exists(path):
+                os.remove(path)
+            path = 'O' + path
             if os.path.exists(path):
                 os.remove(path)
