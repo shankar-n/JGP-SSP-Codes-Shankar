@@ -3,7 +3,7 @@ import subprocess
 from utils import compute_switch_cost
 import os
 
-CONCORDE_EXE = "Concorde\\concorde.exe"
+CONCORDE_EXE = "./concorde/TSP/concorde"
 
 def generate_distance_matrix(configs):
     n = len(configs)
@@ -77,7 +77,10 @@ def solve_hamiltonian_path(configs):
 
     finally:
         # Cleanup
-        for ext in ['.tsp', '.sol', '.res']: # Concorde generates extra files
+        for ext in ['.tsp', '.sol', '.res', '.pul', '.sav', '.mas']: # Concorde generates extra files
             path = temp_tsp.replace('.tsp', ext)
+            if os.path.exists(path):
+                os.remove(path)
+            path = 'O' + path
             if os.path.exists(path):
                 os.remove(path)
