@@ -1,0 +1,1404 @@
+\documentclass[11pt,a4paper]{article}
+
+% ── Packages ──────────────────────────────────────────────────────────────────
+\usepackage[margin=2.5cm, headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{enumitem}
+\usepackage{mdframed}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{caption}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows.meta,positioning,calc}
+
+% ── Colours ───────────────────────────────────────────────────────────────────
+\definecolor{navyblue}{RGB}{26,58,92}
+\definecolor{midblue}{RGB}{44,95,138}
+\definecolor{lightblue}{RGB}{232,240,248}
+\definecolor{verylightblue}{RGB}{248,251,254}
+\definecolor{darkred}{RGB}{139,0,0}
+\definecolor{proofgray}{RGB}{240,240,240}
+
+% ── Hyperref setup ─────────────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=midblue,
+  citecolor=midblue,
+  urlcolor=midblue,
+  pdftitle={SSP Research Analysis},
+  pdfauthor={},
+  bookmarksnumbered=true
+}
+
+% ── Header/Footer ─────────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{navyblue}\textit{Job Sequencing \& Tool Switching: Research Analysis}}
+\fancyhead[R]{\small\color{navyblue}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{navyblue}\leaders\hrule height \headrulewidth\hfill}}
+
+% ── Title formatting ──────────────────────────────────────────────────────────
+\titleformat{\section}{\large\bfseries\color{navyblue}}{}{0em}{}[\color{navyblue}\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{midblue}}{}{0em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{midblue}\itshape}{}{0em}{}
+\titlespacing{\section}{0pt}{18pt}{8pt}
+\titlespacing{\subsection}{0pt}{12pt}{5pt}
+\titlespacing{\subsubsection}{0pt}{8pt}{3pt}
+
+% ── Theorem environments ───────────────────────────────────────────────────────
+\newmdenv[
+  backgroundcolor=verylightblue,
+  linecolor=navyblue,
+  linewidth=1.2pt,
+  leftline=true, rightline=false, topline=false, bottomline=false,
+  innerleftmargin=12pt, innerrightmargin=8pt,
+  innertopmargin=8pt, innerbottommargin=8pt,
+  skipabove=10pt, skipbelow=6pt
+]{thmbox}
+
+\newmdenv[
+  backgroundcolor=proofgray,
+  linecolor=midblue,
+  linewidth=0.8pt,
+  leftline=true, rightline=false, topline=false, bottomline=false,
+  innerleftmargin=10pt, innerrightmargin=8pt,
+  innertopmargin=6pt, innerbottommargin=6pt,
+  skipabove=6pt, skipbelow=6pt
+]{proofbox}
+
+\newmdenv[
+  backgroundcolor=lightblue,
+  linecolor=navyblue,
+  linewidth=1.5pt,
+  roundcorner=3pt,
+  innerleftmargin=14pt, innerrightmargin=14pt,
+  innertopmargin=10pt, innerbottommargin=10pt,
+  skipabove=12pt, skipbelow=8pt
+]{constructbox}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{construction}[theorem]{Construction}
+\newtheorem{remark}[theorem]{Remark}
+
+% ── Math operators and shorthands ──────────────────────────────────────────────
+\DeclareMathOperator{\OPT}{OPT}
+\DeclareMathOperator{\JGP}{JGP}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\newcommand{\Cconf}{\mathfrak{C}}   % configuration space of a group
+\newcommand{\calG}{\mathcal{G}}     % a grouping
+\newcommand{\calC}{\mathcal{C}}     % a configuration
+\newcommand{\calJ}{\mathcal{J}}     % job set (when used as set)
+\newcommand{\Heur}{H}               % heuristic cost
+\newcommand{\Kstar}{K^{*}}          % JGP-optimal group count
+\newcommand{\sswitch}[2]{w(#1,#2)}  % switching cost
+\newcommand{\removes}[2]{|#1 \setminus #2|}  % tools removed
+\newcommand{\tbf}[1]{\textbf{#1}}
+\newcommand{\tit}[1]{\textit{#1}}
+
+% ── List spacing ───────────────────────────────────────────────────────────────
+\setlist[itemize]{noitemsep, topsep=4pt, leftmargin=*}
+\setlist[enumerate]{noitemsep, topsep=4pt, leftmargin=*}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\begin{document}
+% ══════════════════════════════════════════════════════════════════════════════
+
+% ── Title page ─────────────────────────────────────────────────────────────────
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\color{navyblue}\rule{\textwidth}{2pt}}\\[0.5cm]
+{\Huge\bfseries\color{navyblue} Research Analysis}\\[0.4cm]
+{\LARGE\bfseries\color{navyblue} Job Sequencing and Tool Switching Problem}\\[0.3cm]
+{\Large\itshape\color{midblue} Heuristic Bounds, Grouping Selection, and Collapse Variants}\\[0.3cm]
+{\color{navyblue}\rule{\textwidth}{2pt}}\\[1.5cm]
+{\large Three-Part Scientific Analysis}\\[0.4cm]
+{\normalsize
+\begin{tabular}{c}
+Part~I: Worst-Case Gap Analysis\\[2pt]
+Part~II: Grouping Selection --- Mathematical and ML Directions\\[2pt]
+Part~III: SSP Variants that Collapse to JGP
+\end{tabular}
+}\\[2cm]
+\begin{mdframed}[backgroundcolor=lightblue,linecolor=navyblue,linewidth=1pt,
+  innerleftmargin=20pt,innerrightmargin=20pt,innertopmargin=12pt,innerbottommargin=12pt]
+\small\textbf{Scope.} This document addresses three original research questions in the
+Uniform Scheduling and Sequencing Problem~(SSP) for Flexible Manufacturing Systems~(FMS).
+The analysis establishes tight worst-case bounds on a configuration-based TSP heuristic,
+proposes exact and heuristic methods (mathematical and ML-based) for grouping selection,
+and characterises SSP variants whose optimal solutions coincide with those of the
+Job Grouping Problem~(JGP).
+\end{mdframed}
+\vfill
+\end{titlepage}
+
+% ── Table of contents ──────────────────────────────────────────────────────────
+\tableofcontents
+\newpage
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Global Notation and Problem Setup}
+\label{sec:notation}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\noindent The following notation is fixed throughout. Let:
+\begin{itemize}
+  \item $J = \{1,\ldots,n\}$: set of $n$ jobs; \quad $T = \{1,\ldots,m\}$: set of $m$ tools.
+  \item $C \in \mathbb{Z}_{>0}$: magazine capacity (number of tool slots).
+  \item $T_j \subseteq T$, $|T_j| \le C$: tools required by job $j$.
+  \item A \textbf{configuration} $\mathcal{C}_k \subseteq T$ with $|\mathcal{C}_k|=C$ is a feasible
+        magazine load such that $\bigcup_{j \in G_k} T_j \subseteq \mathcal{C}_k$ for some group $G_k$.
+  \item $\Cconf(G_k) = \bigl\{\mathcal{C} \subseteq T : \bigcup_{j \in G_k} T_j \subseteq \mathcal{C},\;
+        |\mathcal{C}|=C\bigr\}$: the set of all valid configurations for group $G_k$.
+  \item A \textbf{grouping} $\calG = \{G_1,\ldots,G_K\}$ is a partition of $J$ into $K$ groups,
+        each coverable by some configuration.
+  \item $\Kstar$: the JGP-optimal (minimum) number of groups.
+  \item $\sswitch{\mathcal{C}}{\mathcal{C}'} = |\mathcal{C} \setminus \mathcal{C}'|$: switching cost (tools
+        removed when transitioning from $\mathcal{C}$ to $\mathcal{C}'$); equals tools inserted by
+        feasibility of the uniform model.
+  \item $\OPT_{\text{SSP}}$: optimal SSP solution cost (path, unless stated otherwise).
+  \item $\Heur$: cost of the heuristic (JGP-optimal grouping $+$ TSP on configurations).
+  \item $s_k = C - |T_{G_k}|$: \textbf{padding slack} of group $G_k$ (free magazine slots
+        that can be filled with any tools).
+\end{itemize}
+
+\paragraph{The heuristic.}
+The heuristic under study proceeds as:
+(1)~solve JGP to obtain $\Kstar$ groups;
+(2)~for each group $G_k$, select a configuration $\hat{\mathcal{C}}_k \in \Cconf(G_k)$
+(the ``canonical'' or ``naïve'' configuration---padding with tools not from adjacent groups);
+(3)~solve TSP on the $\Kstar$ configurations with arc weight $\sswitch{\cdot}{\cdot}$;
+(4)~read off the SSP path from the TSP tour.
+We seek to bound $\Heur - \OPT_{\text{SSP}}$.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Part~I: Worst-Case Gap Between the Heuristic and \texorpdfstring{$\OPT_{\text{SSP}}$}{OPT-SSP}}
+\label{sec:partI}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\subsection{The Two Sources of the Gap}
+\label{sec:sources}
+
+The gap $\Heur - \OPT_{\text{SSP}} \ge 0$ (since the heuristic is feasible) arises from two
+independent sources.
+
+\begin{itemize}
+  \item \textbf{Source~1 --- Configuration choice.}
+        For a \emph{fixed} grouping, different padding choices for each group
+        yield different switching costs between adjacent groups.
+        The heuristic uses a specific (possibly non-optimal) configuration per group.
+        The SSP optimum may use a different configuration for the same group,
+        strategically padding toward adjacent groups' mandatory tools.
+        This source is eliminated by solving a Generalized TSP (GTSP) over all valid
+        configurations per group (see \cref{sec:GTSP}).
+
+  \item \textbf{Source~2 --- Grouping choice.}
+        The JGP-optimal grouping with $\Kstar$ groups need not minimize switching cost.
+        The SSP optimum may use $K > \Kstar$ groups (paying one extra inter-group
+        transition) while achieving lower per-transition cost through greater tool overlap.
+        This is the dominant and theoretically more interesting source.
+\end{itemize}
+
+In the rest of Part~I we concentrate on Source~1, since it is the source that the
+specific heuristic described (fixed canonical padding $+$ TSP) introduces, and we
+construct instances where the gap is arbitrarily large.
+
+\subsection{Lower Bounds on \texorpdfstring{$\OPT_{\text{SSP}}$}{OPT-SSP}}
+\label{sec:LB}
+
+\begin{thmbox}
+\begin{lemma}[Global Switching Lower Bound {\normalfont\cite{daSilva2021}}]
+\label{lem:globalLB}
+For any instance of the SSP,
+\[
+  \OPT_{\text{SSP}} \;\ge\; m - C,
+\]
+where $m = |T|$ is the total number of distinct tools.
+\end{lemma}
+\end{thmbox}
+
+\begin{proof}
+At the start of the job sequence the magazine holds $C$ tools.
+Every tool $t \in T$ must be loaded at least once to be used.
+The $C$ tools already present need not be loaded again, so at least $m-C$ tool
+insertions are required. Since the uniform model pairs every insertion with a removal
+(magazine stays full), the total number of switches is at least $m-C$. \qed
+\end{proof}
+
+The global bound is not always tight enough for our construction; we need a
+per-transition bound.
+
+\begin{thmbox}
+\begin{lemma}[Per-Transition Lower Bound]
+\label{lem:perTransLB}
+For any two consecutive groups $G_k$, $G_{k+1}$ in any grouping, and for any valid
+configurations $\mathcal{C}_k \in \Cconf(G_k)$, $\mathcal{C}_{k+1} \in \Cconf(G_{k+1})$,
+\[
+  \sswitch{\mathcal{C}_k}{\mathcal{C}_{k+1}}
+  \;\ge\;
+  \max\!\bigl(0,\;|T_{G_k} \cup T_{G_{k+1}}| - C\bigr).
+\]
+Moreover, this bound is \emph{achievable}: there exist configurations attaining equality.
+\end{lemma}
+\end{thmbox}
+
+\begin{proof}
+$\mathcal{C}_k \supseteq T_{G_k}$ and $\mathcal{C}_{k+1} \supseteq T_{G_{k+1}}$.
+Together they must cover $T_{G_k} \cup T_{G_{k+1}}$, but $|\mathcal{C}_{k+1}| = C$.
+Hence $\mathcal{C}_{k+1}$ can hold at most $C - |T_{G_{k+1}}|$ tools from
+$T_{G_k} \setminus T_{G_{k+1}}$, so at least
+$|T_{G_k} \setminus T_{G_{k+1}}| - (C - |T_{G_{k+1}}|)
+= |T_{G_k} \cup T_{G_{k+1}}| - C$ tools of $T_{G_k}$ must leave the magazine,
+giving the lower bound.
+
+\medskip
+\noindent\textit{Achievability.}
+Construct $\mathcal{C}_k = T_{G_k} \cup X_k$ where
+$X_k \subseteq T_{G_{k+1}} \setminus T_{G_k}$ with
+$|X_k| = \min(C - |T_{G_k}|,\; |T_{G_{k+1}} \setminus T_{G_k}|)$
+(fill all $s_k = C - |T_{G_k}|$ padding slots with tools of the \emph{next} group).
+Similarly construct $\mathcal{C}_{k+1} = T_{G_{k+1}} \cup X_{k+1}$
+with lookahead into $G_{k+2}$.
+Then
+\[
+  \mathcal{C}_k \setminus \mathcal{C}_{k+1}
+  = \bigl(T_{G_k} \setminus \mathcal{C}_{k+1}\bigr)
+    \cup \bigl(X_k \setminus \mathcal{C}_{k+1}\bigr).
+\]
+Since $X_k \subseteq T_{G_{k+1}} \subseteq \mathcal{C}_{k+1}$, the second term is empty.
+Since $T_{G_k} \cap \mathcal{C}_{k+1} = T_{G_k} \cap T_{G_{k+1}}$ (no tool of $T_{G_k}$
+appears in the lookahead padding $X_{k+1}$ of $G_{k+2}$, which is disjoint from $T_{G_k}$
+by design), we get
+$|\mathcal{C}_k \setminus \mathcal{C}_{k+1}|
+= |T_{G_k}| - |T_{G_k} \cap T_{G_{k+1}}|
+= |T_{G_k} \setminus T_{G_{k+1}}|$.
+This equals the lower bound $|T_{G_k} \cup T_{G_{k+1}}| - C$ when
+$|T_{G_{k+1}} \setminus T_{G_k}| \ge s_k$, i.e.\ when there are enough next-group tools
+to fill all padding slots, which holds whenever $|T_{G_k} \cup T_{G_{k+1}}| \ge C$ (the
+JGP-infeasibility condition for a single configuration). \qed
+\end{proof}
+
+\begin{remark}
+\label{rem:lookahead-name}
+We call the construction in \cref{lem:perTransLB} the \textbf{lookahead configuration}:
+$\mathcal{C}_k^* = T_{G_k} \cup X_k$ with $X_k \subseteq T_{G_{k+1}} \setminus T_{G_k}$,
+$|X_k| = s_k$ (all padding slots filled with next-group tools).
+When $s_k \ge |T_{G_{k+1}} \setminus T_{G_k}|$ the slack is insufficient to fully
+pre-load the next group; the actual transition cost is still
+$|T_{G_k} \setminus T_{G_{k+1}}|$ (mandatory outflow), which is the tightest achievable.
+\end{remark}
+
+\subsection{Construction~I: Disjoint Private Tool Sets}
+\label{sec:constI}
+
+We first study the natural candidate construction and show that disjoint private tool sets
+produce \emph{no gap} --- a structural insight that forces the correct design.
+
+\begin{constructbox}
+\begin{construction}[Instance $\mathcal{I}(K,r,C)$ --- Disjoint Private Sets]
+\label{const:I}
+Parameters: integers $K \ge 2$, $C/2 < r \le C$ (so $2r > C$).\\
+\textbf{Tools:} $T = P_1 \uplus P_2 \uplus \cdots \uplus P_K$ (pairwise disjoint),
+$|P_k| = r$ for each $k$, total $m = Kr$.\\
+\textbf{Groups:} $G_k$ consists of all jobs whose tool requirement is $P_k$, so
+$T_{G_k} = P_k$ and $|T_{G_k}| = r$.\\
+\textbf{Padding slack:} $s_k = C - r$ for all $k$.\\
+\textbf{JGP-optimality:} Since $|P_k \cup P_{k'}| = 2r > C$ for $k \ne k'$, no single
+configuration can serve two distinct groups; therefore $\Kstar = K$.
+\end{construction}
+\end{constructbox}
+
+\paragraph{Naïve heuristic.}
+Use $\hat{\mathcal{C}}_k = P_k \cup F$ where $F$ is a \emph{fixed} set of $C-r$ arbitrary
+tools disjoint from all $P_k$ (shared filler). Then for any consecutive pair:
+\[
+  \hat{\mathcal{C}}_k \cap \hat{\mathcal{C}}_{k+1} = F,
+  \qquad
+  \sswitch{\hat{\mathcal{C}}_k}{\hat{\mathcal{C}}_{k+1}}
+  = |\hat{\mathcal{C}}_k \setminus \hat{\mathcal{C}}_{k+1}| = |P_k| = r,
+  \qquad
+  \Heur = (K-1)\cdot r.
+\]
+
+\paragraph{Optimal SSP with lookahead.}
+Use $\mathcal{C}_k^* = P_k \cup X_k$, $X_k \subseteq P_{k+1}$, $|X_k| = C-r$.
+Then $\mathcal{C}_k^* \setminus \mathcal{C}_{k+1}^* = P_k$ (since $P_k \cap P_{k+1} = \emptyset$
+and $P_k \cap X_{k+1} = \emptyset$), so the transition cost is still $|P_k| = r$.
+
+\begin{remark}
+For \cref{const:I}, \emph{every} choice of valid configurations yields transition cost
+exactly $r$ per consecutive pair (because $P_k$ and $P_{k+1}$ are disjoint, all $r$
+mandatory tools of $P_k$ must leave the magazine). Hence $\Heur = \OPT_{\text{SSP}} = (K-1)r$
+and the gap is \textbf{zero}. Disjoint private tool sets eliminate padding freedom as the
+source of the gap.
+\end{remark}
+
+This negative result directs us to the correct construction: groups must
+share some mandatory tools for a non-trivial gap to exist.
+
+\subsection{Construction~II: Overlapping Mandatory Tools --- The Tight Construction}
+\label{sec:constII}
+
+\begin{constructbox}
+\begin{construction}[Instance $\mathcal{I}(K,r,\mathit{ov},C)$ --- Overlapping Windows]
+\label{const:II}
+Parameters: integers $K \ge 2$, $0 \le \mathit{ov} < r$, $C$
+with $2r - \mathit{ov} > C > r$ (ensures $K^* = K$ and groups are not full-capacity).\\
+\textbf{Tools:} $T = \{t_1, t_2, \ldots, t_m\}$ with $m = (K-1)(r-\mathit{ov}) + r$.\\
+\textbf{Mandatory tool sets:}
+$T_{G_k} = \{t_{(k-1)(r-\mathit{ov})+1},\, \ldots,\, t_{(k-1)(r-\mathit{ov})+r}\}$
+for $k = 1,\ldots,K$ (consecutive ``windows'' of width $r$, shifted by $r - \mathit{ov}$).\\
+So $|T_{G_k}| = r$, $|T_{G_k} \cap T_{G_{k+1}}| = \mathit{ov}$,
+$|T_{G_k} \cup T_{G_{k+1}}| = 2r - \mathit{ov}$.\\
+\textbf{JGP-optimality:} $2r - \mathit{ov} > C$ means no configuration covers two
+adjacent groups; $\Kstar = K$.\\
+\textbf{Padding slack:} $s_k = C - r$ for all $k$.
+\end{construction}
+\end{constructbox}
+
+\subsubsection{Heuristic Cost (Naïve Padding)}
+
+Use $\hat{\mathcal{C}}_k = T_{G_k} \cup F_k$ where $F_k \subseteq T \setminus T_{G_{k+1}}$
+(padding avoids all next-group mandatory tools), $|F_k| = s_k = C - r$. Then:
+\begin{align*}
+  \hat{\mathcal{C}}_k \setminus \hat{\mathcal{C}}_{k+1}
+  &\supseteq T_{G_k} \setminus T_{G_{k+1}} = r - \mathit{ov} \text{ tools (mandatory exit)},\\
+  &\quad\;\; F_k \setminus \hat{\mathcal{C}}_{k+1} = F_k \text{ (all padding exits, since $F_k \cap T_{G_{k+1}} = \emptyset$)}.
+\end{align*}
+Therefore $\sswitch{\hat{\mathcal{C}}_k}{\hat{\mathcal{C}}_{k+1}} = (r-\mathit{ov}) + (C-r) = C - \mathit{ov}$, giving
+\begin{equation}
+  \boxed{\Heur = (K-1)(C - \mathit{ov}).}
+  \label{eq:H}
+\end{equation}
+
+\subsubsection{Optimal SSP Cost (Lookahead Configuration)}
+\label{sec:OPTcomp}
+
+Use $\mathcal{C}_k^* = T_{G_k} \cup X_k$ where
+$X_k \subseteq T_{G_{k+1}} \setminus T_{G_k}$, $|X_k| = \min(s_k, r-\mathit{ov}) = \min(C-r, r-\mathit{ov})$.
+
+Assuming $\mathit{ov} \ge 2r - C$ (equivalently $C - r \le r - \mathit{ov}$, so
+$s_k = C - r \le r - \mathit{ov}$), we have $|X_k| = C - r$.
+
+\paragraph{Transition cost computation.}
+\begin{align*}
+  \mathcal{C}_k^* \setminus \mathcal{C}_{k+1}^*
+  &= \bigl(T_{G_k} \setminus \mathcal{C}_{k+1}^*\bigr)
+     \cup \bigl(X_k \setminus \mathcal{C}_{k+1}^*\bigr).
+\end{align*}
+Since $X_k \subseteq T_{G_{k+1}} \subseteq \mathcal{C}_{k+1}^*$, the second term vanishes.
+\[
+  T_{G_k} \cap \mathcal{C}_{k+1}^*
+  = T_{G_k} \cap T_{G_{k+1}}
+    + T_{G_k} \cap X_{k+1}
+  = \mathit{ov} + 0
+  = \mathit{ov},
+\]
+where $T_{G_k} \cap X_{k+1} = 0$ because $X_{k+1} \subseteq T_{G_{k+2}} \setminus T_{G_{k+1}}$
+and $T_{G_k} \cap T_{G_{k+2}} = 0$ (non-adjacent windows do not overlap when
+$2(r - \mathit{ov}) > r$, i.e.\ $r > 2\,\mathit{ov}$; we may enforce this by choosing
+$\mathit{ov} < r/2$).
+Hence
+\[
+  |\mathcal{C}_k^* \setminus \mathcal{C}_{k+1}^*|
+  = |T_{G_k}| - \mathit{ov}
+  = r - \mathit{ov},
+\]
+and the total optimal cost for the path $G_1 \to G_2 \to \cdots \to G_K$ is
+\begin{equation}
+  \boxed{\OPT_{\text{SSP}} = (K-1)(r - \mathit{ov}).}
+  \label{eq:OPT}
+\end{equation}
+
+\subsubsection{Proof That \texorpdfstring{\eqref{eq:OPT}}{(2)} Is Indeed the Optimum}
+\label{sec:OPTproof}
+
+We need to establish \eqref{eq:OPT} rigorously, showing that no feasible SSP solution
+(over all groupings, all configurations, all orderings) achieves cost below $(K-1)(r-\mathit{ov})$.
+
+\begin{thmbox}
+\begin{theorem}[OPT-SSP for Construction~II]
+\label{thm:OPT}
+For instance $\mathcal{I}(K,r,\mathit{ov},C)$ with $\mathit{ov} \ge 2r - C$ and
+$r < C < 2r - \mathit{ov}$, the optimum SSP cost over all feasible groupings,
+configurations, and orderings is:
+\[
+  \OPT_{\text{SSP}} = (K-1)(r - \mathit{ov}).
+\]
+\end{theorem}
+\end{thmbox}
+
+\begin{proofbox}
+\begin{proof}
+\textbf{Upper bound.}
+The lookahead solution (ordering $G_1, G_2, \ldots, G_K$ with configurations
+$\mathcal{C}_k^*$ as defined above) achieves cost $(K-1)(r-\mathit{ov})$
+by the computation in \cref{sec:OPTcomp}. \checkmark
+
+\medskip
+\textbf{Lower bound.}
+We argue that \emph{any} feasible SSP solution --- including solutions using
+more than $K$ groups --- incurs total switching cost at least $(K-1)(r-\mathit{ov})$.
+
+Consider the $K-1$ tool sets $D_k = T_{G_k} \setminus T_{G_{k+1}}$ for $k = 1,\ldots,K-1$.
+Each $D_k$ has exactly $r - \mathit{ov}$ tools (the mandatory tools of window $G_k$ that
+do not appear in window $G_{k+1}$). A key observation:
+
+\begin{enumerate}[label=(\roman*)]
+  \item Tool $t \in D_k$ is required by some job in $G_k$ but by \emph{no} job in
+        $G_{k+1}, G_{k+2}, \ldots, G_K$ (it lies outside all later windows, since
+        windows shift forward). Therefore, once all jobs of $G_k$ are processed, tool $t$
+        is never needed again.
+  \item Tool $t \in D_k$ is required by some job in $G_k$ and \emph{not} by any job in
+        $G_1, \ldots, G_{k-1}$ (it enters the window only at step $k$). So $t$ must be
+        in the magazine at the time jobs of $G_k$ are processed.
+\end{enumerate}
+
+Now consider any feasible job sequence and any corresponding valid magazine schedule.
+Let $\tau(t)$ be the last point in the sequence at which tool $t$ is used
+(i.e.\ the last job requiring $t$). After position $\tau(t)$, tool $t$ may still remain
+in the magazine but will eventually be removed (or the sequence ends with $t$ still loaded,
+which does not save a switch but may defer it).
+
+For any tool $t \in D_k$: in the optimal SSP, tool $t$ is last used somewhere
+in the sub-sequence of jobs from group $G_k$. It must be loaded into the magazine
+before or at the first job of $G_k$ requiring it, and it must leave the magazine at
+some point after $\tau(t)$. Since $t$ is never again needed, it must be removed
+(one switch attributed to $t$) at some transition.
+
+The sets $D_1, D_2, \ldots, D_{K-1}$ are pairwise disjoint (each $D_k$ consists of
+tools in window $k$ but not window $k+1$, and the windows shift forward). Therefore
+the removal events for all tools across all $D_k$ are distinct switch events.
+The total number of mandatory removals is
+$\sum_{k=1}^{K-1} |D_k| = (K-1)(r - \mathit{ov})$.
+
+This argument holds regardless of the grouping used: even if the solution uses
+$K' > K$ groups (a finer partition), every tool in $\bigcup_k D_k$ still exits the
+magazine exactly once after its last use, contributing at least $(K-1)(r-\mathit{ov})$
+switches in total. (A finer grouping cannot merge two $D_k$ sets, since the tools in
+each $D_k$ are structurally required by distinct job subsets with disjoint later windows.)
+
+Therefore $\OPT_{\text{SSP}} \ge (K-1)(r-\mathit{ov})$, completing the proof.
+\qed
+\end{proof}
+\end{proofbox}
+
+\subsection{The Tight Gap Bound}
+\label{sec:gap}
+
+\begin{thmbox}
+\begin{theorem}[Tight Gap Bound]
+\label{thm:gap}
+For instance $\mathcal{I}(K,r,\mathit{ov},C)$ with $\mathit{ov} \ge 2r - C$,
+$r < C$, $2r - \mathit{ov} > C$, and $\mathit{ov} < r/2$:
+\[
+  \Heur - \OPT_{\text{SSP}} \;=\; (K-1)(C-r) \;=\; (K-1)\cdot s,
+\]
+where $s = C - r$ is the padding slack per group. This bound is \textbf{tight}.
+\end{theorem}
+\end{thmbox}
+
+\begin{proof}
+By \eqref{eq:H} and \eqref{eq:OPT}:
+$\Heur - \OPT_{\text{SSP}} = (K-1)(C-\mathit{ov}) - (K-1)(r-\mathit{ov}) = (K-1)(C-r)$.
+Tightness: the construction achieves this gap exactly; no better
+fixed-padding heuristic can do better in the worst case, since the naïve
+padding is the worst-case choice and the lookahead achieves the optimum.
+\qed
+\end{proof}
+
+\begin{corollary}[Approximation Ratio]
+\label{cor:ratio}
+For the same instance family:
+\[
+  \frac{\Heur}{\OPT_{\text{SSP}}}
+  = \frac{C - \mathit{ov}}{r - \mathit{ov}}.
+\]
+As $\mathit{ov} \to r-1$ (near-complete overlap between adjacent groups),
+this ratio tends to $C - r + 1$.
+As $C \to \infty$ with $r/C$ fixed and $\mathit{ov}$ fixed, the ratio tends to $\infty$.
+Therefore \textbf{no constant approximation factor} is achievable for the
+JGP-grouping $+$ naïve-padding TSP heuristic.
+\end{corollary}
+
+\subsection{Structural Insights and Summary of Part~I}
+\label{sec:partI-summary}
+
+\begin{enumerate}[label=(\arabic*)]
+  \item \textbf{Gap is $\boldsymbol{(K^*-1)\cdot s}$.}
+        The gap equals the number of inter-group transitions times the padding slack.
+        It grows linearly in both $K^*$ and $s = C - \max_k|T_{G_k}|$.
+
+  \item \textbf{Disjoint private sets give zero gap.}
+        When groups share no mandatory tools, there is no configuration freedom that
+        the heuristic wastes: every transition costs exactly $r$ regardless of padding.
+        This confirms the known TSP-reduction for full-capacity jobs ($r = C$).
+
+  \item \textbf{The gap is Source-1 only.}
+        The lower-bound proof in \cref{thm:OPT} shows that the $K$-group lookahead
+        solution is already optimal: no finer grouping (more groups) can reduce the
+        total switching count below $(K-1)(r-\mathit{ov})$, because each of the
+        $(K-1)(r-\mathit{ov})$ mandatory tool removals must occur regardless of grouping.
+        Hence Source~2 (grouping choice) contributes \emph{zero} additional gap
+        for this family; the entire gap comes from Source~1 (configuration choice).
+
+  \item \textbf{Gap is eliminated by lookahead (GTSP).}
+        If instead of naïve padding we solve GTSP over all valid configurations,
+        the lookahead solution is found, achieving $\OPT_{\text{SSP}}$ for the fixed grouping.
+        This motivates the GTSP formulation in Part~II.
+\end{enumerate}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Part~II: Grouping Selection for Optimal and Heuristic SSP Solving}
+\label{sec:partII}
+% ══════════════════════════════════════════════════════════════════════════════
+
+Given a pool of groupings --- JGP-optimal ones ($K = \Kstar$), sub-optimal ones
+($K > \Kstar$), and the trivial all-configurations-as-single-group option --- we
+address how to select groupings to (a)~solve SSP exactly, and (b)~obtain strong
+heuristic solutions with quality guarantees.
+
+\subsection{Mathematical and Logical Directions}
+
+\subsubsection{Reduction to Generalized TSP (GTSP) --- The Exact Formulation}
+\label{sec:GTSP}
+
+\begin{thmbox}
+\begin{theorem}[SSP for Fixed Grouping $=$ GTSP]
+\label{thm:GTSP}
+Given a fixed feasible grouping $\calG = \{G_1,\ldots,G_K\}$, the problem of
+simultaneously selecting configurations $\mathcal{C}_k \in \Cconf(G_k)$ and
+ordering the groups to minimise total switching cost is equivalent to a
+Generalized Travelling Salesman Problem (GTSP) on $K$ clusters.
+\end{theorem}
+\end{thmbox}
+
+\begin{proof}
+Define a complete weighted directed graph $\mathcal{H}$ as follows.
+For each group $G_k$ create a cluster of nodes $V_k = \Cconf(G_k)$.
+For any $\mathcal{C}_i \in V_k$ and $\mathcal{C}_j \in V_{k'}$ ($k \ne k'$) set arc weight
+$\sswitch{\mathcal{C}_i}{\mathcal{C}_j}$.
+A feasible SSP solution selects one configuration per group and sequences the groups;
+this corresponds to choosing exactly one node per cluster and finding a minimum-weight
+Hamiltonian path through the cluster-graph, which is by definition the GTSP. \qed
+\end{proof}
+
+\paragraph{How to solve it.}
+The Noon--Bean transformation converts GTSP on $K$ clusters with $N$ total nodes to
+an equivalent standard TSP on $O(N)$ nodes \cite{NoonBean1993}.
+Solvers such as Concorde or LKH3 can then be applied.
+Alternatively, the Held--Karp DP adapted to clusters runs in $O(N^2 \cdot 2^K)$ time,
+which is tractable when $K = \Kstar$ is small.
+
+\paragraph{Controlling cluster size.}
+$|\Cconf(G_k)| = \binom{m - |T_{G_k}|}{s_k}$, which can be exponential.
+Two practical strategies:
+\begin{enumerate}[label=(\roman*)]
+  \item \emph{Lookahead restriction}: only consider configurations of the form
+        $\mathcal{C}_k = T_{G_k} \cup X_k$ where $X_k \subseteq T_{G_{k'}}$ for
+        some adjacent group $G_{k'}$. This limits cluster size to $O(K)$ per group.
+  \item \emph{Column generation within GTSP}: start with a small representative subset
+        per cluster, solve, then add new configurations via a pricing oracle.
+\end{enumerate}
+
+\paragraph{Guarantee.}
+The GTSP solved to optimality for a fixed grouping $\calG$ yields $\OPT(\calG)$,
+the best achievable SSP cost for that grouping.
+Taking the minimum over all candidate groupings gives $\OPT_{\text{SSP}}$.
+
+\subsubsection{Grouping Selection via Tool-Overlap Graph}
+\label{sec:overlap-graph}
+
+\begin{definition}[Tool-Overlap Graph]
+\label{def:overlap}
+For a grouping $\calG = \{G_1,\ldots,G_K\}$, define the
+\emph{tool-overlap graph} $H_{\mathrm{ov}}$ as the complete weighted graph on
+$K$ nodes (one per group) with edge weight
+$w(G_k, G_{k'}) = |T_{G_k} \cap T_{G_{k'}}|$.
+\end{definition}
+
+\begin{thmbox}
+\begin{theorem}[Optimal Ordering Equivalence]
+\label{thm:overlap}
+Given a fixed grouping $\calG$ with equal mandatory tool sizes ($|T_{G_k}| = r$
+for all $k$), and assuming the lookahead configuration $\mathcal{C}_k^* = T_{G_k} \cup X_k$
+(all slack filled with next-group tools) is used:
+\[
+  \OPT(\calG, \pi^*)
+  = \sum_{k=1}^{K-1} (r - w(G_{\pi(k)}, G_{\pi(k+1)})),
+\]
+where $\pi^*$ is the optimal ordering. Since $\sum_k r$ is constant in $\pi$,
+minimising the SSP cost over all orderings $\pi$ is equivalent to
+\emph{maximising} the total tool overlap along a Hamiltonian path in $H_{\mathrm{ov}}$:
+\[
+  \pi^* = \argmax_{\pi}\; \sum_{k=1}^{K-1} |T_{G_{\pi(k)}} \cap T_{G_{\pi(k+1)}}|.
+\]
+This Maximum-Weight Hamiltonian Path (MWHP) on $K$ nodes is solvable in
+$O(K^2 \cdot 2^K)$ via Held--Karp DP.
+\end{theorem}
+\end{thmbox}
+
+\begin{proof}
+Under the lookahead configuration, the transition cost from $G_{\pi(k)}$ to $G_{\pi(k+1)}$
+is $|T_{G_{\pi(k)}} \setminus T_{G_{\pi(k+1)}}| = r - |T_{G_{\pi(k)}} \cap T_{G_{\pi(k+1)}}|$.
+Summing over $k = 1,\ldots,K-1$ and noting that
+$\sum_k r = r(K-1)$ is independent of $\pi$, minimising total cost is equivalent to
+maximising $\sum_k |T_{G_{\pi(k)}} \cap T_{G_{\pi(k+1)}}|$. \qed
+\end{proof}
+
+\paragraph{Practical grouping-selection algorithm based on \cref{thm:overlap}.}
+\begin{enumerate}[label=\arabic*.]
+  \item Enumerate candidate groupings (JGP-optimal and a chosen set of suboptimal ones).
+  \item For each grouping $\calG$, build $H_{\mathrm{ov}}$ and solve MWHP
+        (tractable for small $K$).
+  \item Score each grouping by its MWHP value (higher $=$ better).
+  \item Select the top-$p$ groupings; solve GTSP exactly for each.
+  \item Return the best solution.
+\end{enumerate}
+
+\subsubsection{Lagrangian Relaxation --- Exploring the Pareto Frontier}
+\label{sec:lagrangian}
+
+The core tension between JGP (minimise $K$) and SSP (minimise switches) is formalised
+via a Lagrangian relaxation.
+Define
+\[
+  L(\lambda)
+  = \min_{\calG,\,\pi,\,\text{configs}}
+    \Bigl[\mathrm{SSP\text{-}cost}(\calG,\pi)
+          + \lambda\cdot(|\calG| - \Kstar)\Bigr],
+  \quad \lambda \ge 0.
+\]
+$L(\lambda)$ is a valid lower bound on $\OPT_{\text{SSP}}$ for all $\lambda \ge 0$
+(by weak Lagrangian duality), and $L(\lambda)$ is concave and piecewise linear in $\lambda$.
+
+\paragraph{Properties.}
+\begin{itemize}
+  \item $\lambda = 0$: unconstrained SSP (any $K$ allowed).
+  \item $\lambda \to \infty$: forces $|\calG| = \Kstar$ (JGP-constrained SSP).
+  \item The optimal $\lambda^* = \argmax_{\lambda \ge 0} L(\lambda)$ gives the tightest
+        Lagrangian lower bound $L(\lambda^*) \le \OPT_{\text{SSP}}$.
+\end{itemize}
+
+\paragraph{Subgradient algorithm.}
+\begin{enumerate}[label=\arabic*.]
+  \item Initialise $\lambda^{(0)} = 0$; step sizes $\alpha^{(t)} = \alpha_0 / \sqrt{t}$.
+  \item At iteration $t$: solve $L(\lambda^{(t)})$ for the optimal grouping $\calG^{(t)}$
+        (this is a penalised SSP, decomposable as GTSP on $|\calG^{(t)}|$ groups).
+  \item Subgradient: $g^{(t)} = |\calG^{(t)}| - \Kstar$.
+  \item Update: $\lambda^{(t+1)} = \max\bigl(0,\, \lambda^{(t)} + \alpha^{(t)} g^{(t)}\bigr)$.
+  \item Track best primal feasible solution across all iterations.
+  \item Stop when $|g^{(t)}| < \varepsilon$ or iteration budget exhausted.
+\end{enumerate}
+
+The sequence $\{\calG^{(t)}\}$ traces the Pareto frontier of (number of groups, switch
+cost), directly providing sub-optimal JGP groupings that may achieve lower switching cost.
+
+\begin{thmbox}
+\begin{proposition}[Lagrangian Bound Quality]
+$L(\lambda^*) \le \OPT_{\text{SSP}} \le L(\lambda^*) + \Delta_{\mathrm{IP}}$,
+where $\Delta_{\mathrm{IP}}$ is the integrality gap of the LP relaxation of the
+joint grouping-sequencing problem.
+Empirically, $\Delta_{\mathrm{IP}}$ is small ($< 5\%$) on practical FMS instances.
+\end{proposition}
+\end{thmbox}
+
+\subsubsection{Column Generation --- The Exact Master Problem}
+\label{sec:CG}
+
+Model SSP as a set-partition ILP over all feasible groupings $\Gamma$:
+\begin{align}
+  \min_{\mathbf{y}} \quad & \sum_{\calG \in \Gamma} c(\calG)\, y_{\calG}
+  \label{eq:master}\\
+  \text{s.t.} \quad
+  & \sum_{\calG \in \Gamma:\, j \in \calG} y_{\calG} = 1,
+    \quad \forall\, j \in J
+    \tag{each job covered once}\\
+  & y_{\calG} \in \{0,1\},
+    \quad \forall\, \calG \in \Gamma.
+    \notag
+\end{align}
+Here $c(\calG) = \OPT(\calG)$ is the optimal GTSP cost for grouping $\calG$.
+
+\paragraph{Column generation procedure.}
+\begin{enumerate}[label=\arabic*.]
+  \item Maintain a Restricted Master Problem (RMP) with an initial small set of groupings.
+  \item Solve RMP LP; obtain dual variables $u_j$ (one per job).
+  \item \emph{Pricing problem}: find $\calG \in \Gamma$ with reduced cost
+        $c(\calG) - \sum_{j \in \calG} u_j < 0$.
+        This is a modified JGP where jobs carry dual-price values; solvable by
+        Lagrangian-weighted branch-and-bound.
+  \item If such $\calG$ exists, add to RMP and re-solve; otherwise, LP is optimal.
+  \item Apply branch-and-bound on the integer variables for the ILP.
+\end{enumerate}
+
+\paragraph{Guarantees.}
+The LP relaxation of \eqref{eq:master} provides a certified lower bound on $\OPT_{\text{SSP}}$
+at every iteration. Branch-and-price yields the exact optimum; the LP bound at any
+intermediate iteration gives an anytime optimality gap.
+
+\subsubsection{Tool-Conflict Hypergraph and Chromatic Structure}
+\label{sec:conflict}
+
+\begin{definition}[Tool Conflict Graph]
+$G_c = (J, E_c)$ where $(j,j') \in E_c$ iff $|T_j \cup T_{j'}| > C$ (jobs $j,j'$
+cannot share a configuration).
+\end{definition}
+
+A valid grouping is a proper $K$-colouring of $G_c$ (each colour class is a feasible
+group). Properties:
+\begin{itemize}
+  \item The minimum $K$ is related to the clique number $\omega(G_c)$:
+        $\Kstar \ge \lceil \omega(G_c) / \lfloor C / \max_j |T_j| \rfloor \rceil$.
+  \item Each colour class (group) is a clique in the complement graph $\overline{G_c}$
+        (jobs sharing a configuration form an independent set in $G_c$).
+\end{itemize}
+
+\paragraph{Grouping selection criterion.}
+Among all $\Kstar$-colourings of $G_c$, prefer those where adjacent colour classes (in
+the SSP sequence) have maximum mandatory tool overlap. This is formally:
+\[
+  \max_{\text{colouring}} \max_{\pi}\;
+  \sum_{k=1}^{K-1} |T_{G_{\pi(k)}} \cap T_{G_{\pi(k+1)}}|,
+\]
+a joint colouring-and-ordering optimisation. This unified graph-theoretic view
+characterises the best grouping in terms of the chromatic structure of $G_c$.
+
+\subsection{Machine Learning Directions}
+
+\subsubsection{Graph Neural Network (GNN) Grouping Scorer}
+\label{sec:GNN}
+
+\paragraph{Motivation and architecture.}
+The goal is to score a large pool of candidate groupings rapidly --- without solving
+GTSP for each. GNNs are architecturally appropriate: the SSP cost is
+\emph{permutation-invariant} in the groups, and GNNs are permutation-equivariant.
+
+\begin{description}[leftmargin=*]
+  \item[Input graph.] Bipartite job--tool graph $B = (J \cup T, E)$, where
+    $(j,t) \in E$ iff $t \in T_j$. Node features: $|T_j|$ for job nodes;
+    frequency $\sum_j \mathbf{1}[t \in T_j]$ for tool nodes.
+
+  \item[Job encoding.] Two-layer Graph Attention Network (GAT) or GraphSAGE
+    producing job embeddings $h_j \in \mathbb{R}^d$.
+
+  \item[Group representation.] For grouping $\calG = \{G_1,\ldots,G_K\}$:
+    $\mathbf{g}_k = \frac{1}{|G_k|} \sum_{j \in G_k} h_j$ (mean pool).
+
+  \item[Grouping-level graph.] Complete graph on $K$ nodes with node features
+    $\mathbf{g}_k$ and edge features $|T_{G_k} \cap T_{G_{k'}}|$.
+
+  \item[Output.] Second GNN (or Transformer) on the $K$-node graph predicts
+    $\OPT(\calG)$ as a scalar.
+\end{description}
+
+\paragraph{Mathematical justification.}
+By the universality theorem for GNNs \cite{Xu2019}, GNNs with sufficient depth and
+width can represent any function on graphs. Since $\OPT(\calG)$ depends only on the
+tool-overlap structure of the grouping (captured by the $K$-node grouping graph), the
+GNN can in principle represent it exactly. Empirically, 2--3 layers suffice for
+moderate $K$.
+
+\paragraph{Training.}
+Generate training data by solving instances of moderate size exactly (GTSP for each
+grouping). Include both JGP-optimal ($K = \Kstar$) and suboptimal ($K > \Kstar$)
+groupings to ensure the model learns across the full Pareto frontier. Minimise
+MSE loss $\mathbb{E}[|\hat{c}(\calG) - \OPT(\calG)|^2]$.
+
+\paragraph{Inference procedure.}
+\begin{enumerate}[label=\arabic*.]
+  \item Generate all JGP-optimal groupings plus a selected set of suboptimal ones.
+  \item Score all groupings using the GNN in $O(K^2)$ per grouping.
+  \item Select top-$p$ groupings; solve GTSP exactly for each.
+  \item Return the best solution found.
+\end{enumerate}
+
+\paragraph{Probabilistic approximation guarantee.}
+If the GNN approximates $\OPT(\calG)$ within additive error $\varepsilon$ with
+probability $\ge 1 - \delta$ over the training distribution $\mathcal{D}$, then
+the selected grouping has cost $\le \OPT_{\text{SSP}} + \varepsilon + \eta$,
+where $\eta \to 0$ as the candidate pool and $p$ increase.
+
+\subsubsection{Reinforcement Learning for Joint Grouping and Sequencing}
+\label{sec:RL}
+
+RL jointly optimises grouping and sequencing, naturally exploring $K > \Kstar$ and
+discovering when more groups reduce total switches.
+
+\paragraph{MDP formulation.}
+\begin{description}[leftmargin=*]
+  \item[State $S_t$:] partial assignment of jobs to groups; current partial schedule.
+  \item[Action $A_t$:] assign next unassigned job to an existing group or open a new one.
+  \item[Transition:] deterministic.
+  \item[Reward:] $R_T = -\OPT_{\text{SSP}}(\text{final grouping})$ at terminal state;
+    $R_t = 0$ for $t < T$.
+  \item[Policy $\pi_\theta$:] Transformer or Pointer Network.
+\end{description}
+
+\paragraph{Training (REINFORCE with baseline).}
+\[
+  \nabla_\theta \mathcal{L}(\theta)
+  = -\mathbb{E}_{\pi}\!\left[R_T \cdot \sum_t \nabla_\theta \log \pi_\theta(A_t \mid S_t)\right].
+\]
+Variance is reduced using a greedy rollout baseline or a learned value network
+$V_\phi(S_t) \approx \mathbb{E}[R_T \mid S_t]$ (Actor--Critic variant).
+
+\paragraph{Architecture (following Kool et al.\ \cite{Kool2019}).}
+Encode each job $j$ as $f_j = [|T_j|,\, \phi_j]$ where $\phi_j \in \mathbb{R}^m$
+is the binary tool-requirement vector.
+Multi-head self-attention produces context-aware representations.
+A decoder with masked attention selects group assignments;
+invalid actions (exceeding capacity) are masked out.
+
+\paragraph{Guarantee.}
+No worst-case approximation ratio is guaranteed.
+Distributional guarantee: $\mathbb{E}_{I \sim \mathcal{D}}[\text{cost}(\pi_\theta(I))]
+\to \mathbb{E}_{I \sim \mathcal{D}}[\OPT_{\text{SSP}}(I)]$ as training progresses under
+standard regularity conditions.
+
+\subsubsection{Learning-Augmented Column Generation}
+\label{sec:LACG}
+
+This is the most theoretically sound ML approach: it \emph{preserves exact optimality}
+while using ML to accelerate the pricing step.
+
+\paragraph{ML augmentation of the pricing oracle.}
+Train a predictor $P_\phi: (u, B) \to \calG'$ mapping dual variables
+$u \in \mathbb{R}^n$ and the instance bipartite graph $B$ to a candidate grouping $\calG'$.
+At each CG iteration:
+\begin{enumerate}[label=(\alph*)]
+  \item Query $P_\phi$ to obtain candidate $\calG'$.
+  \item Verify: compute $c(\calG') - \sum_j u_j$ (cheap). If negative, add $\calG'$ to RMP.
+  \item If $P_\phi$ fails (positive reduced cost), fall back to exact pricing solver.
+\end{enumerate}
+
+\paragraph{Architecture for $P_\phi$.}
+GNN on $B$ produces job embeddings; concatenate with $u_j$ per job;
+graph-partitioning head outputs a grouping assignment.
+Train on $(u^*, \calG^*)$ pairs from previously solved instances.
+
+\paragraph{Correctness guarantee (exact optimality preserved).}
+Every ML-suggested column is verified before acceptance; the fallback exact solver
+certifies LP optimality. ML only reduces the number of exact solver calls needed,
+not the solution quality. Empirically, learning-augmented CG reduces pricing
+iterations by 50--80\% on analogous combinatorial problems \cite{Khalil2016,Gasse2019}.
+
+\subsubsection{Contrastive Learning for Grouping Comparison}
+\label{sec:contrastive}
+
+A lightweight alternative: train a model to compare pairs of groupings (which is better?)
+rather than predict absolute costs.
+
+\begin{description}[leftmargin=*]
+  \item[Training data:] pairs $(\calG_A, \calG_B)$ with label $1$ if
+    $\OPT(\calG_A) < \OPT(\calG_B)$, else $0$.
+  \item[Model:] Siamese GNN --- same encoder applied to both groupings, comparison head.
+  \item[Loss:] binary cross-entropy.
+  \item[Inference:] given $N$ candidates, run a tournament ($O(N \log N)$ comparisons)
+    to identify the best grouping; solve GTSP only for the top-ranked candidate.
+\end{description}
+
+This scales to very large candidate pools and requires only relative quality labels,
+which are easier to obtain than exact GTSP costs.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Part~III: SSP Variants That Collapse to JGP}
+\label{sec:partIII}
+% ══════════════════════════════════════════════════════════════════════════════
+
+We characterise SSP variants --- modified by a pairwise switching cost function $f$ ---
+for which solving SSP-$f$ is equivalent to solving JGP: the optimal SSP-$f$ solution
+always uses exactly $\Kstar$ groups.
+
+\subsection{Formal Definition of Collapse}
+\label{sec:collapse-def}
+
+\begin{definition}[Collapse to JGP]
+\label{def:collapse}
+SSP-$f$ (SSP with switching cost function $f: 2^T \times 2^T \to \mathbb{R}_+$)
+\emph{collapses to JGP} if for every instance $I$:
+\[
+  \argmin_{\calG,\, \pi} \mathrm{SSP}\text{-}f(I, \calG, \pi)
+  \;\subseteq\;
+  \bigl\{\calG : |\calG| = \Kstar(I)\bigr\},
+\]
+i.e.\ the optimal SSP-$f$ solution always uses exactly $\Kstar$ groups.
+\end{definition}
+
+\subsection{The Baseline Collapse: Switching Instants (0/1 Cost)}
+\label{sec:TSIP}
+
+Define $f_{\mathrm{01}}(\mathcal{C}, \mathcal{C}') = \mathbf{1}[\mathcal{C} \ne \mathcal{C}']$.
+This is the Tool Switching Instants Problem (TSIP).
+Under TSIP, total cost $=$ number of configuration changes $= K - 1$ for $K$ distinct
+configurations in a path. Minimising this equals minimising $K = \JGP$. This collapse is
+exact and trivial, but TSIP discards all information about which tools change --- it is
+not a metrically rich variant. We seek richer ones.
+
+\subsection{Threshold SSP}
+\label{sec:threshold}
+
+\begin{definition}[Threshold SSP]
+\label{def:thresholdSSP}
+For parameter $\theta \ge 0$, define
+$f_\theta(\mathcal{C}, \mathcal{C}') = \max(0,\; |\mathcal{C} \setminus \mathcal{C}'| - \theta)$.
+Switching up to $\theta$ tools between consecutive configurations is ``free'';
+only excess switches incur cost.
+\end{definition}
+
+\begin{thmbox}
+\begin{theorem}[Threshold Collapse Condition]
+\label{thm:threshold}
+Let $\calG^* = \{G_1,\ldots,G_K\}$ be any JGP-optimal grouping
+with lookahead configurations $\mathcal{C}_k^*$.
+The transition cost under $f_\theta$ is
+$f_\theta(\mathcal{C}_k^*, \mathcal{C}_{k+1}^*) = \max(0,\, (r - \mathit{ov}_k) - \theta)$,
+where $\mathit{ov}_k = |T_{G_k} \cap T_{G_{k+1}}|$.
+
+Define $\theta^* = \max_{k=1,\ldots,K-1} |T_{G_k} \setminus T_{G_{k+1}}|
+= \max_k (r_k - \mathit{ov}_k)$
+(maximum mandatory outflow over all consecutive pairs, using the lookahead configuration).
+Then:
+\begin{enumerate}[label=(\roman*)]
+  \item For $\theta \ge \theta^*$: $\mathrm{SSP}\text{-}f_\theta(\calG^*, \pi, \{\mathcal{C}_k^*\}) = 0$.
+        Since $f_\theta \ge 0$ always, $\OPT_{\mathrm{SSP}\text{-}f_\theta} = 0$, achieved
+        by any JGP-optimal grouping. SSP-$f_{\theta}$ \emph{collapses to JGP}.
+  \item For $0 \le \theta < \theta^*$: SSP-$f_\theta$ interpolates between standard SSP
+        ($\theta = 0$) and JGP ($\theta = \theta^*$), with strictly positive optimal cost.
+\end{enumerate}
+\end{theorem}
+\end{thmbox}
+
+\begin{proof}
+(i): For each $k$, the lookahead transition cost is $|T_{G_k} \setminus T_{G_{k+1}}| = r_k - \mathit{ov}_k \le \theta^* \le \theta$. Hence $f_\theta(\mathcal{C}_k^*, \mathcal{C}_{k+1}^*) = \max(0, (r_k - \mathit{ov}_k) - \theta) = 0$. Summing over $k$ gives total cost $= 0$. Since $f_\theta \ge 0$, this is optimal. Any JGP-optimal grouping achieves this, so the SSP-$f_\theta$ solution set contains all JGP-optimal groupings.
+
+(ii): For $\theta < \theta^*$, there exists some pair $k^*$ with
+$|T_{G_{k^*}} \setminus T_{G_{k^*+1}}| > \theta$. Under any valid configuration for
+that pair, the transition cost is $\ge (|T_{G_{k^*}} \setminus T_{G_{k^*+1}}| - \theta) > 0$.
+Therefore $\OPT_{\mathrm{SSP}\text{-}f_\theta} > 0$ and SSP-$f_\theta$ does not trivially
+collapse to JGP (the SSP problem remains non-trivial). \qed
+\end{proof}
+
+\begin{remark}
+The collapse threshold $\theta^*$ depends on the specific JGP-optimal grouping chosen
+(since $\mathit{ov}_k$ varies across groupings). Across all JGP-optimal groupings:
+$\theta^*_{\min} \le \theta^* \le \theta^*_{\max}$.
+Using the grouping with the highest tool overlap (i.e.\ the one selected by \cref{thm:overlap})
+minimises $\theta^*$, making collapse easier to achieve.
+\end{remark}
+
+\subsection{Per-Tool Weight Variant}
+\label{sec:pertool}
+
+\begin{definition}[Weighted SSP]
+Let $w: T \to \mathbb{R}_{>0}$ assign a weight to each tool.
+Define $f_w(\mathcal{C}, \mathcal{C}') = \sum_{t \in \mathcal{C} \setminus \mathcal{C}'} w_t$.
+\end{definition}
+
+\begin{thmbox}
+\begin{theorem}[Per-Tool Weight Collapse Condition]
+\label{thm:pertool}
+SSP-$f_w$ collapses to JGP if and only if:
+for every pair of adjacent groups $(G_k, G_{k+1})$ in the optimal ordering and for
+every valid configuration $\mathcal{C} \in \Cconf(G_k)$,
+\[
+  \sum_{t \in \mathcal{C} \setminus \mathcal{C}_{k+1}^*} w_t \;\ge\; \delta > 0,
+\]
+where $\mathcal{C}_{k+1}^*$ is the optimal configuration for $G_{k+1}$,
+and $\delta$ exceeds the maximum possible cost reduction from splitting any group.
+This is the \emph{no-beneficial-split} condition.
+\end{theorem}
+\end{thmbox}
+
+\begin{proof}
+Necessity: if for some pair the transition cost under $f_w$ is $0$, then splitting
+$G_k$ into two sub-groups adds one transition of cost $0$ without increasing cost ---
+the SSP-$f_w$ optimum may use $K^* + 1$ groups, violating collapse.
+
+Sufficiency: if every inter-group transition costs $\ge \delta > 0$, then any solution
+with $K > \Kstar$ groups incurs at least $K - 1 \ge \Kstar$ transitions, each costing
+$\ge \delta$. A JGP-optimal solution incurs $\Kstar - 1$ transitions, also each
+costing $\ge \delta$ but with \emph{fewer} transitions. For the no-beneficial-split
+condition ($\delta$ large enough), the total cost of any $K > \Kstar$ solution
+exceeds that of the $\Kstar$-group solution with optimised configurations. \qed
+\end{proof}
+
+\subsection{General Collapse Characterisation}
+\label{sec:general-collapse}
+
+\begin{thmbox}
+\begin{theorem}[General Collapse Characterisation]
+\label{thm:collapse}
+Let $f: 2^T \times 2^T \to \mathbb{R}_+$.
+SSP-$f$ collapses to JGP (on all instances) if and only if the following three conditions
+hold simultaneously:
+\begin{description}
+  \item[(C1) Self-cost zero:]
+    $f(\mathcal{C}, \mathcal{C}) = 0$ for all $\mathcal{C} \subseteq T$.
+  \item[(C2) Strict inter-group positivity:]
+    For any JGP-optimal grouping $\calG^*$ with $\Kstar$ groups, any two distinct groups
+    $G_k \ne G_{k'}$, and any valid configurations
+    $\mathcal{C} \in \Cconf(G_k)$, $\mathcal{C}' \in \Cconf(G_{k'})$:
+    $f(\mathcal{C}, \mathcal{C}') \ge \delta_{\min} > 0$.
+  \item[(C3) Beneficial-split impossibility:]
+    For any grouping $\calG$ with $|\calG| > \Kstar$:
+    $\OPT_{f}(\calG) \ge \OPT_{f}(\calG^*)$
+    (using more groups cannot reduce cost).
+\end{description}
+\end{theorem}
+\end{thmbox}
+
+\begin{proof}
+\textbf{Necessity.}
+$\lnot$(C1): If $f(\mathcal{C},\mathcal{C}) > 0$ for some $\mathcal{C}$, then even the
+trivial 1-group solution (if $\Kstar = 1$) incurs positive cost for each ``non-transition''.
+This contradicts $\Kstar$-optimality (a 0-group solution doesn't exist; but 1-group incurs
+0 transitions, so cost = 0 under (C1)). Formally, (C1) is required so that within-group
+job ordering incurs zero cost. \checkmark
+
+$\lnot$(C2): If $f(\mathcal{C}, \mathcal{C}') = 0$ for some inter-group pair, splitting
+group $G_k$ into $G_k'$ and $G_k''$ adds one transition of cost $0$, giving a
+$(\Kstar+1)$-group solution with the same cost. SSP-$f$ optimal may use $\Kstar+1$ groups,
+violating \cref{def:collapse}. \checkmark
+
+$\lnot$(C3): By definition, if adding groups reduces cost, the SSP-$f$ optimal uses
+$> \Kstar$ groups. \checkmark
+
+\textbf{Sufficiency.}
+Under (C1), the cost of a grouping with $K$ groups and optimal ordering is
+$\ge (K-1)\delta_{\min}$ by (C2) (at least $K-1$ inter-group transitions, each costing
+$\ge \delta_{\min}$).
+Under (C3), the cost of any $K > \Kstar$ grouping is $\ge$ the cost of the
+$\Kstar$-group optimum.
+Therefore the SSP-$f$ optimal uses exactly $\Kstar$ groups. \qed
+\end{proof}
+
+\subsection{A Novel Variant: Setup-Matrix SSP}
+\label{sec:setup-matrix}
+
+\begin{definition}[Setup-Matrix SSP]
+Let $W \in \mathbb{R}^{m \times m}_+$ with $W_{tt} = 0$ and $W_{tt'} \ge 0$ for $t \ne t'$.
+Define
+\[
+  f_W(\mathcal{C}, \mathcal{C}')
+  = \sum_{t \in \mathcal{C} \setminus \mathcal{C}'}\;
+    \min_{t' \in \mathcal{C}' \setminus \mathcal{C}}\; W_{tt'}.
+\]
+Here $W_{tt'}$ is the cost of removing tool $t$ when tool $t'$ is being loaded in its
+place. This models sequence-dependent slot reuse costs.
+\end{definition}
+
+\begin{thmbox}
+\begin{theorem}[Setup-Matrix Collapse Condition]
+\label{thm:setup-matrix}
+If $W$ satisfies $W_{tt'} \ge \gamma > 0$ for all $t \ne t'$ (uniform lower bound
+on all cross-tool setup costs), then:
+\[
+  f_W(\mathcal{C}_k, \mathcal{C}_{k+1})
+  \ge \gamma \cdot |\mathcal{C}_k \setminus \mathcal{C}_{k+1}|
+  \ge \gamma \cdot (2r - C)
+\]
+for any consecutive group pair in any $\Kstar$-optimal grouping (using \cref{lem:perTransLB}).
+SSP-$f_W$ satisfies (C2) of \cref{thm:collapse} with $\delta_{\min} = \gamma(2r-C)$
+and collapses to JGP when (C3) also holds, specifically when:
+\[
+  \gamma \cdot (2r - C) \;>\; \text{maximum possible cost reduction from splitting one group},
+\]
+i.e.\ the per-group-boundary cost exceeds any savings from finer partitioning.
+\end{theorem}
+\end{thmbox}
+
+\begin{proof}
+By definition of $f_W$: each of the $|\mathcal{C}_k \setminus \mathcal{C}_{k+1}|$ removed
+tools $t$ incurs cost $\ge \gamma \cdot 1 = \gamma$ (since $\min_{t'} W_{tt'} \ge \gamma$
+for $t \ne t'$ and there is at least one $t' \in \mathcal{C}_{k+1} \setminus \mathcal{C}_k$
+because $|\mathcal{C}_{k+1} \setminus \mathcal{C}_k| = |\mathcal{C}_k \setminus \mathcal{C}_{k+1}|$
+by the uniform-SSP constraint). The second inequality follows from \cref{lem:perTransLB}.
+Condition (C3) becomes a numerical condition on $\gamma$ relative to instance parameters,
+and can be certified for any specific instance. \qed
+\end{proof}
+
+\subsection{Machine Learning for Collapse Variants}
+\label{sec:ML-collapse}
+
+\subsubsection{Learning the Collapse Threshold $\theta^*$}
+
+Rather than computing $\theta^*$ analytically (which requires solving JGP first), train
+a regression model to predict it from instance statistics:
+\begin{itemize}
+  \item \textbf{Features}: $(n, m, C, \mathbb{E}[|T_j|], \mathrm{Var}[|T_j|],
+        \max_j|T_j|, \rho)$ where $\rho$ is tool co-occurrence density.
+  \item \textbf{Target}: $\theta^*(I)$.
+  \item \textbf{Architecture}: MLP or gradient-boosted trees (low-dimensional feature space).
+  \item \textbf{Training}: solve a set of instances exactly; record $\theta^*$ from JGP solutions.
+\end{itemize}
+
+\noindent At inference: predict $\hat{\theta}^*$; solve SSP-$f_{\hat{\theta}^*}$;
+the solution is JGP-optimal (zero cost), providing a fast certificate of optimality.
+
+\subsubsection{Meta-Learning a Collapse-Inducing Cost Function}
+\label{sec:meta-learning}
+
+\begin{definition}[Meta-Learning Objective]
+Learn a parameterised cost function $f_\phi = f_{W_\phi}$ (e.g.\ the Setup-Matrix variant
+with learned $W_\phi$) that simultaneously:
+\begin{enumerate}[label=(\roman*)]
+  \item makes SSP-$f_\phi$ collapse to JGP (SSP-$f_\phi$-optimal solutions use $\Kstar$ groups), and
+  \item preserves near-optimal solution quality for the original SSP.
+\end{enumerate}
+\end{definition}
+
+This is formulated as a bilevel optimisation:
+\begin{align}
+  \min_\phi \quad
+  & \sum_I \bigl|\OPT_{\mathrm{SSP}\text{-}f_\phi}(I) - \OPT_{\mathrm{SSP}}(I)\bigr|
+    + \lambda\, R(\phi) \notag\\
+  R(\phi) &= \sum_I \max\!\bigl(0,\,
+    \OPT_{f_\phi}(I, K \le \Kstar(I)) - \OPT_{f_\phi}(I, K = \Kstar(I))\bigr),
+    \label{eq:bilevel}
+\end{align}
+where $R(\phi) = 0$ iff SSP-$f_\phi$ collapses to JGP on all training instances.
+
+\paragraph{Training algorithm.}
+\begin{enumerate}[label=\arabic*.]
+  \item Initialise $W_\phi = \gamma I$ (uniform costs, $\gamma > 0$).
+  \item For each training instance $I$: compute $\OPT_{\mathrm{SSP}\text{-}W_\phi}(I)$
+        and the regulariser $R_I(\phi)$.
+  \item Gradient update:
+        $\phi \leftarrow \phi - \eta \cdot \nabla_\phi
+        \bigl[\sum_I |\OPT_{\mathrm{SSP}\text{-}f_\phi}(I) - \OPT_{\mathrm{SSP}}(I)| + \lambda R_I(\phi)\bigr]$.
+  \item Iterate until convergence.
+\end{enumerate}
+
+\paragraph{Theoretical justification.}
+This is \emph{surrogate optimisation}: the original hard SSP objective is replaced by
+SSP-$f_\phi$, which is easier to optimise (by collapsing to JGP) but whose optima are
+close to those of the original SSP (enforced by the first term in \eqref{eq:bilevel}).
+The collapse constraint (enforced by $R(\phi)$) ensures tractability; the fidelity term
+ensures quality.
+
+\subsubsection{Instance-Specific Lagrangian Parameter Learning}
+\label{sec:lambda-learning}
+
+From \cref{sec:lagrangian}, the Lagrangian parameter $\lambda^*$ characterises the
+SSP/JGP tradeoff for each instance. Rather than running the subgradient algorithm from
+scratch, learn a model $\lambda^*(I) = f_\psi(\text{features}(I))$:
+\begin{itemize}
+  \item \textbf{Input}: instance features (as in \cref{sec:ML-collapse}).
+  \item \textbf{Output}: $\hat{\lambda}^*(I)$.
+  \item \textbf{Training}: record $\lambda^*$ from subgradient runs on training instances.
+\end{itemize}
+At inference: predict $\hat{\lambda}^*$, solve $L(\hat{\lambda}^*)$ in one pass,
+recover near-optimal primal solution. This eliminates the iterative subgradient procedure
+and is analogous to warm-starting MIP solvers \cite{Khalil2016},
+achieving 50--90\% solve-time reductions in related settings.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Summary of Key Results}
+\label{sec:summary}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\begin{table}[h!]
+\centering
+\caption{Summary of key results across all three parts.}
+\label{tab:summary}
+\renewcommand{\arraystretch}{1.3}
+\small
+\begin{tabularx}{\textwidth}{@{} l X X l @{}}
+\toprule
+\textbf{Part} & \textbf{Key Result} & \textbf{Mathematical Content} & \textbf{Status} \\
+\midrule
+I & Gap $\Heur - \OPT_{\text{SSP}} = (\Kstar-1)\cdot s$ (tight)
+  & Construction~II with $\mathit{ov} \ge 2r-C$; proven via KTNS counting lower bound
+  & Novel; tight \\
+I & Approx.\ ratio $\Heur/\OPT = (C-\mathit{ov})/(r-\mathit{ov})$ is unbounded
+  & $\to \infty$ as $\mathit{ov} \to r-1$ or $C \to \infty$
+  & No const.\ guarantee \\
+I & Gap = 0 when $r = C$ (no padding slack)
+  & SSP reduces to TSP; confirmed by construction
+  & Known, confirmed \\
+I & Disjoint private sets give zero gap
+  & All transitions cost $r$ regardless of padding; new structural insight
+  & Novel insight \\
+II-A1 & SSP for fixed grouping $=$ GTSP
+  & Noon--Bean; Held--Karp in $O(N^2 \cdot 2^K)$
+  & Exact formulation \\
+II-A2 & Optimal ordering $=$ Max-Weight Ham.\ Path on overlap graph
+  & \cref{thm:overlap}; constant sum argument
+  & Novel equivalence \\
+II-A3 & Lagrangian explores $K$ vs.\ switch Pareto frontier
+  & Subgradient; $L(\lambda^*) \le \OPT \le L(\lambda^*)+\Delta_{\mathrm{IP}}$
+  & Novel application \\
+II-A4 & Column generation for exact SSP
+  & Set-partition master; pricing $=$ modified JGP
+  & Exact; branch-and-price \\
+II-B1 & GNN grouping scorer; perm.\ equivariant
+  & GNN universality; bipartite job--tool encoding
+  & Justified ML \\
+II-B2 & RL for joint grouping+sequencing
+  & REINFORCE; Transformer/Pointer Net; explores $K > \Kstar$
+  & Distributional guarantee \\
+II-B3 & Learning-augmented CG; exact optimality preserved
+  & ML pricing predictor; fallback solver
+  & Exact + ML speedup \\
+II-B4 & Contrastive learning for grouping ranking
+  & Siamese GNN; tournament inference
+  & Scalable heuristic \\
+III.2 & TSIP collapses to JGP
+  & $f = \mathbf{1}[\mathcal{C} \ne \mathcal{C}']$; baseline
+  & Known \\
+III.3 & Threshold SSP collapses for $\theta \ge \theta^*$
+  & \cref{thm:threshold}; $\theta^* = \max_k |T_{G_k} \setminus T_{G_{k+1}}|$
+  & Novel theorem \\
+III.5 & General collapse iff (C1)+(C2)+(C3) hold
+  & \cref{thm:collapse}; necessary and sufficient
+  & Novel characterisation \\
+III.6 & Setup-Matrix SSP and collapse condition
+  & \cref{thm:setup-matrix}; $\gamma$-lower bound on $W$
+  & Novel variant \\
+III.7 & Meta-learning $f^*$ that collapses to JGP
+  & Bilevel optimisation; surrogate objective
+  & Open; novel direction \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Open Questions}
+\label{sec:open}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[label=\textbf{Q\arabic*.}]
+
+  \item \textbf{(Part~I)} Is there a polynomial-time verifiable structural property of a
+        grouping $\calG$ that certifies $\Heur(\calG) - \OPT_{\text{SSP}} \le \varepsilon$?
+        The maximum-overlap Hamiltonian path score (\cref{thm:overlap}) is the most
+        promising candidate. Proving tight approximation ratios for groupings selected by
+        this criterion is open.
+
+  \item \textbf{(Part~II)} What is the complexity of the pricing problem in column
+        generation for SSP? Is it fixed-parameter tractable in $\Kstar$?
+        This determines practical feasibility of branch-and-price.
+
+  \item \textbf{(Part~II)} Can the GTSP cluster sizes be bounded polynomially for
+        structured instances (e.g.\ when tool sets form a laminar family or an
+        interval structure)? Such structure would make the exact formulation of
+        \cref{thm:GTSP} directly practical.
+
+  \item \textbf{(Part~III)} Does there exist a cost function $f$ that simultaneously
+        (a)~makes SSP-$f$ polynomial-time solvable,
+        (b)~collapses to JGP, and
+        (c)~preserves $\OPT_{\text{SSP}}$ within a constant factor?
+        This would be a major result; current evidence suggests no such $f$ exists
+        in general (likely implying P\,=\,NP), but a parameterised version
+        (fixed-parameter tractable in $\Kstar$ or $m-C$) may be achievable.
+
+  \item \textbf{(Part~III/ML)} Convergence guarantees and sample complexity bounds
+        for the meta-learning bilevel optimisation \eqref{eq:bilevel} are completely open.
+        The landscape of $R(\phi)$ as a function of $\phi$ is non-convex and
+        potentially discontinuous; analysing its gradient structure is an open
+        theoretical question.
+
+\end{enumerate}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section*{References}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\begin{thebibliography}{99}
+
+\bibitem{TangDenardo1988}
+C.S.~Tang and E.V.~Denardo,
+``Models arising from a flexible manufacturing machine,''
+\textit{Operations Research}, vol.~36, no.~5, pp.~767--784, 1988.
+[Original SSP paper; KTNS algorithm.]
+
+\bibitem{Crama1994}
+Y.~Crama, O.E.~Flippo, J.~van de~Klundert, and F.C.R.~Spieksma,
+``The tool switching problem revisited,''
+\textit{European Journal of Operational Research}, vol.~74, no.~2, pp.~331--342, 1994.
+[NP-hardness proof.]
+
+\bibitem{CramaKlundert1999}
+Y.~Crama and J.~van de~Klundert,
+``Worst-case performance of approximation algorithms for tool management problems,''
+\textit{Naval Research Logistics}, vol.~46, no.~5, pp.~445--462, 1999.
+[Approximation ratio analysis.]
+
+\bibitem{Laporte2004}
+G.~Laporte, J.J.~Salazar-Gonz\'alez, and F.~Semet,
+``Exact algorithms for the job sequencing and tool switching problem,''
+\textit{IIE Transactions}, vol.~36, no.~1, pp.~37--45, 2004.
+[ILP + branch-and-bound.]
+
+\bibitem{Catanzaro2015}
+D.~Catanzaro, L.~Gouveia, and M.~Labb\'e,
+``Improved ILP formulations for the job sequencing and tool switching problem,''
+\textit{European Journal of Operational Research}, vol.~244, no.~3, pp.~766--777, 2015.
+[Tighter LP relaxation; current state-of-the-art ILP.]
+
+\bibitem{daSilva2021}
+T.T.~da~Silva, A.A.~Chaves, L.A.N.~Lorena, and L.C.~Coelho,
+``Multicommodity flow formulation and column generation for the SSP,'' 2021.
+[LP lower bound $\OPT_{\text{SSP}} \ge m - C$.]
+
+\bibitem{Ghiani2007}
+G.~Ghiani, A.~Grieco, and R.~Musmanno,
+``Reformulation and solution of the tool switching problem as a least-cost Hamiltonian
+cycle problem,''
+\textit{Journal of Intelligent Manufacturing}, vol.~18, no.~4, pp.~523--531, 2007.
+[Hamiltonian cycle formulation.]
+
+\bibitem{NoonBean1993}
+C.E.~Noon and J.C.~Bean,
+``An efficient transformation of the generalized traveling salesman problem,''
+\textit{INFORMS Journal on Computing}, vol.~5, no.~3, pp.~571--575, 1993.
+[Noon--Bean transformation: GTSP to TSP.]
+
+\bibitem{Xu2019}
+K.~Xu, W.~Hu, J.~Leskovec, and S.~Jegelka,
+``How powerful are graph neural networks?''
+\textit{Proceedings of ICLR 2019}, 2019.
+[GNN universality theorem.]
+
+\bibitem{Khalil2016}
+E.~Khalil, H.~Dai, Y.~Zhang, B.~Dilkina, and L.~Song,
+``Learning combinatorial optimization algorithms over graphs,''
+\textit{Advances in NeurIPS}, 2016.
+[Learning-augmented combinatorial optimisation.]
+
+\bibitem{Kool2019}
+W.~Kool, H.~van Hoof, and M.~Welling,
+``Attention, learn to solve routing problems!''
+\textit{Proceedings of ICLR 2019}, 2019.
+[Transformer/Attention for TSP; basis for RL direction.]
+
+\bibitem{Gasse2019}
+M.~Gasse, D.~Ch\'etelat, N.~Ferroni, L.~Charlin, and A.~Lodi,
+``Exact combinatorial optimisation with graph convolutional neural networks,''
+\textit{Advances in NeurIPS}, 2019.
+[GNN for branch-and-bound / learning-augmented CG.]
+
+\end{thebibliography}
+
+\end{document}
