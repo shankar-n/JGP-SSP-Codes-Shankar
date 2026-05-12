@@ -1,4 +1,0 @@
-#,Group Configurations,Num groups,Min Cost Ham Path,Ham Path Opt. Routes
-1,"[[0 1 5]
- [1 2 3]
- [3 4 5]]",3,4,"[2, 0, 1]"
