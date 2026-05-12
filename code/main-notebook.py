@@ -430,7 +430,7 @@ def _(all_configs, jgp_bfs, pd, solve_hamiltonian_path, tqdm):
         jgp_df_row_id += 1
 
     jgp_df.to_csv("jgp_bfs_analysis.csv",index=False)
-    return
+    return (jgp_df,)
 
 
 @app.cell
@@ -489,6 +489,49 @@ def _(np, optimal_ssp_df):
 @app.cell
 def _(optimal_ssp_df):
     min(optimal_ssp_df["Num Unique Configs"])
+    return
+
+
+@app.cell
+def _(pd):
+    jgp_df = pd.read_csv("jgp_bfs_analysis.csv",index_col="#")
+    jgp_df.head()
+    return (jgp_df,)
+
+
+@app.cell
+def _(jgp_df):
+    min_groups = min(jgp_df['Num groups'])
+    optimal_jgp_df = jgp_df.loc[(jgp_df['Num groups'] == min_groups),:]
+    tsp_best_cost = min(optimal_jgp_df['Min Cost Ham Path'])
+    tsp_best_cost
+    return (optimal_jgp_df,)
+
+
+@app.cell
+def _(optimal_jgp_df):
+    optimal_jgp_df
+    return
+
+
+@app.cell
+def _(jgp_df):
+    min_ssp_cost = min(jgp_df['Min Cost Ham Path'])
+    jgp_bfs_with_optimal_switches = jgp_df.loc[(jgp_df['Min Cost Ham Path'] == min_ssp_cost),:]
+    jgp_bfs_with_optimal_switches
+    return (min_ssp_cost,)
+
+
+@app.cell
+def _(jgp_df):
+    df2 = jgp_df
+    df2.boxplot(by='Num groups')
+    return (df2,)
+
+
+@app.cell
+def _(df2):
+    df2.boxplot(by='Min Cost Ham Path')
     return
 
 
