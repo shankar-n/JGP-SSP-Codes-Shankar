@@ -1,0 +1,8 @@
+__marimo__/
+__pycache__/
+concorde/
+*.pyc
+
+temp_con*
+ssp_feasible_solutions.csv
+jgp_bfs_analysis.csv
