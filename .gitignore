@@ -52,3 +52,5 @@ references/Useless/
 *.toc
 *.nav
 *.snm
+
+*.csv
