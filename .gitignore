@@ -42,20 +42,3 @@
 
 __marimo__/
 .vscode/
-
-**/*/__pycache__/
-
-**/*/*.csv
-
-# references/Useless/
-
-tools/
-
-*.aux
-*.log
-*.nav
-*.snm
-*.toc
-*.vrb
-*.blg
-*.tmp*
