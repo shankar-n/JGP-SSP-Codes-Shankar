@@ -70,9 +70,10 @@ except ImportError:
     print("WARNING: Gurobi not found.  Install gurobipy to use this solver.")
 
 from utils import load_ssp_instance
+from bbc_common import BBCSolverMixin
 
 
-class BranchAndBendersCutSSP:
+class BranchAndBendersCutSSP(BBCSolverMixin):
     """
     Solves the SSP via Branch-and-Benders-Cut using Gurobi lazy callbacks.
 
@@ -120,21 +121,6 @@ class BranchAndBendersCutSSP:
         self.best_objective  = float('inf')
         self.iteration_count = 0
         self.cuts_added      = 0
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # Pre-computation
-    # ─────────────────────────────────────────────────────────────────────────
-
-    def _compute_pairwise_bounds(self):
-        """w_ij = max(0, |T_i ∪ T_j| − capacity)  for all ordered pairs (i,j)."""
-        self.w = {}
-        for i in range(self.n_jobs):
-            for j in range(self.n_jobs):
-                if i != j:
-                    union_size = len(set(self.tool_req[i]) | set(self.tool_req[j]))
-                    self.w[i, j] = max(0, union_size - self.capacity)
-                else:
-                    self.w[i, j] = 0
 
     # ─────────────────────────────────────────────────────────────────────────
     # Master Problem
@@ -213,93 +199,6 @@ class BranchAndBendersCutSSP:
     # Solution helpers
     # ─────────────────────────────────────────────────────────────────────────
 
-    def _find_subtours_from_sol(self, sol):
-        """
-        Detect all subtours directly from binary x-solution values.
-
-        Parameters
-        ----------
-        sol : dict {(i,j): float}
-
-        Returns
-        -------
-        list of lists – each inner list is a cycle of job indices with
-        length < n_jobs.  Returns [] for a Hamiltonian cycle.
-        """
-        n    = self.n_jobs
-        succ = {}
-        for i in range(n):
-            for j in range(n):
-                if i != j and sol.get((i, j), 0.0) > 0.5:
-                    succ[i] = j
-
-        visited  = set()
-        subtours = []
-
-        for start in range(n):
-            if start in visited:
-                continue
-            if start not in succ:
-                visited.add(start)
-                continue
-
-            cycle   = [start]
-            visited.add(start)
-            current = succ[start]
-
-            while current != start:
-                if current in visited:
-                    cycle = None
-                    break
-                visited.add(current)
-                cycle.append(current)
-                nxt = succ.get(current)
-                if nxt is None:
-                    cycle = None
-                    break
-                current = nxt
-
-            if cycle is not None and len(cycle) < n:
-                subtours.append(cycle)
-
-        return subtours
-
-    def _get_sequence_from_sol(self, sol):
-        """
-        Extract the Hamiltonian sequence from a subtour-free binary solution.
-        Starts from job 0 and follows successor arcs.
-
-        Returns list[int] of length n_jobs, or None if extraction fails.
-        """
-        n    = self.n_jobs
-        succ = {}
-        for i in range(n):
-            for j in range(n):
-                if i != j and sol.get((i, j), 0.0) > 0.5:
-                    succ[i] = j
-
-        if not succ:
-            return None
-
-        start    = 0
-        sequence = [start]
-        current  = succ.get(start)
-
-        while current is not None and current != start and len(sequence) < n:
-            sequence.append(current)
-            current = succ.get(current)
-
-        return sequence if len(sequence) == n else None
-
-    def _build_x_bar_from_sequence(self, sequence):
-        """Convert a Hamiltonian sequence to a binary x̄ dict {(i,j): 1.0}."""
-        n     = self.n_jobs
-        x_bar = {}
-        for k in range(n - 1):
-            x_bar[sequence[k], sequence[k + 1]] = 1.0
-        x_bar[sequence[-1], sequence[0]] = 1.0
-        return x_bar
-
     # ─────────────────────────────────────────────────────────────────────────
     # Dual Subproblem – public entry point
     # ─────────────────────────────────────────────────────────────────────────
@@ -313,6 +212,11 @@ class BranchAndBendersCutSSP:
         if sequence is None:
             return None, {}
         return self._solve_dsp_with_xbar(self._build_x_bar_from_sequence(sequence))
+
+
+    def _solve_dsp_fresh(self, x_bar):
+        """Delegate to the shared Gurobi DSP implementation in BBCSolverMixin."""
+        return self._solve_dsp_gurobi(x_bar)
 
     def _solve_dsp_with_xbar(self, x_bar):
         """
@@ -329,94 +233,6 @@ class BranchAndBendersCutSSP:
     # ─────────────────────────────────────────────────────────────────────────
     # DSP – fresh build (default path)
     # ─────────────────────────────────────────────────────────────────────────
-
-    def _solve_dsp_fresh(self, x_bar):
-        """
-        Build the DSP Gurobi model from scratch and solve.
-
-        x_bar : dict {(i,j): float} – arc values (integer or fractional).
-
-        Returns (obj_val, duals) or (None, {}) on failure.
-        """
-        n        = self.n_jobs
-        T        = range(self.n_tools)
-        tool_req = self.tool_req
-
-        dsp = gp.Model("DSP")
-        dsp.setParam('OutputFlag', 0)
-
-        # ── Variables ────────────────────────────────────────────────────────
-        lam = {}
-        for i in range(n):
-            for j in range(n):
-                if i != j:
-                    for t in T:
-                        lam[i, j, t] = dsp.addVar(
-                            lb=0.0, vtype=GRB.CONTINUOUS, name=f"lam_{i}_{j}_{t}"
-                        )
-
-        mu  = {j: dsp.addVar(lb=0.0, vtype=GRB.CONTINUOUS, name=f"mu_{j}")
-               for j in range(n)}
-        nu  = {}
-        eta = {}
-        for j in range(n):
-            for t in T:
-                nu[j, t]  = dsp.addVar(lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS,
-                                       name=f"nu_{j}_{t}")
-                eta[j, t] = dsp.addVar(lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS,
-                                       name=f"eta_{j}_{t}")
-
-        # ── Objective ────────────────────────────────────────────────────────
-        obj = quicksum(
-            (x_bar.get((i, j), 0.0) - 1.0) * lam[i, j, t]
-            for i in range(n) for j in range(n) if i != j
-            for t in T
-        )
-        obj += quicksum(-self.capacity * mu[j] for j in range(n))
-        obj += quicksum(nu[j, t] for j in range(n) for t in tool_req.get(j, []))
-        dsp.setObjective(obj, GRB.MAXIMIZE)
-
-        # ── Constraints for y_jt ≥ 0 ────────────────────────────────────────
-        for j in range(n):
-            Tj = set(tool_req.get(j, []))
-            for t in T:
-                nu_term = nu[j, t] if t in Tj else 0
-                lhs = (
-                    -mu[j]
-                    - quicksum(lam[i, j, t] for i in range(n) if i != j)
-                    + quicksum(lam[j, k, t] for k in range(n) if k != j)
-                    + nu_term
-                )
-                dsp.addConstr(lhs <= 0, name=f"dy_{j}_{t}")
-
-        # ── Constraints for z_jt ≥ 0 ────────────────────────────────────────
-        for j in range(n):
-            Tj = set(tool_req.get(j, []))
-            for t in T:
-                eta_term = eta[j, t] if t not in Tj else 0
-                rhs = 1.0 if t in Tj else 0.0
-                lhs = (
-                    quicksum(lam[i, j, t] for i in range(n) if i != j)
-                    + eta_term
-                )
-                dsp.addConstr(lhs <= rhs, name=f"dz_{j}_{t}")
-
-        dsp.optimize()
-
-        if dsp.status != GRB.OPTIMAL:
-            return None, {}
-
-        duals = {}
-        for (i, j, t), v in lam.items():
-            duals['lambda', i, j, t] = v.X
-        for j, v in mu.items():
-            duals['mu', j] = v.X
-        for (j, t), v in nu.items():
-            duals['nu', j, t] = v.X
-        for (j, t), v in eta.items():
-            duals['eta', j, t] = v.X
-
-        return dsp.objVal, duals
 
     # ─────────────────────────────────────────────────────────────────────────
     # DSP – worker LP reuse path
@@ -651,7 +467,13 @@ class BranchAndBendersCutSSP:
             return
 
         # ── Step C: Solve DSP ────────────────────────────────────────────────
-        dsp_obj, duals = self._solve_dsp_with_xbar(sol)
+        # Build x̄ from the n-arc sequence rather than passing the raw sol
+        # dict (n*(n-1) entries). Both give the same dual solution for binary
+        # solutions, but using the sequence-based x_bar lets _solve_dsp_reuse
+        # skip updating the n*(n-1)-n zero-valued lam coefficients and is
+        # cleaner: we use the sequence we just extracted.
+        x_bar_int = self._build_x_bar_from_sequence(sequence)
+        dsp_obj, duals = self._solve_dsp_with_xbar(x_bar_int)
         if dsp_obj is None:
             return
 

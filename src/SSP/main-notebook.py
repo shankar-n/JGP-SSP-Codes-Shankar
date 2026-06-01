@@ -26,7 +26,17 @@ def _():
     import matplotlib.pyplot as plt
     import itertools
     from utils import load_ssp_instance, detect_0blocks, compute_switch_cost, compute_ssp_cost, compute_ktns, run_brute_force_TSP_on_configs
-    from viz import plot_zero_blocks, plot_magazine_timeline, plot_active_config_network, plot_timedep_costs
+    from viz import (
+        plot_incidence_matrix, plot_ktns_timeline, plot_jgp_ssp_comparison,
+        plot_solution_comparison, plot_config_chain, plot_bounds_bar,
+        plot_interactive_timeline,
+        # backward-compat aliases still importable:
+        plot_zero_blocks, plot_magazine_timeline, plot_active_config_network,
+    )
+    from heuristics import (
+        warmstart_from_jgp, greedy_ffd, adjacent_swap_ls,
+        nearest_neighbor, ktns_magazine_states,
+    )
     from SCIP_formulation_solvers import solve_jgp_arf, solve_ssp_gtsp
     from solution_validators import validate_jgp, validate_ssp
     from porta import run_jgp_porta, read_porta_output, run_ssp_porta, convert_ieq_to_ine
@@ -48,7 +58,6 @@ def _():
         pd,
         plot_active_config_network,
         plot_magazine_timeline,
-        plot_timedep_costs,
         plot_zero_blocks,
         plt,
         read_porta_output,
@@ -59,6 +68,18 @@ def _():
         tqdm,
         validate_jgp,
         validate_ssp,
+        plot_incidence_matrix,
+        plot_ktns_timeline,
+        plot_jgp_ssp_comparison,
+        plot_solution_comparison,
+        plot_config_chain,
+        plot_bounds_bar,
+        plot_interactive_timeline,
+        warmstart_from_jgp,
+        greedy_ffd,
+        adjacent_swap_ls,
+        nearest_neighbor,
+        ktns_magazine_states,
     )
 
 
@@ -136,6 +157,333 @@ def _(T_j, b, num_jobs, num_tools, solve_ssp_gtsp):
 
 
 @app.cell
+def _(T_j, b, mo, num_jobs, num_tools):
+    """Cell 6b: Exact formulation comparison — BBC vs LSS vs SSPMF.
+
+    Runs all three exact ILP/B&B formulations on the loaded instance and
+    produces a side-by-side comparison table.
+
+    References
+    ----------
+    BBC  : Branch-and-Benders-Cut (this project)
+    LSS  : Laporte, Salazar-González & Semet (2004), IIE Transactions 36(1)
+    SSPMF: da Silva, Chaves & Yanasse (2024), multicommodity flow
+    """
+    import sys as _sys
+    import os as _os
+    import time as _time
+    from pathlib import Path as _Path
+
+    # ── Add BBC/ to path (it is a sibling of SSP/ under src/) ──────────────
+    _bbc_dir = str(_Path(_os.getcwd()).parent / "BBC")
+    if _bbc_dir not in _sys.path:
+        _sys.path.insert(0, _bbc_dir)
+
+    # ── Configuration ────────────────────────────────────────────────────────
+    TIME_LIMIT           = 120    # seconds per formulation
+    BBC_WORKER_LP_REUSE  = False  # True → reuse DSP model across callbacks
+    BBC_FRACTIONAL_CUTS  = False  # True → Benders cuts at LP-relaxation nodes
+    BBC_PARALLEL         = False  # True → multi-threaded B&B
+    LSS_LIFTED_OBJ       = True   # True → use lifted LSS objective
+    LSS_VALID_INEQ       = True   # True → add LSS valid inequalities (23)(25)
+    SSPMF_SYM_BREAK      = True   # True → SSPMF symmetry-breaking constraint
+    SSPMF_C21            = True   # True → SSPMF constraint (21)
+
+    # ── Helper: run one formulation safely ───────────────────────────────────
+    def _run(label, fn):
+        try:
+            _t0 = _time.perf_counter()
+            status, obj, seq = fn()
+            elapsed = round(_time.perf_counter() - _t0, 3)
+            return {"label": label, "status": str(status),
+                    "obj": obj, "seq": seq, "time": elapsed, "error": None}
+        except Exception as _e:
+            return {"label": label, "status": "ERROR",
+                    "obj": None, "seq": None, "time": None, "error": str(_e)}
+
+    # ── BBC ──────────────────────────────────────────────────────────────────
+    # Use a list as mutable container so the nested function can write to it
+    # (avoids `global` which doesn't work correctly inside a marimo cell).
+    _bbc_backend = ["N/A"]
+    def _run_bbc():
+        from branch_and_benders_cut import BranchAndBendersCutSSP, _BACKEND
+        _bbc_backend[0] = _BACKEND
+        _s = BranchAndBendersCutSSP(
+            num_jobs, num_tools, b, T_j,
+            worker_lp_reuse     = BBC_WORKER_LP_REUSE,
+            use_fractional_cuts = BBC_FRACTIONAL_CUTS,
+            parallel            = BBC_PARALLEL,
+        )
+        _s.build_master_problem(verbose=False)
+        return _s.solve(time_limit=TIME_LIMIT, verbose=False)
+
+    # ── LSS ──────────────────────────────────────────────────────────────────
+    def _run_lss():
+        from lss_formulation import LSSFormulation
+        _f = LSSFormulation(num_jobs, num_tools, b, T_j,
+                            use_lifted_obj=LSS_LIFTED_OBJ,
+                            use_valid_ineq=LSS_VALID_INEQ)
+        _f.build_model(verbose=False)
+        return _f.solve(time_limit=TIME_LIMIT, verbose=False)
+
+    # ── SSPMF ────────────────────────────────────────────────────────────────
+    def _run_sspmf():
+        from sspmf_formulation import SSPMFFormulation
+        _f = SSPMFFormulation(num_jobs, num_tools, b, T_j,
+                              use_symmetry_breaking=SSPMF_SYM_BREAK,
+                              use_constraint_21=SSPMF_C21)
+        _f.build_model(verbose=False)
+        return _f.solve(time_limit=TIME_LIMIT, verbose=False)
+
+    # ── Run all three ────────────────────────────────────────────────────────
+    _results = [
+        _run("BBC",   _run_bbc),
+        _run("LSS",   _run_lss),
+        _run("SSPMF", _run_sspmf),
+    ]
+
+    # ── Compute best-known objective for gap calculation ─────────────────────
+    _valid_objs = [r["obj"] for r in _results if r["obj"] is not None]
+    _best = min(_valid_objs) if _valid_objs else None
+
+    def _fmt_obj(obj):
+        if obj is None:
+            return "—"
+        return f"**{obj:.1f}**" if (_best is not None and abs(obj - _best) < 1e-4) else f"{obj:.1f}"
+
+    def _fmt_gap(obj):
+        if obj is None or _best is None or _best == 0:
+            return "—"
+        gap = 100.0 * (obj - _best) / _best
+        return f"{gap:.1f}%" if gap > 1e-4 else "0 %"
+
+    def _fmt_time(t):
+        return f"{t:.2f}s" if t is not None else "—"
+
+    def _fmt_status(r):
+        s = r["status"]
+        if r["error"]:
+            return f"`ERROR` ({r['error'][:40]})"
+        return f"`{s}`"
+
+    # ── Render comparison table ───────────────────────────────────────────────
+    _rows = "\n".join(
+        f"| **{r['label']}** | {_fmt_status(r)} | {_fmt_obj(r['obj'])} "
+        f"| {_fmt_gap(r['obj'])} | {_fmt_time(r['time'])} "
+        f"| `{str(r['seq'][:4])[:-1]}…`" if r['seq'] else
+        f"| **{r['label']}** | {_fmt_status(r)} | {_fmt_obj(r['obj'])} "
+        f"| {_fmt_gap(r['obj'])} | {_fmt_time(r['time'])} | — |"
+        for r in _results
+    )
+
+    _table = "\n".join([
+        f"| **{r['label']}** | {_fmt_status(r)} | {_fmt_obj(r['obj'])} "
+        f"| {_fmt_gap(r['obj'])} | {_fmt_time(r['time'])} "
+        f"| `{r['seq'][:5]}…` |" if r['seq'] is not None
+        else
+        f"| **{r['label']}** | {_fmt_status(r)} | — | — | {_fmt_time(r['time'])} | — |"
+        for r in _results
+    ])
+
+    _display = mo.md(f"""
+## Exact Formulation Comparison
+
+**Instance:** {num_jobs} jobs · {num_tools} tools · capacity {b} · time limit {TIME_LIMIT}s per solver
+
+| Formulation | Status | Obj (switches) | Gap to best | Time | Sequence (first 5) |
+|---|---|---|---|---|---|
+{_table}
+
+> BBC backend: `{_bbc_backend}` · LSS lifted obj: `{LSS_LIFTED_OBJ}` · \
+LSS valid ineqs: `{LSS_VALID_INEQ}` · SSPMF sym-break: `{SSPMF_SYM_BREAK}`
+""")
+
+    # ── Unpack results for downstream cells ──────────────────────────────────
+    _bbc_r, _lss_r, _sspmf_r = _results
+
+    bbc_obj, bbc_sequence, bbc_status = _bbc_r["obj"], _bbc_r["seq"], _bbc_r["status"]
+    lss_obj, lss_sequence, lss_status = _lss_r["obj"], _lss_r["seq"], _lss_r["status"]
+    sspmf_obj, sspmf_sequence, sspmf_status = _sspmf_r["obj"], _sspmf_r["seq"], _sspmf_r["status"]
+
+    _display
+
+    return (
+        bbc_obj, bbc_sequence, bbc_status,
+        lss_obj, lss_sequence, lss_status,
+        sspmf_obj, sspmf_sequence, sspmf_status,
+    )
+
+
+
+@app.cell
+def _(mo):
+    """Cell 6c: SSP Instance Generator — produce & compare on a fresh instance.
+
+    Generates a new SSP instance using one of two methods:
+      • Crama (1994) : inclusion-free random sampling, 16 standard benchmark types
+      • Overlapping  : core-group sampling producing high job-tool overlap
+
+    The generated instance is immediately passed to BBC, LSS, and SSPMF for
+    a side-by-side exact-formulation comparison.
+
+    Fix notes vs. original SSPInstanceGenerator
+    -------------------------------------------
+    1. save_instance header corrected from  "M N C"  (tools, jobs, capacity) to
+       "N M C"  (jobs, tools, capacity) — matching load_ssp_instance token order.
+    2. The spurious  "min_tools max_tools"  second header line was removed; it
+       caused load_ssp_instance to corrupt the matrix (flat-token parser).
+    3. load_instance in the class updated accordingly.
+    """
+    import sys as _sys, os as _os, time as _time, tempfile as _tf
+    from pathlib import Path as _Path
+    import numpy as _np
+
+    # ── Configuration ─────────────────────────────────────────────────────────
+    # Method: "crama" or "overlapping"
+    GEN_METHOD       = "crama"
+
+    # Crama preset — pick an index 0–15 from get_crama_instance_types():
+    #   0–3  : (M=10, N=10, C=4/5/6/7,   t∈[2,4])
+    #   4–7  : (M=20, N=15, C=6/8/10/12, t∈[2,6])
+    #   8–11 : (M=40, N=30, C=15/17/20/25,t∈[5,15])
+    #   12–15: (M=60, N=40, C=20/22/25/30,t∈[7,20])
+    CRAMA_TYPE_IDX   = 0     # index into get_crama_instance_types()
+
+    # Custom parameters (used when GEN_METHOD="overlapping" or to override Crama)
+    CUSTOM_M         = 10    # number of tools
+    CUSTOM_N         = 10    # number of jobs
+    CUSTOM_C         = 5     # magazine capacity  (must be >= max_tools)
+    CUSTOM_MIN_TOOLS = 2     # min tools per job
+    CUSTOM_MAX_TOOLS = 4     # max tools per job  (must be <= C)
+    OVERLAP_FACTOR   = 0.65  # only for method="overlapping"
+
+    GEN_SEED         = 42    # random seed (None for non-reproducible)
+
+    # Formulation time limit
+    TIME_LIMIT       = 120   # seconds per solver
+
+    # ── Add BBC directory to path (sibling of SSP/) ───────────────────────────
+    _bbc_dir = str(_Path(_os.getcwd()).parent / "BBC")
+    if _bbc_dir not in _sys.path:
+        _sys.path.insert(0, _bbc_dir)
+
+    # ── Generate instance ─────────────────────────────────────────────────────
+    from ssp_instance_generator import SSPInstanceGenerator as _Gen
+
+    _gen = _Gen(seed=GEN_SEED)
+
+    if GEN_METHOD == "crama":
+        _types   = _Gen.get_crama_instance_types()
+        _idx     = max(0, min(CRAMA_TYPE_IDX, len(_types) - 1))
+        _M, _N, _C, _min_t, _max_t = _types[_idx]
+        _A, _meta = _gen.generate_instance(_M, _N, _C, _min_t, _max_t)
+        _type_label = f"Crama type {_idx} (M={_M}, N={_N}, C={_C}, t∈[{_min_t},{_max_t}])"
+    else:
+        _M, _N, _C = CUSTOM_M, CUSTOM_N, CUSTOM_C
+        _min_t, _max_t = CUSTOM_MIN_TOOLS, CUSTOM_MAX_TOOLS
+        _A, _meta = _gen.generate_overlapping_instance(
+            _M, _N, _C, _min_t, _max_t, overlap_factor=OVERLAP_FACTOR)
+        _type_label = f"Overlapping (M={_M}, N={_N}, C={_C}, overlap={OVERLAP_FACTOR})"
+
+    # After filtering null rows:
+    _Mf = _meta["M_after_filtering"]
+    _T_j = _Gen.matrix_to_tool_req(_A)
+
+    # ── Instance statistics ───────────────────────────────────────────────────
+    _tools_per_job = _A.sum(axis=0)          # sum over tool rows → per job
+    _jobs_per_tool = _A.sum(axis=1)          # sum over job cols → per tool
+    _density       = _A.mean()
+    _null_removed  = _meta.get("null_rows_removed", 0)
+
+    # ── Run BBC, LSS, SSPMF ───────────────────────────────────────────────────
+    def _run_safe(label, fn):
+        try:
+            t0 = _time.perf_counter()
+            status, obj, seq = fn()
+            return {"label": label, "status": str(status), "obj": obj,
+                    "seq": seq, "time": round(_time.perf_counter() - t0, 3), "err": None}
+        except Exception as e:
+            return {"label": label, "status": "ERROR", "obj": None,
+                    "seq": None, "time": None, "err": str(e)[:60]}
+
+    _bbc_backend = ["N/A"]
+    def _run_bbc():
+        from branch_and_benders_cut import BranchAndBendersCutSSP, _BACKEND
+        _bbc_backend[0] = _BACKEND
+        s = BranchAndBendersCutSSP(_Mf, _meta["N"], _C, _T_j)
+        s.build_master_problem(verbose=False)
+        return s.solve(time_limit=TIME_LIMIT, verbose=False)
+
+    def _run_lss():
+        from lss_formulation import LSSFormulation
+        f = LSSFormulation(_Mf, _meta["N"], _C, _T_j)
+        f.build_model(verbose=False)
+        return f.solve(time_limit=TIME_LIMIT, verbose=False)
+
+    def _run_sspmf():
+        from sspmf_formulation import SSPMFFormulation
+        f = SSPMFFormulation(_Mf, _meta["N"], _C, _T_j)
+        f.build_model(verbose=False)
+        return f.solve(time_limit=TIME_LIMIT, verbose=False)
+
+    _results = [
+        _run_safe("BBC",   _run_bbc),
+        _run_safe("LSS",   _run_lss),
+        _run_safe("SSPMF", _run_sspmf),
+    ]
+
+    # ── Compute gaps ──────────────────────────────────────────────────────────
+    _valid = [r["obj"] for r in _results if r["obj"] is not None]
+    _best  = min(_valid) if _valid else None
+
+    def _fo(obj):
+        if obj is None: return "—"
+        return f"**{obj:.1f}**" if _best is not None and abs(obj - _best) < 1e-4 else f"{obj:.1f}"
+
+    def _fg(obj):
+        if obj is None or _best is None or _best == 0: return "—"
+        g = 100.0 * (obj - _best) / _best
+        return "0 %" if g < 1e-4 else f"{g:.1f} %"
+
+    def _ft(t):   return f"{t:.2f}s" if t is not None else "—"
+    def _fs(r):   return f"`{r['status']}`" if not r["err"] else f"`ERROR` {r['err']}"
+    def _fseq(r): return f"`{str(r['seq'][:4])[:-1]}…`" if r["seq"] else "—"
+
+    _table = "\n".join(
+        f"| **{r['label']}** | {_fs(r)} | {_fo(r['obj'])} | {_fg(r['obj'])} "
+        f"| {_ft(r['time'])} | {_fseq(r)} |"
+        for r in _results
+    )
+
+    mo.md(f"""
+## Instance Generator + Formulation Comparison
+
+**Generation method:** {_type_label}  ·  seed={GEN_SEED}  ·  time limit={TIME_LIMIT}s/solver
+
+### Instance statistics
+
+| Parameter | Value |
+|---|---|
+| Jobs (N) | {_meta["N"]} |
+| Tools (M, after null-row filter) | {_Mf} ({_null_removed} removed) |
+| Capacity (C) | {_C} |
+| Tools per job — min / mean / max | {int(_tools_per_job.min())} / {_tools_per_job.mean():.2f} / {int(_tools_per_job.max())} |
+| Jobs per tool — min / mean / max | {int(_jobs_per_tool.min())} / {_jobs_per_tool.mean():.2f} / {int(_jobs_per_tool.max())} |
+| Matrix density | {_density:.1%} |
+
+### Exact formulation comparison
+
+| Formulation | Status | Obj (switches) | Gap to best | Time | Sequence |
+|---|---|---|---|---|---|
+{_table}
+
+> BBC backend: `{_bbc_backend[0]}`
+""")
+
+    return
+
+
+@app.cell
 def _(
     T_j,
     b,
@@ -170,172 +518,105 @@ def _(
 
 
 @app.cell
-def _(T_j, b, compute_ktns, jgp_batches, num_jobs):
-    """Cell 8: Upper bound computations."""
+def _(T_j, adjacent_swap_ls, b, greedy_ffd, jgp_batches, num_jobs, warmstart_from_jgp):
+    """Cell 8: Upper-bound heuristics (from heuristics.py).
 
-    def compute_warmstart_ub(batches, tool_req, cap, n_jobs):
-        """
-        Upper bound by flattening JGP batches into a sequence and
-        computing its KTNS cost.
-        """
-        if not batches:
-            return float('inf')
-        sequence = []
-        for (jobs, _tools) in batches:
-            # Order within batch: descending tool-requirement size
-            # (promotes tool reuse within batch)
-            sequence.extend(sorted(jobs, key=lambda j: len(tool_req[j]),
-                                   reverse=True))
-        return compute_ktns(sequence, tool_req, cap)[0], sequence
-
-    def compute_greedy_ffd_ub(n_jobs, tool_req, cap):
-        """
-        Upper bound via First-Fit Decreasing (FFD) heuristic.
-        Sort jobs by decreasing |T_j|; greedily sequence them.
-        """
-        order = sorted(range(n_jobs), key=lambda j: len(tool_req[j]),
-                       reverse=True)
-        return compute_ktns(order, tool_req, cap)[0], order
-
-    def apply_2opt_improvement(sequence, tool_req, cap, max_iter=200):
-        """
-        2-Opt local search: try all adjacent job swaps; accept if cost
-        decreases.  Returns improved sequence and its cost.
-        """
-        seq = list(sequence)
-        current_cost = compute_ktns(seq, tool_req, cap)[0]
-        improved = True
-        iters = 0
-        while improved and iters < max_iter:
-            improved = False
-            iters += 1
-            for k in range(len(seq) - 1):
-                # Swap positions k and k+1
-                seq[k], seq[k+1] = seq[k+1], seq[k]
-                new_cost = compute_ktns(seq, tool_req, cap)[0]
-                if new_cost < current_cost:
-                    current_cost = new_cost
-                    improved = True
-                else:
-                    # Revert
-                    seq[k], seq[k+1] = seq[k+1], seq[k]
-        return seq, current_cost
-
-    # ── Compute bounds ────────────────────────────────────────────────────
-    ub_ws_cost, seq_ws   = compute_warmstart_ub(jgp_batches, T_j, b, num_jobs)
-    ub_ffd_cost, seq_ffd = compute_greedy_ffd_ub(num_jobs, T_j, b)
-    seq_2opt, ub_2opt    = apply_2opt_improvement(seq_ws, T_j, b)
+    Methods
+    -------
+    warmstart_from_jgp  — flatten JGP batches, ordering jobs within each
+                          batch by decreasing |T_j| (promotes carry-over).
+                          Valid UB because KTNS is optimal for fixed sequence.
+    greedy_ffd          — First-Fit Decreasing: sort all jobs by |T_j| desc,
+                          evaluate with KTNS.  Fast O(n log n) construction.
+    adjacent_swap_ls    — Adjacent-swap local search on the warm-start seed.
+                          NOTE: not classical 2-opt (which reverses segments);
+                          this is a 1-exchange on neighbouring pairs ("bubble
+                          sort with cost"), converging to a local optimum.
+    """
+    ub_ws_cost, seq_ws    = warmstart_from_jgp(jgp_batches, T_j, b)
+    ub_ffd_cost, seq_ffd  = greedy_ffd(num_jobs, T_j, b)
+    seq_2opt, ub_2opt, _  = adjacent_swap_ls(seq_ws, T_j, b)
 
     print("── Upper Bounds ─────────────────────────────────────────────")
-    print(f"  UB1 (JGP Warm-Start) : {ub_ws_cost}")
-    print(f"  UB2 (Greedy FFD)     : {ub_ffd_cost}")
-    print(f"  UB3 (2-Opt refined)  : {ub_2opt}")
+    print(f"  UB1 (JGP warm-start)  : {ub_ws_cost}   seq={seq_ws}")
+    print(f"  UB2 (Greedy FFD)      : {ub_ffd_cost}  seq={seq_ffd}")
+    print(f"  UB3 (adjacent-swap LS): {ub_2opt}   seq={seq_2opt}")
     return seq_ws, ub_2opt, ub_ffd_cost, ub_ws_cost
 
 
 @app.cell
-def _(jgp_obj, np, plt, ssp_obj, ub_2opt, ub_ffd_cost, ub_ws_cost):
-    """Cell 9: Visualization 2 — Bounds hierarchy bar chart."""
+def _(jgp_obj, plot_bounds_bar, ssp_obj, ub_2opt, ub_ffd_cost, ub_ws_cost):
+    """Cell 9: Bounds hierarchy bar chart (via viz.plot_bounds_bar)."""
 
     bounds = {
-        "JGP (LB)":        jgp_obj,
-        "SSP Optimal":     ssp_obj,
-        "2-Opt (UB3)":     ub_2opt,
-        "Warm-Start (UB1)": ub_ws_cost,
-        "FFD (UB2)":       ub_ffd_cost,
+        "JGP  (LB)":              jgp_obj,
+        "SSP exact  (OPT)":       ssp_obj,
+        "Adjacent-swap LS  (UB)": ub_2opt,
+        "JGP warm-start  (UB)":   ub_ws_cost,
+        "Greedy FFD  (UB)":       ub_ffd_cost,
     }
-    colors = {
-        "JGP (LB)":         "#2ecc71",
-        "SSP Optimal":      "#3498db",
-        "2-Opt (UB3)":      "#f39c12",
-        "Warm-Start (UB1)": "#e67e22",
-        "FFD (UB2)":        "#e74c3c",
-    }
-
-    fig_bounds, ax_b = plt.subplots(figsize=(9, 5))
-
-    x_pos   = np.arange(len(bounds))
-    bar_vals = list(bounds.values())
-    bar_clrs = [colors[k] for k in bounds]
-
-    bars = ax_b.bar(x_pos, bar_vals, color=bar_clrs, edgecolor='black',
-                    linewidth=1.2, width=0.6)
-
-    # Value labels on bars
-    for bar, val in zip(bars, bar_vals):
-        if val is not None:
-            ax_b.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.05,
-                      f"{val:.1f}", ha='center', va='bottom',
-                      fontsize=10, fontweight='bold')
-
-    # Shade gap between JGP and warm-start
-    ax_b.axhspan(jgp_obj, ub_ws_cost, alpha=0.06, color='gray',
-                 label='Uncertainty gap')
-    ax_b.axhline(jgp_obj, color='green', lw=1.4, linestyle='--', alpha=0.7)
-    if ssp_obj is not None:
-        ax_b.axhline(ssp_obj, color='blue', lw=1.4, linestyle='--', alpha=0.7)
-
-    ax_b.set_xticks(x_pos)
-    ax_b.set_xticklabels(list(bounds.keys()), fontsize=10)
-    ax_b.set_ylabel("Tool-Switch Cost", fontsize=11)
-    ax_b.set_title(
-        "Bounds Hierarchy:  LB  ≤  OPT(SSP)  ≤  UB\n"
-        "(green = lower bound, blue = exact optimum, orange/red = upper bounds)",
-        fontsize=11
-    )
-    ax_b.set_ylim(0, max(v for v in bar_vals if v is not None) * 1.2)
-    ax_b.grid(axis='y', alpha=0.3, linestyle='--')
-
-    plt.tight_layout()
-    plt.show()
+    fig_bounds = plot_bounds_bar(bounds, title="Bounds Hierarchy: LB ≤ OPT ≤ UB")
 
     # Numerical gap report
     if ssp_obj and jgp_obj:
-        dual_gap  = (ssp_obj  - jgp_obj)  / max(jgp_obj, 1) * 100
-        primal_gap_ws  = (ub_ws_cost - ssp_obj) / max(ssp_obj, 1) * 100
+        dual_gap      = (ssp_obj    - jgp_obj)   / max(jgp_obj, 1)   * 100
+        primal_gap_ws = (ub_ws_cost - ssp_obj)   / max(ssp_obj, 1)   * 100
         print(f"\nGap analysis:")
-        print(f"  Dual gap   (OPT - JGP) / JGP  = {dual_gap:.1f}%")
-        print(f"  Primal gap (UB_ws - OPT) / OPT = {primal_gap_ws:.1f}%")
-        print(f"  Total gap  (UB_ws - JGP) / JGP  = "
+        print(f"  Dual gap    (OPT − JGP) / JGP        = {dual_gap:.1f}%")
+        print(f"  Primal gap  (UB_ws − OPT) / OPT      = {primal_gap_ws:.1f}%")
+        print(f"  Total gap   (UB_ws − JGP) / JGP       = "
               f"{(ub_ws_cost - jgp_obj)/max(jgp_obj,1)*100:.1f}%")
-    return
+
+    fig_bounds
 
 
 @app.cell
-def _(b, jgp_batches, num_tools, plot_magazine_timeline, plt, ssp_route):
-    """Cell 10: Visualization 3 — Two-panel Magazine Timeline (JGP vs SSP)."""
+def _(T_j, b, jgp_batches, plot_jgp_ssp_comparison, ssp_route):
+    """Cell 10: JGP vs SSP magazine timeline comparison.
 
+    Uses the KTNS-based timeline (works with any job sequence).
+    """
     if ssp_route:
-        fig_timeline = plot_magazine_timeline(ssp_route, jgp_batches, num_tools, b)
-        plt.show()
+        ssp_sequence = [j for (cfg, j) in ssp_route if cfg != "DUMMY"]
+        fig_timeline = plot_jgp_ssp_comparison(ssp_sequence, jgp_batches, T_j, b)
     else:
         print("SSP route not available — skipping timeline plot.")
         fig_timeline = None
-    return
+    fig_timeline
 
 
 @app.cell
-def _(b, plot_active_config_network, plt, ssp_route):
-    """Cell 11: Visualization 4 — Active Configuration Transition Network."""
-
+def _(T_j, b, plot_config_chain, ssp_route):
+    """Cell 11: Configuration chain — linear sequence of magazine states."""
     if ssp_route:
-        fig_network = plot_active_config_network(ssp_route, b)
-        plt.show()
+        ssp_sequence = [j for (cfg, j) in ssp_route if cfg != "DUMMY"]
+        fig_chain = plot_config_chain(ssp_sequence, T_j, b)
     else:
-        fig_network = None
-    return
+        fig_chain = None
+    fig_chain
 
 
 @app.cell
-def _(T_j, b, plot_timedep_costs, plt, seq_ws):
-    """Cell 12: Visualization 5 — Time-dependent cost surfaces."""
+def _(T_j, b, plot_interactive_timeline, plot_ktns_timeline, seq_ws):
+    """Cell 12: KTNS timeline for the warm-start sequence + interactive viewer.
 
+    plot_timedep_costs was removed — time-dependent switch cost is not part
+    of the standard SSP model.  Replaced with:
+      - Static KTNS timeline for the JGP warm-start sequence
+      - Interactive Plotly timeline (returned for marimo rendering)
+    """
     if seq_ws:
-        fig_timedep = plot_timedep_costs(seq_ws, T_j, b)
-        plt.show()
+        # Static matplotlib KTNS timeline
+        fig_ktns = plot_ktns_timeline(
+            seq_ws, T_j, b, title="KTNS Timeline — JGP Warm-Start Sequence")
+
+        # Interactive Plotly timeline (marimo renders this natively)
+        fig_interactive = plot_interactive_timeline(
+            seq_ws, T_j, b, title="Interactive KTNS — JGP Warm-Start")
     else:
-        fig_timedep = None
-    return
+        fig_ktns        = None
+        fig_interactive = None
+    fig_ktns
 
 
 @app.cell
@@ -562,27 +843,16 @@ def _(generate_group):
     def generate_test_classes(num_classes):
         TEST_CLASSES = {}
         for i in range(1, num_classes + 1):
-            # Generate 'b' randomly between 1 and 10
             b = random.randint(4, 10)
-
-            # 'a' must satisfy a * b <= 40, so max a = 40 // b
             max_a = max(4, 40 // b)
             a = random.randint(4, max_a)
-
-            # 'c' ideally close to b / 2, but allow some variation
-            variation = random.choice([-1, 0, 1])  # small random variation
+            variation = random.choice([-1, 0, 1])
             c = max(0, int(b / 2 + variation))
-
-            # 'd' chosen from allowed values
             d = random.choice([0.2, 0.3, 0.4])
-
             TEST_CLASSES[f"Class{i}"] = (a, b, c, d)
-
         return TEST_CLASSES
 
-
     SHANKAR_TEST_CLASSES = generate_test_classes(20)
-
     random.seed(42)
     generate_group(SHANKAR_TEST_CLASSES, OUT_DIR)
     return

@@ -69,7 +69,6 @@ Install notes:
 
 import sys
 import threading
-import numpy as np
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -98,6 +97,7 @@ except ImportError:
     HAS_GUROBI = False
 
 from utils import load_ssp_instance
+from bbc_common import BBCSolverMixin
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -309,7 +309,7 @@ class BendersCutCallback:
 # Solver class
 # ─────────────────────────────────────────────────────────────────────────────
 
-class BranchAndBendersCutSSP_CPLEX:
+class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
     """
     Branch-and-Benders-Cut solver using IBM CPLEX (raw cplex API).
 
@@ -362,17 +362,6 @@ class BranchAndBendersCutSSP_CPLEX:
     # ─────────────────────────────────────────────────────────────────────────
     # Pre-computation
     # ─────────────────────────────────────────────────────────────────────────
-
-    def _compute_pairwise_bounds(self):
-        """w_ij = max(0, |T_i ∪ T_j| - capacity)."""
-        self.w = {}
-        for i in range(self.n_jobs):
-            for j in range(self.n_jobs):
-                if i != j:
-                    union_size = len(set(self.tool_req[i]) | set(self.tool_req[j]))
-                    self.w[i, j] = max(0, union_size - self.capacity)
-                else:
-                    self.w[i, j] = 0
 
     # ─────────────────────────────────────────────────────────────────────────
     # Master Problem
@@ -478,88 +467,6 @@ class BranchAndBendersCutSSP_CPLEX:
     # ─────────────────────────────────────────────────────────────────────────
     # Solution helpers (shared with callback)
     # ─────────────────────────────────────────────────────────────────────────
-
-    def _find_subtours_from_sol(self, sol):
-        """
-        Detect all subtours from binary x-solution values.
-
-        Parameters
-        ----------
-        sol : dict  {(i,j): float}
-
-        Returns
-        -------
-        list of lists – each element is a cycle with len < n_jobs.
-        Returns [] for a Hamiltonian cycle.
-        """
-        n    = self.n_jobs
-        succ = {}
-        for i in range(n):
-            for j in range(n):
-                if i != j and sol.get((i, j), 0.0) > 0.5:
-                    succ[i] = j
-
-        visited  = set()
-        subtours = []
-
-        for start in range(n):
-            if start in visited:
-                continue
-            if start not in succ:
-                visited.add(start)
-                continue
-
-            cycle   = [start]
-            visited.add(start)
-            current = succ[start]
-
-            while current != start:
-                if current in visited:
-                    cycle = None
-                    break
-                visited.add(current)
-                cycle.append(current)
-                nxt = succ.get(current)
-                if nxt is None:
-                    cycle = None
-                    break
-                current = nxt
-
-            if cycle is not None and len(cycle) < n:
-                subtours.append(cycle)
-
-        return subtours
-
-    def _get_sequence_from_sol(self, sol):
-        """Extract the Hamiltonian sequence from a subtour-free solution."""
-        n    = self.n_jobs
-        succ = {}
-        for i in range(n):
-            for j in range(n):
-                if i != j and sol.get((i, j), 0.0) > 0.5:
-                    succ[i] = j
-
-        if not succ:
-            return None
-
-        start    = 0
-        sequence = [start]
-        current  = succ.get(start)
-
-        while current is not None and current != start and len(sequence) < n:
-            sequence.append(current)
-            current = succ.get(current)
-
-        return sequence if len(sequence) == n else None
-
-    def _build_x_bar_from_sequence(self, sequence):
-        """Build x̄ dict from Hamiltonian sequence (arc → 1.0)."""
-        n     = len(sequence)
-        x_bar = {}
-        for k in range(n - 1):
-            x_bar[sequence[k], sequence[k + 1]] = 1.0
-        x_bar[sequence[-1], sequence[0]] = 1.0
-        return x_bar
 
     # ─────────────────────────────────────────────────────────────────────────
     # DSP routing
@@ -832,150 +739,6 @@ class BranchAndBendersCutSSP_CPLEX:
                 "No LP solver available for the DSP.  "
                 "Install docplex, gurobipy, or cplex."
             )
-
-    def _solve_dsp_docplex(self, x_bar):
-        """Solve the Dual LP using docplex."""
-        n        = self.n_jobs
-        T        = range(self.n_tools)
-        tool_req = self.tool_req
-
-        dsp     = DocplexModel("DSP", log_output=False)
-        neg_inf = dsp.minus_infinity
-
-        lam = {}
-        for i in range(n):
-            for j in range(n):
-                if i != j:
-                    for t in T:
-                        lam[i, j, t] = dsp.continuous_var(
-                            lb=0.0, name=f"lam_{i}_{j}_{t}"
-                        )
-        mu  = {j: dsp.continuous_var(lb=0.0, name=f"mu_{j}") for j in range(n)}
-        nu  = {}
-        eta = {}
-        for j in range(n):
-            for t in T:
-                nu[j, t]  = dsp.continuous_var(lb=neg_inf, name=f"nu_{j}_{t}")
-                eta[j, t] = dsp.continuous_var(lb=neg_inf, name=f"eta_{j}_{t}")
-
-        obj = dsp.sum(
-            (x_bar.get((i, j), 0) - 1) * lam[i, j, t]
-            for i in range(n) for j in range(n) if i != j
-            for t in T
-        )
-        obj += dsp.sum(-self.capacity * mu[j] for j in range(n))
-        obj += dsp.sum(nu[j, t] for j in range(n) for t in tool_req.get(j, []))
-        dsp.maximize(obj)
-
-        for j in range(n):
-            Tj = set(tool_req.get(j, []))
-            for t in T:
-                nu_term = nu[j, t] if t in Tj else 0
-                lhs = (
-                    -mu[j]
-                    - dsp.sum(lam[i, j, t] for i in range(n) if i != j)
-                    + dsp.sum(lam[j, k, t] for k in range(n) if k != j)
-                    + nu_term
-                )
-                dsp.add_constraint(lhs <= 0, f"dy_{j}_{t}")
-
-        for j in range(n):
-            Tj = set(tool_req.get(j, []))
-            for t in T:
-                eta_term = eta[j, t] if t not in Tj else 0
-                rhs      = 1.0 if t in Tj else 0.0
-                lhs = (
-                    dsp.sum(lam[i, j, t] for i in range(n) if i != j)
-                    + eta_term
-                )
-                dsp.add_constraint(lhs <= rhs, f"dz_{j}_{t}")
-
-        sol = dsp.solve(log_output=False)
-        if sol is None:
-            return None, {}
-
-        duals = {}
-        for (i, j, t), v in lam.items():
-            duals['lambda', i, j, t] = sol.get_value(v)
-        for j, v in mu.items():
-            duals['mu', j] = sol.get_value(v)
-        for (j, t), v in nu.items():
-            duals['nu', j, t] = sol.get_value(v)
-        for (j, t), v in eta.items():
-            duals['eta', j, t] = sol.get_value(v)
-
-        return dsp.objective_value, duals
-
-    def _solve_dsp_gurobi(self, x_bar):
-        """Solve the Dual LP using Gurobi (fallback)."""
-        n        = self.n_jobs
-        T        = range(self.n_tools)
-        tool_req = self.tool_req
-
-        dsp = gp.Model("DSP")
-        dsp.setParam('OutputFlag', 0)
-
-        lam = {}
-        for i in range(n):
-            for j in range(n):
-                if i != j:
-                    for t in T:
-                        lam[i, j, t] = dsp.addVar(lb=0.0, name=f"lam_{i}_{j}_{t}")
-
-        mu  = {j: dsp.addVar(lb=0.0, name=f"mu_{j}") for j in range(n)}
-        nu  = {}
-        eta = {}
-        for j in range(n):
-            for t in T:
-                nu[j, t]  = dsp.addVar(lb=-GRB.INFINITY, name=f"nu_{j}_{t}")
-                eta[j, t] = dsp.addVar(lb=-GRB.INFINITY, name=f"eta_{j}_{t}")
-
-        obj = gp.quicksum(
-            (x_bar.get((i, j), 0) - 1) * lam[i, j, t]
-            for i in range(n) for j in range(n) if i != j for t in T
-        )
-        obj += gp.quicksum(-self.capacity * mu[j] for j in range(n))
-        obj += gp.quicksum(nu[j, t] for j in range(n) for t in tool_req.get(j, []))
-        dsp.setObjective(obj, GRB.MAXIMIZE)
-
-        for j in range(n):
-            Tj = set(tool_req.get(j, []))
-            for t in T:
-                nu_term = nu[j, t] if t in Tj else 0
-                lhs = (
-                    -mu[j]
-                    - gp.quicksum(lam[i, j, t] for i in range(n) if i != j)
-                    + gp.quicksum(lam[j, k, t] for k in range(n) if k != j)
-                    + nu_term
-                )
-                dsp.addConstr(lhs <= 0)
-
-        for j in range(n):
-            Tj = set(tool_req.get(j, []))
-            for t in T:
-                eta_term = eta[j, t] if t not in Tj else 0
-                rhs = 1.0 if t in Tj else 0.0
-                lhs = (
-                    gp.quicksum(lam[i, j, t] for i in range(n) if i != j)
-                    + eta_term
-                )
-                dsp.addConstr(lhs <= rhs)
-
-        dsp.optimize()
-        if dsp.status != GRB.OPTIMAL:
-            return None, {}
-
-        duals = {}
-        for (i, j, t), v in lam.items():
-            duals['lambda', i, j, t] = v.X
-        for j, v in mu.items():
-            duals['mu', j] = v.X
-        for (j, t), v in nu.items():
-            duals['nu', j, t] = v.X
-        for (j, t), v in eta.items():
-            duals['eta', j, t] = v.X
-
-        return dsp.objVal, duals
 
     # ─────────────────────────────────────────────────────────────────────────
     # Dual subproblem entry point (used when worker_lp_reuse=False)
