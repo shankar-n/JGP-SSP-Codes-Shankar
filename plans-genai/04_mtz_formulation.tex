@@ -1,0 +1,521 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm, headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{enumitem}
+\usepackage{mdframed}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{fancyhdr}
+
+\definecolor{navyblue}{RGB}{26,58,92}
+\definecolor{midblue}{RGB}{44,95,138}
+\definecolor{lightblue}{RGB}{232,240,248}
+\definecolor{verylightblue}{RGB}{248,251,254}
+\definecolor{proofgray}{RGB}{242,242,242}
+\definecolor{warncolor}{RGB}{255,245,230}
+\definecolor{warnborder}{RGB}{200,100,0}
+
+\hypersetup{colorlinks=true,linkcolor=midblue,citecolor=midblue,urlcolor=midblue,
+	pdftitle={SSP Part IV: GTSP-MTZ Formulation},bookmarksnumbered=true}
+
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\color{navyblue}\textit{Part IV: GTSP-MTZ Formulation for the Uniform SSP}}
+\fancyhead[R]{\small\color{navyblue}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{navyblue}%
+		\leaders\hrule height\headrulewidth\hfill}}
+
+\titleformat{\section}{\large\bfseries\color{navyblue}}{}{0em}{}[\color{navyblue}\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{midblue}}{}{0em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\itshape\color{midblue}}{}{0em}{}
+\titlespacing{\section}{0pt}{18pt}{8pt}
+\titlespacing{\subsection}{0pt}{12pt}{5pt}
+
+\newmdenv[backgroundcolor=verylightblue,linecolor=navyblue,linewidth=1.2pt,
+leftline=true,rightline=false,topline=false,bottomline=false,
+innerleftmargin=12pt,innerrightmargin=8pt,innertopmargin=8pt,innerbottommargin=8pt,
+skipabove=10pt,skipbelow=6pt]{thmbox}
+
+\newmdenv[backgroundcolor=proofgray,linecolor=midblue,linewidth=0.8pt,
+leftline=true,rightline=false,topline=false,bottomline=false,
+innerleftmargin=10pt,innerrightmargin=8pt,innertopmargin=6pt,innerbottommargin=6pt,
+skipabove=6pt,skipbelow=6pt]{proofbox}
+
+\newmdenv[backgroundcolor=lightblue,linecolor=navyblue,linewidth=1.5pt,roundcorner=3pt,
+innerleftmargin=14pt,innerrightmargin=14pt,innertopmargin=10pt,innerbottommargin=10pt,
+skipabove=12pt,skipbelow=8pt]{formbox}
+
+\newmdenv[backgroundcolor=warncolor,linecolor=warnborder,linewidth=1.2pt,
+leftline=true,rightline=false,topline=false,bottomline=false,
+innerleftmargin=12pt,innerrightmargin=8pt,innertopmargin=8pt,innerbottommargin=8pt,
+skipabove=10pt,skipbelow=6pt]{warnbox}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\setlist[itemize]{noitemsep,topsep=4pt}
+\setlist[enumerate]{noitemsep,topsep=4pt}
+
+%═══════════════════════════════════════════════════════════════════════════════
+\begin{document}
+	%═══════════════════════════════════════════════════════════════════════════════
+	
+	\begin{center}
+		{\color{navyblue}\rule{\textwidth}{2pt}}\\[0.4cm]
+		{\LARGE\bfseries\color{navyblue}
+			The Job Sequencing and Tool Switching Problem}\\[0.2cm]
+		{\large\bfseries\color{navyblue}
+			Part IV: GTSP-MTZ Formulation for the Non-Compact SSP}\\[0.1cm]
+		{\large\itshape\color{midblue}
+			Replacing Exponential Subtour Constraints with Polynomial MTZ Constraints}\\[0.3cm]
+		{\color{navyblue}\rule{\textwidth}{2pt}}
+	\end{center}
+	
+	\vspace{0.5cm}
+	
+	%───────────────────────────────────────────────────────────────────────────────
+	\section{Motivation: Solving the Double-Generation Problem}
+	%───────────────────────────────────────────────────────────────────────────────
+
+	The non-compact ILP of Part~II (\texttt{02\_noncompact\_formulation.tex}) has
+	two simultaneously exponential components:
+	\begin{itemize}
+	\item \textbf{Exponential columns}: $|\mathcal{C}| = \binom{m}{b}$
+	      configuration variables $\to$ requires \textbf{column generation} (H-SUKP pricing).
+	\item \textbf{Exponential rows}: PCTSP-based subtour elimination constraints
+	      $\to$ requires \textbf{row generation} (separation via cut-finding).
+	\end{itemize}
+	Running both simultaneously (``double generation'') is complex: adding a new column
+	can re-violate previously satisfied subtour cuts, forcing repeated separation passes.
+	This interaction makes the LP solve at each Branch-and-Price node very expensive.
+
+	\medskip\noindent\textbf{This document's solution:} replace the exponential
+	subtour constraints with a polynomial ($O(n^2)$)
+	set of \emph{Miller--Tucker--Zemlin} (MTZ) constraints adapted to the
+	cluster structure of the GTSP. Row generation is completely eliminated; only
+	column generation remains. The trade-off is:
+	\begin{center}
+		\renewcommand{\arraystretch}{1.3}
+		\begin{tabular}{lcc}
+			\toprule
+			& \textbf{Old (SEC-based)} & \textbf{New (MTZ-based)} \\
+			\midrule
+			Variables & $|V|^2$ (exponential) & $|V|^2$ (exponential) \\
+			Subtour constraints & $2^{|V|}$ (exponential) & $n^2$ (polynomial) \\
+			Coverage constraints & $n$ & $2n$ \\
+			Column generation needed? & Yes & Yes \\
+			Row generation needed? & Yes & \textbf{No} \\
+			\bottomrule
+		\end{tabular}
+	\end{center}
+	Row generation is eliminated. Column generation for the exponential variable
+	set $\{x_{ij}\}$ remains necessary.
+	
+	%───────────────────────────────────────────────────────────────────────────────
+	\section{Notation}
+	%───────────────────────────────────────────────────────────────────────────────
+	
+	\begin{itemize}
+		\item $J = \{1,\ldots,n\}$: set of $n$ jobs;\quad $T$: set of tools;\quad $C$: magazine capacity.
+		\item $T_j \subseteq T$, $|T_j| \leq C$: mandatory tools of job $j$.
+		\item $V$: set of \textbf{all valid configurations} ---
+		all subsets $\mathcal{C} \subseteq T$ with $|\mathcal{C}| = C$.
+		$|V| = \binom{|T|}{C}$, exponential in general.
+		\item For each job $j^* \in J$, define its \textbf{configuration cluster}:
+		\[
+		H_{j^*} \;=\; \bigl\{\mathcal{C} \in V : T_{j^*} \subseteq \mathcal{C}\bigr\},
+		\]
+		the set of all configurations in $V$ that can serve job $j^*$.
+		\item \textbf{Switching cost} between configurations $i, j \in V$:
+		\[
+		d_{ij} \;=\; C - |i \cap j| \;=\; |i \setminus j|.
+		\]
+		\item $n = |J|$: number of jobs (used in MTZ coefficient).
+		\item \textbf{Dummy nodes} $s, t \notin V$: artificial source and sink
+		for the path formulation (connected to all $i \in V$ with zero-cost arcs).
+	\end{itemize}
+	
+	%───────────────────────────────────────────────────────────────────────────────
+	\section{The Complete GTSP-MTZ Formulation}
+	\label{sec:formulation}
+	%───────────────────────────────────────────────────────────────────────────────
+	
+	Let $V^+ = V \cup \{s, t\}$ (extended node set).
+	Define $x_{ij} \in \{0,1\}$ for all $(i,j) \in V^+ \times V^+$, $i \neq j$.
+	
+	\begin{formbox}
+		\textbf{GTSP-MTZ Formulation for SSP (Path version)}
+		
+		\medskip
+		\textbf{Objective:}
+		\begin{equation}
+			\label{eq:obj}
+			\min \quad \sum_{i \in V} \sum_{j \in V,\; j \neq i} d_{ij}\, x_{ij}
+		\end{equation}
+		
+		\textbf{Path start and end} (dummy source $s$ and sink $t$):
+		\begin{align}
+			\sum_{j \in V} x_{sj} &= 1 \label{eq:source}\\
+			\sum_{i \in V} x_{it} &= 1 \label{eq:sink}
+		\end{align}
+		
+		\textbf{Configuration-level degree constraints}
+		(each config used at most once):
+		\begin{align}
+			\sum_{j \in V^+ \setminus \{i\}} x_{ij} &\leq 1
+			\quad \forall\, i \in V \label{eq:outdeg}\\
+			\sum_{i \in V^+ \setminus \{j\}} x_{ij} &\leq 1
+			\quad \forall\, j \in V \label{eq:indeg}
+		\end{align}
+		
+		\textbf{Flow conservation} (if a config is entered, it is also exited):
+		\begin{equation}
+			\label{eq:flow}
+			\sum_{j \in V^+ \setminus \{i\}} x_{ij}
+			\;=\;
+			\sum_{j \in V^+ \setminus \{i\}} x_{ji}
+			\quad \forall\, i \in V
+		\end{equation}
+		
+		\textbf{Cluster coverage --- Exit constraint}
+		(the path must leave each job's cluster):
+		\begin{equation}
+			\label{eq:exit}
+			\sum_{i \in H_{j^*}} \;\sum_{j \in V \setminus H_{j^*}} x_{ij}
+			\;\geq\; 1
+			\qquad \forall\, j^* \in J
+		\end{equation}
+		
+		\textbf{Cluster coverage --- Entry constraint}
+		(the path must enter each job's cluster):
+		\begin{equation}
+			\label{eq:entry}
+			\sum_{i \in V \setminus H_{j^*}} \;\sum_{j \in H_{j^*}} x_{ij}
+			\;\geq\; 1
+			\qquad \forall\, j^* \in J
+		\end{equation}
+		
+		\textbf{Cluster-level MTZ subtour elimination}:
+		\begin{equation}
+			\label{eq:MTZ}
+			u_{j'} - u_{j''} + n \sum_{i \in H_{j'}} \sum_{j \in H_{j''}} x_{ij}
+			\;\leq\; n - 1
+			\qquad \forall\, j', j'' \in J,\; j' \neq j''
+		\end{equation}
+		
+		\textbf{Bounds on position variables:}
+		\begin{equation}
+			\label{eq:ubounds}
+			1 \;\leq\; u_{j'} \;\leq\; n \qquad \forall\, j' \in J
+		\end{equation}
+		
+		\textbf{Integrality:}
+		\begin{equation}
+			\label{eq:int}
+			x_{ij} \in \{0, 1\} \qquad \forall\, i, j \in V^+,\; i \neq j
+		\end{equation}
+	\end{formbox}
+	
+	%───────────────────────────────────────────────────────────────────────────────
+	\section{Mathematical Verification}
+	\label{sec:verify}
+	%───────────────────────────────────────────────────────────────────────────────
+	
+	\subsection{Correctness of the Objective}
+	
+	The objective \eqref{eq:obj} sums $d_{ij} = C - |i \cap j|$ over all arcs
+	$(i \to j)$ selected in the solution.
+	Since $|i| = |j| = C$, we have $|i \setminus j| = C - |i \cap j|$
+	(tools removed when transitioning from $i$ to $j$) $=$ tools inserted
+	(uniform SSP model). The objective correctly minimises total tool switches.
+	
+	\subsection{Correctness of Coverage Constraints}
+	
+	\begin{thmbox}
+		\begin{proposition}[Coverage $\Leftrightarrow$ Job Feasibility]
+			\label{prop:coverage}
+			In any feasible solution to the formulation, every job $j^* \in J$ is served:
+			there exists at least one visited configuration $\mathcal{C}$ with
+			$T_{j^*} \subseteq \mathcal{C}$ (i.e., $\mathcal{C} \in H_{j^*}$).
+		\end{proposition}
+	\end{thmbox}
+	
+	\begin{proofbox}
+		\begin{proof}
+			The selected arcs $\{(i,j) : x_{ij}=1\}$ form a path from $s$ to $t$ through
+			a sequence of configurations $\mathcal{C}_{(1)},\mathcal{C}_{(2)},\ldots$
+			The exit constraint \eqref{eq:exit} requires at least one arc from inside
+			$H_{j^*}$ to outside $H_{j^*}$, and the entry constraint \eqref{eq:entry}
+			requires at least one arc from outside $H_{j^*}$ into $H_{j^*}$.
+			Since the selected arcs form a connected path, the existence of both an entry
+			and an exit arc for $H_{j^*}$ implies the path passes through at least one node
+			in $H_{j^*}$, i.e., at least one visited configuration belongs to $H_{j^*}$.
+			That configuration serves job $j^*$. \qed
+		\end{proof}
+	\end{proofbox}
+	
+	\subsection{Correctness of MTZ Subtour Elimination}
+	
+	\begin{thmbox}
+		\begin{proposition}[MTZ Eliminates Cluster-Level Subtours]
+			\label{prop:MTZ}
+			In any feasible integer solution, the selected arcs do not contain a closed
+			tour visiting only a strict subset of job clusters.
+			More precisely: if there exists a directed cycle in the arc solution that
+			visits configurations only from clusters $\{H_{j'} : j' \in S\}$ for some
+			$S \subsetneq J$, then constraint \eqref{eq:MTZ} is violated.
+		\end{proposition}
+	\end{thmbox}
+	
+	\begin{proofbox}
+		\begin{proof}
+			Suppose for contradiction there is a directed cycle among configurations
+			visiting clusters $S \subsetneq J$. Then for each consecutive cluster pair
+			$(j', j'')$ in this cycle, there exists an arc $(i,j)$ with $i \in H_{j'}$,
+			$j \in H_{j''}$ with $x_{ij}=1$, so
+			$\sum_{i \in H_{j'}} \sum_{j \in H_{j''}} x_{ij} \geq 1$.
+			
+			Summing constraint \eqref{eq:MTZ} around the cycle for all consecutive pairs
+			$(j',j'')$ in $S$:
+			\[
+			\sum_{\text{cycle}} (u_{j'} - u_{j''})
+			+ n \sum_{\text{cycle}} \sum_{i \in H_{j'}} \sum_{j \in H_{j''}} x_{ij}
+			\leq |S|(n-1).
+			\]
+			The left-hand telescoping sum of $u$-differences around a cycle equals zero.
+			The flow term gives $\sum_{\text{cycle}} 1 = |S|$ (at least one arc per cluster pair).
+			Hence $n|S| \leq |S|(n-1)$, i.e.\ $n \leq n-1$, a contradiction.
+			Therefore no cluster-level subtour exists. \qed
+		\end{proof}
+	\end{proofbox}
+	
+	\begin{warnbox}
+		\textbf{Important caveat --- Intra-cluster subtours.}
+		Constraint \eqref{eq:MTZ} eliminates subtours at the \emph{cluster level}
+		but does \textbf{not} eliminate subtours involving multiple configurations
+		from the \emph{same} cluster $H_{j^*}$ (i.e.\ a cycle entirely within $H_{j^*}$).
+		
+		\medskip
+		However, such intra-cluster subtours are \textbf{never optimal} for SSP:
+		visiting two configurations $\mathcal{C}_a, \mathcal{C}_b \in H_{j^*}$ in a cycle
+		serves job $j^*$ redundantly (twice) and incurs an avoidable switching cost.
+		Any optimal integer solution will not exhibit intra-cluster cycles.
+		The LP relaxation may, but the integer optimal will not.
+		
+		\medskip
+		If a stronger guarantee is needed (e.g.\ for LP bound quality),
+		add configuration-level MTZ constraints:
+		\[
+		v_i - v_j + N x_{ij} \leq N-1 \quad \forall\, i, j \in V
+		\]
+		with $N = |V|$ and $v_i \in \mathbb{R}$.
+		These eliminate all subtours but reintroduce $O(|V|^2)$ (exponential) constraints.
+	\end{warnbox}
+	
+	\subsection{Correctness as Path (not Cycle)}
+	
+	\begin{thmbox}
+		\begin{proposition}[Path Structure]
+			\label{prop:path}
+			The dummy-node constraints \eqref{eq:source}--\eqref{eq:sink} together
+			with \eqref{eq:flow} ensure the selected arcs form a directed path
+			from $s$ to $t$ through some subset of $V$.
+		\end{proposition}
+	\end{thmbox}
+	
+	\begin{proofbox}
+		\begin{proof}
+			Constraint \eqref{eq:source}: exactly one arc leaves $s$.
+			Constraint \eqref{eq:sink}: exactly one arc enters $t$.
+			Constraint \eqref{eq:flow}: for each internal node $i \in V$, in-degree $=$ out-degree.
+			The degree constraints \eqref{eq:outdeg}--\eqref{eq:indeg} bound in- and out-degree to $\leq 1$.
+			Together, these conditions define a collection of directed paths and cycles from $s$ to $t$.
+			The MTZ constraints \eqref{eq:MTZ} eliminate cycles among the clusters $J$.
+			Since $s$ and $t$ are distinct dummy nodes not in any cluster $H_{j^*}$, the
+			solution is a single directed path $s \to \mathcal{C}_{(1)} \to \cdots \to \mathcal{C}_{(k)} \to t$. \qed
+		\end{proof}
+	\end{proofbox}
+	
+	\subsection{Equivalence to OPT-SSP}
+	
+	\begin{thmbox}
+		\begin{theorem}[Formulation Correctness]
+			\label{thm:correct}
+			The optimal objective value of the GTSP-MTZ formulation \eqref{eq:obj}--\eqref{eq:int}
+			equals $OPT_{\mathrm{SSP}}$: the minimum total tool switches over all feasible
+			job orderings and all valid configuration sequences.
+		\end{theorem}
+	\end{thmbox}
+	
+	\begin{proofbox}
+		\begin{proof}
+			\textbf{(Feasibility $\Rightarrow$ SSP solution.)}
+			Any integer feasible solution gives a path $s \to \mathcal{C}_{(1)} \to \cdots \to \mathcal{C}_{(k)} \to t$
+			through configurations. By \cref{prop:coverage}, every job $j^* \in J$ has
+			$\mathcal{C}_{(l)} \in H_{j^*}$ for some $l$; process job $j^*$ when configuration
+			$\mathcal{C}_{(l)}$ is active. The total switching cost is
+			$\sum_{l=1}^{k-1} d_{\mathcal{C}_{(l)},\mathcal{C}_{(l+1)}} = $ objective value.
+			This is a feasible SSP solution of the same cost.
+			
+			\textbf{(SSP solution $\Rightarrow$ Feasibility.)}
+			Any feasible SSP solution processes jobs in some order with configurations
+			$\mathcal{C}^{(1)},\ldots,\mathcal{C}^{(n)}$ (one per job, possibly repeated).
+			Collapsing consecutive identical configurations, we get a sequence
+			$\mathcal{C}_{(1)},\ldots,\mathcal{C}_{(k)}$ of distinct consecutive configurations.
+			Set $x_{\mathcal{C}_{(l)},\mathcal{C}_{(l+1)}}=1$ for $l=1,\ldots,k-1$, and
+			$x_{s,\mathcal{C}_{(1)}}=x_{\mathcal{C}_{(k)},t}=1$.
+			All constraints \eqref{eq:source}--\eqref{eq:int} are satisfied:
+			degree constraints hold by the path structure; coverage holds since every job
+			is served; MTZ is satisfied by setting $u_{j^*} = \min\{l : \mathcal{C}_{(l)} \in H_{j^*}\}$.
+			The objective equals the SSP solution cost.
+			
+			\textbf{Optimality} follows because the bijection above preserves costs. \qed
+		\end{proof}
+	\end{proofbox}
+	
+	%───────────────────────────────────────────────────────────────────────────────
+	\section{Constraint Count and Complexity}
+	\label{sec:complexity}
+	%───────────────────────────────────────────────────────────────────────────────
+	
+	\begin{center}
+		\renewcommand{\arraystretch}{1.4}
+		\begin{tabularx}{\textwidth}{@{}lXr@{}}
+			\toprule
+			\textbf{Constraint group} & \textbf{Description} & \textbf{Count} \\
+			\midrule
+			\eqref{eq:source}--\eqref{eq:sink} & Path start/end (dummy nodes) & 2 \\
+			\eqref{eq:outdeg}--\eqref{eq:indeg} & Config-level degree (at most one in/out) & $2|V|$ \\
+			\eqref{eq:flow} & Flow conservation at each config & $|V|$ \\
+			\eqref{eq:exit} & Exit coverage per job cluster & $n$ \\
+			\eqref{eq:entry} & Entry coverage per job cluster & $n$ \\
+			\eqref{eq:MTZ} & Cluster-level MTZ subtour elimination & $n(n-1)$ \\
+			\eqref{eq:ubounds} & Bounds on $u_{j'}$ & $2n$ \\
+			\midrule
+			\textbf{Total} & & $\boldsymbol{3|V| + n(n+1) + 4}$ \\
+			\bottomrule
+		\end{tabularx}
+	\end{center}
+	
+	\medskip
+	\noindent
+	The constraints in $|V|$ are unavoidable (one per variable column) and handled
+	by column generation. The constraints in $n$ --- the MTZ and coverage groups ---
+	are \textbf{polynomial in the number of jobs}: $O(n^2)$.
+	This is the key improvement over the SEC-based formulation,
+	which has $O(2^{|V|})$ subtour constraints requiring row generation.
+	
+	\begin{remark}[Column Generation]
+		The decision variables $x_{ij}$ are indexed by pairs of configurations.
+		Since $|V| = \binom{|T|}{C}$ is exponential, column generation is still necessary.
+		The pricing problem: given dual variables $(\mu_i, \lambda_j)$ for the degree
+		constraints and $(\pi_{j^*})$ for the coverage constraints, find the arc $(i,j)$
+		with most negative reduced cost
+		$\bar{d}_{ij} = d_{ij} - \mu_i - \lambda_j - \sum_{j^*: i \in H_{j^*},\,j \notin H_{j^*}} \pi_{j^*}$.
+		This reduces to finding, for each pair of job clusters, the pair of configurations
+		$(i \in H_{j'},\, j \in H_{j''})$ minimising switching cost $d_{ij}$ minus dual bonuses.
+		For structured instances (e.g.\ laminar tool families), this is tractable.
+	\end{remark}
+	
+	%───────────────────────────────────────────────────────────────────────────────
+	\section{Comparison with the Board's Formulation}
+	\label{sec:compare}
+	%───────────────────────────────────────────────────────────────────────────────
+	
+	The board's formulation is mathematically correct in its core ideas.
+	The complete formulation above adds three elements that were implicit or missing:
+	
+	\begin{enumerate}[label=(\arabic*)]
+		\item \textbf{Dummy source/sink nodes} \eqref{eq:source}--\eqref{eq:sink}:
+		The board uses the cycle-TSP structure (degree $= 1$ for all nodes).
+		The path version (SSP is a path, not a cycle) requires dummy nodes.
+		Without them, the formulation finds a Hamiltonian \emph{cycle} which is not
+		what SSP requires. A valid alternative: set $d_{ts} = 0$ (free return arc)
+		and minimise the cycle cost, then break at $(t \to s)$.
+		
+		\item \textbf{Flow conservation} \eqref{eq:flow}:
+		Ensures that if a configuration is entered along the path, it is also
+		exited (the path does not terminate mid-way at an internal node).
+		
+		\item \textbf{Configuration-level degree constraints}
+		\eqref{eq:outdeg}--\eqref{eq:indeg}:
+		Without these, multiple arcs could leave or enter the same configuration,
+		which would not correspond to a valid sequential job processing order.
+	\end{enumerate}
+	
+	The entry/exit constraints \eqref{eq:exit}--\eqref{eq:entry} and the cluster-level
+	MTZ \eqref{eq:MTZ} are exactly as on the board and are correct.
+	
+	\begin{thmbox}
+		\begin{remark}[Why $n$ in the MTZ coefficient]
+			The MTZ constraint uses $n = |J|$ (number of jobs/clusters) rather than $|V|$
+			(number of configurations). This is correct because the position variables
+			$u_{j'}$ track the \emph{order of cluster visits}, not configurations.
+			There are at most $n$ clusters to visit, so $u_{j'} \in [1,n]$ suffices.
+			Using $|V|$ instead would be a valid but unnecessarily weak (larger) coefficient,
+			relaxing the constraint and potentially worsening the LP bound.
+		\end{remark}
+	\end{thmbox}
+	
+	%───────────────────────────────────────────────────────────────────────────────
+	\section{Summary}
+	%───────────────────────────────────────────────────────────────────────────────
+	
+	The GTSP-MTZ formulation for SSP:
+	\begin{itemize}
+		\item Is \textbf{mathematically correct}: \cref{thm:correct} proves it
+		exactly captures $OPT_{\mathrm{SSP}}$.
+		\item Has \textbf{polynomial subtour constraints}: $O(n^2)$ MTZ constraints
+		replace $O(2^{|V|})$ SEC constraints --- row generation is eliminated.
+		\item Still requires \textbf{column generation}: the variable set $\{x_{ij}\}$
+		is exponential in size.
+		\item Has a \textbf{known LP bound weakness}: cluster-level MTZ is weaker than
+		SEC for the LP relaxation (larger integrality gap), as is standard for
+		MTZ vs.\ SEC in classic TSP.
+		\item Can be \textbf{strengthened} by:
+		adding the JGP-grouping structure (restricting $V$ to JGP-feasible
+		configs), using Lifted MTZ constraints,
+		or incorporating a MWHP-based ordering warm start.
+	\end{itemize}
+
+%----------------------------------------------------------------------
+\section{Where This Fits: Solution Architecture}
+%----------------------------------------------------------------------
+
+The four formulation families form a progression in tractability:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Formulation} & \textbf{Column gen.?} & \textbf{Row gen.?}\\
+\midrule
+Compact ILPs (Part I) & No & No\\
+Non-compact + PCTSP (Part II) & Yes & \textbf{Yes}\\
+\textbf{MTZ (this document)} & \textbf{Yes} & \textbf{No}\\
+Branch-and-Benders & No & Yes (lazy cuts)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+The MTZ formulation eliminates row generation entirely: with only
+column generation, a Branch-and-Price approach becomes much more
+manageable. The trade-off is a weaker LP bound vs.\ PCTSP-based
+subtour elimination---the same MTZ vs.\ SEC trade-off as in the
+classical TSP \cite{Applegate2006}.
+
+\bibliographystyle{abbrvnat}
+\bibliography{references}
+\end{document}

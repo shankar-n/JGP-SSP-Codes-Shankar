@@ -1,0 +1,436 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{enumitem}
+\usepackage{mdframed}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+
+\definecolor{navyblue}{RGB}{26,58,92}
+\definecolor{midblue}{RGB}{44,95,138}
+\definecolor{lightblue}{RGB}{232,240,248}
+\definecolor{proofgray}{RGB}{242,242,242}
+
+\hypersetup{colorlinks=true,linkcolor=midblue,citecolor=midblue,urlcolor=midblue}
+
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\color{navyblue}\textit{Non-Compact Configuration-Based Formulation for the U-SSP}}
+\fancyhead[R]{\small\color{navyblue}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}{\large\bfseries\color{navyblue}}{}{0em}{}[\color{navyblue}\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{midblue}}{}{0em}{}
+\titleformat{\subsubsection}{\normalsize\itshape\color{midblue}}{}{0em}{}
+
+\newmdenv[backgroundcolor=lightblue,linecolor=navyblue,linewidth=1.2pt,
+  leftline=true,rightline=false,topline=false,bottomline=false,
+  innerleftmargin=12pt,innerrightmargin=8pt,innertopmargin=8pt,
+  innerbottommargin=8pt,skipabove=10pt,skipbelow=6pt]{thmbox}
+
+\newmdenv[backgroundcolor=proofgray,linecolor=midblue,linewidth=0.8pt,
+  leftline=true,rightline=false,topline=false,bottomline=false,
+  innerleftmargin=10pt,innerrightmargin=8pt,innertopmargin=6pt,
+  innerbottommargin=6pt,skipabove=6pt,skipbelow=6pt]{proofbox}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+\setlist[itemize]{noitemsep,topsep=4pt}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{document}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\begin{center}
+  {\color{navyblue}\rule{\textwidth}{2pt}}\\[0.4cm]
+  {\LARGE\bfseries\color{navyblue}The Job Sequencing and Tool Switching Problem}\\[0.3cm]
+  {\large\itshape\color{midblue}Part II: The Non-Compact Configuration-Based Formulation}\\[0.2cm]
+  {\color{navyblue}\rule{\textwidth}{2pt}}
+\end{center}
+
+\begin{mdframed}[backgroundcolor=lightblue,linecolor=navyblue,linewidth=1pt,
+  innerleftmargin=14pt,innerrightmargin=14pt,innertopmargin=8pt,innerbottommargin=8pt]
+\small\textbf{Scope.}
+This document presents the \emph{non-compact, configuration-based} ILP formulation
+for the Uniform SSP, proposed by Colares and Wagler \cite{Colares2026Exact}.
+It includes: the configuration space and job clusters, the transition metric with
+a metric-space proof, the full ILP with PCTSP-based subtour elimination (which is
+tighter than GSECs), and the column generation framework with the H-SUKP pricing
+subproblem. This is the primary modelling framework for all subsequent analysis.
+
+\smallskip
+\textbf{Key caveat}: the PCTSP-based formulation requires \emph{both} column
+generation (exponential variables) and row generation (exponential constraints),
+creating a ``double generation'' problem. Part~IV (\texttt{04\_mtz\_formulation.tex})
+resolves this by replacing the exponential constraints with polynomial MTZ constraints,
+leaving only column generation.
+\end{mdframed}
+
+\vspace{0.5cm}
+\tableofcontents
+\newpage
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Motivation: Escaping Compact-Model Failure}
+\label{sec:motivation}
+% ─────────────────────────────────────────────────────────────────────────────
+
+As established in \texttt{01\_foundations.tex}, all compact ILP formulations
+for the SSP suffer from two fundamental problems:
+(i) the LP relaxation collapses to a lower bound of 0, providing no pruning
+information, and
+(ii) the 0-block symmetry creates $2^k$ equivalent integer solutions that
+exhaust the branch-and-bound tree.
+
+The non-compact formulation introduced here replaces positional variables with
+explicit \emph{configuration} variables — one per valid magazine state. This
+eliminates the symmetry problem and gives a much tighter LP relaxation. However,
+it introduces a new computational challenge that must be understood upfront.
+
+\begin{mdframed}[backgroundcolor=lightblue,linecolor=navyblue,linewidth=1pt,
+  innerleftmargin=14pt,innerrightmargin=14pt,innertopmargin=8pt,innerbottommargin=8pt]
+\textbf{The double-generation problem.}
+The non-compact formulation has \emph{two} sources of exponential size
+simultaneously:
+\begin{itemize}
+\item \textbf{Exponential columns} (configurations): $|\mathcal{C}| = \binom{m}{b}$
+  variables. Handled by \textbf{column generation}: add improving configurations
+  one at a time via a pricing oracle (H-SUKP, Section~\ref{sec:sukp}).
+\item \textbf{Exponential rows} (subtour constraints): the PCTSP-based subtour
+  elimination constraints number $O(2^{|\mathcal{C}|})$. Handled by
+  \textbf{row generation}: add violated constraints on-the-fly via separation.
+\end{itemize}
+Running column generation and row generation \emph{simultaneously} is called
+\emph{double generation}. It is technically complex: each LP re-solve after
+adding a new column potentially violates previously satisfied subtour cuts,
+requiring a full re-separation pass. This interaction makes convergence slow and
+implementation fragile.
+
+\medskip
+\textbf{The remedy} (Part~IV, \texttt{04\_mtz\_formulation.tex}):
+replace the exponential subtour constraints with a \emph{polynomial} set of
+Miller--Tucker--Zemlin (MTZ) constraints. This eliminates row generation entirely,
+leaving only column generation — a much more tractable problem.
+The trade-off is a slightly weaker LP bound, but in practice this is far
+outweighed by the reduction in implementation complexity and solver iterations.
+\end{mdframed}
+
+\medskip
+The non-compact approach takes a different viewpoint from compact models: instead
+of asking ``which tool is at position $k$?'', it asks ``which complete magazine
+state (configuration) is used to process a group of jobs?'' By working directly
+over the set of all valid magazine states, the model eliminates positional
+symmetry entirely and achieves a far tighter LP relaxation.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Configuration Space and Job Clusters}
+\label{sec:config_space}
+% ─────────────────────────────────────────────────────────────────────────────
+
+We use the same notation as \texttt{01\_foundations.tex}:
+$J=\{1,\ldots,n\}$ jobs, $T=\{1,\ldots,m\}$ tools, magazine capacity $b$,
+requirement sets $T_j \subseteq T$.
+
+\begin{definition}[Configuration space $\mathcal{C}$]
+The \emph{configuration space} is the set of all maximal tool subsets:
+\[
+  \mathcal{C} = \bigl\{ C \subseteq T \;\big|\; |C| = b \bigr\}.
+\]
+Its cardinality is $|\mathcal{C}| = \binom{m}{b}$.
+\end{definition}
+
+By Lemma~1 of \texttt{01\_foundations.tex}, restricting to maximal configurations
+is without loss of generality. We augment $\mathcal{C}$ with a dummy configuration
+$C_0 = \emptyset$ (or any fixed initial state) representing the machine's magazine
+before any job is processed.
+
+\begin{definition}[Job cluster $H_j$]
+For each job $j \in J$, its \emph{cluster} is the set of configurations that
+can process it:
+\[
+  H_j = \bigl\{ C \in \mathcal{C} \;\big|\; T_j \subseteq C \bigr\}.
+\]
+Since $|T_j| \le b$, every cluster is non-empty.
+\end{definition}
+
+\noindent\textbf{Key point.}
+Unlike in a standard GTSP, clusters can \emph{overlap}: a single configuration
+$C$ may satisfy multiple jobs simultaneously when $T_i \cup T_j \subseteq C$.
+This overlap is the central structural property of the SSP and is handled by
+the GTSP equivalence in \texttt{03\_gtsp\_equivalence.tex}.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{The Transition Metric}
+\label{sec:metric}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Definition}
+
+When the machine transitions from a magazine state $C_u$ to $C_v$, the tools
+in $C_u \setminus C_v$ are evicted and the tools in $C_v \setminus C_u$ must
+be inserted. Since both configurations are maximal ($|C_u|=|C_v|=b$), the number
+of evictions equals the number of insertions, and the switching cost is:
+\[
+  d(C_u, C_v) = |C_v \setminus C_u| = b - |C_u \cap C_v|.
+\]
+
+\subsection{Metric Space Validity}
+
+\begin{thmbox}
+\begin{theorem}[Triangle inequality for $d$ \cite{Colares2026Exact}]
+\label{thm:triangle}
+For any three configurations $C_u, C_w, C_v \in \mathcal{C}$:
+\[
+  d(C_u, C_v) \le d(C_u, C_w) + d(C_w, C_v).
+\]
+\end{theorem}
+\end{thmbox}
+
+\begin{proofbox}
+\begin{proof}
+Using $d(A,B) = |A \setminus B|$, we show $|C_u \setminus C_v| \le
+|C_u \setminus C_w| + |C_w \setminus C_v|$.
+
+Pick any tool $t \in C_u \setminus C_v$, so $t \in C_u$ and $t \notin C_v$.
+\begin{itemize}
+\item If $t \notin C_w$: then $t \in C_u \setminus C_w$.
+\item If $t \in C_w$: then since $t \notin C_v$, we have $t \in C_w \setminus C_v$.
+\end{itemize}
+In both cases $t \in (C_u \setminus C_w) \cup (C_w \setminus C_v)$, so
+$C_u \setminus C_v \subseteq (C_u \setminus C_w) \cup (C_w \setminus C_v)$.
+Taking cardinalities and applying subadditivity of set union:
+\[
+  |C_u \setminus C_v| \le |(C_u \setminus C_w) \cup (C_w \setminus C_v)|
+  \le |C_u \setminus C_w| + |C_w \setminus C_v|. \qquad\qed
+\]
+\end{proof}
+\end{proofbox}
+
+\begin{remark}
+The metric is also symmetric ($d(C_u,C_v)=d(C_v,C_u)$) and non-negative,
+so $(\mathcal{C}, d)$ is a valid metric space. Symmetry follows from
+$|A \setminus B| = |B \setminus A|$ when $|A|=|B|=b$.
+The maximum distance is $b$ (completely disjoint configurations).
+\end{remark}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{The Non-Compact ILP}
+\label{sec:nc_ilp}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Decision Variables}
+
+\begin{itemize}
+\item $y(v) \in \{0,1\}$: 1 if configuration $v \in \mathcal{C}$ is \emph{activated}
+      (used at least once in the sequence).
+\item $x(u,v) \in \{0,1\}$: 1 if the machine transitions \emph{directly} from
+      configuration $u$ to configuration $v$.
+\end{itemize}
+
+We include $C_0$ (dummy start/end node) with $y(C_0)=1$ fixed and $d(C_0,v)$
+equal to the cost of loading configuration $v$ from an empty magazine.
+
+\subsection{Objective and Base Constraints}
+
+\begin{align}
+\min \quad & \sum_{u \in \mathcal{C}} \sum_{v \in \mathcal{C} \setminus \{u\}}
+             d(u,v)\, x(u,v) \label{eq:nc_obj}\\[4pt]
+\text{s.t.}\quad
+& \sum_{v \in H_j} y(v) \ge 1 \quad \forall j \in J
+  \label{eq:nc_cover}\\
+& \sum_{u \ne v} x(u,v) = y(v) \quad \forall v \in \mathcal{C}
+  \label{eq:nc_flowin}\\
+& \sum_{v \ne u} x(u,v) = y(u) \quad \forall u \in \mathcal{C}
+  \label{eq:nc_flowout}\\
+& y(C_0) = 1 \label{eq:nc_depot}\\
+& x(u,v) \in \{0,1\},\; y(v) \in \{0,1\} \quad \forall u,v \in \mathcal{C}
+  \notag
+\end{align}
+
+\noindent\textbf{Interpretation.}
+Constraint~\eqref{eq:nc_cover} ensures every job is processed by at least one
+activated configuration. Constraints~\eqref{eq:nc_flowin}--\eqref{eq:nc_flowout}
+enforce flow conservation: each activated node has exactly one incoming and one
+outgoing arc, forming a collection of paths/cycles. The depot constraint~\eqref{eq:nc_depot}
+anchors the sequence to start and end at $C_0$.
+
+\subsection{Subtour Elimination: PCTSP-Based SECs}
+
+Constraints~\eqref{eq:nc_flowin}--\eqref{eq:nc_flowout} alone allow disconnected
+subtours among activated configurations. We need constraints that force all
+activated configurations to lie on a \emph{single} path through the depot.
+
+The standard approach uses Generalized Subtour Elimination Constraints (GSECs).
+However, GSECs are only valid when $y(v) \ge 1$ for all nodes in the subset,
+which does not hold here since $y(v) \in \{0,1\}$. A tighter and correct
+formulation uses the Prize-Collecting TSP (PCTSP) subtour elimination constraints
+\cite{Balas1989}:
+\[
+  \sum_{u \in S}\sum_{v \in S \setminus \{u\}} x(u,v)
+  \;\le\; \sum_{u \in S \setminus \{k\}} y(u)
+  \quad \forall S \subset \mathcal{C},\; 2 \le |S| \le |\mathcal{C}|-1,\;
+  C_0 \notin S,\; \forall k \in S.
+  \label{eq:nc_pctsp}
+\]
+
+\begin{remark}[Why PCTSP over GSEC]
+The GSEC form $\sum_{u,v \in S} x(u,v) \le |S|-1$ assumes all $y(u)=1$ within
+$S$. When some $y(u)=0$ (unactivated), the bound is too loose and subtours of
+inactive nodes can appear in LP solutions. The PCTSP form $\sum x(u,v) \le
+\sum_{u \ne k} y(u)$ correctly adapts to the actual number of \emph{activated}
+nodes, eliminating spurious subtours even in the fractional LP relaxation.
+See \cite{Balas1989} for the original derivation.
+\end{remark}
+
+\subsection{Complete Non-Compact ILP}
+
+Combining all components:
+\begin{align}
+\min \quad & \sum_{u,v} d(u,v)\, x(u,v) \notag\\
+\text{s.t.}\quad
+& \sum_{v \in H_j} y(v) \ge 1 && \forall j \in J \notag\\
+& \sum_{u \ne v} x(u,v) = y(v) && \forall v \in \mathcal{C} \notag\\
+& \sum_{v \ne u} x(u,v) = y(u) && \forall u \in \mathcal{C} \notag\\
+& \sum_{u \in S}\sum_{v \in S \setminus \{u\}} x(u,v)
+  \le \sum_{u \in S \setminus \{k\}} y(u)
+  && \forall S \subset \mathcal{C},\, C_0 \notin S,\, \forall k \in S \notag\\
+& y(C_0) = 1 \notag\\
+& x(u,v),\, y(v) \in \{0,1\} && \forall u,v \in \mathcal{C} \notag
+\end{align}
+
+\noindent Since $|\mathcal{C}| = \binom{m}{b}$ is exponential, the full model
+cannot be instantiated explicitly. This motivates the column generation approach
+in the next section.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Column Generation Framework}
+\label{sec:cg}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Restricted Master Problem (RMP)}
+
+Let $V \subset \mathcal{C}$ be a small, dynamically growing subset of
+configurations (initially seeded by heuristic solutions or greedy construction).
+The RMP solves the LP relaxation of the non-compact ILP restricted to $V$:
+\begin{align}
+\min \quad & \sum_{i,j \in V} d(i,j)\, x_{ij} \label{eq:rmp_obj}\\
+\text{s.t.}\quad
+& \sum_{i \in V \cap H_r} y_i \ge 1 && \forall r \in J
+  \quad (\text{dual: } \pi_r \ge 0) \label{eq:rmp_cover}\\
+& \sum_{j \ne i} x_{ij} = y_i && \forall i \in V
+  \quad (\text{dual: } \alpha_i \in \mathbb{R}) \label{eq:rmp_flowin}\\
+& \sum_{j \ne i} x_{ji} = y_i && \forall i \in V
+  \quad (\text{dual: } \beta_i \in \mathbb{R}) \label{eq:rmp_flowout}\\
+& \sum_{i \in S}\sum_{j \in S \setminus\{i\}} x_{ij}
+  \le \sum_{i \in S \setminus\{k\}} y_i
+  && \forall S \subset V,\, C_0 \notin S,\, k \in S
+  \quad (\text{dual: } \mu_{S,k} \le 0) \label{eq:rmp_sec}\\
+& y_{C_0} = 1 \notag\\
+& x_{ij} \ge 0,\; y_i \ge 0 && \forall i,j \in V \notag
+\end{align}
+
+At each iteration, solving the RMP yields LP optimal value $Z^*_{RMP}$ and dual
+variables $(\pi, \alpha, \beta, \mu)$.
+
+\subsection{Pricing Subproblem: When to Add a Configuration}
+
+A new configuration $c \notin V$ should be added if doing so can reduce the
+RMP objective. The \emph{reduced cost} of introducing $c$ with incoming arc from
+$u \in V$ and outgoing arc to $w \in V$ is:
+\[
+  \bar{c}(u,c,w) = d(u,c) + d(c,w) - \alpha_u - \beta_w
+  - \sum_{r \in J:\, T_r \subseteq c} \pi_r
+  - \sum_{S,k:\, u,c \in H(S)} \mu_{S,k}
+\]
+(the GSEC dual terms vanish for a new node $c$ not yet in any identified subset
+$S$). A configuration $c$ is \emph{improving} if $\min_{u,w} \bar{c}(u,c,w) < 0$.
+
+Ignoring routing duals for the pricing step (standard practice), the dominant
+term is the coverage gain. We seek:
+\[
+  \max_{c:\, |c|=b} \;\sum_{r \in J:\, T_r \subseteq c} \pi_r
+\]
+subject to $|c| \le b$ and the configuration feasibility condition
+$T_r \subseteq c \iff v_r = 1$ (all tools of job $r$ are in $c$).
+
+\subsection{The Pricing Subproblem as a Hypergraph SUKP}
+\label{sec:sukp}
+
+Let $z_t \in \{0,1\}$ indicate that tool $t$ is included in the new configuration,
+and $v_r \in \{0,1\}$ indicate that job $r$ is \emph{covered} by the configuration
+(meaning all its required tools are selected). The pricing problem is:
+
+\begin{align}
+\max \quad & \sum_{r \in J} \pi_r\, v_r \label{eq:ps_obj}\\
+\text{s.t.}\quad
+& v_r \le z_t && \forall r \in J,\, \forall t \in T_r \label{eq:ps_cover}\\
+& \sum_{t \in T} z_t \le b \label{eq:ps_cap}\\
+& z_t \in \{0,1\} \;\; \forall t \in T, \quad v_r \in \{0,1\} \;\; \forall r \in J
+  \notag
+\end{align}
+
+Constraint~\eqref{eq:ps_cover} ensures that $v_r=1$ only if all tools in $T_r$
+are selected. This is the \emph{Set Union Knapsack Problem (SUKP)} with hyperedges
+(one hyperedge per job, connecting its required tools) and item capacity $b$:
+it is \textbf{strongly NP-hard} \cite{Goldschmidt1994}. It can be solved exactly
+by branch-and-bound or IP, with ML-based acceleration for large instances
+(see \texttt{08\_research\_notes.md}).
+
+\begin{remark}[SUKP vs.\ standard knapsack]
+In a standard knapsack, each item contributes independently to value and weight.
+In the SUKP, a job $r$ contributes reward $\pi_r$ only if \emph{all} its tools
+are selected simultaneously — a non-separable, conjunctive structure. This is
+why the pricing subproblem is strictly harder than a standard knapsack.
+\end{remark}
+
+\subsection{Column Generation Termination}
+
+The LP relaxation is solved to optimality when no improving column can be found:
+$\min_{c} \bar{c}(u,c,w) \ge 0$ for all potential insertion pairs $(u,w)$.
+This certificate is provided by the exact SUKP solver. If a negative reduced
+cost column is found, it is added to $V$ and the RMP is re-solved.
+The process continues until optimality is certified.
+Integer solutions are recovered by branch-and-price \cite{Barnhart1998}.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Why the Non-Compact Formulation is Better}
+\label{sec:advantages}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\begin{enumerate}
+\item \textbf{No positional symmetry.} Each configuration is a unique physical
+  machine state, not a positional variable. The $2^k$ 0-block symmetry of compact
+  models disappears: the KTNS policy is implicit in the choice of which
+  configurations appear on the path.
+\item \textbf{Tight LP relaxation.} The coverage constraints over job clusters,
+  combined with flow conservation, provide a much stronger lower bound than the
+  zero bound of position-based models.
+\item \textbf{Scalable via column generation.} We never enumerate all
+  $\binom{m}{b}$ configurations; only those with improving reduced costs are added.
+\item \textbf{Natural GTSP structure.} The non-compact ILP is isomorphic to a
+  Generalised TSP over the configuration graph (Part~III), enabling the use of
+  decades of TSP theory and solvers.
+\item \textbf{The double-generation caveat.} The PCTSP-based formulation
+  above requires both column generation and row generation simultaneously.
+  Part~IV (\texttt{04\_mtz\_formulation.tex}) resolves this by replacing the
+  exponential PCTSP constraints with $O(n^2)$ MTZ constraints, eliminating
+  row generation entirely at the cost of a slightly weaker LP bound.
+\end{enumerate}
+
+
+\bibliographystyle{abbrvnat}
+\bibliography{references}
+\end{document}

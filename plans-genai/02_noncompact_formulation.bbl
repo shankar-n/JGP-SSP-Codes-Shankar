@@ -1,0 +1,32 @@
+\begin{thebibliography}{4}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Balas(1989)]{Balas1989}
+E.~Balas.
+\newblock The prize collecting traveling salesman problem.
+\newblock \emph{Networks}, 19\penalty0 (6):\penalty0 621--636, 1989.
+
+\bibitem[Barnhart et~al.(1998)Barnhart, Johnson, Nemhauser, Savelsbergh, and
+  Vance]{Barnhart1998}
+C.~Barnhart, E.~L. Johnson, G.~L. Nemhauser, M.~W.~P. Savelsbergh, and P.~H.
+  Vance.
+\newblock Branch-and-price: Column generation for solving huge integer
+  programs.
+\newblock \emph{Operations Research}, 46\penalty0 (3):\penalty0 316--329, 1998.
+
+\bibitem[Colares and Wagler(2026)]{Colares2026Exact}
+R.~Colares and A.~Wagler.
+\newblock Exact formulations for the job sequencing and tool switching problem.
+\newblock \emph{Working Paper, Universit{\'e} Clermont Auvergne, LIMOS}, 2026.
+
+\bibitem[Goldschmidt et~al.(1994)Goldschmidt, Nehme, and Yu]{Goldschmidt1994}
+O.~Goldschmidt, D.~Nehme, and G.~Yu.
+\newblock Note on the set-union knapsack problem.
+\newblock \emph{Naval Research Logistics}, 41\penalty0 (6):\penalty0 833--842,
+  1994.
+
+\end{thebibliography}
