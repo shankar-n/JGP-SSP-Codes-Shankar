@@ -42,3 +42,13 @@
 
 __marimo__/
 .vscode/
+
+references/Useless/
+
+*.aux
+*.blg
+*.log
+*.tmp*
+*.toc
+*.nav
+*.snm
