@@ -89,10 +89,10 @@ from utils import load_ssp_instance
 # Solver detection  (CPLEX → Gurobi → SCIP)
 # ---------------------------------------------------------------------------
 
-_BACKEND = None          # human-readable name
-_BackendClass = None     # the solver class
+_BACKEND = None
+_BackendClass = None
 
-# ── 1. CPLEX ─────────────────────────────────────────────────────────────────
+# CPLEX only — Gurobi and SCIP backends have been archived to _archived/
 try:
     import cplex  # noqa: F401
     from branch_and_benders_cut_cplex import BranchAndBendersCutSSP_CPLEX as _BackendClass
@@ -100,31 +100,11 @@ try:
 except ImportError:
     pass
 
-# ── 2. Gurobi ────────────────────────────────────────────────────────────────
-if _BackendClass is None:
-    try:
-        import gurobipy  # noqa: F401
-        from branch_and_benders_cut_gurobi import BranchAndBendersCutSSP as _BackendClass
-        _BACKEND = "Gurobi"
-    except ImportError:
-        pass
-
-# ── 3. SCIP ───────────────────────────────────────────────────────────────────
-if _BackendClass is None:
-    try:
-        import pyscipopt  # noqa: F401
-        from branch_and_benders_cut_scip import BranchAndBendersCutSSP_SCIP as _BackendClass
-        _BACKEND = "SCIP"
-    except ImportError:
-        pass
-
 if _BackendClass is None:
     raise ImportError(
-        "No supported MIP solver found.\n"
-        "Install at least one of:\n"
-        "  • CPLEX  : pip install cplex  (or IBM CPLEX Studio)\n"
-        "  • Gurobi : pip install gurobipy  (requires a Gurobi licence)\n"
-        "  • SCIP   : pip install pyscipopt  (requires SCIP binary)\n"
+        "BBC requires IBM CPLEX.  Install the cplex Python package "
+        "(ships with IBM CPLEX Studio).\n"
+        "Gurobi/SCIP backends have been archived to BBC/_archived/."
     )
 
 print(f"[branch_and_benders_cut] Using backend: {_BACKEND}")
@@ -144,47 +124,65 @@ BranchAndBendersCutSSP = _BackendClass
 
 def solve_ssp_branch_and_benders(instance_path: str,
                                   time_limit: int = 300,
-                                  verbose: bool = True):
+                                  verbose: bool = True,
+                                  worker_lp_reuse: bool = False,
+                                  use_fractional_cuts: bool = False,
+                                  use_combinatorial_cuts: bool = False,
+                                  use_triplet_bounds: bool = False,
+                                  parallel: bool = False):
     """
-    Load an SSP instance from *instance_path* and solve it with the
-    best available backend (CPLEX → Gurobi → SCIP).
+    Load an SSP instance from *instance_path* and solve it with BBC.
 
     Parameters
     ----------
     instance_path : str
         Path to the instance file understood by ``utils.load_ssp_instance``.
     time_limit : int
-        Time limit in seconds passed to the backend solver.
+        Time limit in seconds.
     verbose : bool
-        Whether the solver should print progress.
+        Print solver progress and stats table.
+    worker_lp_reuse : bool
+        Reuse DSP model across callback calls (bendersatsp2 pattern).
+    use_fractional_cuts : bool
+        Add Benders LP user cuts at LP relaxation nodes (attacks tailing-off).
+    use_combinatorial_cuts : bool
+        Use KTNS-based combinatorial cuts instead of LP Benders at integer nodes.
+    use_triplet_bounds : bool
+        Strengthen the root LP bound with O(n³) triplet constraints.
+    parallel : bool
+        Allow CPLEX to use multiple B&B threads.
 
     Returns
     -------
     status : str
-        Solver status string (e.g. ``"OPTIMAL"``, ``"TIME_LIMIT"``).
     obj_val : float or None
-        Objective value (total tool switches) if a solution was found.
     sequence : list[int] or None
-        Optimal job sequence (0-indexed) if a solution was found.
+    solver : BranchAndBendersCutSSP
+        The solver instance; access solver.solve_stats and
+        solver.plot_convergence() for diagnostics.
     """
     n_jobs, n_tools, capacity, A, tool_req = load_ssp_instance(instance_path)
 
     if verbose:
-        print(f"[branch_and_benders_cut] Backend : {_BACKEND}")
-        print(f"[branch_and_benders_cut] Instance: {Path(instance_path).name}")
-        print(f"[branch_and_benders_cut] Jobs={n_jobs}, Tools={n_tools}, "
-              f"Capacity={capacity}")
+        print(f"[BBC] Backend  : {_BACKEND}")
+        print(f"[BBC] Instance : {Path(instance_path).name}")
+        print(f"[BBC] Jobs={n_jobs}, Tools={n_tools}, Capacity={capacity}")
 
-    solver = BranchAndBendersCutSSP(n_jobs, n_tools, capacity, tool_req)
+    solver = BranchAndBendersCutSSP(
+        n_jobs, n_tools, capacity, tool_req,
+        worker_lp_reuse        = worker_lp_reuse,
+        use_fractional_cuts    = use_fractional_cuts,
+        use_combinatorial_cuts = use_combinatorial_cuts,
+        use_triplet_bounds     = use_triplet_bounds,
+        parallel               = parallel,
+    )
     solver.build_master_problem(verbose=False)
     status, obj_val, sequence = solver.solve(time_limit=time_limit, verbose=verbose)
 
     if verbose:
-        print(f"\n[branch_and_benders_cut] Status   : {status}")
-        print(f"[branch_and_benders_cut] Objective: {obj_val}")
-        print(f"[branch_and_benders_cut] Sequence : {sequence}")
+        solver.print_stats_table()
 
-    return status, obj_val, sequence
+    return status, obj_val, sequence, solver
 
 
 # ---------------------------------------------------------------------------

@@ -68,6 +68,7 @@ Install notes:
 """
 
 import sys
+import time
 import threading
 from pathlib import Path
 
@@ -122,25 +123,40 @@ class BendersCutCallback:
     1. Extract x values and θ.
     2. Detect subtours via _find_subtours_from_sol().
        - If subtours exist → call context.reject_candidate() with SECs.
-    3. No subtours → extract Hamiltonian sequence → solve DSP.
-    4. DSP value > θ → inject Benders cut via context.reject_candidate().
+    3. No subtours → extract Hamiltonian sequence.
+       a. use_combinatorial_cuts=True  → KTNS cut (cheap, weaker).
+       b. use_combinatorial_cuts=False → solve DSP LP, add Benders optimality cut.
+    4. Cut violated → inject via context.reject_candidate().
 
     At each LP relaxation node (use_fractional_cuts=True):
     1. Extract fractional x values.
-    2. Solve DSP with fractional x̄.
+    2. Solve DSP LP with fractional x̄.
     3. DSP value > θ_rel → inject user cut via context.add_user_cut().
     """
 
     def __init__(self, solver):
         self.solver          = solver
-        self.cuts_added      = 0
         self.iteration_count = 0
         self.best_objective  = float('inf')
         self.best_solution   = None
 
-        # Thread-local DSP storage (used when parallel=True)
-        # Maps thread_id (int) → cplex DSP model (or dict of components)
-        self._thread_dsps: dict = {}
+        # ── Cut counters (separate for diagnostics) ───────────────────────
+        self.sec_cuts_added      = 0   # subtour elimination constraints
+        self.benders_cuts_added  = 0   # LP Benders optimality cuts
+        self.comb_cuts_added     = 0   # combinatorial (KTNS-based) cuts
+        self.frac_cuts_added     = 0   # fractional LP user cuts
+        # total for backward compat
+        self.cuts_added          = 0
+
+        # ── Convergence log: list of (elapsed_s, theta, best_primal) ─────
+        self.convergence_log: list = []
+        # True root LP relaxation: best_bound captured at root node (node_count==0),
+        # frozen the moment node_count transitions to >=1.
+        # This correctly reflects LP bound AFTER frac cuts (if any) but BEFORE branching.
+        self.root_lp_bound: float  = None
+        self._root_lp_last: float  = None   # running update while still at root
+        self._root_lp_locked: bool = False  # True once we've left the root
+        self._t0: float            = time.perf_counter()
 
     # ── Entry point ───────────────────────────────────────────────────────────
 
@@ -150,16 +166,18 @@ class BendersCutCallback:
             ctx_id = context.get_id()
 
             # ── Thread lifecycle (parallel only) ──────────────────────────
+            # _thread_dsps lives on the solver (not the callback) to avoid
+            # any race between callback construction and thread startup.
             if ctx_id & Context.id.thread_up:
                 if self.solver.parallel:
                     tid = context.get_int_info(Context.info.thread_id)
-                    self._thread_dsps[tid] = self.solver._build_dsp_cplex_model()
+                    self.solver._thread_dsps[tid] = self.solver._build_dsp_cplex_model()
                 return
 
             if ctx_id & Context.id.thread_down:
                 if self.solver.parallel:
                     tid = context.get_int_info(Context.info.thread_id)
-                    dsp_obj = self._thread_dsps.pop(tid, None)
+                    dsp_obj = self.solver._thread_dsps.pop(tid, None)
                     if dsp_obj is not None:
                         dsp_obj['model'].end()
                 return
@@ -172,8 +190,10 @@ class BendersCutCallback:
                     self._handle_candidate(context, tid)
                 return
 
-            # ── LP relaxation node (fractional cuts) ─────────────────────
+            # ── LP relaxation node ────────────────────────────────────────
+            # Always registered (for root LP capture); user cuts only when flag set.
             if ctx_id & Context.id.relaxation:
+                self._capture_root_lp(context)
                 if self.solver.use_fractional_cuts:
                     tid = (context.get_int_info(Context.info.thread_id)
                            if self.solver.parallel else None)
@@ -189,9 +209,9 @@ class BendersCutCallback:
 
     def _handle_candidate(self, context, tid=None):
         self.iteration_count += 1
+        elapsed = time.perf_counter() - self._t0
 
         solver  = self.solver
-        n       = solver.n_jobs
         n_vars  = solver.n_vars
 
         # ── Retrieve all variable values ──────────────────────────────────
@@ -219,7 +239,8 @@ class BendersCutCallback:
                     constraints.append(SparsePair(indices, [1.0] * len(indices)))
                     senses.append('L')
                     rhs_vals.append(float(len(st) - 1))
-                    self.cuts_added += 1
+                    self.sec_cuts_added += 1
+                    self.cuts_added     += 1
 
             if constraints:
                 context.reject_candidate(
@@ -227,6 +248,10 @@ class BendersCutCallback:
                     senses=senses,
                     rhs=rhs_vals
                 )
+            # Log convergence even on SEC rejection
+            self.convergence_log.append(
+                (elapsed, theta_val, self.best_objective)
+            )
             return
 
         # ── Step B: Extract Hamiltonian sequence ──────────────────────────
@@ -234,27 +259,108 @@ class BendersCutCallback:
         if sequence is None:
             return
 
-        x_bar = solver._build_x_bar_from_sequence(sequence)
+        # ── Step C: Compute subproblem cost and inject cut ────────────────
+        cut_injected = False
 
-        # ── Step C: Solve DSP ─────────────────────────────────────────────
-        dsp_obj, duals = solver._solve_dsp_with_xbar(x_bar, tid=tid)
-        if dsp_obj is None:
+        if solver.use_combinatorial_cuts:
+            # ── Combinatorial (KTNS-based) cut — O(nM), no LP solve ───────
+            # Cut: θ ≥ Z*(π) · (1 − Σ_{arc∈π}(1 − x_arc))
+            #     = Z*(π) · (1 − |π| + Σ x_arc)
+            # Rearranged: θ − Z*(π)·Σ x_arc ≥ Z*(π)·(1 − |π|)
+            from utils import compute_ktns
+            z_star, _ = compute_ktns(sequence, solver.tool_req, solver.capacity)
+
+            if z_star > theta_val + 1e-6:
+                d = solver.depot
+                path_arcs = (
+                    [(d, sequence[0])]
+                    + [(sequence[k], sequence[k+1]) for k in range(len(sequence)-1)]
+                    + [(sequence[-1], d)]
+                )
+                n_arcs = len(path_arcs)  # = n_jobs + 1
+                indices = (
+                    [solver.theta_idx]
+                    + [solver.x_idx_map[i, j] for (i, j) in path_arcs]
+                )
+                coeffs = [1.0] + [-float(z_star)] * n_arcs
+                rhs    = float(z_star) * (1 - n_arcs)
+
+                context.reject_candidate(
+                    constraints=[SparsePair(indices, coeffs)],
+                    senses=['G'],
+                    rhs=[rhs]
+                )
+                self.comb_cuts_added += 1
+                self.cuts_added      += 1
+                cut_injected = True
+
+            # Track best primal regardless of cut
+            if z_star < self.best_objective:
+                self.best_objective = float(z_star)
+                self.best_solution  = sequence[:]
+
+        else:
+            # ── LP Benders cut — solves the dual subproblem ───────────────
+            x_bar = solver._build_x_bar_from_sequence(sequence)
+            dsp_obj, duals = solver._solve_dsp_with_xbar(x_bar, tid=tid)
+            if dsp_obj is None:
+                return
+
+            if dsp_obj > theta_val + 1e-6:
+                cut_sp, cut_rhs = solver._build_benders_cut_sparsepair(duals)
+                context.reject_candidate(
+                    constraints=[cut_sp],
+                    senses=['G'],
+                    rhs=[cut_rhs]
+                )
+                self.benders_cuts_added += 1
+                self.cuts_added         += 1
+                cut_injected = True
+
+            if dsp_obj < self.best_objective:
+                self.best_objective = dsp_obj
+                self.best_solution  = sequence[:]
+
+        # ── Log convergence after every integer candidate ─────────────────
+        self.convergence_log.append(
+            (elapsed, theta_val, self.best_objective)
+        )
+
+    # ── Root LP bound capture ─────────────────────────────────────────────────
+
+    def _capture_root_lp(self, context):
+        """
+        Track the true root LP relaxation bound.
+
+        Called on every Context.id.relaxation event.  While CPLEX is still
+        processing the root node (node_count == 0), we keep updating
+        `_root_lp_last` with `best_bound`.  The first time node_count >= 1
+        we know branching has started: freeze root_lp_bound and stop.
+
+        For frac_cuts=False: fires once at the root; `_root_lp_last` is set,
+        then frozen by the post-solve fallback in solve() if branching never
+        triggered a second call.
+        For frac_cuts=True: fires many times at the root as user cuts tighten
+        the LP; we always keep the most recent (tightest) value.
+        """
+        if self._root_lp_locked:
             return
-
-        # ── Step D: Benders cut ───────────────────────────────────────────
-        if dsp_obj > theta_val + 1e-6:
-            cut_sp, cut_rhs = solver._build_benders_cut_sparsepair(duals)
-            context.reject_candidate(
-                constraints=[cut_sp],
-                senses=['G'],
-                rhs=[cut_rhs]
-            )
-            self.cuts_added += 1
-
-        # Track best incumbent
-        if dsp_obj < self.best_objective:
-            self.best_objective = dsp_obj
-            self.best_solution  = sequence[:]
+        try:
+            node_count = context.get_long_info(Context.info.node_count)
+            # Read θ directly from the LP solution — this IS the root LP bound
+            # for our formulation (min θ s.t. ...).  More reliable than
+            # Context.info.best_bound, which is CPLEX's internal global tracker
+            # and may lag behind the actual LP value.
+            theta_lp = context.get_relaxation_point([self.solver.theta_idx])[0]
+            if node_count == 0:
+                self._root_lp_last = theta_lp   # keep updating at root
+            else:
+                # Just left root — freeze
+                if self._root_lp_last is not None:
+                    self.root_lp_bound = self._root_lp_last
+                self._root_lp_locked = True
+        except Exception:
+            pass
 
     # ── LP relaxation handler (fractional cuts) ───────────────────────────────
 
@@ -300,7 +406,8 @@ class BendersCutCallback:
                     local=False,
                     purgeable=True
                 )
-                self.cuts_added += 1
+                self.frac_cuts_added += 1
+                self.cuts_added      += 1
             except Exception:
                 pass  # Not all LP nodes support user cuts
 
@@ -325,23 +432,42 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         Build one DSP model per thread and reuse it across callback calls,
         updating only the objective coefficients (bendersatsp2.py pattern).
     use_fractional_cuts : bool
-        Fire the callback at LP relaxation nodes and add Benders user cuts.
+        Fire the callback at LP relaxation nodes and add Benders LP user cuts.
+        Requires presolve to be disabled.  Attacks tailing-off.
+    use_combinatorial_cuts : bool
+        Use KTNS-based combinatorial Benders cuts at integer candidates instead
+        of the LP dual subproblem.  O(nM) per cut — much cheaper but weaker.
+        Mutually exclusive with LP cuts at integer nodes; fractional LP cuts
+        (use_fractional_cuts) can still be combined with this.
+    use_triplet_bounds : bool
+        Strengthen the initial θ lower bound with O(n³) triplet constraints:
+        θ ≥ w_ijk·(x_ij + x_jk − 1) for all real-job triples (i,j,k).
+        Tightens the root LP bound at the cost of a larger master problem.
     parallel : bool
         Allow CPLEX to use multiple B&B threads.  Each thread gets its own DSP
-        model via thread_up / thread_down.
+        model via thread_up / thread_down.  Thread-safe: _thread_dsps lives on
+        the solver and is initialised before any thread starts.
     """
 
     def __init__(self, n_jobs, n_tools, capacity, tool_req,
-                 worker_lp_reuse=False, use_fractional_cuts=False, parallel=False):
-        self.n_jobs              = n_jobs
-        self.n_tools             = n_tools
-        self.capacity            = capacity
-        self.tool_req            = tool_req
-        self.worker_lp_reuse     = worker_lp_reuse
-        self.use_fractional_cuts = use_fractional_cuts
-        self.parallel            = parallel
+                 worker_lp_reuse=False, use_fractional_cuts=False,
+                 use_combinatorial_cuts=False, use_triplet_bounds=False,
+                 parallel=False):
+        self.n_jobs                 = n_jobs
+        self.n_tools                = n_tools
+        self.capacity               = capacity
+        self.tool_req               = tool_req
+        self.worker_lp_reuse        = worker_lp_reuse
+        self.use_fractional_cuts    = use_fractional_cuts
+        self.use_combinatorial_cuts = use_combinatorial_cuts
+        self.use_triplet_bounds     = use_triplet_bounds
+        self.parallel               = parallel
 
         self._compute_pairwise_bounds()
+        # Precompute triplet bounds if needed (done once at init)
+        self.w3: dict = {}   # (i,j,k) → max(0, |T_i∪T_j∪T_k|−c)
+        if use_triplet_bounds:
+            self._compute_triplet_bounds()
 
         # CPLEX model and variable index bookkeeping
         self.cpx       = None
@@ -353,11 +479,51 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         # Shared (non-parallel) DSP model when worker_lp_reuse=True
         self._shared_dsp = None   # dict: {model, lam_idx, mu_idx, nu_idx, eta_idx, n_lam}
 
-        # Tracking
-        self.best_solution   = None
-        self.best_objective  = float('inf')
-        self.cuts_added      = 0
-        self.iteration_count = 0
+        # Thread-local DSP storage (parallel=True).  Lives on the solver so
+        # it is initialised before any CPLEX thread starts — no race condition.
+        self._thread_dsps: dict = {}
+
+        # Tracking (backward-compat + detailed)
+        self.best_solution      = None
+        self.best_objective     = float('inf')
+        self.cuts_added         = 0   # total
+        self.sec_cuts_added     = 0
+        self.benders_cuts_added = 0
+        self.comb_cuts_added    = 0
+        self.frac_cuts_added    = 0
+        self.iteration_count    = 0
+
+        # Convergence log and stats (populated after solve())
+        self.convergence_log: list = []
+        self.root_lp_bound: float  = None
+        self.solve_stats: dict     = {}
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Triplet bound pre-computation
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def _compute_triplet_bounds(self) -> None:
+        """
+        Precompute w3[i,j,k] = max(0, |T_i ∪ T_j ∪ T_k| − c) for all ordered
+        triples of real jobs (i, j, k distinct).  Used in build_master_problem
+        to add triplet lower bound constraints on θ.
+        """
+        n = self.n_jobs
+        c = self.capacity
+        tr = self.tool_req
+        for i in range(n):
+            Ti = set(tr.get(i, []))
+            for j in range(n):
+                if j == i:
+                    continue
+                Tj = set(tr.get(j, []))
+                for k in range(n):
+                    if k == i or k == j:
+                        continue
+                    Tk = set(tr.get(k, []))
+                    val = max(0, len(Ti | Tj | Tk) - c)
+                    if val > 0:
+                        self.w3[i, j, k] = val
 
     # ─────────────────────────────────────────────────────────────────────────
     # Pre-computation
@@ -395,6 +561,9 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
             self.cpx.set_warning_stream(None)
 
         n = self.n_jobs
+        d = n           # depot node (idea.md: J∪{0}; here index=n_jobs)
+        self.depot = d
+        nodes = list(range(n)) + [d]
 
         # ── θ variable at column 0 ────────────────────────────────────────
         self.cpx.variables.add(
@@ -405,10 +574,8 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         )
         self.theta_idx = 0
 
-        # ── Arc variables x[i,j] ─────────────────────────────────────────
-        self.x_pairs = [
-            (i, j) for i in range(n) for j in range(n) if i != j
-        ]
+        # ── Arc variables (all nodes including depot) ─────────────────────
+        self.x_pairs = [(i, j) for i in nodes for j in nodes if i != j]
         n_arcs = len(self.x_pairs)
 
         self.cpx.variables.add(
@@ -422,51 +589,132 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
             self.x_idx_map[i, j] = k + 1
 
         self.n_vars = 1 + n_arcs
-
-        # Minimise θ
         self.cpx.objective.set_sense(self.cpx.objective.sense.minimize)
 
-        # ── Degree constraints ─────────────────────────────────────────────
-        for i in range(n):
-            out_idx = [self.x_idx_map[i, j] for j in range(n) if i != j]
+        # ── Degree constraints (all nodes including depot) ─────────────────
+        for i in nodes:
+            out_idx = [self.x_idx_map[i, j] for j in nodes if i != j]
             self.cpx.linear_constraints.add(
-                lin_expr = [SparsePair(out_idx, [1.0] * len(out_idx))],
-                senses   = ['E'],
-                rhs      = [1.0],
-                names    = [f'out_{i}']
+                lin_expr=[SparsePair(out_idx, [1.0]*len(out_idx))],
+                senses=['E'], rhs=[1.0], names=[f'out_{i}']
             )
-            in_idx = [self.x_idx_map[j, i] for j in range(n) if j != i]
+            in_idx = [self.x_idx_map[j, i] for j in nodes if j != i]
             self.cpx.linear_constraints.add(
-                lin_expr = [SparsePair(in_idx, [1.0] * len(in_idx))],
-                senses   = ['E'],
-                rhs      = [1.0],
-                names    = [f'in_{i}']
+                lin_expr=[SparsePair(in_idx, [1.0]*len(in_idx))],
+                senses=['E'], rhs=[1.0], names=[f'in_{i}']
             )
 
-        # ── Initial lower bound:  θ - Σ w_ij x_ij ≥ 0 ────────────────────
-        lb_indices = [self.theta_idx] + [self.x_idx_map[i, j] for i, j in self.x_pairs]
-        lb_coeffs  = [1.0]            + [-self.w[i, j]         for i, j in self.x_pairs]
+        # ── Initial lower bound: θ - Σ w_ij x_ij ≥ 0  (depot arcs have w=0)
+        lb_indices = [self.theta_idx] + [
+            self.x_idx_map[i, j] for i, j in self.x_pairs
+            if i != d and j != d
+        ]
+        lb_coeffs = [1.0] + [
+            -self.w.get((i, j), 0) for i, j in self.x_pairs
+            if i != d and j != d
+        ]
         self.cpx.linear_constraints.add(
-            lin_expr = [SparsePair(lb_indices, lb_coeffs)],
-            senses   = ['G'],
-            rhs      = [0.0],
-            names    = ['theta_lb']
+            lin_expr=[SparsePair(lb_indices, lb_coeffs)],
+            senses=['G'], rhs=[0.0], names=['theta_lb']
         )
 
-        # ── Solver parameters ──────────────────────────────────────────────
+        # ── Triplet lower bounds: θ ≥ w_ijk·(x_ij + x_jk − 1) ───────────
+        # Valid because: if x_ij=x_jk=1 (j between i and k), the three-job
+        # segment requires at least w_ijk switches.  For all other x values
+        # the RHS ≤ 0 ≤ θ, so the constraint is trivially satisfied.
+        if self.use_triplet_bounds and self.w3:
+            triplet_exprs = []
+            triplet_rhs   = []
+            for (i, j, k), val in self.w3.items():
+                if (i, j) not in self.x_idx_map or (j, k) not in self.x_idx_map:
+                    continue
+                # θ − val·x_ij − val·x_jk ≥ −val   ↔   θ ≥ val·(x_ij+x_jk−1)
+                triplet_exprs.append(SparsePair(
+                    [self.theta_idx, self.x_idx_map[i, j], self.x_idx_map[j, k]],
+                    [1.0, -float(val), -float(val)]
+                ))
+                triplet_rhs.append(-float(val))
+            if triplet_exprs:
+                self.cpx.linear_constraints.add(
+                    lin_expr = triplet_exprs,
+                    senses   = ['G'] * len(triplet_exprs),
+                    rhs      = triplet_rhs,
+                )
+
         if not self.parallel:
             self.cpx.parameters.threads.set(1)
-
         if self.use_fractional_cuts:
-            # Allow CPLEX to use user cuts at LP nodes
             self.cpx.parameters.preprocessing.presolve.set(0)
-
         if verbose:
-            print(f"Master Problem built: {n} jobs, {n_arcs} arc variables")
+            flags = []
+            if self.use_triplet_bounds:    flags.append(f"triplet_bounds({len(self.w3)})")
+            if self.use_combinatorial_cuts: flags.append("comb_cuts")
+            if self.use_fractional_cuts:   flags.append("frac_cuts")
+            if self.worker_lp_reuse:       flags.append("lp_reuse")
+            if self.parallel:              flags.append("parallel")
+            flag_str = ", ".join(flags) if flags else "defaults"
+            print(f"Master Problem built: {n} jobs + depot, {n_arcs} arc variables "
+                  f"[{flag_str}]")
 
     # ─────────────────────────────────────────────────────────────────────────
     # Solution helpers (shared with callback)
     # ─────────────────────────────────────────────────────────────────────────
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Depot-aware sequence helpers (override bbc_common versions)
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def _get_sequence_from_sol(self, sol):
+        """Start traversal from depot node, return only real-job sequence."""
+        n = self.n_jobs
+        d = self.depot
+        succ = {i: j for i in range(n+1) for j in range(n+1)
+                if i != j and sol.get((i, j), 0.0) > 0.5}
+        current = succ.get(d)
+        sequence = []
+        visited = {d}
+        while current is not None and current != d and len(sequence) < n:
+            if current in visited:
+                break
+            sequence.append(current)
+            visited.add(current)
+            current = succ.get(current)
+        return sequence if len(sequence) == n else None
+
+    def _build_x_bar_from_sequence(self, sequence):
+        """Path formulation: depot→seq[0]→...→seq[-1]→depot (no wrap-around)."""
+        d = self.depot
+        x_bar = {}
+        x_bar[d, sequence[0]] = 1.0
+        for k in range(len(sequence) - 1):
+            x_bar[sequence[k], sequence[k + 1]] = 1.0
+        x_bar[sequence[-1], d] = 1.0
+        return x_bar
+
+    def _find_subtours_from_sol(self, sol):
+        """Detect subtours; valid tour visits all n_jobs+1 nodes (incl. depot)."""
+        n = self.n_jobs
+        d = self.depot
+        all_nodes = list(range(n)) + [d]
+        succ = {i: j for i in all_nodes for j in all_nodes
+                if i != j and sol.get((i, j), 0.0) > 0.5}
+        visited, subtours = set(), []
+        for start in all_nodes:
+            if start in visited or start not in succ:
+                visited.add(start); continue
+            cycle, current = [start], succ[start]
+            visited.add(start)
+            while current != start:
+                if current in visited:
+                    cycle = None; break
+                visited.add(current)
+                cycle.append(current)
+                current = succ.get(current)
+                if current is None:
+                    cycle = None; break
+            if cycle is not None and len(cycle) < n + 1:
+                subtours.append(cycle)
+        return subtours
 
     # ─────────────────────────────────────────────────────────────────────────
     # DSP routing
@@ -538,12 +786,20 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
             col_ub.append(ub)
             return idx
 
-        # lam[i,j,t] >= 0; obj = 0 (updated per call)
+        # lam[i,j,t] >= 0; obj = 0 (updated per call) — job-to-job arcs
         for i in range(n):
             for j in range(n):
                 if i != j:
                     for t in T:
                         lam_idx[i, j, t] = add_var(f"lam_{i}_{j}_{t}", 0.0, 0.0)
+
+        # lam_depot[j,t] >= 0; obj = 0 (updated per call) — depot→job arcs
+        # Enforces y_{depot,t} = 0 (empty magazine at start), breaking the
+        # cyclic-preloading LP artifact that gives DSP = 0 for all sequences.
+        lam_depot_idx = {}
+        for j in range(n):
+            for t in T:
+                lam_depot_idx[j, t] = add_var(f"lam_d_{j}_{t}", 0.0, 0.0)
 
         # mu[j] >= 0; obj = -capacity
         for j in range(n):
@@ -572,7 +828,8 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         )
 
         # ── Constraints for y_jt >= 0 ─────────────────────────────────────
-        # dual of y_jt:  -mu_j - Σ_i lam_ijt + Σ_k lam_jkt + nu_jt <= 0
+        # dual of y_jt:  -mu_j - lam_depot_jt - Σ_i lam_ijt + Σ_k lam_jkt + nu_jt <= 0
+        # lam_depot_jt is the dual of the depot→j arc, enforcing y_{depot,t}=0.
         for j in range(n):
             Tj = set(tool_req.get(j, []))
             for t in T:
@@ -580,6 +837,9 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
                 coeffs  = []
 
                 indices.append(mu_idx[j]); coeffs.append(-1.0)
+
+                # depot→j incoming arc
+                indices.append(lam_depot_idx[j, t]); coeffs.append(-1.0)
 
                 for i in range(n):
                     if i != j:
@@ -600,12 +860,15 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
                 )
 
         # ── Constraints for z_jt >= 0 ─────────────────────────────────────
-        # dual of z_jt:  Σ_i lam_ijt + eta_jt <= rhs  (rhs = 1 if t in T_j else 0)
+        # dual of z_jt:  lam_depot_jt + Σ_i lam_ijt + eta_jt <= rhs
         for j in range(n):
             Tj = set(tool_req.get(j, []))
             for t in T:
                 indices = []
                 coeffs  = []
+
+                # depot→j incoming arc
+                indices.append(lam_depot_idx[j, t]); coeffs.append(1.0)
 
                 for i in range(n):
                     if i != j:
@@ -614,11 +877,15 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
                 if t not in Tj:
                     indices.append(eta_idx[j, t]); coeffs.append(1.0)
 
-                rhs = 1.0 if t in Tj else 0.0
+                # rhs = 1 for ALL t (not 0 for t∉T_j).
+                # The dual constraint for z_{j,t} has RHS = obj_coeff_z = 1
+                # regardless of whether t∈T_j.  Using rhs=0 for t∉T_j forces
+                # all inter-job lam to zero for non-required tools, which breaks
+                # the dual chain and gives DSP=2 instead of the correct 6.
                 dsp.linear_constraints.add(
                     lin_expr = [SparsePair(indices, coeffs)],
                     senses   = ['L'],
-                    rhs      = [rhs],
+                    rhs      = [1.0],
                     names    = [f'dz_{j}_{t}']
                 )
 
@@ -626,9 +893,10 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         dsp.parameters.lpmethod.set(dsp.parameters.lpmethod.values.dual)
 
         return {
-            'model'   : dsp,
-            'lam_idx' : lam_idx,
-            'mu_idx'  : mu_idx,
+            'model'         : dsp,
+            'lam_idx'       : lam_idx,
+            'lam_depot_idx' : lam_depot_idx,
+            'mu_idx'        : mu_idx,
             'nu_idx'  : nu_idx,
             'eta_idx' : eta_idx,
             'n_cols'  : n_cols,
@@ -642,10 +910,10 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         Otherwise return (or lazily create) the shared model.
         """
         if self.parallel and tid is not None:
-            # Thread model should have been created in thread_up
-            if tid not in self._cb_ref._thread_dsps:
-                self._cb_ref._thread_dsps[tid] = self._build_dsp_cplex_model()
-            return self._cb_ref._thread_dsps[tid]
+            # _thread_dsps lives on the solver (initialised before threads start)
+            if tid not in self._thread_dsps:
+                self._thread_dsps[tid] = self._build_dsp_cplex_model()
+            return self._thread_dsps[tid]
         else:
             if self._shared_dsp is None:
                 self._shared_dsp = self._build_dsp_cplex_model()
@@ -664,17 +932,23 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         -------
         (obj_val, duals) or (None, {})
         """
-        dsp_data = self._get_dsp_model(tid=tid)
-        dsp      = dsp_data['model']
-        lam_idx  = dsp_data['lam_idx']
-        mu_idx   = dsp_data['mu_idx']
-        nu_idx   = dsp_data['nu_idx']
-        eta_idx  = dsp_data['eta_idx']
+        dsp_data      = self._get_dsp_model(tid=tid)
+        dsp           = dsp_data['model']
+        lam_idx       = dsp_data['lam_idx']
+        lam_depot_idx = dsp_data['lam_depot_idx']
+        mu_idx        = dsp_data['mu_idx']
+        nu_idx        = dsp_data['nu_idx']
+        eta_idx       = dsp_data['eta_idx']
 
-        # Update lam objective coefficients: coeff = x_bar.get((i,j), 0) - 1
+        # Update job-to-job lam objective: coeff = x_bar.get((i,j), 0) - 1
         updates = []
         for (i, j, t), col in lam_idx.items():
             coeff = x_bar.get((i, j), 0.0) - 1.0
+            updates.append((col, coeff))
+        # Update depot→job lam objective: coeff = x_bar.get((depot,j), 0) - 1
+        depot = self.depot
+        for (j, t), col in lam_depot_idx.items():
+            coeff = x_bar.get((depot, j), 0.0) - 1.0
             updates.append((col, coeff))
         dsp.objective.set_linear(updates)
 
@@ -702,18 +976,22 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
     # ── Fresh DSP (docplex or Gurobi) ─────────────────────────────────────────
 
     def _solve_dsp_fresh(self, x_bar):
-        """Build and solve the DSP from scratch for a given x̄."""
-        if HAS_DOCPLEX:
-            return self._solve_dsp_docplex(x_bar)
-        elif HAS_GUROBI:
-            return self._solve_dsp_gurobi(x_bar)
-        elif HAS_CPLEX:
+        """Build and solve the DSP from scratch for a given x̄.
+
+        Raw CPLEX is tried first because it contains the complete depot-arc
+        lam fix.  docplex/gurobi are fallbacks only when CPLEX is unavailable.
+        """
+        if HAS_CPLEX:
             # Build a fresh raw CPLEX DSP model
             dsp_data = self._build_dsp_cplex_model()
-            # Set lam obj to x_bar values - 1
+            # Set lam obj to x_bar values - 1 (job-to-job and depot arcs)
             updates = []
             for (i, j, t), col in dsp_data['lam_idx'].items():
                 coeff = x_bar.get((i, j), 0.0) - 1.0
+                updates.append((col, coeff))
+            depot = self.depot
+            for (j, t), col in dsp_data['lam_depot_idx'].items():
+                coeff = x_bar.get((depot, j), 0.0) - 1.0
                 updates.append((col, coeff))
             dsp_data['model'].objective.set_linear(updates)
             dsp_data['model'].solve()
@@ -734,6 +1012,10 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
                 duals['eta', j, t] = all_vals[col]
             dsp_data['model'].end()
             return obj_val, duals
+        elif HAS_DOCPLEX:
+            return self._solve_dsp_docplex(x_bar)
+        elif HAS_GUROBI:
+            return self._solve_dsp_gurobi(x_bar)
         else:
             raise RuntimeError(
                 "No LP solver available for the DSP.  "
@@ -807,27 +1089,31 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         status   : str
         obj_val  : float or None
         sequence : list[int] or None
+
+        After the call, self.solve_stats contains detailed diagnostics and
+        self.convergence_log contains [(elapsed_s, dual_bound, primal_bound)].
         """
         if self.cpx is None:
             self.build_master_problem(verbose=verbose)
 
         self.cpx.parameters.timelimit.set(float(time_limit))
 
-        # ── Register modern generic callback ─────────────────────────────
+        # ── Register modern generic callback ──────────────────────────────
+        # _thread_dsps already lives on self — no _cb_ref needed, no race.
         cb = BendersCutCallback(self)
-        # Keep a back-reference so _get_dsp_model can access _thread_dsps
-        self._cb_ref = cb
 
-        context_mask = Context.id.candidate
+        # Always register relaxation so we can capture the true root LP bound.
+        # (frac cuts also use it; the handler separates the two concerns.)
+        context_mask = Context.id.candidate | Context.id.relaxation
         if self.parallel:
             context_mask |= Context.id.thread_up | Context.id.thread_down
-        if self.use_fractional_cuts:
-            context_mask |= Context.id.relaxation
 
         self.cpx.set_callback(cb, context_mask)
 
         # ── Solve ─────────────────────────────────────────────────────────
+        t_start = time.perf_counter()
         self.cpx.solve()
+        wall_time = time.perf_counter() - t_start
 
         # ── Extract result ────────────────────────────────────────────────
         status_code = self.cpx.solution.get_status()
@@ -843,55 +1129,169 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
             sequence   = cb.best_solution
             status_str = 'NO_SOLUTION'
 
-        self.cuts_added      = cb.cuts_added
-        self.iteration_count = cb.iteration_count
+        # ── Finalise root LP bound ────────────────────────────────────────
+        # If the solve finished at the root (no branching), node_count never
+        # reached 1 inside the relaxation callback, so root_lp_bound was never
+        # frozen.  Use the last captured value.
+        if cb.root_lp_bound is None and cb._root_lp_last is not None:
+            cb.root_lp_bound = cb._root_lp_last
+
+        # ── Copy callback stats to solver ─────────────────────────────────
+        self.cuts_added         = cb.cuts_added
+        self.sec_cuts_added     = cb.sec_cuts_added
+        self.benders_cuts_added = cb.benders_cuts_added
+        self.comb_cuts_added    = cb.comb_cuts_added
+        self.frac_cuts_added    = cb.frac_cuts_added
+        self.iteration_count    = cb.iteration_count
+        self.convergence_log    = cb.convergence_log
+        self.root_lp_bound      = cb.root_lp_bound
+
         if cb.best_objective < self.best_objective:
             self.best_objective = cb.best_objective
             self.best_solution  = cb.best_solution
 
+        # ── Extract CPLEX MIP stats ───────────────────────────────────────
+        try:
+            dual_bound = self.cpx.solution.MIP.get_best_objval()
+        except Exception:
+            dual_bound = self.root_lp_bound
+
+        # Compute gap manually from obj/dual — get_mip_relative_gap() throws
+        # for many status codes (no solution, gap=inf, status type mismatch).
+        # Formula: |UB - LB| / |UB| × 100  (0% when optimal, >0% when timed out)
+        if obj_val is not None and dual_bound is not None and abs(obj_val) > 1e-10:
+            mip_gap_pct = abs(obj_val - dual_bound) / abs(obj_val) * 100.0
+        else:
+            mip_gap_pct = None
+
+        try:
+            nodes    = self.cpx.solution.progress.get_num_nodes_processed()
+            lp_iters = self.cpx.solution.progress.get_num_iterations()
+        except Exception:
+            nodes    = None
+            lp_iters = None
+
+        self.solve_stats = {
+            "status":           status_str,
+            "obj_val":          obj_val,
+            "dual_bound":       dual_bound,
+            "root_lp_bound":    self.root_lp_bound,
+            "mip_gap_pct":      mip_gap_pct,
+            "wall_time_s":      round(wall_time, 3),
+            "nodes":            nodes,
+            "lp_iters":         lp_iters,
+            "cb_invocations":   self.iteration_count,
+            "cuts_total":       self.cuts_added,
+            "cuts_sec":         self.sec_cuts_added,
+            "cuts_benders":     self.benders_cuts_added,
+            "cuts_comb":        self.comb_cuts_added,
+            "cuts_frac":        self.frac_cuts_added,
+            # flags
+            "use_combinatorial_cuts": self.use_combinatorial_cuts,
+            "use_triplet_bounds":     self.use_triplet_bounds,
+            "use_fractional_cuts":    self.use_fractional_cuts,
+            "worker_lp_reuse":        self.worker_lp_reuse,
+        }
+
         if verbose:
             sep = '=' * 60
+            st  = self.solve_stats
             print(f"\n{sep}")
-            print(f"Solution Status : {status_str}")
-            print(f"Objective Value : {obj_val}")
-            print(f"Sequence        : {sequence}")
-            print(f"Iterations      : {self.iteration_count}")
-            print(f"Cuts Added      : {self.cuts_added}")
+            print(f"  Status          : {st['status']}")
+            print(f"  Objective (UB)  : {st['obj_val']}")
+            print(f"  Dual bound (LB) : {st['dual_bound']}")
+            print(f"  Root LP bound   : {st['root_lp_bound']}")
+            print(f"  MIP gap         : "
+                  f"{st['mip_gap_pct']:.4f}%" if st['mip_gap_pct'] is not None
+                  else f"  MIP gap         : —")
+            print(f"  Wall time       : {st['wall_time_s']:.2f}s")
+            print(f"  B&B nodes       : {st['nodes']}")
+            print(f"  LP iterations   : {st['lp_iters']}")
+            print(f"  CB invocations  : {st['cb_invocations']}")
+            print(f"  Cuts — total    : {st['cuts_total']}")
+            print(f"         SECs     : {st['cuts_sec']}")
+            print(f"         Benders  : {st['cuts_benders']}")
+            print(f"         Comb     : {st['cuts_comb']}")
+            print(f"         Frac     : {st['cuts_frac']}")
+            print(f"  Sequence        : {sequence}")
             print(f"{sep}\n")
 
         return status_str, obj_val, sequence
 
+    # ─────────────────────────────────────────────────────────────────────────
+    # Diagnostics
+    # ─────────────────────────────────────────────────────────────────────────
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Entry point
-# ─────────────────────────────────────────────────────────────────────────────
+    def get_stats(self) -> dict:
+        """Return the solve_stats dict (populated after solve())."""
+        return self.solve_stats
 
-if __name__ == "__main__":
-    if not HAS_CPLEX:
-        print("ERROR: cplex not installed")
-        sys.exit(1)
+    def plot_convergence(self, ax=None):
+        """
+        Plot the primal/dual bound convergence curve.
 
-    instance_path = (
-        Path(__file__).parent.parent / "Instances" / "Shankar" / "shankar-example.txt"
-    )
+        Uses self.convergence_log: [(elapsed_s, dual_bound, primal_bound)].
+        Returns the matplotlib Axes object.
+        """
+        import matplotlib.pyplot as plt
 
-    try:
-        n_jobs, n_tools, capacity, A, tool_req = load_ssp_instance(str(instance_path))
+        if not self.convergence_log:
+            print("No convergence data — run solve() first.")
+            return None
 
-        print(f"Instance : {instance_path.name}")
-        print(f"Jobs: {n_jobs}  Tools: {n_tools}  Capacity: {capacity}\n")
+        times   = [r[0] for r in self.convergence_log]
+        duals   = [r[1] for r in self.convergence_log]
+        primals = [r[2] for r in self.convergence_log]
+        # Replace inf placeholders for plotting
+        primals = [p if p < 1e15 else None for p in primals]
 
-        solver = BranchAndBendersCutSSP_CPLEX(n_jobs, n_tools, capacity, tool_req)
-        solver.build_master_problem(verbose=True)
+        if ax is None:
+            _, ax = plt.subplots(figsize=(8, 4))
 
-        print("\nSolving …\n")
-        status, obj_val, sequence = solver.solve(time_limit=60, verbose=True)
+        ax.step(times, duals,   where='post', label='Dual (LB / θ)',  color='steelblue')
+        ax.step(times, primals, where='post', label='Primal (UB)',     color='darkorange')
 
-        print(f"Status   : {status}")
-        print(f"Objective: {obj_val}")
-        print(f"Sequence : {sequence}")
+        if self.root_lp_bound is not None:
+            ax.axhline(self.root_lp_bound, color='steelblue',
+                       linestyle=':', alpha=0.6, label=f'Root LP = {self.root_lp_bound:.2f}')
 
-    except Exception as exc:
-        import traceback
-        print(f"Error: {exc}")
-        traceback.print_exc()
+        ax.set_xlabel("Elapsed time (s)")
+        ax.set_ylabel("Objective (tool switches)")
+        ax.set_title("BBC Convergence — Dual / Primal Bounds")
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+
+        return ax
+
+    def print_stats_table(self):
+        """Pretty-print solve_stats as a compact table for research reporting."""
+        st = self.solve_stats
+        if not st:
+            print("No stats — run solve() first.")
+            return
+        rows = [
+            ("Status",           st.get("status")),
+            ("Objective (UB)",   st.get("obj_val")),
+            ("Dual bound (LB)",  st.get("dual_bound")),
+            ("Root LP bound",    st.get("root_lp_bound")),
+            ("MIP gap (%)",      f"{st['mip_gap_pct']:.4f}" if st.get("mip_gap_pct") is not None else "—"),
+            ("Wall time (s)",    st.get("wall_time_s")),
+            ("B&B nodes",        st.get("nodes")),
+            ("LP iterations",    st.get("lp_iters")),
+            ("CB invocations",   st.get("cb_invocations")),
+            ("Cuts — total",     st.get("cuts_total")),
+            ("  SECs",           st.get("cuts_sec")),
+            ("  Benders",        st.get("cuts_benders")),
+            ("  Combinatorial",  st.get("cuts_comb")),
+            ("  Fractional",     st.get("cuts_frac")),
+            ("Flags",
+             " | ".join(k for k in
+                        ["use_combinatorial_cuts","use_triplet_bounds",
+                         "use_fractional_cuts","worker_lp_reuse"]
+                        if st.get(k))),
+        ]
+        width = max(len(r[0]) for r in rows) + 2
+        print("─" * (width + 20))
+        for label, val in rows:
+            print(f"  {label:<{width}}: {val}")
+        print("─" * (width + 20))

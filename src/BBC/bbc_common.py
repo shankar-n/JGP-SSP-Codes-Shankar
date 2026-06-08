@@ -138,14 +138,18 @@ class BBCSolverMixin:
         """
         Convert a Hamiltonian sequence to a binary arc dict {(i,j): 1.0}.
 
-        Only the n arcs in the tour are present; missing arcs default to 0
-        via dict.get(), giving coefficient (0 − 1) = −1 in the DSP.
+        Uses the actual depot arcs (depot→sequence[0] and sequence[-1]→depot)
+        instead of closing a job-only cycle.  The depot arc forces the DSP to
+        see y_{depot,t} = 0 (empty magazine at start), preventing the circular
+        preloading LP artifact that returns DSP = 0 for all sequences.
         """
         n     = len(sequence)
+        depot = self.depot          # = n_jobs
         x_bar = {}
         for k in range(n - 1):
             x_bar[sequence[k], sequence[k + 1]] = 1.0
-        x_bar[sequence[-1], sequence[0]] = 1.0
+        x_bar[depot, sequence[0]]  = 1.0   # depot → first job
+        x_bar[sequence[-1], depot] = 1.0   # last job → depot
         return x_bar
 
     # ── Shared DSP solvers (fallback implementations) ─────────────────────────
@@ -178,11 +182,16 @@ class BBCSolverMixin:
         T        = range(self.n_tools)
         tool_req = self.tool_req
 
+        depot = self.depot  # = n_jobs
+
         dsp = gp.Model("DSP")
         dsp.setParam('OutputFlag', 0)
 
         lam = {(i, j, t): dsp.addVar(lb=0.0, name=f"lam_{i}_{j}_{t}")
                for i in range(n) for j in range(n) if i != j for t in T}
+        # depot→j arc lam (enforces empty-magazine depot constraint)
+        lam_d = {(j, t): dsp.addVar(lb=0.0, name=f"lam_d_{j}_{t}")
+                 for j in range(n) for t in T}
         mu  = {j: dsp.addVar(lb=0.0, name=f"mu_{j}") for j in range(n)}
         nu  = {(j, t): dsp.addVar(lb=-GRB.INFINITY, name=f"nu_{j}_{t}")
                for j in range(n) for t in T}
@@ -191,6 +200,8 @@ class BBCSolverMixin:
 
         obj = gp.quicksum((x_bar.get((i, j), 0.0) - 1.0) * lam[i, j, t]
                           for i in range(n) for j in range(n) if i != j for t in T)
+        obj += gp.quicksum((x_bar.get((depot, j), 0.0) - 1.0) * lam_d[j, t]
+                           for j in range(n) for t in T)
         obj += gp.quicksum(-self.capacity * mu[j] for j in range(n))
         obj += gp.quicksum(nu[j, t]
                            for j in range(n) for t in tool_req.get(j, []))
@@ -202,14 +213,18 @@ class BBCSolverMixin:
                 nu_term = nu[j, t] if t in Tj else 0
                 dsp.addConstr(
                     -mu[j]
+                    - lam_d[j, t]
                     - gp.quicksum(lam[i, j, t] for i in range(n) if i != j)
                     + gp.quicksum(lam[j, k, t] for k in range(n) if k != j)
                     + nu_term <= 0, name=f"dy_{j}_{t}"
                 )
                 eta_term = eta[j, t] if t not in Tj else 0
+                # rhs=1 for ALL t: dual constraint for z_{j,t} has obj coeff=1
+                # regardless of t∈T_j. rhs=0 for t∉T_j was a bug.
                 dsp.addConstr(
-                    gp.quicksum(lam[i, j, t] for i in range(n) if i != j)
-                    + eta_term <= (1.0 if t in Tj else 0.0),
+                    lam_d[j, t]
+                    + gp.quicksum(lam[i, j, t] for i in range(n) if i != j)
+                    + eta_term <= 1.0,
                     name=f"dz_{j}_{t}"
                 )
 
@@ -245,11 +260,15 @@ class BBCSolverMixin:
         T        = range(self.n_tools)
         tool_req = self.tool_req
 
+        depot   = self.depot  # = n_jobs
         dsp     = DocplexModel("DSP", log_output=False)
         neg_inf = dsp.minus_infinity
 
         lam = {(i, j, t): dsp.continuous_var(lb=0.0, name=f"lam_{i}_{j}_{t}")
                for i in range(n) for j in range(n) if i != j for t in T}
+        # depot→j arc lam (enforces empty-magazine depot constraint)
+        lam_d = {(j, t): dsp.continuous_var(lb=0.0, name=f"lam_d_{j}_{t}")
+                 for j in range(n) for t in T}
         mu  = {j: dsp.continuous_var(lb=0.0, name=f"mu_{j}") for j in range(n)}
         nu  = {(j, t): dsp.continuous_var(lb=neg_inf, name=f"nu_{j}_{t}")
                for j in range(n) for t in T}
@@ -258,6 +277,8 @@ class BBCSolverMixin:
 
         obj = dsp.sum((x_bar.get((i, j), 0) - 1) * lam[i, j, t]
                       for i in range(n) for j in range(n) if i != j for t in T)
+        obj += dsp.sum((x_bar.get((depot, j), 0) - 1) * lam_d[j, t]
+                       for j in range(n) for t in T)
         obj += dsp.sum(-self.capacity * mu[j] for j in range(n))
         obj += dsp.sum(nu[j, t] for j in range(n) for t in tool_req.get(j, []))
         dsp.maximize(obj)
@@ -268,14 +289,18 @@ class BBCSolverMixin:
                 nu_term = nu[j, t] if t in Tj else 0
                 dsp.add_constraint(
                     -mu[j]
+                    - lam_d[j, t]
                     - dsp.sum(lam[i, j, t] for i in range(n) if i != j)
                     + dsp.sum(lam[j, k, t] for k in range(n) if k != j)
                     + nu_term <= 0, f"dy_{j}_{t}"
                 )
                 eta_term = eta[j, t] if t not in Tj else 0
+                # rhs=1 for ALL t: dual constraint for z_{j,t} has obj coeff=1
+                # regardless of t∈T_j. rhs=0 for t∉T_j was a bug.
                 dsp.add_constraint(
-                    dsp.sum(lam[i, j, t] for i in range(n) if i != j)
-                    + eta_term <= (1.0 if t in Tj else 0.0),
+                    lam_d[j, t]
+                    + dsp.sum(lam[i, j, t] for i in range(n) if i != j)
+                    + eta_term <= 1.0,
                     f"dz_{j}_{t}"
                 )
 

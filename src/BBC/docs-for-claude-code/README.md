@@ -4,9 +4,41 @@
 
 This directory contains three exact solvers for the **Job Sequencing and Tool Switching Problem (SSP)**:
 
-1. **BBC** – Branch-and-Benders-Cut (this codebase, three backends)
+1. **BBC** – Branch-and-Benders-Cut (CPLEX only — see note below)
 2. **LSS** – Laporte, Salazar-González & Semet (2004) TSP-based ILP
 3. **SSPMF** – da Silva, Chaves & Yanasse (2024) Multicommodity Flow ILP
+
+---
+
+## ⚠️ Deviations from the papers / original plan
+
+### BBC: CPLEX only
+The Gurobi and SCIP backends have been **archived** to `_archived/`.  
+Only `branch_and_benders_cut_cplex.py` is active.
+
+**Root-cause fix (depot node):** The original BBC master problem modelled a
+Hamiltonian *cycle* on `n_jobs` nodes (no depot).  This caused the DSP to
+compute cycle cost instead of path cost, leading to incorrect Benders cuts and
+eventual infeasibility.  A **depot node** (index `n_jobs`, `T_depot=∅`) was
+added to `build_master_problem`, converting the problem to a Hamiltonian *path*
+as described in `idea.md` (the plan includes `J ∪ {0}` in all degree
+constraints).
+
+### Result post-processing in `main-notebook.py` cell 6b
+LSS (Laporte 2004) and SSPMF (da Silva 2024) are kept **exactly as per their
+papers**.  Both paper formulations count the initial magazine loading from the
+empty depot as part of the objective.  The GTSP reference solver (cell 6) does
+**not** count this (it uses a DUMMY node with zero-cost transitions).
+
+To make the comparison table consistent, cell 6b **post-processes** each
+result by subtracting `|T_{seq[0]}|` (the initial load at the first job):
+
+```python
+adjusted_obj = reported_obj - len(T_j[seq[0]])
+```
+
+This post-processing is applied only for display in the comparison table; the
+solver code itself is untouched.
 
 A `benchmark.py` runner compares all three on standard instances.
 

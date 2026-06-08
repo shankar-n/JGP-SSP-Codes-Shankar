@@ -103,7 +103,7 @@ def compute_ktns(sequence, tool_req, cap):
             configs.append(list(magazine))
             total_cost += len(to_add)   # each tool added = 1 switch
 
-        return (total_cost, np.array(configs))
+        return (total_cost, np.array(configs, dtype=object))  # dtype=object: magazine lists vary in length (NumPy 2.x compat)
 
 def run_brute_force_TSP_on_configs(configs):
         n = len(configs)

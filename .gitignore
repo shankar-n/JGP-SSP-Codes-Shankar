@@ -45,6 +45,7 @@ __marimo__/
 
 references/Useless/
 tools/
+data/MTSP*
 
 *.aux
 *.blg

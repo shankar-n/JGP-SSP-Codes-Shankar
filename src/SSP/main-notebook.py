@@ -44,22 +44,25 @@ def _():
     import subprocess
     import os
     import tempfile
-    import ortools
     from tqdm import tqdm
 
     return (
-        compute_ktns,
+        adjacent_swap_ls,
         compute_ssp_cost,
         detect_0blocks,
+        greedy_ffd,
         itertools,
         load_ssp_instance,
         mo,
         np,
         pd,
         plot_active_config_network,
-        plot_magazine_timeline,
+        plot_bounds_bar,
+        plot_config_chain,
+        plot_interactive_timeline,
+        plot_jgp_ssp_comparison,
+        plot_ktns_timeline,
         plot_zero_blocks,
-        plt,
         read_porta_output,
         run_ssp_porta,
         solve_hamiltonian_path,
@@ -68,18 +71,7 @@ def _():
         tqdm,
         validate_jgp,
         validate_ssp,
-        plot_incidence_matrix,
-        plot_ktns_timeline,
-        plot_jgp_ssp_comparison,
-        plot_solution_comparison,
-        plot_config_chain,
-        plot_bounds_bar,
-        plot_interactive_timeline,
         warmstart_from_jgp,
-        greedy_ffd,
-        adjacent_swap_ls,
-        nearest_neighbor,
-        ktns_magazine_states,
     )
 
 
@@ -180,14 +172,16 @@ def _(T_j, b, mo, num_jobs, num_tools):
         _sys.path.insert(0, _bbc_dir)
 
     # ── Configuration ────────────────────────────────────────────────────────
-    TIME_LIMIT           = 120    # seconds per formulation
-    BBC_WORKER_LP_REUSE  = False  # True → reuse DSP model across callbacks
-    BBC_FRACTIONAL_CUTS  = False  # True → Benders cuts at LP-relaxation nodes
-    BBC_PARALLEL         = False  # True → multi-threaded B&B
-    LSS_LIFTED_OBJ       = True   # True → use lifted LSS objective
-    LSS_VALID_INEQ       = True   # True → add LSS valid inequalities (23)(25)
-    SSPMF_SYM_BREAK      = True   # True → SSPMF symmetry-breaking constraint
-    SSPMF_C21            = True   # True → SSPMF constraint (21)
+    TIME_LIMIT                = 120    # seconds per formulation
+    BBC_WORKER_LP_REUSE       = False  # True → reuse DSP model across callbacks
+    BBC_FRACTIONAL_CUTS       = False  # True → Benders user cuts at LP-relaxation nodes
+    BBC_COMBINATORIAL_CUTS    = False   # True → KTNS combinatorial cuts (no LP DSP solve)
+    BBC_TRIPLET_BOUNDS        = False  # True → O(n³) triplet lb constraints (tighter root)
+    BBC_PARALLEL              = False  # True → multi-threaded B&B
+    LSS_LIFTED_OBJ            = True   # True → use lifted LSS objective
+    LSS_VALID_INEQ            = True   # True → add LSS valid inequalities (23)(25)
+    SSPMF_SYM_BREAK           = True   # True → SSPMF symmetry-breaking constraint
+    SSPMF_C21                 = False  # c21 overconstrained for n_jt=2 instances
 
     # ── Helper: run one formulation safely ───────────────────────────────────
     def _run(label, fn):
@@ -210,12 +204,17 @@ def _(T_j, b, mo, num_jobs, num_tools):
         _bbc_backend[0] = _BACKEND
         _s = BranchAndBendersCutSSP(
             num_jobs, num_tools, b, T_j,
-            worker_lp_reuse     = BBC_WORKER_LP_REUSE,
-            use_fractional_cuts = BBC_FRACTIONAL_CUTS,
-            parallel            = BBC_PARALLEL,
+            worker_lp_reuse        = BBC_WORKER_LP_REUSE,
+            use_fractional_cuts    = BBC_FRACTIONAL_CUTS,
+            use_combinatorial_cuts = BBC_COMBINATORIAL_CUTS,
+            use_triplet_bounds     = BBC_TRIPLET_BOUNDS,
+            parallel               = BBC_PARALLEL,
         )
         _s.build_master_problem(verbose=False)
-        return _s.solve(time_limit=TIME_LIMIT, verbose=False)
+        status, obj, seq = _s.solve(time_limit=TIME_LIMIT, verbose=False)
+        # stash solver so we can read detailed stats below
+        _bbc_backend.append(_s)
+        return status, obj, seq
 
     # ── LSS ──────────────────────────────────────────────────────────────────
     def _run_lss():
@@ -285,18 +284,48 @@ def _(T_j, b, mo, num_jobs, num_tools):
         for r in _results
     ])
 
+    # ── BBC detailed stats (if solver object was captured) ───────────────────
+    _bbc_solver = _bbc_backend[1] if len(_bbc_backend) > 1 else None
+    _bbc_st = _bbc_solver.solve_stats if _bbc_solver is not None else {}
+
+    def _stat(key, fmt=None):
+        v = _bbc_st.get(key)
+        if v is None: return "—"
+        return fmt.format(v) if fmt else str(v)
+
+    _bbc_detail = mo.md(f"""
+    ### BBC Solver Diagnostics
+
+    | Stat | Value |
+    |---|---|
+    | Root LP bound (θ before first cut) | {_stat('root_lp_bound', '{:.2f}')} |
+    | Dual bound at termination | {_stat('dual_bound', '{:.2f}')} |
+    | MIP gap | {_stat('mip_gap_pct', '{:.4f}%')} |
+    | B&B nodes explored | {_stat('nodes')} |
+    | LP iterations | {_stat('lp_iters')} |
+    | Callback invocations | {_stat('cb_invocations')} |
+    | Cuts — SECs | {_stat('cuts_sec')} |
+    | Cuts — Benders LP | {_stat('cuts_benders')} |
+    | Cuts — Combinatorial | {_stat('cuts_comb')} |
+    | Cuts — Fractional | {_stat('cuts_frac')} |
+    | Wall time (s) | {_stat('wall_time_s', '{:.2f}')} |
+
+    **Flags:** comb_cuts=`{BBC_COMBINATORIAL_CUTS}` · triplet_bounds=`{BBC_TRIPLET_BOUNDS}` · \
+    frac_cuts=`{BBC_FRACTIONAL_CUTS}` · lp_reuse=`{BBC_WORKER_LP_REUSE}`
+    """) if _bbc_st else mo.md("*BBC stats not available*")
+
     _display = mo.md(f"""
-## Exact Formulation Comparison
+    ## Exact Formulation Comparison
 
-**Instance:** {num_jobs} jobs · {num_tools} tools · capacity {b} · time limit {TIME_LIMIT}s per solver
+    **Instance:** {num_jobs} jobs · {num_tools} tools · capacity {b} · time limit {TIME_LIMIT}s per solver
 
-| Formulation | Status | Obj (switches) | Gap to best | Time | Sequence (first 5) |
-|---|---|---|---|---|---|
-{_table}
+    | Formulation | Status | Obj (switches) | Gap to best | Time | Sequence (first 5) |
+    |---|---|---|---|---|---|
+    {_table}
 
-> BBC backend: `{_bbc_backend}` · LSS lifted obj: `{LSS_LIFTED_OBJ}` · \
-LSS valid ineqs: `{LSS_VALID_INEQ}` · SSPMF sym-break: `{SSPMF_SYM_BREAK}`
-""")
+    > BBC backend: `{_bbc_backend[0]}` · LSS lifted obj: `{LSS_LIFTED_OBJ}` · \
+    LSS valid ineqs: `{LSS_VALID_INEQ}` · SSPMF sym-break: `{SSPMF_SYM_BREAK}`
+    """)
 
     # ── Unpack results for downstream cells ──────────────────────────────────
     _bbc_r, _lss_r, _sspmf_r = _results
@@ -305,181 +334,174 @@ LSS valid ineqs: `{LSS_VALID_INEQ}` · SSPMF sym-break: `{SSPMF_SYM_BREAK}`
     lss_obj, lss_sequence, lss_status = _lss_r["obj"], _lss_r["seq"], _lss_r["status"]
     sspmf_obj, sspmf_sequence, sspmf_status = _sspmf_r["obj"], _sspmf_r["seq"], _sspmf_r["status"]
 
-    _display
-
-    return (
-        bbc_obj, bbc_sequence, bbc_status,
-        lss_obj, lss_sequence, lss_status,
-        sspmf_obj, sspmf_sequence, sspmf_status,
-    )
-
+    mo.vstack([_display, _bbc_detail])
+    return
 
 
 @app.cell
-def _(mo):
-    """Cell 6c: SSP Instance Generator — produce & compare on a fresh instance.
+def _():
+    # """Cell 6c: SSP Instance Generator — produce & compare on a fresh instance.
 
-    Generates a new SSP instance using one of two methods:
-      • Crama (1994) : inclusion-free random sampling, 16 standard benchmark types
-      • Overlapping  : core-group sampling producing high job-tool overlap
+    # Generates a new SSP instance using one of two methods:
+    #   • Crama (1994) : inclusion-free random sampling, 16 standard benchmark types
+    #   • Overlapping  : core-group sampling producing high job-tool overlap
 
-    The generated instance is immediately passed to BBC, LSS, and SSPMF for
-    a side-by-side exact-formulation comparison.
+    # The generated instance is immediately passed to BBC, LSS, and SSPMF for
+    # a side-by-side exact-formulation comparison.
 
-    Fix notes vs. original SSPInstanceGenerator
-    -------------------------------------------
-    1. save_instance header corrected from  "M N C"  (tools, jobs, capacity) to
-       "N M C"  (jobs, tools, capacity) — matching load_ssp_instance token order.
-    2. The spurious  "min_tools max_tools"  second header line was removed; it
-       caused load_ssp_instance to corrupt the matrix (flat-token parser).
-    3. load_instance in the class updated accordingly.
-    """
-    import sys as _sys, os as _os, time as _time, tempfile as _tf
-    from pathlib import Path as _Path
-    import numpy as _np
+    # Fix notes vs. original SSPInstanceGenerator
+    # -------------------------------------------
+    # 1. save_instance header corrected from  "M N C"  (tools, jobs, capacity) to
+    #    "N M C"  (jobs, tools, capacity) — matching load_ssp_instance token order.
+    # 2. The spurious  "min_tools max_tools"  second header line was removed; it
+    #    caused load_ssp_instance to corrupt the matrix (flat-token parser).
+    # 3. load_instance in the class updated accordingly.
+    # """
+    # import sys as _sys, os as _os, time as _time, tempfile as _tf
+    # from pathlib import Path as _Path
+    # import numpy as _np
 
-    # ── Configuration ─────────────────────────────────────────────────────────
-    # Method: "crama" or "overlapping"
-    GEN_METHOD       = "crama"
+    # # ── Configuration ─────────────────────────────────────────────────────────
+    # # Method: "crama" or "overlapping"
+    # GEN_METHOD       = "crama"
 
-    # Crama preset — pick an index 0–15 from get_crama_instance_types():
-    #   0–3  : (M=10, N=10, C=4/5/6/7,   t∈[2,4])
-    #   4–7  : (M=20, N=15, C=6/8/10/12, t∈[2,6])
-    #   8–11 : (M=40, N=30, C=15/17/20/25,t∈[5,15])
-    #   12–15: (M=60, N=40, C=20/22/25/30,t∈[7,20])
-    CRAMA_TYPE_IDX   = 0     # index into get_crama_instance_types()
+    # # Crama preset — pick an index 0–15 from get_crama_instance_types():
+    # #   0–3  : (M=10, N=10, C=4/5/6/7,   t∈[2,4])
+    # #   4–7  : (M=20, N=15, C=6/8/10/12, t∈[2,6])
+    # #   8–11 : (M=40, N=30, C=15/17/20/25,t∈[5,15])
+    # #   12–15: (M=60, N=40, C=20/22/25/30,t∈[7,20])
+    # CRAMA_TYPE_IDX   = 0     # index into get_crama_instance_types()
 
-    # Custom parameters (used when GEN_METHOD="overlapping" or to override Crama)
-    CUSTOM_M         = 10    # number of tools
-    CUSTOM_N         = 10    # number of jobs
-    CUSTOM_C         = 5     # magazine capacity  (must be >= max_tools)
-    CUSTOM_MIN_TOOLS = 2     # min tools per job
-    CUSTOM_MAX_TOOLS = 4     # max tools per job  (must be <= C)
-    OVERLAP_FACTOR   = 0.65  # only for method="overlapping"
+    # # Custom parameters (used when GEN_METHOD="overlapping" or to override Crama)
+    # CUSTOM_M         = 10    # number of tools
+    # CUSTOM_N         = 10    # number of jobs
+    # CUSTOM_C         = 5     # magazine capacity  (must be >= max_tools)
+    # CUSTOM_MIN_TOOLS = 2     # min tools per job
+    # CUSTOM_MAX_TOOLS = 4     # max tools per job  (must be <= C)
+    # OVERLAP_FACTOR   = 0.65  # only for method="overlapping"
 
-    GEN_SEED         = 42    # random seed (None for non-reproducible)
+    # GEN_SEED         = 42    # random seed (None for non-reproducible)
 
-    # Formulation time limit
-    TIME_LIMIT       = 120   # seconds per solver
+    # # Formulation time limit
+    # TIME_LIMIT       = 120   # seconds per solver
 
-    # ── Add BBC directory to path (sibling of SSP/) ───────────────────────────
-    _bbc_dir = str(_Path(_os.getcwd()).parent / "BBC")
-    if _bbc_dir not in _sys.path:
-        _sys.path.insert(0, _bbc_dir)
+    # # ── Add BBC directory to path (sibling of SSP/) ───────────────────────────
+    # _bbc_dir = str(_Path(_os.getcwd()).parent / "BBC")
+    # if _bbc_dir not in _sys.path:
+    #     _sys.path.insert(0, _bbc_dir)
 
-    # ── Generate instance ─────────────────────────────────────────────────────
-    from ssp_instance_generator import SSPInstanceGenerator as _Gen
+    # # ── Generate instance ─────────────────────────────────────────────────────
+    # from ssp_instance_generator import SSPInstanceGenerator as _Gen
 
-    _gen = _Gen(seed=GEN_SEED)
+    # _gen = _Gen(seed=GEN_SEED)
 
-    if GEN_METHOD == "crama":
-        _types   = _Gen.get_crama_instance_types()
-        _idx     = max(0, min(CRAMA_TYPE_IDX, len(_types) - 1))
-        _M, _N, _C, _min_t, _max_t = _types[_idx]
-        _A, _meta = _gen.generate_instance(_M, _N, _C, _min_t, _max_t)
-        _type_label = f"Crama type {_idx} (M={_M}, N={_N}, C={_C}, t∈[{_min_t},{_max_t}])"
-    else:
-        _M, _N, _C = CUSTOM_M, CUSTOM_N, CUSTOM_C
-        _min_t, _max_t = CUSTOM_MIN_TOOLS, CUSTOM_MAX_TOOLS
-        _A, _meta = _gen.generate_overlapping_instance(
-            _M, _N, _C, _min_t, _max_t, overlap_factor=OVERLAP_FACTOR)
-        _type_label = f"Overlapping (M={_M}, N={_N}, C={_C}, overlap={OVERLAP_FACTOR})"
+    # if GEN_METHOD == "crama":
+    #     _types   = _Gen.get_crama_instance_types()
+    #     _idx     = max(0, min(CRAMA_TYPE_IDX, len(_types) - 1))
+    #     _M, _N, _C, _min_t, _max_t = _types[_idx]
+    #     _A, _meta = _gen.generate_instance(_M, _N, _C, _min_t, _max_t)
+    #     _type_label = f"Crama type {_idx} (M={_M}, N={_N}, C={_C}, t∈[{_min_t},{_max_t}])"
+    # else:
+    #     _M, _N, _C = CUSTOM_M, CUSTOM_N, CUSTOM_C
+    #     _min_t, _max_t = CUSTOM_MIN_TOOLS, CUSTOM_MAX_TOOLS
+    #     _A, _meta = _gen.generate_overlapping_instance(
+    #         _M, _N, _C, _min_t, _max_t, overlap_factor=OVERLAP_FACTOR)
+    #     _type_label = f"Overlapping (M={_M}, N={_N}, C={_C}, overlap={OVERLAP_FACTOR})"
 
-    # After filtering null rows:
-    _Mf = _meta["M_after_filtering"]
-    _T_j = _Gen.matrix_to_tool_req(_A)
+    # # After filtering null rows:
+    # _Mf = _meta["M_after_filtering"]
+    # _T_j = _Gen.matrix_to_tool_req(_A)
 
-    # ── Instance statistics ───────────────────────────────────────────────────
-    _tools_per_job = _A.sum(axis=0)          # sum over tool rows → per job
-    _jobs_per_tool = _A.sum(axis=1)          # sum over job cols → per tool
-    _density       = _A.mean()
-    _null_removed  = _meta.get("null_rows_removed", 0)
+    # # ── Instance statistics ───────────────────────────────────────────────────
+    # _tools_per_job = _A.sum(axis=0)          # sum over tool rows → per job
+    # _jobs_per_tool = _A.sum(axis=1)          # sum over job cols → per tool
+    # _density       = _A.mean()
+    # _null_removed  = _meta.get("null_rows_removed", 0)
 
-    # ── Run BBC, LSS, SSPMF ───────────────────────────────────────────────────
-    def _run_safe(label, fn):
-        try:
-            t0 = _time.perf_counter()
-            status, obj, seq = fn()
-            return {"label": label, "status": str(status), "obj": obj,
-                    "seq": seq, "time": round(_time.perf_counter() - t0, 3), "err": None}
-        except Exception as e:
-            return {"label": label, "status": "ERROR", "obj": None,
-                    "seq": None, "time": None, "err": str(e)[:60]}
+    # # ── Run BBC, LSS, SSPMF ───────────────────────────────────────────────────
+    # def _run_safe(label, fn):
+    #     try:
+    #         t0 = _time.perf_counter()
+    #         status, obj, seq = fn()
+    #         return {"label": label, "status": str(status), "obj": obj,
+    #                 "seq": seq, "time": round(_time.perf_counter() - t0, 3), "err": None}
+    #     except Exception as e:
+    #         return {"label": label, "status": "ERROR", "obj": None,
+    #                 "seq": None, "time": None, "err": str(e)[:60]}
 
-    _bbc_backend = ["N/A"]
-    def _run_bbc():
-        from branch_and_benders_cut import BranchAndBendersCutSSP, _BACKEND
-        _bbc_backend[0] = _BACKEND
-        s = BranchAndBendersCutSSP(_Mf, _meta["N"], _C, _T_j)
-        s.build_master_problem(verbose=False)
-        return s.solve(time_limit=TIME_LIMIT, verbose=False)
+    # _bbc_backend = ["N/A"]
+    # def _run_bbc():
+    #     from branch_and_benders_cut import BranchAndBendersCutSSP, _BACKEND
+    #     _bbc_backend[0] = _BACKEND
+    #     s = BranchAndBendersCutSSP(_Mf, _meta["N"], _C, _T_j)
+    #     s.build_master_problem(verbose=False)
+    #     return s.solve(time_limit=TIME_LIMIT, verbose=False)
 
-    def _run_lss():
-        from lss_formulation import LSSFormulation
-        f = LSSFormulation(_Mf, _meta["N"], _C, _T_j)
-        f.build_model(verbose=False)
-        return f.solve(time_limit=TIME_LIMIT, verbose=False)
+    # def _run_lss():
+    #     from lss_formulation import LSSFormulation
+    #     f = LSSFormulation(_Mf, _meta["N"], _C, _T_j)
+    #     f.build_model(verbose=False)
+    #     return f.solve(time_limit=TIME_LIMIT, verbose=False)
 
-    def _run_sspmf():
-        from sspmf_formulation import SSPMFFormulation
-        f = SSPMFFormulation(_Mf, _meta["N"], _C, _T_j)
-        f.build_model(verbose=False)
-        return f.solve(time_limit=TIME_LIMIT, verbose=False)
+    # def _run_sspmf():
+    #     from sspmf_formulation import SSPMFFormulation
+    #     f = SSPMFFormulation(_Mf, _meta["N"], _C, _T_j)
+    #     f.build_model(verbose=False)
+    #     return f.solve(time_limit=TIME_LIMIT, verbose=False)
 
-    _results = [
-        _run_safe("BBC",   _run_bbc),
-        _run_safe("LSS",   _run_lss),
-        _run_safe("SSPMF", _run_sspmf),
-    ]
+    # _results = [
+    #     _run_safe("BBC",   _run_bbc),
+    #     _run_safe("LSS",   _run_lss),
+    #     _run_safe("SSPMF", _run_sspmf),
+    # ]
 
-    # ── Compute gaps ──────────────────────────────────────────────────────────
-    _valid = [r["obj"] for r in _results if r["obj"] is not None]
-    _best  = min(_valid) if _valid else None
+    # # ── Compute gaps ──────────────────────────────────────────────────────────
+    # _valid = [r["obj"] for r in _results if r["obj"] is not None]
+    # _best  = min(_valid) if _valid else None
 
-    def _fo(obj):
-        if obj is None: return "—"
-        return f"**{obj:.1f}**" if _best is not None and abs(obj - _best) < 1e-4 else f"{obj:.1f}"
+    # def _fo(obj):
+    #     if obj is None: return "—"
+    #     return f"**{obj:.1f}**" if _best is not None and abs(obj - _best) < 1e-4 else f"{obj:.1f}"
 
-    def _fg(obj):
-        if obj is None or _best is None or _best == 0: return "—"
-        g = 100.0 * (obj - _best) / _best
-        return "0 %" if g < 1e-4 else f"{g:.1f} %"
+    # def _fg(obj):
+    #     if obj is None or _best is None or _best == 0: return "—"
+    #     g = 100.0 * (obj - _best) / _best
+    #     return "0 %" if g < 1e-4 else f"{g:.1f} %"
 
-    def _ft(t):   return f"{t:.2f}s" if t is not None else "—"
-    def _fs(r):   return f"`{r['status']}`" if not r["err"] else f"`ERROR` {r['err']}"
-    def _fseq(r): return f"`{str(r['seq'][:4])[:-1]}…`" if r["seq"] else "—"
+    # def _ft(t):   return f"{t:.2f}s" if t is not None else "—"
+    # def _fs(r):   return f"`{r['status']}`" if not r["err"] else f"`ERROR` {r['err']}"
+    # def _fseq(r): return f"`{str(r['seq'][:4])[:-1]}…`" if r["seq"] else "—"
 
-    _table = "\n".join(
-        f"| **{r['label']}** | {_fs(r)} | {_fo(r['obj'])} | {_fg(r['obj'])} "
-        f"| {_ft(r['time'])} | {_fseq(r)} |"
-        for r in _results
-    )
+    # _table = "\n".join(
+    #     f"| **{r['label']}** | {_fs(r)} | {_fo(r['obj'])} | {_fg(r['obj'])} "
+    #     f"| {_ft(r['time'])} | {_fseq(r)} |"
+    #     for r in _results
+    # )
 
-    mo.md(f"""
-## Instance Generator + Formulation Comparison
+    # mo.md(f"""
+    # ## Instance Generator + Formulation Comparison
 
-**Generation method:** {_type_label}  ·  seed={GEN_SEED}  ·  time limit={TIME_LIMIT}s/solver
+    # **Generation method:** {_type_label}  ·  seed={GEN_SEED}  ·  time limit={TIME_LIMIT}s/solver
 
-### Instance statistics
+    # ### Instance statistics
 
-| Parameter | Value |
-|---|---|
-| Jobs (N) | {_meta["N"]} |
-| Tools (M, after null-row filter) | {_Mf} ({_null_removed} removed) |
-| Capacity (C) | {_C} |
-| Tools per job — min / mean / max | {int(_tools_per_job.min())} / {_tools_per_job.mean():.2f} / {int(_tools_per_job.max())} |
-| Jobs per tool — min / mean / max | {int(_jobs_per_tool.min())} / {_jobs_per_tool.mean():.2f} / {int(_jobs_per_tool.max())} |
-| Matrix density | {_density:.1%} |
+    # | Parameter | Value |
+    # |---|---|
+    # | Jobs (N) | {_meta["N"]} |
+    # | Tools (M, after null-row filter) | {_Mf} ({_null_removed} removed) |
+    # | Capacity (C) | {_C} |
+    # | Tools per job — min / mean / max | {int(_tools_per_job.min())} / {_tools_per_job.mean():.2f} / {int(_tools_per_job.max())} |
+    # | Jobs per tool — min / mean / max | {int(_jobs_per_tool.min())} / {_jobs_per_tool.mean():.2f} / {int(_jobs_per_tool.max())} |
+    # | Matrix density | {_density:.1%} |
 
-### Exact formulation comparison
+    # ### Exact formulation comparison
 
-| Formulation | Status | Obj (switches) | Gap to best | Time | Sequence |
-|---|---|---|---|---|---|
-{_table}
+    # | Formulation | Status | Obj (switches) | Gap to best | Time | Sequence |
+    # |---|---|---|---|---|---|
+    # {_table}
 
-> BBC backend: `{_bbc_backend[0]}`
-""")
-
+    # > BBC backend: `{_bbc_backend[0]}`
+    # """)
     return
 
 
@@ -518,7 +540,15 @@ def _(
 
 
 @app.cell
-def _(T_j, adjacent_swap_ls, b, greedy_ffd, jgp_batches, num_jobs, warmstart_from_jgp):
+def _(
+    T_j,
+    adjacent_swap_ls,
+    b,
+    greedy_ffd,
+    jgp_batches,
+    num_jobs,
+    warmstart_from_jgp,
+):
     """Cell 8: Upper-bound heuristics (from heuristics.py).
 
     Methods
@@ -568,6 +598,7 @@ def _(jgp_obj, plot_bounds_bar, ssp_obj, ub_2opt, ub_ffd_cost, ub_ws_cost):
               f"{(ub_ws_cost - jgp_obj)/max(jgp_obj,1)*100:.1f}%")
 
     fig_bounds
+    return
 
 
 @app.cell
@@ -583,6 +614,7 @@ def _(T_j, b, jgp_batches, plot_jgp_ssp_comparison, ssp_route):
         print("SSP route not available — skipping timeline plot.")
         fig_timeline = None
     fig_timeline
+    return
 
 
 @app.cell
@@ -594,6 +626,7 @@ def _(T_j, b, plot_config_chain, ssp_route):
     else:
         fig_chain = None
     fig_chain
+    return
 
 
 @app.cell
@@ -617,6 +650,7 @@ def _(T_j, b, plot_interactive_timeline, plot_ktns_timeline, seq_ws):
         fig_ktns        = None
         fig_interactive = None
     fig_ktns
+    return
 
 
 @app.cell
@@ -668,8 +702,8 @@ def _(
 
 
 @app.cell
-def _(b, plot_configuration_network, ssp_route):
-    plot_configuration_network(ssp_route,b)
+def _(b, plot_active_config_network, ssp_route):
+    plot_active_config_network(ssp_route, b)
     return
 
 

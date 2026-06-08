@@ -26,7 +26,7 @@ from utils import load_ssp_instance
 
 # ── Instance path ─────────────────────────────────────────────────────────────
 INSTANCE_PATH = (
-    Path(__file__).parent.parent / "Instances" / "Shankar" / "shankar-example.txt"
+    Path(__file__).parent.parent.parent / "data" / "Shankar" / "shankar-example.txt"
 )
 TIME_LIMIT = 60   # seconds per solver
 
