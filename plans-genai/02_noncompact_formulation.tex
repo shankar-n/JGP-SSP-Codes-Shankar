@@ -320,6 +320,19 @@ in the next section.
 \label{sec:cg}
 % ─────────────────────────────────────────────────────────────────────────────
 
+\paragraph{Why generate configurations, not whole sequences.}
+A tempting alternative is a Dantzig--Wolfe master over entire job sequences
+$\sigma$: one column per sequence with cost $\mathrm{KTNS}(\sigma)$ and convexity
+$\sum_\sigma \lambda_\sigma = 1$. This degenerates. Every sequence processes every
+job exactly once, so each job-covering row $\sum_\sigma a_{j\sigma}\lambda_\sigma = 1$
+is identical to the convexity row; the LP collapses to
+$\min_\sigma \mathrm{KTNS}(\sigma) = Z^{*}_{\mathrm{SSP}}$, giving no usable lower
+bound, and its pricing subproblem is itself an NP-hard SSP. Generating
+\emph{configurations} (equivalently, arcs of the configuration graph), as below, instead
+yields a genuine LP relaxation whose pricing is a tractable set-union knapsack.
+\emph{(This observation was relocated here from the gap-analysis note, Part~V, where it
+did not belong.)}
+
 \subsection{Restricted Master Problem (RMP)}
 
 Let $V \subset \mathcal{C}$ be a small, dynamically growing subset of
@@ -430,7 +443,7 @@ Integer solutions are recovered by branch-and-price \cite{Barnhart1998}.
   row generation entirely at the cost of a slightly weaker LP bound.
 \end{enumerate}
 
-
+%
 \bibliographystyle{abbrvnat}
 \bibliography{references}
 \end{document}

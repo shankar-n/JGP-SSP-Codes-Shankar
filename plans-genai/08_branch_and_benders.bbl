@@ -1,0 +1,26 @@
+\begin{thebibliography}{3}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Laporte et~al.(2004)Laporte, Salazar-Gonz{\'a}lez, and
+  Semet]{Laporte2004}
+G.~Laporte, J.~J. Salazar-Gonz{\'a}lez, and F.~Semet.
+\newblock Exact algorithms for the job sequencing and tool switching problem.
+\newblock \emph{IIE Transactions}, 36\penalty0 (1):\penalty0 37--45, 2004.
+
+\bibitem[Tang and Denardo(1988)]{Tang1988}
+C.~S. Tang and E.~V. Denardo.
+\newblock Models arising from a flexible manufacturing machine, part i:
+  Minimization of the number of tool switches.
+\newblock \emph{Operations Research}, 36\penalty0 (5):\penalty0 767--777, 1988.
+
+\bibitem[Vanderbeck and Wolsey(2010)]{Vanderbeck2010}
+F.~Vanderbeck and L.~A. Wolsey.
+\newblock Reformulation and decomposition of integer programs.
+\newblock In M.~J{\"u}nger et~al., editors, \emph{50 Years of Integer
+  Programming 1958--2008}, pages 431--502. Springer, Berlin, Heidelberg, 2010.
+
+\end{thebibliography}

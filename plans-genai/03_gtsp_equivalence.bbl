@@ -1,0 +1,20 @@
+\begin{thebibliography}{2}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Colares and Wagler(2026)]{Colares2026Exact}
+R.~Colares and A.~Wagler.
+\newblock Exact formulations for the job sequencing and tool switching problem.
+\newblock \emph{Working Paper, Universit{\'e} Clermont Auvergne, LIMOS}, 2026.
+
+\bibitem[Lien et~al.(1993)Lien, Ma, and Wah]{Lien1993}
+Y.-N. Lien, E.~Ma, and B.~W.~S. Wah.
+\newblock Transformation of the generalized traveling-salesman problem into the
+  standard traveling-salesman problem.
+\newblock \emph{Information Sciences}, 74\penalty0 (1-2):\penalty0 177--189,
+  1993.
+
+\end{thebibliography}

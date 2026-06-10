@@ -24,9 +24,12 @@ working notes, not polished results.
   $|T| \times |J| \le 60$).
 
 ### In Progress
-- **Tight gap bound for fixed $K^*$ and $b$**: studying small instances computationally.
-  Conjecture: gap $\le 1$ when $K^* = 3$, $b = 3$. No proof yet.
-  See TODO 1 in `05_jgp_ssp_gap_analysis.tex`.
+- **Approximation ratio of JGP+GSP**: conjectured $H/Z^*_\mathrm{SSP} \leq 4/3$ for
+  all b=3 instances. Ring (K*=3) achieves ratio exactly 4/3 (lower bound proved).
+  Copy-paste construction gives ratio 7/6 < 4/3 for large K*. The intermediate bound
+  $\sum R_k \leq H/4$ used in an earlier draft is **FALSE** in general (counterexample
+  exists: T^(1)={a,b,c}, T^(2)={a,b,d}, T^(3)={c,d,e} gives ΣR_k=1 > H/4=0.75).
+  The 4/3 conjecture remains open. See Section 5 of `05_jgp_ssp_gap_analysis.tex`.
 - **Branch-and-Benders cut** approach for SSP (compact formulation): implementation
   almost complete. Lazy cuts added on integer solutions using KTNS. Future: user
   cuts at fractional solutions.
@@ -78,6 +81,37 @@ working notes, not polished results.
   problem (section 2.2 on Benders). **VERIFY which thesis this refers to.**
 - Also study: Laporte et al. (2004) "new model" (Constraints 11-13, 18 define TSP;
   remaining constraints would be relaxed in Benders).
+
+---
+
+---
+
+## Research Results (June 2026, this session)
+
+The following results have been derived and written into the main LaTeX documents.
+Check those files for full statements and proofs.
+
+1. **Approximation ratio conjecture** (`05_jgp_ssp_gap_analysis.tex`, Section 5):
+   Lower bound H/Z*_SSP ≥ 4/3 proved (6-ring witness). Upper bound H/Z*_SSP ≤ 4/3
+   is a **conjecture** for all b=3 instances. The intermediate bound ΣR_k ≤ H/4
+   was in an earlier draft but is false (counterexample found).
+
+2. **Conflict graph independence theorem** (`05_jgp_ssp_gap_analysis.tex`, Section 6):
+   Proved that LP tightness of JGP and the SSP-JGP gap are independent:
+   - 6-ring: conflict graph 2K_3 (perfect, χ=χ_f=3), gap=1.
+   - 5-ring: conflict graph C_5 (imperfect, χ=3>χ_f=5/2), gap=0.
+   References: Chudnovsky et al. (2006) for SPGT, Cornuejols (2001) for clutter theory,
+   Crama et al. (1994) for JGP=chromatic number equivalence.
+
+3. **MTZ exchange argument partial results** (`04_mtz_formulation.tex`):
+   Proved that cluster-simple optimal solutions exist for disjoint-tool instances and
+   for the 6-job ring. General case remains open. The aggregate MTZ formulation is
+   correct for these classes.
+
+4. **TD-SSP R(ρ) analysis** (`07_collapse_variants.tex`): Approximation ratio R(ρ)
+   decreases monotonically from ≤4/3 at ρ=0 to 1 as ρ→∞. Ring threshold ρ_c=1.
+   Manufacturing parameters ρ≈3–60 (Privault & Finke 1995) all exceed ρ_c=1,
+   so JGP+GSP is exactly optimal for the TD objective on ring-like instances.
 
 ---
 

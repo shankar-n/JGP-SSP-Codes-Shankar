@@ -179,12 +179,17 @@ nodes (one per group) with edge weight:
 \]
 \end{definition}
 
-Under lookahead configurations (from \cref{lem:transition} in
-\texttt{05\_jgp\_ssp\_gap\_analysis.tex}), the switching cost at boundary
+Under \emph{one-directional} lookahead configurations --- each $C_k$ uses its slack to
+pre-load tools of the \emph{next} group only (the per-transition device of Part~V,
+\texttt{05\_jgp\_ssp\_gap\_analysis.tex}) --- the boundary cost
 $k \to k+1$ is $r_k - w(G_k, G_{k+1})$ where $r_k = |\bigcup_{j \in G_k}T_j|$.
-Minimising total switching cost is therefore equivalent to maximising
+Minimising this one-directional cost is equivalent to maximising
 $\sum_k w(G_{\pi(k)}, G_{\pi(k+1)})$ over orderings $\pi$: a
-\textbf{Max-Weight Hamiltonian Path (MWHP)} on $H_\mathrm{ov}$.
+\textbf{Max-Weight Hamiltonian Path (MWHP)} on $H_\mathrm{ov}$. This is the optimal
+ordering \emph{within the one-directional policy}; with positive slack, bidirectional
+padding (a configuration retaining tools of \emph{both} neighbours) can be strictly
+cheaper, so the MWHP value is in general an \emph{upper bound} on the true GSP optimum
+(exact when slack is zero).
 
 \subsection{The MWHP Result — with Proof Conditions}
 
@@ -245,8 +250,9 @@ reasonable approximation but is not guaranteed to find the true GSP optimum.
 \subsection{The Sliding-Window Instance Family}
 \label{sec:sliding_window}
 
-The MWHP result is exact for the following structured instance family, which also
-gives tight instances for Part I of \texttt{05\_jgp\_ssp\_gap\_analysis.tex}.
+The MWHP ordering result applies to the following structured instance family, which
+also realises the tool-counting lower bound of Part~V
+(\texttt{05\_jgp\_ssp\_gap\_analysis.tex}).
 
 \begin{definition}[Sliding-window instance $\mathcal{I}(K,r,\mathrm{ov},b)$]
 Parameters: $K$ groups, group tool set size $r$, overlap $\mathrm{ov}$
@@ -267,14 +273,23 @@ $0 \le \mathrm{ov} \le r/2$, $r < b$, $2r - \mathrm{ov} > b$.
 \end{definition}
 
 For this family, $\Kstar = K$ (no adjacent groups can be merged) and the MWHP
-result applies exactly. The natural linear ordering $G_1 \to G_2 \to \cdots \to G_K$
-maximises the overlap $\mathrm{ov}$ at each boundary and is the MWHP optimum.
-The optimal lookahead GSP cost is $(K-1)(r-\mathrm{ov})$.
+result applies: the natural linear ordering $G_1 \to G_2 \to \cdots \to G_K$
+maximises the overlap $\mathrm{ov}$ at each boundary and is the MWHP optimum, with
+one-directional lookahead cost $(K-1)(r-\mathrm{ov})$.
 
 \begin{corollary}[Optimal SSP cost for the sliding-window family]
-Combined with the mandatory exit lower bound (\cref{lem:mandatory_exit} in
-\texttt{05\_jgp\_ssp\_gap\_analysis.tex}), both bounds equal $(K-1)(r-\mathrm{ov})$,
-so $Z_\mathrm{SSP}^* = (K-1)(r-\mathrm{ov})$ for $\mathcal{I}(K,r,\mathrm{ov},b)$.
+\label{cor:sliding}
+The one-directional MWHP schedule costs $(K-1)(r-\mathrm{ov})$, an \emph{upper} bound.
+The true optimum is governed by the tool-counting bound of Part~V
+(\texttt{05\_jgp\_ssp\_gap\_analysis.tex}): with $|U| = (K-1)(r-\mathrm{ov})+r$ tools,
+\[
+  Z_\mathrm{SSP}^{*} \;=\; |U|-b \;=\; (K-1)(r-\mathrm{ov}) - (b-r),
+\]
+the lower bound $Z^{*}\!\ge|U|-b$ being met by a bidirectional-padding schedule. Thus
+the one-directional MWHP value exceeds $Z_\mathrm{SSP}^{*}$ by exactly the slack $b-r$,
+and the two coincide iff the groups are \emph{zero-slack} ($r=b$). (Values verified in
+\texttt{plans-genai/\_verification/}: e.g.\ $K{=}3,r{=}3,\mathrm{ov}{=}1,b{=}4$ gives
+$Z^{*}=3$, MWHP $=4$.)
 \end{corollary}
 
 \noindent\textbf{Practical use.}
@@ -294,8 +309,10 @@ a heuristic shortcut, not an exact method, for general instances.
 
 The JGP minimises group count $|\calG|$; the SSP minimises switching cost.
 These objectives can conflict: a grouping with $K > \Kstar$ groups may yield
-a lower switching cost than any $\Kstar$-group solution (as conjectured in
-\texttt{05\_jgp\_ssp\_gap\_analysis.tex}, TODO 2).
+a lower switching cost than any $\Kstar$-group solution. This is \emph{proved} in
+Part~V (\texttt{05\_jgp\_ssp\_gap\_analysis.tex}, Theorem on sub-optimal groupings):
+on the $6$-job ring a $K{=}4$ grouping attains the SSP optimum $3$, strictly below the
+JGP-optimal heuristic value $4$.
 
 A Lagrangian relaxation penalises extra groups:
 \[
@@ -328,11 +345,17 @@ $G_c = (J, E_c)$ where $(i,j) \in E_c \iff |T_i \cup T_j| > b$
 (jobs $i$ and $j$ cannot share a configuration).
 \end{definition}
 
-Valid JGP groupings correspond to proper colourings of $G_c$: each colour class
-is a feasible group. The chromatic number $\chi(G_c) = \Kstar$.
+Every feasible JGP grouping is a proper colouring of $G_c$ (no group contains a
+conflicting pair), hence $\chi(G_c) \le \Kstar$. The converse \emph{fails}: a colour
+class can be capacity-infeasible even with no internal conflict --- e.g.\ the three jobs
+$\{t_1,t_2\},\{t_1,t_3\},\{t_1,t_4\}$ ($b=3$) are pairwise compatible but their union has
+size $4$ --- so $\chi(G_c)=\Kstar$ holds only under a Helly-type condition on the tool
+sets (it does hold for the ring instances). See Part~V
+(\texttt{05\_jgp\_ssp\_gap\_analysis.tex}, \S\,Conflict-Graph Structure).
 
 \begin{remark}[MWHP connects chromatic structure to switching cost]
-Among all $\Kstar$-colourings of $G_c$, the MWHP criterion (\cref{sec:mwhp})
+Among all JGP-optimal groupings (each a proper $\Kstar$-colouring of $G_c$), the MWHP
+criterion (\cref{sec:mwhp})
 selects the colouring whose colour classes have maximum pairwise mandatory tool
 overlap in the optimal ordering. This connects the chromatic structure of $G_c$
 to the SSP objective. To our knowledge, this connection is not made explicit
@@ -396,8 +419,9 @@ $\nabla_\theta \mathcal{L} = -\mathbb{E}[(R_T - b)\nabla_\theta \log \pi_\theta]
 
 \noindent\textbf{Key distinction.}
 A JGP solver minimises group count. This RL policy minimises switching cost
-directly, and may discover that $K > \Kstar$ groups are beneficial — empirically
-testing the conjecture of TODO 2 in \texttt{05\_jgp\_ssp\_gap\_analysis.tex}.
+directly, and may discover that $K > \Kstar$ groups are beneficial --- the
+sub-optimal-grouping phenomenon proved in Part~V
+(\texttt{05\_jgp\_ssp\_gap\_analysis.tex}).
 
 \noindent\textbf{Guarantee.}
 No worst-case bound; distributional convergence only.
@@ -431,7 +455,7 @@ Result & Status & Location \\
 GTSP for fixed grouping & \textbf{Proved} & \cref{thm:gtsp_fixed} \\
 MWHP = optimal ordering (distance-2 disjoint instances) & \textbf{Proved} & \cref{thm:mwhp} \\
 MWHP for general instances & \textbf{Open / Approximation only} & \cref{sec:mwhp} \\
-Sliding-window family: $\ZSSP = (K-1)(r-\mathrm{ov})$ & \textbf{Proved} & Corollary \\
+Sliding-window family: $\ZSSP = |U|-b$ & \textbf{Proved} & \cref{cor:sliding} \\
 Lagrangian Pareto frontier & \textbf{Proposed} & \cref{sec:lagrangian} \\
 Chromatic/MWHP connection & \textbf{Proved observation} & \cref{sec:chromatic} \\
 GNN grouping scorer & \textbf{Proposed} & \cref{sec:ml} \\

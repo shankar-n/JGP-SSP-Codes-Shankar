@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{5}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -10,5 +10,31 @@
 D.~L. Applegate, R.~E. Bixby, V.~Chv{\'a}tal, and W.~J. Cook.
 \newblock \emph{The Traveling Salesman Problem: A Computational Study}.
 \newblock Princeton University Press, 2006.
+
+\bibitem[Barnhart et~al.(1998)Barnhart, Johnson, Nemhauser, Savelsbergh, and
+  Vance]{Barnhart1998}
+C.~Barnhart, E.~L. Johnson, G.~L. Nemhauser, M.~W.~P. Savelsbergh, and P.~H.
+  Vance.
+\newblock Branch-and-price: Column generation for solving huge integer
+  programs.
+\newblock \emph{Operations Research}, 46\penalty0 (3):\penalty0 316--329, 1998.
+
+\bibitem[Desrochers and Laporte(1991)]{DesrochersLaporte1991}
+M.~Desrochers and G.~Laporte.
+\newblock Improvements and extensions to the {Miller--Tucker--Zemlin} subtour
+  elimination constraints.
+\newblock \emph{Operations Research Letters}, 10\penalty0 (1):\penalty0 27--36,
+  1991.
+
+\bibitem[L{\"u}bbecke and Desrosiers(2005)]{Lubbecke2005}
+M.~E. L{\"u}bbecke and J.~Desrosiers.
+\newblock Selected topics in column generation.
+\newblock \emph{Operations Research}, 53\penalty0 (6):\penalty0 1007--1023,
+  2005.
+
+\bibitem[Miller et~al.(1960)Miller, Tucker, and Zemlin]{Miller1960}
+C.~E. Miller, A.~W. Tucker, and R.~A. Zemlin.
+\newblock Integer programming formulation of traveling salesman problems.
+\newblock \emph{Journal of the ACM}, 7\penalty0 (4):\penalty0 326--329, 1960.
 
 \end{thebibliography}

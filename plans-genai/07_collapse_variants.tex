@@ -92,7 +92,8 @@ solving the JGP? We present:
 (iii)~\textbf{sufficient conditions} for collapse (C1+C2+C3) — \textbf{proved};
 (iv)~the magazine setup time variant $S_\mathrm{stop}$ and when it causes
 collapse — \textbf{proved};
-(v)~the necessity of the conditions — \textbf{open problem (TODO)}.
+(v)~a \textbf{necessity analysis} of the conditions (\cref{sec:analysis}): (C3) is
+necessary, while (C1) and (C2) are not, each with an explicit witness.
 The document explicitly distinguishes proved from open results.
 \end{mdframed}
 
@@ -198,12 +199,14 @@ groups. \qed
 \end{proof}
 \end{proofbox}
 
-\begin{remark}[Necessity — open problem]
-The sufficient conditions (C1)+(C2)+(C3) are \emph{not} proved to be necessary.
-It is possible that $f$ causes collapse even when (C2) fails (e.g., if some
-inter-group transitions have zero cost but the overall structure prevents benefiting
-from more groups). Proving necessity, or finding a weaker necessary and sufficient
-condition, is an open problem; see \cref{sec:todo}.
+\begin{remark}[Necessity — partial answer, with an open core]
+The conjunction (C1)+(C2)+(C3) is \emph{sufficient} but not necessary: the necessity
+analysis of \cref{sec:analysis} (\cref{prop:necessity}) shows (C3) is necessary while
+(C1) and (C2) are each dispensable, via explicit witnesses (e.g.\ collapse can hold with
+positive self-cost, violating (C1), or with some zero-cost inter-group transitions,
+violating (C2)). What remains open is a single \emph{necessary and sufficient}
+characterisation of collapse; \cref{sec:analysis} reduces this to the threshold
+$\rho_c(I)$ but does not close it.
 \end{remark}
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -272,25 +275,71 @@ is the \emph{collapse threshold}. Below this threshold, the SSP and JGP optima d
 \subsection{Parameterised Collapse: The $\rho$-Frontier}
 
 \begin{propbox}
-\textbf{Status: Proposed research direction.}
+\textbf{Status: Partially proved; approximation ratio analysis proposed.}
 \end{propbox}
 
 Define the ratio $\rho = S_\mathrm{stop} / c_\mathrm{switch}$.
 As $\rho$ increases from 0 to $\infty$:
 \begin{itemize}
-\item $\rho = 0$: pure U-SSP; JGP and SSP optima can differ by up to
-  $\ZJGP - 1$ switches (Theorem 2 of \texttt{05\_jgp\_ssp\_gap\_analysis.tex}).
+\item $\rho = 0$: pure U-SSP; JGP and SSP optima can differ (gap analysis in
+  \texttt{05\_jgp\_ssp\_gap\_analysis.tex}).
 \item $\rho > nb$: complete collapse (Theorem~\ref{thm:setup_collapse}).
 \item $0 < \rho < nb$: partial regime where the optimal number of groups
   is between $\ZJGP$ and some $K_\rho > \ZJGP$.
 \end{itemize}
 
-\noindent\textbf{Proposed direction.}
-Characterise the exact threshold $\rho_c$ at which the optimal number of groups
-transitions from $\ZJGP$ to $\ZJGP+1, \ZJGP+2, \ldots$ This would give a complete
-picture of how the JGP/SSP tradeoff depends on the physical parameters of the machine.
-This is related to the Lagrangian relaxation of \texttt{06\_grouping\_selection.tex},
-where $\lambda \approx \rho$ penalises extra groups.
+\noindent\textbf{Approximation ratio as a function of $\rho$.}
+Define the JGP+GSP TD-SSP approximation ratio at parameter $\rho$:
+\[
+  R(\rho) = \sup_I \frac{(K^*-1)\rho + H(I)}{(K^*-1)\rho + \ZSSP(I)},
+\]
+where $H(I)$ is the JGP+GSP cost (U-SSP component only) and $\ZSSP(I)$ is the
+U-SSP optimum. For the 6-job ring (\texttt{05\_jgp\_ssp\_gap\_analysis.tex}, Example~1),
+$K^*=3$, $H=4$, $\ZSSP=3$:
+\[
+  R(\rho)_{\text{ring}} = \frac{2\rho + 4}{2\rho + 3}.
+\]
+At $\rho=0$: ratio $=4/3$. At $\rho=1$: ratio $=1$ (JGP+GSP is optimal).
+For $\rho > 1 = \rho_c(\text{ring})$, the JGP+GSP solution is exactly optimal
+for the TD objective.
+
+\medskip
+Two boundary values are established:
+\begin{itemize}
+\item $R(0) \leq 4/3$ for $b=3$ (conjectured tight; see
+  \texttt{05\_jgp\_ssp\_gap\_analysis.tex}, \S5).
+\item $\lim_{\rho \to \infty} R(\rho) = 1$ (JGP+GSP optimal in the TSIP regime).
+\end{itemize}
+
+\noindent\textbf{Practical implication.}
+In CNC manufacturing, the machine stop time $S_\mathrm{stop}$ is typically
+5--30 minutes (magazine swap, re-initialisation) while individual tool change
+costs $c_\mathrm{switch}$ are 0.5--2 minutes, giving $\rho \approx 3$--60
+\cite{Privault1995}.
+For ring-like instances ($\rho_c=1$), all practical parameter values satisfy
+$\rho \gg \rho_c$: JGP+GSP is exactly optimal for the TD objective.
+The U-SSP gap (at $\rho=0$) is therefore largely irrelevant in practice for
+such instances.
+
+\medskip
+\noindent\textbf{Bi-objective interpretation.}
+The TD-SSP family parameterised by $\rho$ is the weighted-sum scalarisation of:
+\begin{align*}
+  \min\; & (K - 1) \quad &&\text{(configuration changes = JGP objective)},\\
+  \min\; & Z_{\mathrm{switch}} \quad &&\text{(tool changes = U-SSP objective)}.
+\end{align*}
+As $\rho$ varies, the optimal solution traces the Pareto frontier.
+JGP+GSP always achieves the JGP-efficient point $(K^*-1, H)$.
+The U-SSP optimal sequence may achieve a different Pareto-efficient point
+$(K > K^*-1, \ZSSP < H)$. For $\rho > \rho_c(I)$, the JGP point dominates.
+The multi-objective structure is studied for related tool-switching variants
+in \cite{Furrer2017}.
+
+\noindent\textbf{Open problem.}
+Characterise the exact threshold $\rho_c$ per instance, and the function $R(\rho)$
+as a closed form. This is also related to the Lagrangian relaxation of
+\texttt{06\_grouping\_selection.tex}, where $\lambda \approx \rho$ penalises extra
+groups.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{The TD-SSP and Lexicographic Collapse}

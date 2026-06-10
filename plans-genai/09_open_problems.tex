@@ -1,0 +1,132 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{mdframed}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\definecolor{navyblue}{RGB}{26,58,92}
+\definecolor{midblue}{RGB}{44,95,138}
+\definecolor{lightblue}{RGB}{232,240,248}
+\definecolor{opencolor}{RGB}{235,245,235}
+\definecolor{openborder}{RGB}{0,120,0}
+\hypersetup{colorlinks=true,linkcolor=midblue,citecolor=midblue,urlcolor=midblue}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\color{navyblue}\textit{Consolidated Open Problems}}
+\fancyhead[R]{\small\color{navyblue}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\titleformat{\section}{\large\bfseries\color{navyblue}}{}{0em}{}[\color{navyblue}\titlerule]
+\newmdenv[backgroundcolor=opencolor,linecolor=openborder,linewidth=1.2pt,
+  leftline=true,rightline=false,topline=false,bottomline=false,
+  innerleftmargin=12pt,innerrightmargin=8pt,innertopmargin=8pt,
+  innerbottommargin=8pt,skipabove=8pt,skipbelow=6pt]{op}
+\newcommand{\ZSSP}{Z_{\mathrm{SSP}}^{*}}
+\newcommand{\Kstar}{K^{*}}
+\setlist[itemize]{noitemsep,topsep=3pt}
+\begin{document}
+\begin{center}
+  {\color{navyblue}\rule{\textwidth}{2pt}}\\[0.4cm]
+  {\LARGE\bfseries\color{navyblue}The Job Sequencing and Tool Switching Problem}\\[0.3cm]
+  {\large\itshape\color{midblue}Consolidated Open Problems and Their Current Status}\\[0.2cm]
+  {\color{navyblue}\rule{\textwidth}{2pt}}
+\end{center}
+\vspace{0.3cm}
+\begin{mdframed}[backgroundcolor=lightblue,linecolor=navyblue,linewidth=1pt,
+  innerleftmargin=14pt,innerrightmargin=14pt,innertopmargin=8pt,innerbottommargin=8pt]
+\small This is an index of the open problems raised across Parts~I--VII, with precise
+statements, current status, and pointers. ``Verified'' means checked by the scripts in
+\texttt{plans-genai/\_verification/} (see \texttt{VERIFIED\_FACTS.md}). Conjectures are
+labelled as such; nothing here is claimed as proved unless it is proved in the cited Part.
+\end{mdframed}
+\vspace{0.3cm}
+\section{Gap and Approximation Ratio (Part V)}
+\begin{op}
+\textbf{OP\,1 (Tight ratio for $b=3$; conjecture).} Is $H/\ZSSP \le 4/3$ for every
+$b=3$ instance, with equality only at the $6$-job ring?
+\emph{Status:} open. Strong evidence --- no counterexample in the $10691$ exhaustively
+enumerated $b=3$ edge instances, nor in a further $6065$ instances with size-$3$ jobs, nor
+in the copy-paste or ring families (Part~V; $\approx 17$k instances total). The earlier
+route via $\sum_k R_k \le H/4$ is \emph{false} (counterexample
+$\{a,b,c\},\{a,b,d\},\{c,d,e\}$) and has been retracted.
+\end{op}
+\begin{op}
+\textbf{OP\,2 (Extremal ratio for general $b$).} What is $\sup_I H/\ZSSP$ as a function
+of $b$? \emph{Status:} partially resolved. Exact witnesses give ratios $4/3$ ($b=3$), $4/3$ ($b=4$),
+and $3/2$ ($b=5$). These are \emph{proved} lower bounds on $\sup_I H/\ZSSP$ (the instances and
+their $Z^*,H$ are computed exactly), so it is a \textbf{theorem} that $\sup_I H/\ZSSP>4/3$ for
+$b\ge5$ --- i.e.\ the $4/3$ bound is specific to $b=3$, \emph{not} universal. What is \emph{not}
+proved (three data points only): monotonicity in $b$, the growth law (does it $\to2$? is it
+unbounded?), and the $b=3$ upper bound itself (OP\,1).
+\end{op}
+\begin{op}
+\textbf{OP\,3 (Structural characterisation of zero gap).} Give a necessary-and-sufficient
+structural condition for $H=\ZSSP$. \emph{Status:} open, partly clarified. By OP\,4 the gap
+vanishes for \emph{every} instance once grouping choice is unrestricted, so the question is
+really: when does some \emph{minimum-cardinality} ($\Kstar$-)grouping already attain
+$\ZSSP$? Two sufficient conditions are proved (the heuristic meets either lower bound
+$\Kstar-1$ or $|U|-b$; Part~V), and empirically every positive-gap $b=3$ edge instance has
+$\Kstar=3$ with the ring/prism boundary structure. A clean necessary-and-sufficient
+characterisation (e.g.\ via a forbidden ``ring obstruction'') is missing.
+\end{op}
+\section{Grouping Selection (Parts V--VI)}
+\begin{op}
+\textbf{OP\,4 (Joint grouping--sequencing).} \emph{Structural part now resolved} (Part~V,
+grouping-exactness theorem): $\ZSSP=\min_{\mathcal{G}}\mathrm{GTSP}(\mathcal{G})$ over
+\emph{all} feasible groupings, so the JGP$+$GSP gap is \emph{exactly} the price of
+restricting to minimum-cardinality groupings (proved; verified on $1306$ instances). In
+particular a sub-optimal grouping ($K>\Kstar$) can strictly beat the heuristic (the
+$6$-ring $K=4$ grouping attains $\ZSSP=3<4=H$). \emph{What remains open} is the
+\textbf{algorithmic} problem: efficiently optimise over the (exponentially many) feasible
+groupings --- a polynomial algorithm, or NP-hardness, for this joint grouping-and-sequencing
+objective.
+\end{op}
+\begin{op}
+\textbf{OP\,5 (Beyond one-directional lookahead).} The MWHP ordering result (Part~VI) is
+exact only for the one-directional lookahead policy and coincides with the optimum at zero
+slack; with positive slack, bidirectional padding can be strictly cheaper (the
+sliding-window family has true cost $|U|-b=(K{-}1)(r{-}\mathrm{ov})-(b{-}r)$, below the MWHP
+value $(K{-}1)(r{-}\mathrm{ov})$). A polynomial exact GSP for positive-slack groupings, or a
+proof of NP-hardness, is open.
+\end{op}
+\section{Exact Formulations (Parts II, IV)}
+\begin{op}
+\textbf{OP\,6 (Exchange argument / cluster-MTZ exactness; central to Part~IV).} \textbf{RESOLVED (negative).} The cluster-aggregated MTZ formulation is \emph{not} exact. Its constraint is representable for a configuration path \emph{iff} every ordered cluster pair is traversed at most once \emph{and} the induced precedence digraph (edge $j'\!\to\!j''$ whenever an arc runs from a $j'$-config to a $j''$-config) is \emph{acyclic}. The acyclicity fails under \textbf{job domination}: if $T_i\subseteq T_j$, every config covering $j$ also covers $i$, so an arc between two such configs forces both $j\!\to\!i$ and $i\!\to\!j$, a $2$-cycle. Explicit counterexample ($b=3$): jobs $\{1,4\},\{1,3,4\},\{1\},\{1,2,4\}$ have $\ZSSP=1$ but cluster-MTZ optimum $2$ (brute-force verified; $19$ counterexamples in $\approx7.9$k instances). \textbf{For column generation use per-configuration MTZ or lazy SEC/PCTSP cuts (both exact), not cluster-MTZ.} The job-indexed MTZ of the BBC master (Part~VIII) is unaffected.
+\end{op}
+\begin{op}
+\textbf{OP\,7 (LP strength and net solver benefit of MTZ).} The cluster-MTZ relaxation is no
+tighter than SEC and is weakened further by aggregation (Part~IV). Quantify the LP gap on SSP
+instances (with and without Desrochers--Laporte lifting), and measure whether removing row
+generation yields a net branch-and-price speed-up versus the SEC and SSPMF formulations on the
+Catanzaro Tabela1C set. \emph{Status:} open, computational.
+\end{op}
+\begin{op}
+\textbf{OP\,8 (Fractional Benders cuts).} The branch-and-Benders solver (Part~VIII,
+\texttt{08\_branch\_and\_benders.tex}) currently adds optimality cuts only at integer master
+solutions (KTNS subproblem). Deriving valid cuts at \emph{fractional} master solutions from a
+relaxation of the KTNS recursion (min-cost-flow / interval-matrix lower bound, or the
+totally-unimodular tooling LP) --- enabling user cuts that tighten the bound before branching
+--- is open. Cut \emph{lifting} (certifying a cut for all sequences sharing a $0$-block
+structure) is the related practical lever.
+\end{op}
+\section{Cost-Function Variants (Part VII)}
+\begin{op}
+\textbf{OP\,9 (Tight collapse condition).} The conditions (C1)+(C2)+(C3) are sufficient for
+collapse of an SSP variant to the JGP; the necessity analysis (Part~VII) shows (C3) necessary
+and (C1),(C2) dispensable. A single necessary-and-sufficient characterisation of collapse,
+beyond the reduction to the threshold $\rho_c(I)$, is open.
+\end{op}
+\begin{op}
+\textbf{OP\,10 (Setup-time regime in practice).} For the magazine/tool setup-time ratio
+$\rho$, the TD-SSP approximation ratio $R(\rho)$ decreases from $\le 4/3$ at $\rho=0$ to $1$
+as $\rho\to\infty$, with ring threshold $\rho_c=1$ (Part~VII). Whether the manufacturing
+regime $\rho\in[3,60]$ (Privault--Finke) makes JGP+GSP exactly optimal on broader instance
+classes (not just ring-like) is open.
+\end{op}
+\vspace{0.4cm}
+\noindent\textit{Cross-references: OP\,1--4 (Part~V, \texttt{05}); OP\,5 (Part~VI,
+\texttt{06}); OP\,6--7 (Part~IV, \texttt{04}); OP\,8 (Part~VIII, \texttt{08}); OP\,9--10
+(Part~VII, \texttt{07}).}
+\end{document}
