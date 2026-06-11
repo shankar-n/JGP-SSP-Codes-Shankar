@@ -70,7 +70,9 @@ BBC is the exact solver research. Code is also prototyped in `src/SSP/main-noteb
 | `bbc_common.py` ★                   | `BBCSolverMixin`: subtour detection, sequence extraction, DSP solvers |
 | `lss_formulation.py`                | LSS formulation (Laporte 2004) — compact ILP comparison               |
 | `sspmf_formulation.py`              | SSPMF formulation (da Silva 2024) — multicommodity flow comparison    |
-| `benchmark.py`, `test_solver.py`    | Benchmarking and smoke tests                                          |
+| `benchmark.py`, `test_solver.py`    | Legacy runner; cross-solver agreement tests                           |
+| `benchmark_config.py`, `benchmark_runner.py` | Campaign config (single source of truth) + resumable runner   |
+| `precompute_jgp_gsp.py`, `analysis/` | JGP+GSP costs per instance; plots/tables generators                  |
 | `docs-for-claude-code/`             | Design documents — load `ssp-bbc-expert` skill for details            |
 | `_archived/`                        | Deprecated Gurobi/SCIP backends — do not touch                        |
 
@@ -88,6 +90,9 @@ BBC is the exact solver research. Code is also prototyped in `src/SSP/main-noteb
 | `01_foundations.tex`            | Problem foundations writeup                                                 |
 | `02_noncompact_formulation.tex` | Non-compact ILP exploration                                                 |
 | `03_gtsp_equivalence.tex`       | SSP ↔ GTSP equivalence exploration                                          |
+| `09_open_problems.tex` ★        | Consolidated OP index (OP1–11; updated 2026-06-10)                          |
+| `10_position_formulations.tex` ★ | Part X: standalone PCF/PTF formulations with fixed O(n·|T|) rows (2026-06-10) |
+| `_verification/` ★              | Verification scripts (`ssp_verify.py` + per-document `verify_*.py`); `VERIFIED_FACTS.md` |
 | `references.bib`                | Bibliography (use for valid citation keys)                                  |
 
 ---
@@ -139,4 +144,5 @@ Benchmark sets:
 - BBC CPLEX: complete, subtour detection fixed, FREE bounds on ν/η fixed
 - Gap analysis: ring counterexample + unbounded gap proved
 - Golang BFS enumerator: working
-- **In progress**: tight gap bound (K\*=3, b=3 conjecture), fractional Benders cuts, MTZ vs. GSEC LP comparison, experiments at b=4, |T|=8, |J|=8
+- **In progress**: tight gap bound (now generalised: gap ≤ K\*−2 conjecture, OP11), fractional Benders cuts (implemented, untested), MTZ vs. GSEC LP comparison, experiments at b=4, |T|=8, |J|=8
+- **Verification campaign (2026-06-10, Claude-Fable)**: plans-genai 01–10 all verified/corrected (changes flagged `%% TODO-VERIFY`); BBC code audited — **Benders-cut depot-dual bug FIXED: re-run all pre-fix benchmarks and archive old `raw_results.csv` first (the runner resumes and would skip stale rows)**; conventions unified (repo exact solvers + `compute_ktns` are all EMPTY-START = free-initial + min(b,|U|); GTSP reference is free-initial); cluster-MTZ settled NOT exact, per-configuration MTZ proved exact; Part X (PCF/PTF) added — PTF LP can exceed |U|−b

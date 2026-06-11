@@ -174,11 +174,15 @@ def nearest_neighbor(n_jobs, tool_req, cap, start=0):
     sequence  = [start]
     unvisited.discard(start)
     magazine  = set(tool_req[start])
-
-    # Initialise magazine for the first job
-    needed_first = set(tool_req[start])
-    while len(magazine) < cap and needed_first:
-        magazine = needed_first.copy()
+    # AUDIT-FIX(Claude-Fable 2026-06-10): removed an INFINITE LOOP here.
+    # The old code was:
+    #     needed_first = set(tool_req[start])
+    #     while len(magazine) < cap and needed_first:
+    #         magazine = needed_first.copy()
+    # The loop body never changes len(magazine) or needed_first, so it spins
+    # forever whenever |T_start| < cap.  The magazine is already initialised
+    # to the first job's tools above; no padding is needed (the greedy delta
+    # below only ever subtracts the magazine).
 
     while unvisited:
         best_j, best_delta = None, float('inf')

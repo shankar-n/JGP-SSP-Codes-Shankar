@@ -108,7 +108,13 @@ counterexample (\cref{thm:notexact}) on which $\OMTZ=2>1=\OSSP$, and the failure
 (it is triggered by \emph{job domination} $T_i\subseteq T_j$, which is ubiquitous).
 \textbf{Therefore this formulation must not be used as an exact model for column generation.}
 The safe exact alternatives --- per-configuration MTZ and lazy SEC/PCTSP cuts --- are given
-in \cref{sec:safe}.
+in \cref{sec:safe}; \emph{per-configuration MTZ exactness is now proved}
+(\cref{thm:perconfig}). This revision also fixes two flaws found on verification:
+the coverage constraints \eqref{eq:exit}--\eqref{eq:entry} must sum over $V^{+}$, not $V$
+(else paths starting or ending inside a singleton cluster are wrongly cut off), and the raw
+ILP admits \emph{parasitic cycles} that fake coverage (\cref{lem:parasitic}), so even
+heuristic use requires path extraction. The aggregate Desrochers--Laporte lifting claimed
+earlier is invalid (\cref{rem:dl}).
 \item \textbf{The motivation is a trade-off, not a free win.} Removing row generation costs
 LP strength: MTZ-type subtour constraints give a relaxation no tighter than SEC, and
 aggregation to clusters weakens it further (\cref{rem:lpweak}). Whether the saved separation
@@ -220,11 +226,16 @@ $i\ne j$, with position variables $u_{j'}$ for each job $j'\in J$.
 		\sum_{j\in V^{+}\setminus\{i\}} x_{ij}=\sum_{j\in V^{+}\setminus\{i\}} x_{ji}
 		\quad\forall i\in V.
 	\end{equation}
-	\textbf{Cluster coverage --- exit and entry of each job cluster:}
+	\textbf{Cluster coverage --- exit and entry of each job cluster (sums over $V^{+}$):}
+	%% TODO-VERIFY(Claude-Fable 2026-06-10): corrected V -> V^+ in both sums. With sums over V
+	%% only, a path that starts (resp. ends) at the unique configuration of a singleton cluster
+	%% violates entry (resp. exit): the boundary arcs from s / to t must count. The brute-force
+	%% number OMTZ=2 in thm:notexact is consistent with the V^+ semantics only (with V-only
+	%% sums that instance would give OMTZ=3).
 	\begin{align}
-		\sum_{i\in H_{j^{*}}}\sum_{j\in V\setminus H_{j^{*}}} x_{ij}&\ge 1
+		\sum_{i\in H_{j^{*}}}\sum_{j\in V^{+}\setminus H_{j^{*}}} x_{ij}&\ge 1
 		\quad\forall j^{*}\in J,\label{eq:exit}\\
-		\sum_{i\in V\setminus H_{j^{*}}}\sum_{j\in H_{j^{*}}} x_{ij}&\ge 1
+		\sum_{i\in V^{+}\setminus H_{j^{*}}}\sum_{j\in H_{j^{*}}} x_{ij}&\ge 1
 		\quad\forall j^{*}\in J.\label{eq:entry}
 	\end{align}
 	\textbf{Cluster-level MTZ subtour elimination:}
@@ -234,7 +245,10 @@ $i\ne j$, with position variables $u_{j'}$ for each job $j'\in J$.
 	\end{equation}
 	\textbf{Bounds and integrality:}
 	\begin{equation}\label{eq:ubounds}
-		1\le u_{j'}\le n\ \ \forall j'\in J,\qquad x_{ij}\in\{0,1\}\ \ \forall i,j\in V^{+}.
+		%% TODO-VERIFY(Claude-Fable 2026-06-10): arc set tightened; the earlier
+		%% "\forall i,j \in V^+" left x_{ts}, x_{is}, x_{tj} present but unconstrained.
+		1\le u_{j'}\le n\ \ \forall j'\in J,\qquad x_{ij}\in\{0,1\}\ \ \forall (i,j)\in
+		A:=(\{s\}\times V)\cup\{(i,j)\in V\times V:i\ne j\}\cup(V\times\{t\}).
 	\end{equation}
 \end{formbox}
 
@@ -252,8 +266,12 @@ model) the insertions, so \eqref{eq:obj} counts tool switches.
 \begin{thmbox}
 	\begin{proposition}[Coverage $\Leftrightarrow$ job feasibility]
 		\label{prop:coverage}
-		In any feasible solution, every job $j^{*}$ is served by some visited configuration
-		$\mathcal{C}\in H_{j^{*}}$.
+		%% TODO-VERIFY(Claude-Fable 2026-06-10): added the single-path hypothesis. Without it
+		%% the statement is FALSE: a disconnected parasitic cycle can satisfy entry/exit for a
+		%% job the path never serves (see lem:parasitic and the explicit example there).
+		In any feasible solution whose arc support is a single $s$--$t$ path (in particular,
+		any parasitic-free solution, \cref{lem:parasitic}), every job $j^{*}$ is served by
+		some visited configuration $\mathcal{C}\in H_{j^{*}}$.
 	\end{proposition}
 \end{thmbox}
 \begin{proofbox}
@@ -406,13 +424,59 @@ heart of this note.
 	\end{proof}
 \end{proofbox}
 
+%% TODO-VERIFY(Claude-Fable 2026-06-10): the warnbox that stood here ("intra-cluster
+%% subtours ... never occur in an integer optimum") was WRONG in two ways: (1) it missed
+%% cycles through configurations covering NO job, which \eqref{eq:MTZ} also fails to
+%% eliminate; (2) "never occurs in an integer optimum" is invalid because a parasitic
+%% cycle can be the ONLY thing satisfying entry/exit coverage for some job (fake
+%% coverage). Replaced by lem:parasitic + the warnbox below. Numerically confirmed
+%% (CHECK4, outputs/verify_mtz_doc.py).
+\begin{thmbox}
+	\begin{lemma}[Classification of surviving (parasitic) cycles]
+		\label{lem:parasitic}
+		Let $Z=C_1\to\cdots\to C_m\to C_1$ be a directed cycle in $V$ carried by an integer
+		solution. If every $C_l$ lies in at least one cluster and the membership sets
+		$\mathrm{cl}(C_l)=\{j\in J: C_l\in H_j\}$ are not all equal to one common singleton
+		$\{j\}$, then \eqref{eq:MTZ} is infeasible for the solution. Hence exactly two
+		families of cycles survive \eqref{eq:MTZ}:
+		(a)~all configurations of $Z$ have the identical singleton membership $\{j\}$;
+		(b)~$Z$ contains a configuration covering no job.
+	\end{lemma}
+\end{thmbox}
+\begin{proofbox}
+	\begin{proof}
+		Choose for each node a cluster $a_l\in\mathrm{cl}(C_l)$; since the membership sets are
+		not all the same singleton, either some $|\mathrm{cl}(C_l)|\ge2$ or two nodes have
+		different memberships, so the choice can be made non-constant around $Z$. Whenever
+		$a_l\ne a_{l+1}$, the arc $C_l\to C_{l+1}$ contributes $1$ to the pair sum of
+		$(a_l,a_{l+1})$, and \eqref{eq:MTZ} forces $u_{a_l}\le u_{a_{l+1}}-1$; where
+		$a_l=a_{l+1}$ no constraint is needed. Following $Z$ once around, the inequalities
+		chain into $u_{a_1}\le u_{a_1}-r$ with $r\ge1$ the number of change points
+		($r\geq 1$ since the cyclic sequence $(a_l)$ is non-constant), a contradiction.
+	\end{proof}
+\end{proofbox}
+
 \begin{warnbox}
-	\textbf{Intra-cluster subtours.} \eqref{eq:MTZ} does not forbid a cycle among several
-	configurations of the \emph{same} cluster $H_{j^{*}}$. Such a cycle serves $j^{*}$
-	redundantly at positive cost, so it never occurs in an integer optimum (it may occur in
-	the LP relaxation). A full guarantee needs per-configuration MTZ
-	$v_i-v_j+|V|x_{ij}\le|V|-1$, which reintroduces $O(|V|^{2})$ (exponential) constraints
-	and is therefore not used.
+	\textbf{Parasitic cycles: the ILP as written is not sound without post-processing.}
+	Family~(a) of \cref{lem:parasitic} is harmless: every arc of such a cycle has both
+	endpoints in $H_j$ and in no other cluster, so it crosses no cluster boundary,
+	contributes to no coverage row, and has strictly positive cost --- it is absent from
+	optima. Family~(b) is \emph{dangerous}: a cycle through an uncovered configuration can
+	satisfy \eqref{eq:exit}--\eqref{eq:entry} for a job the $s$--$t$ path never serves
+	(\emph{fake coverage}). Concretely, on the instance of \cref{thm:notexact}, the solution
+	``path $s\to\{1,2,4\}\to t$ (cost $0$) plus the disconnected $2$-cycle
+	$\{2,3,4\}\rightleftarrows\{1,3,4\}$ (cost $2$)'' satisfies every constraint of the
+	model --- the uncovered $\{2,3,4\}$ contributes no MTZ pair, and the cycle supplies
+	entry and exit for $H_2$ --- yet its path serves only jobs $1,3,4$
+	(verified constraint-by-constraint, \texttt{verify\_mtz\_doc.py}). Consequently
+	$\OMTZ\ge\OSSP$ is \emph{not} guaranteed for the raw ILP. Sound heuristic use requires
+	\emph{path extraction}: read off the $s$--$t$ path, discard cycles, and reject (or
+	repair) if some job is unserved. Restricting $V$ to configurations covering at least one
+	job eliminates family~(b), but is \emph{not} innocuous: uncovered configurations can be
+	essential membership-resetting intermediates --- on the \cref{thm:notexact} instance
+	every representable covering path passes through the uncovered $\{2,3,4\}$, so with
+	covering-only $V$ the model becomes infeasible there while $\OSSP=1$. A full guarantee
+	needs per-configuration MTZ (\cref{sec:safe}, exactness proved in \cref{thm:perconfig}).
 \end{warnbox}
 
 \subsection{Path structure and conditional correctness}
@@ -420,26 +484,34 @@ heart of this note.
 \begin{thmbox}
 	\begin{proposition}[Path structure]
 		\label{prop:path}
+		%% TODO-VERIFY(Claude-Fable 2026-06-10): weakened from "a single path" to "path +
+		%% parasitic cycles"; the original claim was false (see lem:parasitic).
 		Constraints \eqref{eq:source}--\eqref{eq:flow} and the degree bounds make the selected
-		arcs a single directed $s$--$t$ path through a subset of $V$, once \eqref{eq:MTZ}
-		removes cluster-level cycles.
+		arcs the disjoint union of a single directed $s$--$t$ path through a subset of $V$ and
+		(possibly) parasitic cycles of the two families of \cref{lem:parasitic}; all other
+		cycles are excluded by \eqref{eq:MTZ}.
 	\end{proposition}
 \end{thmbox}
 \begin{proofbox}
 	\begin{proof}
 		One arc leaves $s$, one enters $t$; flow conservation and degree $\le1$ at internal
-		nodes give a disjoint union of one $s$--$t$ path and cycles. \cref{prop:MTZ} removes the
-		cycles (which, lying in $V$, span clusters of $J$), leaving a single path.
+		nodes give a disjoint union of one $s$--$t$ path and cycles. \cref{lem:parasitic}
+		eliminates every cycle except those of its families (a) and (b).
 	\end{proof}
 \end{proofbox}
 
 \begin{thmbox}
 	\begin{theorem}[Restriction; not exact in general]
 		\label{thm:correct}
-		The integer model \eqref{eq:obj}--\eqref{eq:ubounds} is a \emph{restriction} of the SSP
-		to \emph{representable} schedules (cluster-simple with acyclic precedence digraph,
-		\cref{prop:representable}): every feasible integer solution is a feasible SSP schedule
-		of equal cost, so $\OMTZ\ge\OSSP$, and $\OMTZ$ is the cheapest representable schedule.
+		%% TODO-VERIFY(Claude-Fable 2026-06-10): added the parasitic-free qualifier; without
+		%% it the first claim is false (lem:parasitic, fake coverage), and OMTZ >= OSSP is not
+		%% guaranteed for the raw ILP.
+		Restricted to \emph{parasitic-free} solutions (\cref{lem:parasitic}; enforced in
+		practice by path extraction), the integer model \eqref{eq:obj}--\eqref{eq:ubounds} is
+		a \emph{restriction} of the SSP to \emph{representable} schedules (cluster-simple with
+		acyclic precedence digraph, \cref{prop:representable}): every parasitic-free feasible
+		integer solution is a feasible SSP schedule of equal cost, so the parasitic-free
+		optimum $\OMTZ$ satisfies $\OMTZ\ge\OSSP$ and is the cheapest representable schedule.
 		Equality $\OMTZ=\OSSP$ holds \emph{iff} some optimal SSP schedule is representable; this
 		\textbf{fails in general} (\cref{thm:notexact}) but holds for the classes of
 		\cref{prop:exchange_disjoint,prop:exchange_ring}.
@@ -447,8 +519,8 @@ heart of this note.
 \end{thmbox}
 \begin{proofbox}
 	\begin{proof}
-		\emph{Every model solution is a schedule (hence $\OMTZ\ge\OSSP$).} By
-		\cref{prop:path,prop:coverage} an integer-feasible solution is a single $s$--$t$ path
+		\emph{Every parasitic-free model solution is a schedule (hence $\OMTZ\ge\OSSP$).} By
+		\cref{prop:path,prop:coverage} a parasitic-free integer-feasible solution is a single $s$--$t$ path
 		that serves every job; processing each job at a covering configuration along the path
 		gives an SSP schedule whose switch cost equals the objective \eqref{eq:obj}. Thus a
 		schedule of cost $\OMTZ$ exists, so $\OSSP\le\OMTZ$. By \cref{prop:MTZ} and the
@@ -468,9 +540,11 @@ heart of this note.
 \end{proofbox}
 
 \begin{warnbox}
-	\textbf{Reading of \cref{thm:correct}.} The model always returns the cheapest
+	\textbf{Reading of \cref{thm:correct}.} \emph{After path extraction}
+	(\cref{lem:parasitic}) the model returns the cheapest
 	\emph{cluster-simple} schedule, which is a genuine SSP schedule --- an \emph{upper} bound on
-	$\OSSP$. When no optimum is cluster-simple, $\OMTZ>\OSSP$: the model \emph{misses} the true
+	$\OSSP$. The raw ILP optimum may instead be a parasitic solution whose path misses jobs;
+	always extract and check. When no optimum is cluster-simple, $\OMTZ>\OSSP$: the model \emph{misses} the true
 	optimum. A certified \emph{lower} bound must therefore come from a genuine relaxation (the
 	base degree/flow/coverage model, or the SEC formulation), \emph{not} from the
 	over-constrained MTZ model. Exactness \emph{fails} in general (\cref{thm:notexact}).
@@ -533,17 +607,32 @@ intended structural gain over the $O(2^{|V|})$ SECs.
 	what avoids the SEC double-generation issue. The pricing problem seeks the arc of most
 	negative reduced cost
 	$\bar d_{ij}=d_{ij}-\mu_i-\lambda_j-\sum_{j^{*}:\,i\in H_{j^{*}},\,j\notin H_{j^{*}}}\pi_{j^{*}}$.
+	%% TODO-VERIFY(Claude-Fable 2026-06-10): this expression is INCOMPLETE. It omits (at
+	%% least) the duals of: flow conservation \eqref{eq:flow} (terms +sigma_i - sigma_j),
+	%% the entry-coverage rows \eqref{eq:entry} (sum over j* with j in H_{j*}, i notin
+	%% H_{j*}), and the MTZ rows \eqref{eq:MTZ} with coefficient n for every ordered pair
+	%% (j',j'') with i in H_{j'}, j in H_{j''}. Rederive before implementing pricing.
 \end{remark}
 
 \begin{remark}[Desrochers--Laporte lifting recovers some strength]
 	\label{rem:dl}
 	For per-arc MTZ, Desrochers and Laporte \cite{DesrochersLaporte1991} strengthen
 	$u_{j'}-u_{j''}+n\,x_{ij}\le n-1$ to
-	$u_{j'}-u_{j''}+n\,x_{ij}+(n-2)x_{ji}\le n-1$ at no extra constraint count. The aggregate
-	analogue replaces the arc terms by the forward and reverse cluster-pair sums. This tightens
-	the relaxation toward (but not to) SEC; by how much, on SSP instances, is part of the open
-	question above. A per-arc (non-aggregated) MTZ would give $O(n^{2}|V|^{2})$ constraints ---
-	exponential --- and is not used.
+	$u_{j'}-u_{j''}+n\,x_{ij}+(n-2)x_{ji}\le n-1$ at no extra constraint count.
+	%% TODO-VERIFY(Claude-Fable 2026-06-10): the earlier draft claimed the aggregate analogue
+	%% (replacing arc terms by forward/reverse cluster-pair sums) tightens the relaxation.
+	%% That aggregate lifting is INVALID; counterexample below (CHECK3, verify_mtz_doc.py).
+	\textbf{Correction (this revision):} the natural aggregate analogue --- replacing the arc
+	terms by the forward and reverse cluster-pair sums --- is \emph{invalid}: it cuts off
+	representable integer solutions. Example ($n=3$, $b=2$): $T_1=\{1\}$, $T_2=\{2\}$,
+	$T_3=\{3\}$, path $\{1,4\}\to\{1,2\}\to\{3,5\}$. The forward pair sums force
+	$u_1\le u_2-1\le u_3-2$, while the aggregate reverse term for the ordered pair $(3,1)$
+	(the arc $\{1,2\}\to\{3,5\}$ runs from $H_1$ to $H_3$, so its reverse sum is $1$) demands
+	$u_3-u_1+(n-2)\le n-1$, i.e.\ $u_3-u_1\le1$ --- infeasible. The DL lifting is valid only
+	per arc (because in a tour $x_{ji}=1$ forces $u_i-u_j=1$ exactly, an identity the
+	cluster aggregation destroys); a per-arc MTZ here means $O(n^{2}|V|^{2})$ constraints ---
+	exponential --- and is not used. For the per-configuration model the per-arc DL lifting
+	\emph{is} valid (\cref{rem:bigM}).
 \end{remark}
 
 %-------------------------------------------------------------------------------
@@ -587,12 +676,23 @@ potential $v_i\in[1,|V|]$ and impose, for generated arcs,
   v_i - v_j + |V|\,x_{ij} \le |V|-1 \qquad \forall\, i,j\in V,\ i\ne j .
 \]
 These are the \emph{standard} MTZ subtour constraints on the configuration graph: they
-eliminate exactly the subtours and exclude no optimum --- there is no domination pathology,
-because the potentials are per-configuration, not per-job, so the $2$-cycle of
-\cref{thm:notexact} cannot arise. In column generation a new column $i$ adds one variable
-$v_i$ and arc rows over generated nodes only: $O(|V_{\mathrm{gen}}|^{2})$ rows --- more than
-the $O(n^{2})$ cluster form, but \emph{correct}. (This is the recommended choice for the
-upcoming CG runs.)
+eliminate \emph{all} subtours (\cref{lem:cyclefree}) --- including the parasitic families of
+\cref{lem:parasitic} --- and exclude no optimum; there is no domination pathology, because
+the potentials are per-configuration, not per-job, so the $2$-cycle of
+\cref{thm:notexact} cannot arise. Exactness is \emph{proved} in
+\cref{sec:perconfigproof} (\cref{thm:perconfig}). In column generation a new column $i$ adds
+one variable $v_i$ and arc rows over generated nodes only: $O(|V_{\mathrm{gen}}|^{2})$ rows
+--- more than the $O(n^{2})$ cluster form, but \emph{correct}. (Use the sharper big-$M$
+of \cref{rem:bigM}.)
+%% TODO-VERIFY(Claude-Fable 2026-06-10): recommendation updated --- for COLUMN
+%% GENERATION the growing/churning row set of per-config MTZ is now superseded by
+%% the position-indexed configuration master of Part X (10_position_formulations.tex):
+%% proved exact, FIXED O(n|T|) rows, root LP = |U|-b with the tool-counting rows.
+%% Per-config MTZ remains right when V is small enough to enumerate.
+\emph{Update (2026-06-10): for column generation this recommendation is superseded by
+the position-indexed master of Part~X (\texttt{10\_position\_formulations.tex}) ---
+proved exact with a \emph{fixed} $O(n|T|)$ row set; per-configuration MTZ remains the
+choice when $V$ is enumerated explicitly.}
 \item \textbf{Lazy SEC/PCTSP cuts (exact).} Keep the Part~II degree/flow/coverage model and
 separate subtour cuts on integer incumbents (the standard double-generation loop); fully
 worked out in Part~II.
@@ -601,6 +701,129 @@ worked out in Part~II.
 heuristic} (every feasible solution is a genuine schedule) or warm start --- just not as the
 exact master. The job-indexed MTZ of the BBC master (Part~VIII) is on \emph{jobs}, not
 configurations, and is the standard exact ATSP MTZ, hence unaffected.
+
+\subsection{Exactness proof for the per-configuration MTZ model}
+\label{sec:perconfigproof}
+
+%% TODO-VERIFY(Claude-Fable 2026-06-10): this subsection is NEW --- the exactness claim in
+%% item (a) above previously had no proof. Numerical support: CHECK2 in
+%% outputs/verify_mtz_doc.py confirms min covering-walk cost == exact SSP optimum
+%% (state-DP of _verification/ssp_verify.py) on 397/397 random instances
+%% (|T| in 4..6, b in {2,3}, n in 3..5). Please verify each lemma before citing.
+
+On the arc set $A$ of \eqref{eq:ubounds}, the \emph{per-configuration MTZ model} consists of
+\eqref{eq:obj}--\eqref{eq:entry} (coverage over $V^{+}$, as corrected) together with
+continuous potentials $v_i\in[1,|V|]$ for $i\in V$ and
+\begin{equation}\label{eq:cfgMTZ}
+	v_i-v_j+|V|\,x_{ij}\ \le\ |V|-1\qquad\forall i,j\in V,\ i\ne j,
+\end{equation}
+in place of \eqref{eq:MTZ} and the $u$-variables. Write $\OPT_{\mathrm{cfg}}$ for its
+optimum. Throughout, $d_{ij}=|i\setminus j|$ satisfies the triangle inequality
+$d_{ik}\le d_{ij}+d_{jk}$ (since $i\setminus k\subseteq(i\setminus j)\cup(j\setminus k)$
+and $|i|=|j|=|k|=b$).
+
+\begin{thmbox}
+	\begin{lemma}[All cycles eliminated]
+		\label{lem:cyclefree}
+		No solution of \eqref{eq:cfgMTZ} with $v\in[1,|V|]^{V}$ carries a directed cycle
+		within $V$.
+	\end{lemma}
+\end{thmbox}
+\begin{proofbox}
+	\begin{proof}
+		Summing \eqref{eq:cfgMTZ} over the $m$ arcs of a cycle, the potentials telescope to
+		zero and each arc contributes $|V|$, giving $m|V|\le m(|V|-1)$, a contradiction.
+		(Unlike \eqref{eq:MTZ}, this applies to \emph{every} cycle: the potentials live on
+		configurations, so neither uncovered configurations nor shared cluster memberships
+		create exempt arcs.)
+	\end{proof}
+\end{proofbox}
+
+\begin{thmbox}
+	\begin{lemma}[Normal form of optimal schedules]
+		\label{lem:normalform}
+		Every feasible SSP instance admits an optimal schedule whose magazine trajectory is a
+		sequence of configurations $C_{(1)},\dots,C_{(m)}$ that are \emph{pairwise distinct},
+		with $m\le n$, each $C_{(l)}$ serving at least one job, and total switch cost
+		$\sum_{l=1}^{m-1} d_{C_{(l)}C_{(l+1)}}$ (initial load $C_{(1)}$ free, dummy-depot
+		convention).
+	\end{lemma}
+\end{thmbox}
+\begin{proofbox}
+	\begin{proof}
+		Take any optimal schedule. W.l.o.g.\ the magazine is full at every instant (pad
+		arbitrarily; standard assumption~(2) of Crama et al.), so the trajectory is a sequence
+		of $n$ configurations, one per job position, with switch cost
+		$\sum|M_{l+1}\setminus M_l|$. (i)~\emph{Collapse} consecutive equal configurations;
+		the collapsed terms contribute $0$, so the cost telescopes unchanged and consecutive
+		configurations are now distinct. (ii)~\emph{De-duplicate}: if $C_{(p)}=C_{(q)}$ with
+		$p<q$, reassign the jobs served at visit $q$ to visit $p$ (the configuration is
+		identical, so their tools remain loaded) and delete node $q$, joining its neighbours
+		$X\to C_{(q)}\to Y$ into $X\to Y$; by the triangle inequality
+		$d_{XY}\le d_{XC_{(q)}}+d_{C_{(q)}Y}$ the cost does not increase. If this creates an
+		adjacent equal pair ($X=Y$), collapse again. Each step strictly shortens the sequence,
+		so the process terminates with pairwise distinct configurations. (iii)~A configuration
+		serving no job is deleted by the same shortcut without reassignment. Finally $m\le n$:
+		after (i)--(iii) every remaining configuration serves at least one job and every job is
+		served exactly once.
+	\end{proof}
+\end{proofbox}
+
+\begin{thmbox}
+	\begin{theorem}[Per-configuration MTZ is exact]
+		\label{thm:perconfig}
+		$\OPT_{\mathrm{cfg}}=\OSSP$.
+	\end{theorem}
+\end{thmbox}
+\begin{proofbox}
+	\begin{proof}
+		($\OSSP\le\OPT_{\mathrm{cfg}}$, soundness.) Let $x,v$ be any integer-feasible
+		solution. By \eqref{eq:source}--\eqref{eq:flow} the support of $x$ decomposes into one
+		$s$--$t$ path and directed cycles in $V$; \cref{lem:cyclefree} excludes all cycles, so
+		the support is a single simple path $s\to C_{(1)}\to\cdots\to C_{(k)}\to t$. By
+		\eqref{eq:entry} (sums over $V^{+}$) every cluster $H_{j^{*}}$ receives an arc, whose
+		head is a node of the path, so every job is covered by a visited configuration. Assign
+		each job to a covering visited configuration and order the jobs by the position of
+		their assigned configuration (ties arbitrarily): this is an SSP schedule whose magazine
+		trajectory is the path, with switch cost
+		$\sum_{l}d_{C_{(l)}C_{(l+1)}}$ --- the objective value \eqref{eq:obj} --- after the free
+		initial load $C_{(1)}$ (dummy-depot convention). Hence every feasible solution maps to
+		a schedule of equal cost, and $\OSSP\le\OPT_{\mathrm{cfg}}$.
+
+		($\OPT_{\mathrm{cfg}}\le\OSSP$, completeness.) Take an optimal schedule in the normal
+		form of \cref{lem:normalform}, with trajectory $C_{(1)},\dots,C_{(m)}$. Set
+		$x_{sC_{(1)}}=x_{C_{(m)}t}=1$ and $x_{C_{(l)}C_{(l+1)}}=1$ for $1\le l\le m-1$, all
+		other $x=0$; set $v_{C_{(l)}}=l$ and $v_i=|V|$ for every unused $i\in V$.
+		Source/sink, degree, and flow conservation hold because the $C_{(l)}$ are pairwise
+		distinct. \eqref{eq:cfgMTZ}: on a path arc, $v_i-v_j+|V|=(l)-(l+1)+|V|=|V|-1$; on a
+		non-arc pair, $v_i-v_j\le|V|-1$ since $v\in[1,|V|]$. Coverage: job $j^{*}$ is served at
+		some visited $C\in H_{j^{*}}$; let $l_{\min}$ (resp.\ $l_{\max}$) be the first (resp.\
+		last) position with $C_{(l)}\in H_{j^{*}}$. The predecessor of $C_{(l_{\min})}$ ---
+		$C_{(l_{\min}-1)}$ or $s$ --- lies in $V^{+}\setminus H_{j^{*}}$ by minimality, giving
+		\eqref{eq:entry}; the successor of $C_{(l_{\max})}$ --- $C_{(l_{\max}+1)}$ or $t$ ---
+		gives \eqref{eq:exit}. (This is exactly where the $V^{+}$ correction is needed: with
+		sums over $V$ only, a schedule whose first or last configuration is the unique member
+		of some cluster would be wrongly excluded.) The objective equals
+		$\sum_l d_{C_{(l)}C_{(l+1)}}=\OSSP$. Hence $\OPT_{\mathrm{cfg}}\le\OSSP$.
+	\end{proof}
+\end{proofbox}
+
+\begin{thmbox}
+	\begin{remark}[Sharper big-$M$; valid per-arc DL lifting]
+		\label{rem:bigM}
+		(i)~By \cref{lem:normalform} some optimal schedule uses $m\le n$ distinct
+		configurations, so \eqref{eq:cfgMTZ} remains exact with $|V|$ replaced by
+		$N:=\min(n,|V|)$ and $v_i\in[1,N]$: soundness is unaffected (\cref{lem:cyclefree}
+		holds verbatim with $N$), and the completeness construction satisfies $v\le m\le N$.
+		Paths longer than $N$ configurations are cut off, but an optimum survives. Since
+		typically $n\ll|V|=\binom{|T|}{b}$, this is a much tighter big-$M$ for the LP
+		relaxation. (ii)~The per-arc Desrochers--Laporte lifting
+		$v_i-v_j+N\,x_{ij}+(N-2)\,x_{ji}\le N-1$ is \emph{valid} here: for the path solution
+		of \cref{thm:perconfig}, $x_{ji}=1$ implies $v_i-v_j=1$, making the constraint tight,
+		and all other cases are slack --- contrast with the \emph{invalid} cluster-aggregated
+		lifting (\cref{rem:dl}).
+	\end{remark}
+\end{thmbox}
 
 %-------------------------------------------------------------------------------
 \section{Summary}
@@ -613,8 +836,11 @@ configurations, and is the standard exact ATSP MTZ, hence unaffected.
 	$\OMTZ\ge\OSSP$ always but $\OMTZ>\OSSP$ is possible: there is a $b=3$ counterexample with
 	$\OMTZ=2>1=\OSSP$ (\cref{thm:notexact}), and the failure is generic (job domination
 	$T_i\subseteq T_j$). Exactness holds only on the restrictive classes
-	\cref{prop:exchange_disjoint,prop:exchange_ring}. \textbf{For an exact CG solver, use the
-	per-configuration MTZ or lazy SEC of \cref{sec:safe}}, not the cluster form.
+	\cref{prop:exchange_disjoint,prop:exchange_ring}. Moreover the raw ILP admits
+	\emph{parasitic cycles} that fake coverage (\cref{lem:parasitic}): heuristic use requires
+	path extraction. \textbf{For an exact CG solver, use the
+	per-configuration MTZ (now proved exact, \cref{thm:perconfig}) or lazy SEC of
+	\cref{sec:safe}}, not the cluster form.
 	\item \textbf{Polynomial subtour constraints, no row generation.} $O(n^{2})$ MTZ
 	constraints \cite{Miller1960} replace $\sim2^{|V|}$ SECs; new columns never trigger
 	separation (\cref{rem:cg}).

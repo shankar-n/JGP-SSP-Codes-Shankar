@@ -52,6 +52,15 @@
   innerleftmargin=12pt,innerrightmargin=8pt,innertopmargin=8pt,
   innerbottommargin=8pt,skipabove=10pt,skipbelow=6pt]{propbox}
 
+% AUDIT(Claude-Fable 2026-06-10): warnbox env added — used by the repair notes
+% inserted during verification; was missing from this preamble (compile error).
+\definecolor{warncolor}{RGB}{255,245,220}
+\definecolor{warnborder}{RGB}{180,100,0}
+\newmdenv[backgroundcolor=warncolor,linecolor=warnborder,linewidth=1.2pt,
+  leftline=true,rightline=false,topline=false,bottomline=false,
+  innerleftmargin=12pt,innerrightmargin=8pt,innertopmargin=8pt,
+  innerbottommargin=8pt,skipabove=10pt,skipbelow=6pt]{warnbox}
+
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -149,9 +158,12 @@ Under $f_{01}$, the optimal SSP-$f_{01}$ solution uses exactly $\ZJGP$ groups.
 
 \begin{proofbox}
 \begin{proof}
-Any solution with $K$ configuration changes corresponds to processing $K$
-groups (one per distinct configuration used). So $\OPT_{\mathrm{TSIP}} = \ZJGP - 1$
-(minimum configuration changes = minimum groups minus one). \qed
+%% TODO-VERIFY(Claude-Fable 2026-06-10): proof tightened (blocks vs distinct configs).
+A solution with $c$ configuration changes has $c+1$ maximal blocks of constant
+configuration; the distinct configurations among the blocks cover all jobs by feasible
+groups, so their number is $\ge\ZJGP$, giving $c+1\ge\ZJGP$, i.e.\ $c\ge\ZJGP-1$.
+Conversely, processing a JGP-optimal grouping contiguously uses $\ZJGP-1$ changes.
+So $\OPT_{\mathrm{TSIP}} = \ZJGP - 1$, achieved with exactly $\ZJGP$ groups. \qed
 \end{proof}
 \end{proofbox}
 
@@ -186,18 +198,53 @@ SSP-$f$ collapses to JGP if $f$ satisfies all three of the following conditions:
 \end{theorem}
 \end{thmbox}
 
+\begin{warnbox}
+%% TODO-VERIFY(Claude-Fable 2026-06-10): logical repair. As stated, thm:sufficient is
+%% VACUOUS: (C3) literally restates the definition of collapse, so "C1+C2+C3 implies
+%% collapse" is trivial; and the old proof was additionally invalid (it asserted a
+%% K*-group solution of cost exactly (K*-1)delta exists --- (C2) is only a LOWER
+%% bound; the best K*-solution can be arbitrarily expensive). Replaced by the
+%% non-trivial checkable condition below; the original statement is kept above for
+%% reference but should be regarded as a definition-splitting device only.
+\textbf{Repair: a non-vacuous sufficient condition.} (C3) restates the definition of
+collapse, so \cref{thm:sufficient} as stated is empty. A \emph{checkable} sufficient
+condition replaces (C3) by an upper bound matching (C2)'s lower bound:
+\end{warnbox}
+
+\begin{thmbox}
+\begin{theorem}[Checkable sufficient condition for collapse]
+\label{thm:sufficient_real}
+Fix the convention that a solution's cost is summed over its block boundaries
+(consecutive distinct configurations; intra-block transitions cost $0$ by (C1)).
+Suppose $f$ satisfies (C1), the lower bound (C2) with constant $\delta>0$ for
+\emph{all} pairs of distinct configurations, and the upper bound
+\begin{description}
+\item[(C2$'$)] some JGP-optimal grouping admits an order and configurations whose
+  consecutive transition costs are all $\le\bar\Delta$.
+\end{description}
+If $\Kstar\,\delta\ \ge\ (\Kstar-1)\,\bar\Delta$, then SSP-$f$ collapses to JGP on the
+instance.
+\end{theorem}
+\end{thmbox}
 \begin{proofbox}
 \begin{proof}
-Under (C2), any solution with $K$ groups incurs $\ge K-1$ inter-group transitions,
-each costing $\ge \delta > 0$, so total cost $\ge (K-1)\delta$.
-For $K > \Kstar$: $(K-1)\delta > (\Kstar-1)\delta$, meaning a $\Kstar$-group
-solution with cost $(\Kstar-1)\delta$ (e.g., by using the TSIP baseline) is
-strictly cheaper than any $(K+1)$-group solution.
-Condition (C3) ensures that no splitting of groups into more pieces can further
-reduce cost. Together, every optimal solution under SSP-$f$ uses exactly $\Kstar$
-groups. \qed
+The (C2$'$) solution costs $\le(\Kstar-1)\bar\Delta$. Any solution with $K>\Kstar$
+blocks has $K-1\ge\Kstar$ boundaries, each costing $\ge\delta$, hence costs
+$\ge\Kstar\delta\ge(\Kstar-1)\bar\Delta$. So some $\Kstar$-group solution is at least
+tied with every finer solution, and the optimum is achieved with $\ZJGP$ groups.
 \end{proof}
 \end{proofbox}
+
+\begin{remark}[Application to $f_S$]
+For the setup-time cost $f_S$: every change costs $\ge S_\mathrm{stop}+c_\mathrm{switch}$
+($\ge1$ tool inserted) and the (C2$'$) bound is
+$\bar\Delta\le S_\mathrm{stop}+b\,c_\mathrm{switch}$, so \cref{thm:sufficient_real} gives
+collapse already when
+$\Kstar(S_\mathrm{stop}+c_\mathrm{switch})\ge(\Kstar-1)(S_\mathrm{stop}+b\,c_\mathrm{switch})$,
+i.e.\ $S_\mathrm{stop}\ge c_\mathrm{switch}\bigl((b-1)\Kstar-b\bigr)$ --- far weaker than
+the crude $S_\mathrm{stop}>n\,b\,c_\mathrm{switch}$ of \cref{thm:setup_collapse}, and
+instance-exactly superseded by \cref{thm:threshold}.
+\end{remark}
 
 \begin{remark}[Necessity — partial answer, with an open core]
 The conjunction (C1)+(C2)+(C3) is \emph{sufficient} but not necessary: the necessity
@@ -244,24 +291,22 @@ then SSP-$f_S$ collapses to JGP: the optimal solution uses exactly $\ZJGP$ group
 
 \begin{proofbox}
 \begin{proof}
-Consider two competing solutions: one with $K$ groups (configuration changes)
-and one with $K+1$ groups.
-
-The maximum possible total \emph{per-tool} switching cost across the entire
-sequence of $n$ jobs and $b$-capacity magazine is bounded by $n \cdot b \cdot c_\mathrm{switch}$
-(at most $b$ insertions per job, $n$ jobs total).
-
-So any solution with $K$ groups costs at most $K \cdot S_\mathrm{stop} + n \cdot b \cdot c_\mathrm{switch}$.
-Any solution with $K+1$ groups costs at least $(K+1) \cdot S_\mathrm{stop}$.
-
-Under the condition $S_\mathrm{stop} > n \cdot b \cdot c_\mathrm{switch}$:
+%% TODO-VERIFY(Claude-Fable 2026-06-10): off-by-one fixed (K groups = K-1 stops under
+%% the transition-sum convention of def. SSP-f; the old "K stops for K groups"
+%% over-counted both sides by S_stop, leaving the conclusion unchanged).
+A solution with $K$ groups (blocks) has $K-1$ configuration changes. The total
+\emph{per-tool} switching cost of any solution is at most
+$n\cdot b\cdot c_\mathrm{switch}$ (at most $b$ insertions per job, $n$ jobs). Hence the
+\emph{best} $K$-group solution costs at most
+$(K-1)S_\mathrm{stop}+n\,b\,c_\mathrm{switch}$, while \emph{any} $(K+1)$-group solution
+costs at least $K\,S_\mathrm{stop}$. Under $S_\mathrm{stop}>n\,b\,c_\mathrm{switch}$:
 \[
-  (K+1)S_\mathrm{stop} > K \cdot S_\mathrm{stop} + n \cdot b \cdot c_\mathrm{switch}
-  \;\ge\; \text{cost of any } K\text{-group solution.}
+  K\,S_\mathrm{stop} \;>\; (K-1)\,S_\mathrm{stop}+n\,b\,c_\mathrm{switch}
+  \;\ge\; \text{cost of the best } K\text{-group solution},
 \]
-Therefore, no $(K+1)$-group solution can beat the best $K$-group solution.
-Since this holds for any $K$, the optimal number of groups is minimised — exactly
-the JGP objective. \qed
+so no $(K+1)$-group solution can beat the best $K$-group solution. Since this holds
+for every $K\ge\Kstar$, the optimum is achieved at the minimum number of groups ---
+exactly the JGP objective. \qed
 \end{proof}
 \end{proofbox}
 
@@ -269,7 +314,9 @@ the JGP objective. \qed
 When the setup time is large enough to dominate the per-tool cost of the
 \emph{entire} sequence, it is always better to minimise stops (groups) than
 to minimise individual tool insertions. The boundary $S_\mathrm{stop} = n \cdot b \cdot c_\mathrm{switch}$
-is the \emph{collapse threshold}. Below this threshold, the SSP and JGP optima diverge.
+is a (crude) upper bound on the \emph{collapse threshold}: below it the SSP and JGP
+optima \emph{may} diverge --- whether they do is instance-specific, with exact
+threshold $\rho_c(I)$ (\cref{thm:threshold}); e.g.\ $\rho_c=1\ll nb$ for the $6$-ring.
 \end{remark}
 
 \subsection{Parameterised Collapse: The $\rho$-Frontier}
@@ -289,19 +336,28 @@ As $\rho$ increases from 0 to $\infty$:
 \end{itemize}
 
 \noindent\textbf{Approximation ratio as a function of $\rho$.}
-Define the JGP+GSP TD-SSP approximation ratio at parameter $\rho$:
+%% TODO-VERIFY(Claude-Fable 2026-06-10): formula corrected. The earlier denominator
+%% (K*-1)rho + Z_SSP paired K*-1 stops with the Z_SSP switch count, a combination NO
+%% solution achieves (that is precisely the gap); it even contradicted the text's own
+%% claim R(1)=1 (the old formula gives 6/5 at rho=1). The denominator must be the true
+%% f_S optimum, min over K of (K-1)rho + z_K, with z_K the best switch cost among
+%% K-block solutions (z_3=4, z_4=z_5=z_6=3 for the ring: verify_gap_doc.py).
+Let $z_K(I)$ be the minimum U-SSP switch cost among solutions with exactly $K$
+configuration blocks (so $z_{\Kstar}=H$ and $\min_K z_K=\ZSSP$). The JGP+GSP
+approximation ratio for the $f_S$ objective at parameter $\rho$ is
 \[
-  R(\rho) = \sup_I \frac{(K^*-1)\rho + H(I)}{(K^*-1)\rho + \ZSSP(I)},
+  R(\rho) = \sup_I\
+  \frac{(\Kstar-1)\rho + H(I)}{\min_{K\ge\Kstar}\bigl[(K-1)\rho + z_K(I)\bigr]} .
 \]
-where $H(I)$ is the JGP+GSP cost (U-SSP component only) and $\ZSSP(I)$ is the
-U-SSP optimum. For the 6-job ring (\texttt{05\_jgp\_ssp\_gap\_analysis.tex}, Example~1),
-$K^*=3$, $H=4$, $\ZSSP=3$:
+For the 6-job ring (\texttt{05\_jgp\_ssp\_gap\_analysis.tex}, Example~1):
+$\Kstar=3$, $H=z_3=4$, $z_4=z_5=z_6=3$, hence
 \[
-  R(\rho)_{\text{ring}} = \frac{2\rho + 4}{2\rho + 3}.
+  R(\rho)_{\text{ring}} = \frac{2\rho + 4}{\min(2\rho+4,\ 3\rho + 3)}
+  = \begin{cases} \dfrac{2\rho+4}{3\rho+3}, & 0\le\rho\le1,\\[2pt]
+     1, & \rho\ge 1.\end{cases}
 \]
-At $\rho=0$: ratio $=4/3$. At $\rho=1$: ratio $=1$ (JGP+GSP is optimal).
-For $\rho > 1 = \rho_c(\text{ring})$, the JGP+GSP solution is exactly optimal
-for the TD objective.
+At $\rho=0$: ratio $=4/3$, decreasing to $1$ exactly at $\rho=\rho_c(\text{ring})=1$;
+for $\rho \ge 1$ the JGP+GSP solution is exactly optimal for the $f_S$ objective.
 
 \medskip
 Two boundary values are established:
@@ -314,8 +370,11 @@ Two boundary values are established:
 \noindent\textbf{Practical implication.}
 In CNC manufacturing, the machine stop time $S_\mathrm{stop}$ is typically
 5--30 minutes (magazine swap, re-initialisation) while individual tool change
-costs $c_\mathrm{switch}$ are 0.5--2 minutes, giving $\rho \approx 3$--60
-\cite{Privault1995}.
+costs $c_\mathrm{switch}$ are 0.5--2 minutes, giving $\rho \approx 3$--60.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): the numeric ranges above were attributed to
+%% Privault1995; I could not verify they appear there --- treat as illustrative until
+%% a source is found (cite removed pending check; ask the advisor for a practical
+%% reference on magazine setup vs tool change times).
 For ring-like instances ($\rho_c=1$), all practical parameter values satisfy
 $\rho \gg \rho_c$: JGP+GSP is exactly optimal for the TD objective.
 The U-SSP gap (at $\rho=0$) is therefore largely irrelevant in practice for
@@ -367,6 +426,10 @@ TD-SSP model, the total cost is:
 \[
   Z_\mathrm{TD} = K \cdot S_\mathrm{stop} + \sum_{k=1}^{K-1} f_\mathrm{TD}(C_k, C_{k+1}).
 \]
+%% TODO-VERIFY(Claude-Fable 2026-06-10): note --- this charges K stops for K groups
+%% (initial setup included), unlike f_S above which charges K-1. The difference is a
+%% uniform +S_stop shift in K, so argmin and the theorem below are unaffected, but
+%% pick ONE convention before quoting numbers across sections.
 
 \begin{thmbox}
 \begin{theorem}[Lexicographic JGP recovery for TD-SSP]
@@ -426,10 +489,15 @@ whose SSP-$f$ cost is strictly lower than all $\Kstar$-group solutions, collapse
 fails by definition. So (C3) is necessary.
 
 \medskip
-\textbf{(C1) not necessary.} Let $f(C,C')=\varepsilon>0$ for all pairs including
-$C=C'$ (positive self-cost). Any solution with $K$ groups pays $(K-1)\varepsilon$
-regardless of self-costs. Minimising $K$ still gives collapse, so (C1) fails
-(self-cost positive) yet collapse holds.
+\textbf{(C1) not necessary.}
+%% TODO-VERIFY(Claude-Fable 2026-06-10): argument corrected. Under the per-job
+%% transition convention of def. SSP-f, constant f = epsilon makes EVERY solution
+%% cost (n-1)epsilon (self-transitions are charged too), not (K-1)epsilon. The
+%% conclusion survives: all solutions tie, so some optimum uses Z_JGP groups.
+Let $f(C,C')=\varepsilon>0$ for all pairs including $C=C'$. Every solution then costs
+$(n-1)\varepsilon$ (each of the $n-1$ job-to-job transitions costs $\varepsilon$,
+whether or not the configuration changes), so all solutions are optimal --- in
+particular one with $\ZJGP$ groups. Collapse holds while (C1) fails.
 
 \medskip
 \textbf{(C2) not necessary.} Take $J=\{j_1,j_2,j_3\}$, $b=3$,
@@ -437,9 +505,15 @@ $T_1=\{t_1,t_2,t_3\}$, $T_2=\{t_3,t_4,t_5\}$, $T_3=\{t_1,t_4,t_6\}$.
 Here $\Kstar=3$ (each pair requires $>3$ tools). Define:
 $f(C_1,C_2)=0$, $f(C_2,C_3)=f(C_1,C_3)=1$, $f(C,C)=0$.
 The best 3-group solution costs $f(C_1,C_2)+f(C_2,C_3)=0+1=1$.
-No 4-group solution achieves cost $<1$ (it still must cross the boundary
-between some pair with positive cost). Collapse holds despite $f(C_1,C_2)=0$
-violating (C2). \qed
+%% TODO-VERIFY(Claude-Fable 2026-06-10): caveat added --- this witness is DEGENERATE:
+%% with 3 jobs and zero-slack singletons, every solution has K <= 3 = K*, so collapse
+%% holds for ANY f on this instance. It still witnesses "collapse does not imply
+%% (C2)", but a non-degenerate witness (an instance where K > K* solutions exist and
+%% lose) would be more convincing; left as a small open task.
+With only $3$ jobs no solution can use more than $3=\Kstar$ blocks, so collapse holds
+trivially --- which is exactly the point: collapse holds while $f(C_1,C_2)=0$
+violates (C2), so (C2) is not implied by collapse. (The witness is degenerate; a
+non-degenerate witness with $K>\Kstar$ solutions available would strengthen this.) \qed
 \end{proof}
 \end{proofbox}
 
@@ -466,7 +540,11 @@ Define the \emph{switch-savings function}:
   \quad K>\Kstar.
 \]
 The collapse threshold is $\rho_c(I)=\sup_{K>\Kstar}\Delta(I,K)/(K-\Kstar)$.
-SSP-$f_S$ collapses to JGP if and only if $\rho>\rho_c(I)$.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): strictness corrected (was "iff rho >
+%% rho_c", contradicting the proof): at rho = rho_c the K*-group solution TIES the
+%% best finer solution, so the optimum is still achieved with Z_JGP groups and
+%% collapse (in the achieved-by sense of def:collapse) holds.
+SSP-$f_S$ collapses to JGP if and only if $\rho\ge\rho_c(I)$.
 \end{theorem}
 \end{thmbox}
 

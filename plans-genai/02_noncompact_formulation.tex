@@ -74,9 +74,18 @@ subproblem. This is the primary modelling framework for all subsequent analysis.
 \smallskip
 \textbf{Key caveat}: the PCTSP-based formulation requires \emph{both} column
 generation (exponential variables) and row generation (exponential constraints),
-creating a ``double generation'' problem. Part~IV (\texttt{04\_mtz\_formulation.tex})
-resolves this by replacing the exponential constraints with polynomial MTZ constraints,
-leaving only column generation.
+creating a ``double generation'' problem.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): pointer updated — the cluster-MTZ
+%% "resolution" of Part IV is now PROVED NOT EXACT (job-domination counterexample,
+%% Part IV); the working resolutions are per-configuration MTZ (exact, but rows
+%% grow with generated columns) and the position-indexed formulations of Part X
+%% (exact, FIXED O(n|T|) rows).
+\emph{Update (2026-06-10): the cluster-MTZ remedy originally proposed in Part~IV is
+proved \textbf{not exact} (Part~IV, job-domination counterexample). The current
+resolutions are the per-configuration MTZ (exact; rows grow with generated columns)
+and, preferably, the position-indexed formulations of Part~X
+(\texttt{10\_position\_formulations.tex}): exact with a \emph{fixed} $O(n|T|)$
+constraint set, eliminating row generation entirely.}
 \end{mdframed}
 
 \vspace{0.5cm}
@@ -120,12 +129,17 @@ requiring a full re-separation pass. This interaction makes convergence slow and
 implementation fragile.
 
 \medskip
-\textbf{The remedy} (Part~IV, \texttt{04\_mtz\_formulation.tex}):
-replace the exponential subtour constraints with a \emph{polynomial} set of
-Miller--Tucker--Zemlin (MTZ) constraints. This eliminates row generation entirely,
-leaving only column generation — a much more tractable problem.
-The trade-off is a slightly weaker LP bound, but in practice this is far
-outweighed by the reduction in implementation complexity and solver iterations.
+\textbf{The remedy.}
+%% TODO-VERIFY(Claude-Fable 2026-06-10): rewritten — the cluster-MTZ remedy is
+%% not exact (Part IV); Part X provides the exact fixed-row alternative.
+The cluster-level MTZ replacement originally proposed for this purpose is
+\emph{not exact} (Part~IV, settled negatively). Two correct remedies exist:
+per-configuration MTZ (Part~IV, exact, but its row set grows with the generated
+columns), and the position-indexed formulations of Part~X
+(\texttt{10\_position\_formulations.tex}) — exact, with a \emph{fixed}
+$O(n|T|)$ constraint set, so row generation disappears and column generation
+proceeds against immutable rows. The LP-strength price and its repair (per-tool
+counting rows; the PTF variant exceeding the SSPMF bound) are quantified there.
 \end{mdframed}
 
 \medskip
@@ -326,8 +340,12 @@ $\sigma$: one column per sequence with cost $\mathrm{KTNS}(\sigma)$ and convexit
 $\sum_\sigma \lambda_\sigma = 1$. This degenerates. Every sequence processes every
 job exactly once, so each job-covering row $\sum_\sigma a_{j\sigma}\lambda_\sigma = 1$
 is identical to the convexity row; the LP collapses to
-$\min_\sigma \mathrm{KTNS}(\sigma) = Z^{*}_{\mathrm{SSP}}$, giving no usable lower
-bound, and its pricing subproblem is itself an NP-hard SSP. Generating
+$\min_\sigma \mathrm{KTNS}(\sigma) = Z^{*}_{\mathrm{SSP}}$ ---
+%% TODO-VERIFY(Claude-Fable 2026-06-10): wording fixed: the bound is PERFECT, the
+%% problem is that obtaining it requires solving the SSP itself in pricing.
+a \emph{perfect} bound that is unusable, because attaining it requires the
+pricing subproblem to solve the NP-hard SSP itself; the decomposition buys
+nothing. Generating
 \emph{configurations} (equivalently, arcs of the configuration graph), as below, instead
 yields a genuine LP relaxation whose pricing is a tractable set-union knapsack.
 \emph{(This observation was relocated here from the gap-analysis note, Part~V, where it
@@ -371,8 +389,13 @@ $u \in V$ and outgoing arc to $w \in V$ is:
 (the GSEC dual terms vanish for a new node $c$ not yet in any identified subset
 $S$). A configuration $c$ is \emph{improving} if $\min_{u,w} \bar{c}(u,c,w) < 0$.
 
-Ignoring routing duals for the pricing step (standard practice), the dominant
-term is the coverage gain. We seek:
+%% TODO-VERIFY(Claude-Fable 2026-06-10): honesty fix — ignoring the routing duals
+%% makes the pricing a HEURISTIC, and the termination claim below must be weakened
+%% accordingly (a configuration can have negative reduced cost through alpha/beta
+%% even with zero coverage gain). Exact pricing must price ARCS, cf. Part X.
+Ignoring the routing duals $(\alpha,\beta,\mu)$ reduces pricing to its dominant
+coverage term --- a useful \emph{heuristic} oracle, but \textbf{not} an exactness
+certificate (see the warning below). We seek:
 \[
   \max_{c:\, |c|=b} \;\sum_{r \in J:\, T_r \subseteq c} \pi_r
 \]
@@ -413,10 +436,17 @@ why the pricing subproblem is strictly harder than a standard knapsack.
 
 The LP relaxation is solved to optimality when no improving column can be found:
 $\min_{c} \bar{c}(u,c,w) \ge 0$ for all potential insertion pairs $(u,w)$.
-This certificate is provided by the exact SUKP solver. If a negative reduced
-cost column is found, it is added to $V$ and the RMP is re-solved.
-The process continues until optimality is certified.
-Integer solutions are recovered by branch-and-price \cite{Barnhart1998}.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): certificate claim corrected — the SUKP
+%% prices only the coverage term; LP optimality requires pricing the FULL reduced
+%% cost including routing duals (alpha, beta, and the accumulated GSEC duals).
+\textbf{Caution:} the SUKP of \cref{sec:sukp} prices only the coverage term; a
+genuine optimality certificate must minimise the \emph{full} reduced cost
+$\bar c(u,c,w)$, including the routing duals $\alpha_u,\beta_w$ (a join over
+insertion pairs) and the accumulated GSEC duals. The clean way to obtain an exact
+certificate with a fixed dual structure is the position-indexed master of Part~X,
+whose pricing is a pure set-selection with no row churn. If a negative reduced
+cost column is found, it is added to $V$ and the RMP is re-solved; integer
+solutions are recovered by branch-and-price \cite{Barnhart1998}.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Why the Non-Compact Formulation is Better}
@@ -438,9 +468,9 @@ Integer solutions are recovered by branch-and-price \cite{Barnhart1998}.
   decades of TSP theory and solvers.
 \item \textbf{The double-generation caveat.} The PCTSP-based formulation
   above requires both column generation and row generation simultaneously.
-  Part~IV (\texttt{04\_mtz\_formulation.tex}) resolves this by replacing the
-  exponential PCTSP constraints with $O(n^2)$ MTZ constraints, eliminating
-  row generation entirely at the cost of a slightly weaker LP bound.
+  %% TODO-VERIFY(Claude-Fable 2026-06-10): updated (cluster-MTZ not exact).
+  The cluster-MTZ shortcut of Part~IV is \emph{not exact}; the exact fixed-row
+  resolution is Part~X (\texttt{10\_position\_formulations.tex}).
 \end{enumerate}
 
 %

@@ -36,10 +36,18 @@
 \vspace{0.3cm}
 \begin{mdframed}[backgroundcolor=lightblue,linecolor=navyblue,linewidth=1pt,
   innerleftmargin=14pt,innerrightmargin=14pt,innertopmargin=8pt,innerbottommargin=8pt]
-\small This is an index of the open problems raised across Parts~I--VII, with precise
+\small This is an index of the open problems raised across Parts~I--VIII, with precise
 statements, current status, and pointers. ``Verified'' means checked by the scripts in
 \texttt{plans-genai/\_verification/} (see \texttt{VERIFIED\_FACTS.md}). Conjectures are
 labelled as such; nothing here is claimed as proved unless it is proved in the cited Part.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): statuses updated after the verification
+%% campaign of 2026-06-10 (Parts IV-VIII verified/corrected; BBC code audited).
+\emph{Updated 2026-06-10} after the verification campaign: per-configuration MTZ
+exactness proved (Part~IV), general-$b$ ratio theory added (Part~V,
+\S\,General-$b$ Bounds), the excess re-insertion conjecture
+$\mathrm{gap}\le\Kstar-2$ introduced (subsuming the earlier $\Kstar{=}3$, $b{=}3$
+conjecture), the BBC Benders-cut depot bug found and fixed, and objective
+conventions unified (empty-start $=$ free-initial $+\min(b,|U|)$).
 \end{mdframed}
 \vspace{0.3cm}
 \section{Gap and Approximation Ratio (Part V)}
@@ -51,15 +59,29 @@ enumerated $b=3$ edge instances, nor in a further $6065$ instances with size-$3$
 in the copy-paste or ring families (Part~V; $\approx 17$k instances total). The earlier
 route via $\sum_k R_k \le H/4$ is \emph{false} (counterexample
 $\{a,b,c\},\{a,b,d\},\{c,d,e\}$) and has been retracted.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): new conditional route added (Part V).
+\emph{New (2026-06-10):} a conditional proof route exists (Part~V,
+Prop.\ ``A route to the $4/3$ conjecture''): OP\,11 \emph{plus} the structural
+claim ``every positive-gap $b=3$ instance has $\Kstar=3$ and $\ZSSP\ge3$''
+(exhaustively verified on the edge family) together imply the $4/3$ bound.
 \end{op}
 \begin{op}
 \textbf{OP\,2 (Extremal ratio for general $b$).} What is $\sup_I H/\ZSSP$ as a function
 of $b$? \emph{Status:} partially resolved. Exact witnesses give ratios $4/3$ ($b=3$), $4/3$ ($b=4$),
 and $3/2$ ($b=5$). These are \emph{proved} lower bounds on $\sup_I H/\ZSSP$ (the instances and
 their $Z^*,H$ are computed exactly), so it is a \textbf{theorem} that $\sup_I H/\ZSSP>4/3$ for
-$b\ge5$ --- i.e.\ the $4/3$ bound is specific to $b=3$, \emph{not} universal. What is \emph{not}
-proved (three data points only): monotonicity in $b$, the growth law (does it $\to2$? is it
-unbounded?), and the $b=3$ upper bound itself (OP\,1).
+$b\ge5$ --- i.e.\ the $4/3$ bound is specific to $b=3$, \emph{not} universal.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): status upgraded with the new Part V
+%% theory (Section "General-b Bounds on the Ratio").
+\emph{Updated (2026-06-10):} \textbf{unconditionally proved}:
+$H/\ZSSP\le\min(b,\,\Kstar-1,\,|U|-b)$ (Part~V, Thm.\ ``Unconditional ratio
+bound''). \textbf{Conditionally} (on OP\,11): $H/\ZSSP\le2-1/(\Kstar-1)<2$ for
+every $b$ --- so the growth law is capped at $2$, not unbounded, if OP\,11
+holds. All known extremal witnesses have $|U|-b=\Kstar$ and ratio $2-2/\Kstar$.
+Remaining open: OP\,11 itself; whether ratio $\to2$ is \emph{attained} in the
+limit (requires $\Kstar\to\infty$ with $|U|-b\approx\Kstar-1$ and maximal gap
+simultaneously --- the copy construction fails, decaying to $7/6$); and the
+exact per-$b$ supremum.
 \end{op}
 \begin{op}
 \textbf{OP\,3 (Structural characterisation of zero gap).} Give a necessary-and-sufficient
@@ -68,8 +90,29 @@ vanishes for \emph{every} instance once grouping choice is unrestricted, so the 
 really: when does some \emph{minimum-cardinality} ($\Kstar$-)grouping already attain
 $\ZSSP$? Two sufficient conditions are proved (the heuristic meets either lower bound
 $\Kstar-1$ or $|U|-b$; Part~V), and empirically every positive-gap $b=3$ edge instance has
-$\Kstar=3$ with the ring/prism boundary structure. A clean necessary-and-sufficient
+$\Kstar=3$ with the ring/prism boundary structure.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): two new PROVED zero-gap classes added.
+\emph{Updated (2026-06-10), now proved for all instances and all $b$} (Part~V,
+Cor.\ ``Zero-gap classes''): $\Kstar\le2\Rightarrow\mathrm{gap}=0$, and
+$|U|\le b+1\Rightarrow\mathrm{gap}=0$; so worst cases require $\Kstar\ge3$.
+A clean necessary-and-sufficient
 characterisation (e.g.\ via a forbidden ``ring obstruction'') is missing.
+\end{op}
+\begin{op}
+%% TODO-VERIFY(Claude-Fable 2026-06-10): NEW open problem (the organising
+%% conjecture of the 2026-06-10 campaign); numbered 11 to keep OP4-10 stable.
+\textbf{OP\,11 (Excess re-insertion conjecture; NEW, the organising conjecture).}
+Is $\mathrm{gap}=H-\ZSSP\le\Kstar-2$ for every instance and every $b$?
+(Equivalently, via the cost identity $\mathrm{cost}=(|U|-b)+R$: does some
+JGP-optimal grouping force at most $\Kstar-2$ more re-insertions than the SSP
+optimum?) \emph{Status:} conjecture (Part~V, \S\,General-$b$ Bounds).
+$\Kstar=2$ is \textbf{proved}; the first open case is $\Kstar=3$:
+$\mathrm{gap}\le1$ for \emph{all} $b$ --- this subsumes and generalises the
+earlier ``$\mathrm{gap}\le1$ when $\Kstar=3$, $b=3$'' conjecture. Every known
+extremal witness attains the bound with \emph{equality}; no violation in
+$\approx1380$ targeted instances plus all earlier exhaustive searches.
+Consequences if true: $H/\ZSSP\le2-1/(\Kstar-1)<2$ universally (OP\,2) and a
+conditional route to the $4/3$ bound (OP\,1).
 \end{op}
 \section{Grouping Selection (Parts V--VI)}
 \begin{op}
@@ -88,45 +131,99 @@ objective.
 exact only for the one-directional lookahead policy and coincides with the optimum at zero
 slack; with positive slack, bidirectional padding can be strictly cheaper (the
 sliding-window family has true cost $|U|-b=(K{-}1)(r{-}\mathrm{ov})-(b{-}r)$, below the MWHP
-value $(K{-}1)(r{-}\mathrm{ov})$). A polynomial exact GSP for positive-slack groupings, or a
-proof of NP-hardness, is open.
+value $(K{-}1)(r{-}\mathrm{ov})$).
+%% TODO-VERIFY(Claude-Fable 2026-06-10): sharpened with the verified finding.
+\emph{Sharpened (2026-06-10):} on every tested sliding-window member the
+\emph{full bidirectional} GTSP over the $\Kstar$-grouping attains $\ZSSP$
+exactly ($H=Z^{*}$; Part~VI, remark after Cor.\ ``Optimal SSP cost''), so the
+MWHP excess is purely a policy artifact there. A polynomial exact GSP for
+positive-slack groupings, or a proof of NP-hardness, is open.
 \end{op}
 \section{Exact Formulations (Parts II, IV)}
 \begin{op}
 \textbf{OP\,6 (Exchange argument / cluster-MTZ exactness; central to Part~IV).} \textbf{RESOLVED (negative).} The cluster-aggregated MTZ formulation is \emph{not} exact. Its constraint is representable for a configuration path \emph{iff} every ordered cluster pair is traversed at most once \emph{and} the induced precedence digraph (edge $j'\!\to\!j''$ whenever an arc runs from a $j'$-config to a $j''$-config) is \emph{acyclic}. The acyclicity fails under \textbf{job domination}: if $T_i\subseteq T_j$, every config covering $j$ also covers $i$, so an arc between two such configs forces both $j\!\to\!i$ and $i\!\to\!j$, a $2$-cycle. Explicit counterexample ($b=3$): jobs $\{1,4\},\{1,3,4\},\{1\},\{1,2,4\}$ have $\ZSSP=1$ but cluster-MTZ optimum $2$ (brute-force verified; $19$ counterexamples in $\approx7.9$k instances). \textbf{For column generation use per-configuration MTZ or lazy SEC/PCTSP cuts (both exact), not cluster-MTZ.} The job-indexed MTZ of the BBC master (Part~VIII) is unaffected.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): three additions from the Part IV
+%% verification campaign.
+\emph{Updated (2026-06-10):} (i)~per-configuration MTZ exactness is now
+\textbf{proved} (Part~IV, Thm.\ ``Per-configuration MTZ is exact''), with a
+sharper big-$M$ of $\min(n,|V|)$; (ii)~the cluster-MTZ ILP as originally written
+was additionally \emph{unsound} (parasitic cycles through uncovered
+configurations can fake coverage; even heuristic use requires path extraction)
+and its coverage constraints must sum over $V^{+}$ --- both fixed in Part~IV;
+(iii)~the aggregate Desrochers--Laporte lifting claimed earlier is
+\emph{invalid} (explicit counterexample, Part~IV).
 \end{op}
 \begin{op}
 \textbf{OP\,7 (LP strength and net solver benefit of MTZ).} The cluster-MTZ relaxation is no
 tighter than SEC and is weakened further by aggregation (Part~IV). Quantify the LP gap on SSP
-instances (with and without Desrochers--Laporte lifting), and measure whether removing row
+instances, and measure whether removing row
 generation yields a net branch-and-price speed-up versus the SEC and SSPMF formulations on the
 Catanzaro Tabela1C set. \emph{Status:} open, computational.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): DL-lifting clause corrected.
+\emph{Correction (2026-06-10):} the planned ``with and without
+Desrochers--Laporte lifting'' comparison must use the \emph{per-arc} (or
+per-configuration, Part~IV Rem.\ ``Sharper big-$M$'') lifting only --- the
+aggregate cluster-level lifting is invalid (Part~IV).
 \end{op}
 \begin{op}
-\textbf{OP\,8 (Fractional Benders cuts).} The branch-and-Benders solver (Part~VIII,
-\texttt{08\_branch\_and\_benders.tex}) currently adds optimality cuts only at integer master
-solutions (KTNS subproblem). Deriving valid cuts at \emph{fractional} master solutions from a
-relaxation of the KTNS recursion (min-cost-flow / interval-matrix lower bound, or the
-totally-unimodular tooling LP) --- enabling user cuts that tighten the bound before branching
---- is open. Cut \emph{lifting} (certifying a cut for all sequences sharing a $0$-block
-structure) is the related practical lever.
+\textbf{OP\,8 (Fractional Benders cuts).}
+%% TODO-VERIFY(Claude-Fable 2026-06-10): rewritten. The old statement claimed
+%% the EXISTENCE of fractional cuts was open and that the integer cuts came from
+%% KTNS; both were wrong (Part VIII corrections): the default cuts are classical
+%% LP-dual (DSP) cuts, the DSP is valid at fractional x-bar, and the relaxation
+%% handler is implemented (untested).
+\emph{Restated (2026-06-10):} fractional separation \emph{exists} canonically
+--- the default BBC cuts are classical LP-duality cuts from the DSP (whose
+feasible region is independent of $x$), valid at fractional $\bar x$ and
+implemented in the relaxation handler (Part~VIII) --- but it is \emph{untested}.
+Open: (i)~empirical value on Catanzaro Tabela1C (bound improvement vs node-LP
+cost; requires presolve off and thread-safe worker-LP reuse); (ii)~strength of
+the fractional DSP bound vs the SSPMF root bound $|U|-b$, and \emph{stronger}
+separable families; (iii)~cut \emph{lifting} for the combinatorial cuts
+(certifying a cut for all sequences sharing a $0$-block structure).
+\textbf{Note:} all BBC benchmarks predating 2026-06-10 must be re-run --- the
+Benders cut omitted the depot-arc dual terms (over-tight, potentially
+optimum-cutting at degenerate DSP vertices; found and fixed in the code audit,
+\texttt{\_verification/verify\_bbc\_audit.py}).
 \end{op}
 \section{Cost-Function Variants (Part VII)}
 \begin{op}
-\textbf{OP\,9 (Tight collapse condition).} The conditions (C1)+(C2)+(C3) are sufficient for
-collapse of an SSP variant to the JGP; the necessity analysis (Part~VII) shows (C3) necessary
-and (C1),(C2) dispensable. A single necessary-and-sufficient characterisation of collapse,
-beyond the reduction to the threshold $\rho_c(I)$, is open.
+\textbf{OP\,9 (Tight collapse condition).}
+%% TODO-VERIFY(Claude-Fable 2026-06-10): updated --- (C1)+(C2)+(C3) was vacuous
+%% ((C3) restates collapse); replaced in Part VII by a checkable condition.
+\emph{Restated (2026-06-10):} the old sufficient condition (C1)+(C2)+(C3) was
+vacuous ((C3) restates the definition); Part~VII now gives the \emph{checkable}
+sufficient condition $\Kstar\delta\ge(\Kstar-1)\bar\Delta$ (transition-cost
+lower/upper bounds $\delta,\bar\Delta$), and the per-instance threshold theorem:
+SSP-$f_S$ collapses iff $\rho\ge\rho_c(I)$. Open: a single
+necessary-and-sufficient characterisation of collapse for \emph{general} cost
+functions $f$, beyond the $f_S$ threshold $\rho_c(I)$; and a non-degenerate
+witness that (C2) is dispensable (the current one has only $\Kstar$ jobs).
 \end{op}
 \begin{op}
 \textbf{OP\,10 (Setup-time regime in practice).} For the magazine/tool setup-time ratio
-$\rho$, the TD-SSP approximation ratio $R(\rho)$ decreases from $\le 4/3$ at $\rho=0$ to $1$
-as $\rho\to\infty$, with ring threshold $\rho_c=1$ (Part~VII). Whether the manufacturing
-regime $\rho\in[3,60]$ (Privault--Finke) makes JGP+GSP exactly optimal on broader instance
-classes (not just ring-like) is open.
+$\rho$, the approximation ratio $R(\rho)$ decreases from $\le 4/3$ at $\rho=0$
+(conjectural, $b=3$) to exactly $1$ at $\rho=\rho_c(I)$, with ring threshold
+$\rho_c=1$ (Part~VII, corrected formula: the denominator is the true $f_S$
+optimum $\min_K[(K-1)\rho+z_K]$).
+%% TODO-VERIFY(Claude-Fable 2026-06-10): R(rho) formula reference corrected
+%% (old displayed formula contradicted its own rho=1 claim); the [3,60]
+%% manufacturing range is now unsourced (could not be verified in
+%% Privault-Finke) --- find a practical reference before citing.
+Whether realistic manufacturing regimes (large $\rho$; numeric range needs a
+verified source) make JGP+GSP exactly optimal on broader instance
+classes (not just ring-like) is open --- equivalently: characterise instances
+with small $\rho_c(I)$.
 \end{op}
 \vspace{0.4cm}
-\noindent\textit{Cross-references: OP\,1--4 (Part~V, \texttt{05}); OP\,5 (Part~VI,
+\noindent\textit{Cross-references: OP\,1--4, OP\,11 (Part~V, \texttt{05}); OP\,5 (Part~VI,
 \texttt{06}); OP\,6--7 (Part~IV, \texttt{04}); OP\,8 (Part~VIII, \texttt{08}); OP\,9--10
-(Part~VII, \texttt{07}).}
+(Part~VII, \texttt{07}). OP\,11 sits in the Part~V section (after OP\,3); numbering of
+OP\,4--10 kept stable for external references. Part~X
+(\texttt{10\_position\_formulations.tex}, added 2026-06-10) carries its own list
+OP-X1--X4: characterising the PTF LP bound (it can exceed $|U|-b$, the SSPMF
+level) and comparing it to Catanzaro F3/F4; polynomial row families and facets
+for PCF/PTF (PORTA); practical pair pricing for PTF; and a lower bound showing
+every configuration-arc ordering certificate needs $\Omega(|V_{\mathrm{used}}|)$
+rows (which would settle whether per-config MTZ can be row-reduced).}
 \end{document}

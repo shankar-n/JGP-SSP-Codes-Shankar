@@ -139,6 +139,17 @@ and $V_j^*$, connecting the two replicas has zero cost:
 \]
 These zero-cost arcs model the fact that processing multiple consecutive jobs
 under the \emph{same} magazine configuration incurs no tool switch.
+
+\item \textbf{Depot cluster (path--cycle correction).}
+%% TODO-VERIFY(Claude-Fable 2026-06-10): step ADDED — without it thm:bijection is
+%% false: a GTSP Hamiltonian CYCLE pays the wrap-around arc, while the SSP is an
+%% open path with a free initial load (e.g. two tool-disjoint jobs: path cost b,
+%% any depot-free cycle cost 2b).
+Add a singleton cluster $V_0^*=\{v_0\}$ with
+$d^*(v_0,\cdot)=d^*(\cdot,v_0)=0$. The Hamiltonian cycle is forced through
+$v_0$, which severs it into an open path with a free initial configuration ---
+matching the free-initial-load SSP objective. Without this cluster the cycle
+would additionally pay the return arc, and the equivalence below would fail.
 \end{enumerate}
 
 \begin{figure}[h!]
@@ -204,8 +215,10 @@ identical switching cost.
 \begin{proofbox}
 \begin{proof}
 Any Hamiltonian cycle in $\mathcal{I}_{\text{GTSP}}$ selects exactly one replica
-$v_{C,j}$ from each cluster $V_j^*$, which maps to selecting one configuration
-$C \in H_j$ per job — a valid SSP sequence.
+$v_{C,j}$ from each cluster $V_j^*$ and the depot $v_0$; cutting the cycle at
+$v_0$ (both incident arcs cost $0$) and reading the replicas in order, collapsed
+to their configurations, yields a configuration trajectory serving one job per
+cluster of equal cost — a valid SSP sequence.
 
 Conversely, in any SSP solution, if the magazine stays at configuration $C$ across
 a contiguous block of jobs $j_1, j_2, \ldots, j_\ell$, the KTNS policy incurs zero
@@ -254,10 +267,15 @@ then $H_i \cap H_k = \emptyset$ for all $i \ne k$, and the U-SSP maps directly
 to a GTSP with disjoint clusters — no I-N replication is needed.
 \end{corollary}
 
-\noindent\textbf{Implication.} The standard GTSP is a \emph{special case} of the
-SSP (the disjoint-cluster case), not an independent problem. Whenever instances
-are ``dense'' (large $|T_j|$ relative to $b$), solvers can be applied without
-the overhead of the I-N transformation.
+\noindent\textbf{Implication.}
+%% TODO-VERIFY(Claude-Fable 2026-06-10): direction corrected — the old text said
+%% "the standard GTSP is a special case of the SSP", which is backwards and
+%% contradicts the Metric Barrier section that follows.
+The disjoint-cluster SSP is a \emph{native GTSP instance} (with the special metric
+$d=b-|C_u\cap C_v|$): GTSP machinery applies directly, without the I-N overhead,
+whenever instances are ``dense'' (large $|T_j|$ relative to $b$). The converse ---
+which GTSP instances are expressible as SSPs --- is precisely the Metric Barrier
+question of the next section.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{The Metric Barrier: Limits of the Reverse Reduction}
@@ -269,10 +287,17 @@ an arbitrary GTSP can always be reduced back to an SSP. The answer is no, due to
 the rigid geometric structure of the SSP metric.
 
 \begin{thmbox}
-\begin{theorem}[Metric Barrier \cite{Colares2026Exact}]
+%% TODO-VERIFY(Claude-Fable 2026-06-10): statement weakened to what the proof
+%% actually shows. The old claim ("can be polynomially reduced to a U-SSP only
+%% if...") is FALSE as stated: both decision problems are NP-complete, so
+%% polynomial reductions exist in both directions regardless of the metric.
+%% What the proof establishes is a barrier for WEIGHT-PRESERVING embeddings.
+\begin{theorem}[Metric Barrier --- weight-preserving embeddings]
 \label{thm:barrier}
-A GTSP instance with arc weight function $w$ can be polynomially reduced to
-a U-SSP only if $w$ satisfies all four properties simultaneously:
+A GTSP instance with arc weight function $w$ admits a \emph{weight-preserving}
+embedding into a U-SSP (i.e.\ vertices realised as configurations of a common
+size $b$ with $w(u,v)=b-|C_u\cap C_v|$) only if $w$ satisfies all four
+properties simultaneously:
 \begin{enumerate}[label=(\roman*)]
 \item \textbf{Symmetry:} $w(u,v) = w(v,u)$ for all $u,v$.
 \item \textbf{Non-negative integer values:} $w(u,v) \in \mathbb{Z}_{\ge 0}$.
@@ -306,6 +331,10 @@ This barrier is not merely theoretical. Real GTSP instances from routing
 applications often have asymmetric costs (direction-dependent travel times),
 ruling out direct SSP equivalence. Conversely, SSP instances arising from FMS
 scheduling always satisfy all four properties by construction.
+\emph{Caveat (added 2026-06-10): the barrier concerns weight-preserving
+embeddings only. Since both decision problems are NP-complete,
+\emph{cost-distorting} polynomial reductions GTSP $\to$ SSP exist trivially;
+whether a natural approximation-preserving reduction exists is open.}
 \end{remark}
 
 % ─────────────────────────────────────────────────────────────────────────────

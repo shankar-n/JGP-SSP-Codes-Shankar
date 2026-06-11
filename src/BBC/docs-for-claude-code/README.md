@@ -24,23 +24,37 @@ added to `build_master_problem`, converting the problem to a Hamiltonian *path*
 as described in `idea.md` (the plan includes `J ∪ {0}` in all degree
 constraints).
 
-### Result post-processing in `main-notebook.py` cell 6b
-LSS (Laporte 2004) and SSPMF (da Silva 2024) are kept **exactly as per their
-papers**.  Both paper formulations count the initial magazine loading from the
-empty depot as part of the objective.  The GTSP reference solver (cell 6) does
-**not** count this (it uses a DUMMY node with zero-cost transitions).
+### Objective conventions (CORRECTED in audit, 2026-06-10, Claude-Fable)
+The earlier version of this section claimed cell 6b subtracts `|T_{seq[0]}|`
+from LSS/SSPMF results.  **That is stale: no such post-processing exists in the
+current notebook — and none is needed.**  Verified by reading all models:
 
-To make the comparison table consistent, cell 6b **post-processes** each
-result by subtracting `|T_{seq[0]}|` (the initial load at the first job):
+- BBC (DSP forces `y_depot = 0`), repo-LSS (`y[0,t] = 0`), repo-SSPMF
+  (position 0 charges all required tools), and `precompute_jgp_gsp.py`
+  (`compute_ktns`, empty magazine) all use the **empty-start** convention:
+  the objective counts every insertion, including the first job's load.
+  Cell 6b and the whole benchmark pipeline are mutually consistent as-is.
+- The GTSP reference solver (cell 6, DUMMY node) and all plans-genai documents
+  use the **free-initial** convention.  Conversion (constant per instance,
+  argmin-safe):  `empty_start = free_initial + min(C, |U|)` where `U` is the
+  union of required tools.  Differences/gaps are convention-invariant; **ratios
+  are not** — convert before comparing H/Z* against the Part V theory.
+- Caveat: whether the *published* Laporte (2004) / da Silva (2024) models are
+  empty-start has NOT been verified (da Silva's `M − C` LP bound suggests
+  free-initial).  Check before quoting published tables against repo numbers.
 
-```python
-adjusted_obj = reported_obj - len(T_j[seq[0]])
-```
+### Benders cut: depot-arc duals (BUG FIXED 2026-06-10, Claude-Fable)
+The cut built in `_build_benders_cut_sparsepair` previously omitted the
+depot-arc dual terms `Σ_j (x_dj − 1)·λ̄d_jt` (and the DSP solvers never
+extracted `λ̄d`).  The omitted term is ≤ 0, so cuts were over-tight; at
+degenerate DSP optima this can cut off true optima (193 witnesses:
+`plans-genai/_verification/verify_bbc_audit.py`).  Root cause: the cut was
+implemented from `plan-from-gemma.md` §4 (written before the depot fix; sums
+over jobs only), while `idea.md` §3 correctly ranges `i ∈ J ∪ {0}`.  Fixed;
+**re-run any benchmarks produced before this date with default (DSP) cuts.**
 
-This post-processing is applied only for display in the comparison table; the
-solver code itself is untouched.
-
-A `benchmark.py` runner compares all three on standard instances.
+`benchmark_runner.py` (preferred) and `benchmark.py` (legacy) compare all
+three on standard instances.
 
 ---
 
@@ -48,14 +62,18 @@ A `benchmark.py` runner compares all three on standard instances.
 
 | File | Description |
 |------|-------------|
-| `branch_and_benders_cut.py` | Auto-detecting dispatcher (CPLEX → Gurobi → SCIP) |
-| `branch_and_benders_cut_cplex.py` | BBC — IBM CPLEX backend |
-| `branch_and_benders_cut_gurobi.py` | BBC — Gurobi backend |
-| `branch_and_benders_cut_scip.py` | BBC — SCIP/PySCIPOPT backend |
+| `branch_and_benders_cut.py` | Dispatcher / façade (CPLEX only; Gurobi/SCIP archived) |
+| `branch_and_benders_cut_cplex.py` | BBC — IBM CPLEX backend (the solver) |
+| `bbc_common.py` | `BBCSolverMixin`: shared helpers + docplex/gurobi DSP fallbacks |
 | `lss_formulation.py` | LSS formulation (Laporte 2004) |
 | `sspmf_formulation.py` | SSPMF formulation (da Silva 2024) |
-| `benchmark.py` | Benchmark runner (BBC vs LSS vs SSPMF) |
-| `test_solver.py` | Unit/integration tests for all backends |
+| `benchmark.py` | Legacy standalone benchmark runner |
+| `benchmark_config.py` | Single source of truth: instance sets, config grid, CSV schema |
+| `benchmark_runner.py` | Resumable subprocess benchmark runner → `raw_results.csv` |
+| `precompute_jgp_gsp.py` | JGP+GSP heuristic costs per instance → `jgp_gsp_costs.csv` |
+| `analysis/` | `generate_plots.py` (Dolan–Moré etc.), `generate_tables.py` |
+| `test_solver.py` | Cross-solver agreement tests (convention-free) |
+| `_archived/` | Deprecated Gurobi/SCIP backends — do not touch |
 
 ---
 

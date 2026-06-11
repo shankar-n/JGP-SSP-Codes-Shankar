@@ -212,7 +212,18 @@ $\pi^*$ under lookahead configurations is a MWHP on $H_\mathrm{ov}$:
 \begin{proof}
 Under lookahead, $C_{\pi(k)} = T^{(\pi(k))} \cup X_{\pi(k)}$ where
 $X_{\pi(k)} \subseteq T^{(\pi(k+1))} \setminus T^{(\pi(k))}$ and
-$|X_{\pi(k)}| = s$ (the slack). Then:
+$|X_{\pi(k)}| = s$ (the slack).
+%% TODO-VERIFY(Claude-Fable 2026-06-10): missing hypothesis made explicit. For
+%% X to exist we need |T^(k+1) \ T^(k)| = r - w >= s = b - r, i.e. consecutive
+%% groups unmergeable (|T^(k) u T^(k+1)| > b). Automatic for JGP-optimal
+%% groupings; NOT automatic for arbitrary groupings with K > K*.
+Such an $X_{\pi(k)}$ exists because consecutive groups are unmergeable
+($|T^{(\pi(k))}\cup T^{(\pi(k+1))}|>b$, automatic for JGP-optimal groupings and
+assumed here), which gives
+$|T^{(\pi(k+1))}\setminus T^{(\pi(k))}|=r-w\ge b-r=s$. For the last group
+$\pi(K)$ there is no successor; fix $X_{\pi(K)}$ to be any tools \emph{outside}
+$\bigcup_{k<K}T^{(\pi(k))}$ (the one-directional policy forbids backward
+padding, which is what bidirectional padding would exploit). Then:
 \[
   C_{\pi(k)} \setminus C_{\pi(k+1)}
   = T^{(\pi(k))} \setminus C_{\pi(k+1)},
@@ -255,9 +266,14 @@ also realises the tool-counting lower bound of Part~V
 (\texttt{05\_jgp\_ssp\_gap\_analysis.tex}).
 
 \begin{definition}[Sliding-window instance $\mathcal{I}(K,r,\mathrm{ov},b)$]
+%% TODO-VERIFY(Claude-Fable 2026-06-10): two fixes. (1) The JOBS were never
+%% defined — added: one job per window. (2) Parameter range relaxed from r<b to
+%% r<=b: the corollary below references the zero-slack case r=b, which the old
+%% range excluded.
 Parameters: $K$ groups, group tool set size $r$, overlap $\mathrm{ov}$
 between adjacent groups, magazine capacity $b$, satisfying:
-$0 \le \mathrm{ov} \le r/2$, $r < b$, $2r - \mathrm{ov} > b$.
+$0 \le \mathrm{ov} \le r/2$, $r \le b$, $2r - \mathrm{ov} > b$.
+\textbf{Jobs:} one job per window, $T_{j_k}=T^{(k)}$ (so $|T_{j_k}|=r\le b$).
 \begin{itemize}
 \item \textbf{Tools:} $T = \{t_1,\ldots,t_m\}$ with $m = (K-1)(r-\mathrm{ov})+r$.
 \item \textbf{Mandatory sets:} $T^{(k)} = \{t_{(k-1)(r-\mathrm{ov})+1},\ldots,
@@ -283,14 +299,41 @@ The one-directional MWHP schedule costs $(K-1)(r-\mathrm{ov})$, an \emph{upper} 
 The true optimum is governed by the tool-counting bound of Part~V
 (\texttt{05\_jgp\_ssp\_gap\_analysis.tex}): with $|U| = (K-1)(r-\mathrm{ov})+r$ tools,
 \[
-  Z_\mathrm{SSP}^{*} \;=\; |U|-b \;=\; (K-1)(r-\mathrm{ov}) - (b-r),
+  Z_\mathrm{SSP}^{*} \;=\; |U|-b \;=\; (K-1)(r-\mathrm{ov}) - (b-r).
 \]
-the lower bound $Z^{*}\!\ge|U|-b$ being met by a bidirectional-padding schedule. Thus
-the one-directional MWHP value exceeds $Z_\mathrm{SSP}^{*}$ by exactly the slack $b-r$,
-and the two coincide iff the groups are \emph{zero-slack} ($r=b$). (Values verified in
-\texttt{plans-genai/\_verification/}: e.g.\ $K{=}3,r{=}3,\mathrm{ov}{=}1,b{=}4$ gives
-$Z^{*}=3$, MWHP $=4$.)
+Thus the one-directional MWHP value exceeds $Z_\mathrm{SSP}^{*}$ by exactly the slack
+$b-r$, and the two coincide iff the groups are \emph{zero-slack} ($r=b$).
 \end{corollary}
+\begin{proofbox}
+\begin{proof}
+%% TODO-VERIFY(Claude-Fable 2026-06-10): proof was missing ("being met by a
+%% bidirectional-padding schedule" was asserted without argument); added via the
+%% Part V cost identity. Machine-checked on (K,r,ov,b) = (3,3,1,4), (4,3,1,4),
+%% (3,4,2,5), (4,4,1,5): K*=K and Z*=|U|-b in all cases (/tmp run, ssp_verify).
+$Z^{*}\ge|U|-b$ is the tool-counting bound. For achievability use the cost
+identity of Part~V (cost $=(|U|-b)+R$ with $R$ the re-insertions): in the natural
+window order every tool is required on a \emph{contiguous} set of jobs (each tool
+lies in at most two adjacent windows by $\mathrm{ov}\le r/2$), so the lazy
+schedule --- insert each tool at its first required job, evict only tools whose
+last required job has passed --- never re-inserts: at the transition into job
+$k{+}1$ exactly $r-\mathrm{ov}$ tools become dead and $r-\mathrm{ov}$ new tools
+are needed, so capacity is never exceeded. Hence $R=0$ and
+$Z^{*}=|U|-b$.
+\end{proof}
+\end{proofbox}
+
+\begin{remark}[The MWHP excess is a policy artifact, not a heuristic gap]
+%% TODO-VERIFY(Claude-Fable 2026-06-10): new observation from verification runs.
+On all tested family members the \emph{full} GTSP optimum over the
+$\Kstar$-grouping (bidirectional padding allowed) equals $Z^{*}$ --- e.g.\
+$(K,r,\mathrm{ov},b)=(3,3,1,4)$: $Z^{*}=H=3$ while MWHP $=4$. So the
+JGP$+$GSP heuristic has \emph{zero gap} on this family; only the restricted
+one-directional policy pays the extra $b-r$. The family therefore does
+\emph{not} witness heuristic gaps (consistent with the positive-gap witnesses of
+Part~V having different job structure, e.g.\ the $8$-job sliding-window
+\emph{ring}); it witnesses the value of bidirectional padding, and realises the
+tool-counting bound exactly.
+\end{remark}
 
 \noindent\textbf{Practical use.}
 For arbitrary instances, compute $H_\mathrm{ov}$ and solve MWHP as a proxy for
@@ -314,26 +357,42 @@ Part~V (\texttt{05\_jgp\_ssp\_gap\_analysis.tex}, Theorem on sub-optimal groupin
 on the $6$-job ring a $K{=}4$ grouping attains the SSP optimum $3$, strictly below the
 JGP-optimal heuristic value $4$.
 
-A Lagrangian relaxation penalises extra groups:
+A Lagrangian penalty on extra groups:
 \[
   L(\lambda) = \min_{\calG,\pi,\{C_k\}} \Bigl[
   \mathrm{cost}(\calG,\pi,\{C_k\}) + \lambda(|\calG| - \Kstar)
-  \Bigr], \quad \lambda \ge 0.
+  \Bigr]
+  \;=\;\min_{K\ge\Kstar}\bigl[z_K+\lambda(K-\Kstar)\bigr], \quad \lambda \ge 0,
 \]
-By weak duality, $L(\lambda) \le Z_\mathrm{SSP}^*$ for all $\lambda \ge 0$.
-As $\lambda$ decreases from $\infty$ to 0:
+where $z_K$ is the best cost among $K$-group solutions (so $z_{\Kstar}=H$ and
+$\min_K z_K=\ZSSP$ by the grouping-exactness theorem of Part~V).
+%% TODO-VERIFY(Claude-Fable 2026-06-10): the earlier claims here were WRONG and
+%% are replaced. (a) "By weak duality L(lambda) <= Z*_SSP for all lambda" is
+%% FALSE: on the 6-ring (z_3=4, z_4=z_5=z_6=3), L(0.5)=3.5 and L(1)=4 > Z*=3.
+%% (b) "Z*_SSP - L(lambda*) equals the LP integrality gap" was not meaningful:
+%% in fact L(0) = Z*_SSP EXACTLY (grouping exactness), so max_lambda L >= Z*.
+%% Correct facts below; numerically checked (/tmp/v06.py run, 2026-06-10).
+The correct properties are:
 \begin{itemize}
-\item Large $\lambda$: penalises extra groups heavily $\Rightarrow$ optimal at
-  $\Kstar$ groups (same as JGP).
-\item Small $\lambda$: groups are cheap $\Rightarrow$ more groups, lower switching
-  cost per group.
-\item $\lambda = 0$: pure SSP minimisation.
+\item $L(0)=\ZSSP$ \emph{exactly} (grouping exactness, Part~V) --- the penalty-free
+  problem \emph{is} the SSP, not a bound on it;
+\item $L(\lambda)\le z_{\Kstar}=H$ for every $\lambda\ge0$ (plug in the
+  $\Kstar$-group solution; the penalty vanishes), with $L(\lambda)\to H$ as
+  $\lambda\to\infty$;
+\item $L$ is concave, piecewise-linear, and nondecreasing in $\lambda$; its
+  breakpoints are the slopes $(z_{\Kstar}-z_K)/(K-\Kstar)$, $K>\Kstar$, of the
+  lower convex
+  envelope of the Pareto set $\{(K,z_K)\}$, and the largest breakpoint is exactly
+  the collapse threshold $\rho_c(I)$ of Part~VII
+  (\texttt{07\_collapse\_variants.tex}, Theorem ``Collapse threshold formula'')
+  with $\lambda=\rho$;
+\item minimisers of $L(\lambda)$ for intermediate $\lambda$ are Pareto-efficient
+  groupings with $K>\Kstar$ --- the useful output: a principled generator of
+  sub-optimal groupings that may beat the $\Kstar$-restricted heuristic.
 \end{itemize}
-The subgradient algorithm traces a Pareto frontier of (group count, switching cost),
-providing sub-optimal groupings at various $K > \Kstar$ that may achieve
-$\mathrm{cost}(\calG,\pi^*) < \OPT(\calG^*)$ for any $\Kstar$-group solution.
-The tightest lower bound is $L(\lambda^*) = \max_{\lambda \ge 0} L(\lambda)$;
-the gap $Z_\mathrm{SSP}^* - L(\lambda^*)$ equals the LP integrality gap.
+$L$ is thus a scalarisation knob for \emph{exploring} the (group count, switch
+cost) trade-off --- the same parameterisation as the setup-time ratio $\rho$ of
+Part~VII --- not a lower-bounding device for $\ZSSP$.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Chromatic Structure and the Conflict Graph (Proved Observation)}
@@ -388,17 +447,38 @@ $w(G_k,G_{k'})$) predicts $\OPT(\calG)$.
 
 \noindent\textbf{Mathematical justification.}
 $\OPT(\calG)$ depends on the pairwise tool overlap between groups, which is
-captured by $H_\mathrm{ov}$. GNNs are permutation-equivariant and can
-approximate any function on graphs \cite{Xu2019}; since SSP cost is
-permutation-invariant in the group labels, the architecture is principled.
+captured by $H_\mathrm{ov}$.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): corrected an overclaim. Xu et al. 2019
+%% prove the OPPOSITE of "GNNs approximate any function on graphs": message-
+%% passing GNN expressive power is BOUNDED by the 1-WL test. The honest
+%% justification is permutation invariance + the fact that the relevant features
+%% (pairwise overlaps) are given explicitly as edge weights of H_ov.
+GNNs are permutation-equivariant, matching the permutation-invariance of the
+SSP cost in the group labels; and since the decisive quantities (the pairwise
+overlaps $w(G_k,G_{k'})$) are supplied \emph{explicitly} as edge features of
+$H_\mathrm{ov}$, the predictor need not infer them --- sidestepping the
+expressiveness limits of message-passing GNNs, which are bounded by the
+1-Weisfeiler--Leman test \cite{Xu2019}. Caveat: $\OPT(\calG)$ also depends on
+higher-order overlap patterns (e.g.\ bridge tools spanning three groups), which
+pairwise features do not determine; this is precisely what the learned component
+must capture, and no expressiveness guarantee is claimed.
 
 \noindent\textbf{Training.} Solve instances exactly up to moderate size;
 generate both $K=\Kstar$ and $K>\Kstar$ groupings; train on exact $\OPT(\calG)$ values.
 
-\noindent\textbf{Guarantee.} If the GNN approximates $\OPT(\calG)$ within error
-$\varepsilon$ with probability $\ge 1-\delta$, the returned best grouping has cost
-$\le Z_\mathrm{SSP}^* + \varepsilon + \eta$ where $\eta \to 0$ as the number of
-evaluated groupings grows.
+\noindent\textbf{Guarantee.}
+%% TODO-VERIFY(Claude-Fable 2026-06-10): bound corrected from epsilon to
+%% 2*epsilon (estimation error hits both the selected and the best grouping),
+%% and the role of the pool made explicit.
+If the scorer approximates $\OPT(\calG)$ within $\pm\varepsilon$ on every
+grouping in the candidate pool $\mathcal{P}$ (w.p.\ $\ge1-\delta$ jointly), the
+grouping selected by the scorer has true cost
+$\le \min_{\calG\in\mathcal{P}}\OPT(\calG) + 2\varepsilon$
+(standard argmin-transfer argument). By grouping exactness (Part~V),
+$\min_{\calG\in\mathcal{P}}\OPT(\calG)=\ZSSP$ \emph{provided} $\mathcal{P}$
+contains an SSP-optimal grouping; otherwise the pool-coverage error adds on
+top. No guarantee without the $\varepsilon$-accuracy assumption, which is
+empirical.
 
 \subsection{RL for Joint Grouping and Sequencing}
 
@@ -439,8 +519,11 @@ At each CG iteration: query $P_\phi$; check reduced cost of $G'$ (cheap); if
 negative, add to master; else fall back to exact pricing.
 All ML-suggested columns are verified before use; LP optimality is certified
 by the fallback. Exact LP optimality is preserved; ML only reduces pricing
-calls. Analogous approaches reduce pricing iterations by 50--80\% on related
+calls. Analogous approaches substantially reduce pricing effort on related
 problems \cite{Morabit2021}.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): the earlier "50--80%" figure could not
+%% be verified against Morabit et al. and is removed pending a check of the
+%% paper's actual reported reductions; reinstate with a page/table reference.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Summary: What Is Proved vs.\ Proposed}

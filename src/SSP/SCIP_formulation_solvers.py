@@ -65,11 +65,15 @@ def solve_jgp_arf(n_jobs, n_tools, cap, tool_req):
             return None, []
 
         # ── Extract batches ──────────────────────────────────────────────
-        # BUG FIX: must check ALL jobs (range(n_jobs)), not range(h, n_jobs)
+        # AUDIT(Claude-Fable 2026-06-10): resolved the stale comment/TODO that
+        # stood here.  range(h, n_jobs) is CORRECT and required: in the ARF
+        # formulation v[i, h] exists only for h <= i (a batch is represented
+        # by its lowest-index job), so iterating i < h would KeyError.  The
+        # earlier "BUG FIX: must check ALL jobs" note was wrong.
         batches = []
         for h in range(n_jobs):
             if mdl.getVal(v[h, h]) > 0.5:
-                jobs_in_h  = [i for i in range(h,n_jobs) #added h, find out [TODO]
+                jobs_in_h  = [i for i in range(h, n_jobs)
                               if mdl.getVal(v[i, h]) > 0.5]
                 tools_in_h = [t for t in range(n_tools)
                               if mdl.getVal(y[t, h]) > 0.5]

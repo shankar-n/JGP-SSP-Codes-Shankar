@@ -257,6 +257,12 @@ class BendersCutCallback:
         # ── Step B: Extract Hamiltonian sequence ──────────────────────────
         sequence = solver._get_sequence_from_sol(sol)
         if sequence is None:
+            # AUDIT(Claude-Fable 2026-06-10): this path FAILS OPEN — returning
+            # without reject_candidate ACCEPTS the incumbent unverified.  It
+            # should be unreachable after a clean subtour check; warn loudly so
+            # a silent wrong optimum cannot pass unnoticed.
+            print("[BBC WARNING] subtour-free candidate but sequence extraction "
+                  "failed — candidate accepted UNVERIFIED. Investigate!")
             return
 
         # ── Step C: Compute subproblem cost and inject cut ────────────────
@@ -304,6 +310,35 @@ class BendersCutCallback:
             x_bar = solver._build_x_bar_from_sequence(sequence)
             dsp_obj, duals = solver._solve_dsp_with_xbar(x_bar, tid=tid)
             if dsp_obj is None:
+                # AUDIT-FIX(Claude-Fable 2026-06-10): previously FAILED OPEN
+                # (accepted the candidate with theta unverified).  Fall back to
+                # the KTNS combinatorial cut, which needs no LP.
+                from utils import compute_ktns
+                z_star, _ = compute_ktns(sequence, solver.tool_req,
+                                         solver.capacity)
+                print(f"[BBC WARNING] DSP failed at incumbent; using KTNS "
+                      f"fallback cut (z*={z_star}).")
+                if z_star > theta_val + 1e-6:
+                    dd = solver.depot
+                    path_arcs = ([(dd, sequence[0])]
+                                 + [(sequence[k], sequence[k + 1])
+                                    for k in range(len(sequence) - 1)]
+                                 + [(sequence[-1], dd)])
+                    indices = ([solver.theta_idx]
+                               + [solver.x_idx_map[a] for a in path_arcs])
+                    coeffs = [1.0] + [-float(z_star)] * len(path_arcs)
+                    context.reject_candidate(
+                        constraints=[SparsePair(indices, coeffs)],
+                        senses=['G'],
+                        rhs=[float(z_star) * (1 - len(path_arcs))]
+                    )
+                    self.comb_cuts_added += 1
+                    self.cuts_added += 1
+                if z_star < self.best_objective:
+                    self.best_objective = float(z_star)
+                    self.best_solution = sequence[:]
+                self.convergence_log.append(
+                    (elapsed, theta_val, self.best_objective))
                 return
 
             if dsp_obj > theta_val + 1e-6:
@@ -604,15 +639,22 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
                 senses=['E'], rhs=[1.0], names=[f'in_{i}']
             )
 
-        # ── Initial lower bound: θ - Σ w_ij x_ij ≥ 0  (depot arcs have w=0)
-        lb_indices = [self.theta_idx] + [
-            self.x_idx_map[i, j] for i, j in self.x_pairs
-            if i != d and j != d
-        ]
-        lb_coeffs = [1.0] + [
-            -self.w.get((i, j), 0) for i, j in self.x_pairs
-            if i != d and j != d
-        ]
+        # ── Initial lower bound: θ ≥ Σ w_ij x_ij + Σ_j |T_j| x_{d,j} ─────────
+        # AUDIT-IMPROVEMENT(Claude-Fable 2026-06-10): the DSP charges insertions
+        # from an EMPTY depot magazine (y_{depot,t}=0), so the first job σ(1)
+        # always costs ≥ |T_{σ(1)}| insertions.  The old version set w=0 on depot
+        # arcs, leaving that term out of the root bound.  Valid: first-job
+        # insertions and later transition insertions are disjoint position-wise.
+        lb_indices = [self.theta_idx]
+        lb_coeffs  = [1.0]
+        for (i, j) in self.x_pairs:
+            if j == d:
+                continue  # j→depot arcs cost nothing
+            lb_indices.append(self.x_idx_map[i, j])
+            if i == d:
+                lb_coeffs.append(-float(len(self.tool_req.get(j, []))))
+            else:
+                lb_coeffs.append(-float(self.w.get((i, j), 0)))
         self.cpx.linear_constraints.add(
             lin_expr=[SparsePair(lb_indices, lb_coeffs)],
             senses=['G'], rhs=[0.0], names=['theta_lb']
@@ -964,6 +1006,16 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         duals = {}
         for (i, j, t), col in lam_idx.items():
             duals['lambda', i, j, t] = all_vals[col]
+        # AUDIT-FIX(Claude-Fable 2026-06-10): depot-arc duals were never extracted,
+        # so _build_benders_cut_sparsepair silently dropped the term
+        # sum_j (x_dj - 1)*lam_d[j,t] from the cut.  Dropping a non-positive term
+        # makes the cut OVER-TIGHT and, at degenerate DSP optima (lam_d > 0 on
+        # non-first-job depot arcs; these exist: lam_d and nu trade off at zero
+        # reduced cost), the cut can cut off true optimal (sequence, theta) points.
+        # Witnessed numerically: 193 violations on random instances
+        # (plans-genai/_verification/verify_bbc_audit.py, T3).
+        for (j, t), col in lam_depot_idx.items():
+            duals['lambda_d', j, t] = all_vals[col]
         for j, col in mu_idx.items():
             duals['mu', j] = all_vals[col]
         for (j, t), col in nu_idx.items():
@@ -1004,6 +1056,10 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
             duals = {}
             for (i, j, t), col in dsp_data['lam_idx'].items():
                 duals['lambda', i, j, t] = all_vals[col]
+            # AUDIT-FIX(Claude-Fable 2026-06-10): extract depot-arc duals (see
+            # _solve_dsp_reuse for the full explanation of the cut-validity bug).
+            for (j, t), col in dsp_data['lam_depot_idx'].items():
+                duals['lambda_d', j, t] = all_vals[col]
             for j, col in dsp_data['mu_idx'].items():
                 duals['mu', j] = all_vals[col]
             for (j, t), col in dsp_data['nu_idx'].items():
@@ -1042,7 +1098,13 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         Convert Benders dual variables into a cplex.SparsePair + rhs.
 
         The cut is:
-            θ ≥ Σ_{i,j,t} (x_ij - 1) λ̄_ijt  - Σ_j c μ̄_j  + Σ_{j,t∈T_j} ν̄_jt
+            θ ≥ Σ_{i,j,t} (x_ij - 1) λ̄_ijt + Σ_{j,t} (x_dj - 1) λ̄d_jt
+                - Σ_j c μ̄_j  + Σ_{j,t∈T_j} ν̄_jt
+
+        AUDIT-FIX(Claude-Fable 2026-06-10): the depot-arc term Σ(x_dj-1)λ̄d_jt was
+        previously OMITTED.  Since it is ≤ 0, omitting it over-tightens the cut;
+        at degenerate DSP optima this cuts off true optimal solutions (witnessed:
+        verify_bbc_audit.py T3, 193 violations).  Now included.
 
         Rearranged as  θ - Σ coeff_ij x_ij ≥ cut_rhs :
 
@@ -1061,6 +1123,13 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
                         duals.get(('lambda', i, j, t), 0.0)
                         for t in range(self.n_tools)
                     )
+        # depot→job arcs (AUDIT-FIX): coeff for x_{d,j} from lam_depot duals
+        d = self.depot
+        for j in range(n):
+            coeff[d, j] = sum(
+                duals.get(('lambda_d', j, t), 0.0)
+                for t in range(self.n_tools)
+            )
 
         cut_rhs = 0.0
         for j in range(n):
@@ -1152,7 +1221,12 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
 
         # ── Extract CPLEX MIP stats ───────────────────────────────────────
         try:
-            dual_bound = self.cpx.solution.MIP.get_best_objval()
+            # AUDIT-FIX(Claude-Fable 2026-06-10): was get_best_objval, which does
+            # not exist in the CPLEX Python API (verified hasattr=False on 22.2);
+            # the except silently substituted the root LP bound, so reported
+            # dual_bound / mip_gap_pct were wrong whenever branching improved
+            # the bound. Correct name: get_best_objective.
+            dual_bound = self.cpx.solution.MIP.get_best_objective()
         except Exception:
             dual_bound = self.root_lp_bound
 

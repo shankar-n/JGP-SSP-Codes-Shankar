@@ -90,9 +90,22 @@ $\theta$ for the tool cost) and the tooling in a \emph{subproblem} solved by KTN
 Benders optimality cuts. The decisive structural feature --- and the reason BBC is
 attractive here --- is that \textbf{the subproblem is polynomial}, in contrast to the
 Dantzig--Wolfe/column-generation route of Part~II whose pricing subproblem is itself an
-NP-hard SSP. The integer (lazy) version is implemented and exact
-(\texttt{src/BBC/branch\_and\_benders\_cut\_cplex.py}); separating Benders cuts at
-\emph{fractional} master solutions is an open direction (\cref{sec:open}).
+NP-hard SSP.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): scope corrected. The earlier draft described
+%% only KTNS-based "no-good" cuts and claimed fractional separation was open. The
+%% implementation's DEFAULT is classical LP-duality Benders cuts from the dual (DSP) of
+%% an exact tooling LP; the KTNS no-good cut is the optional use_combinatorial_cuts
+%% mode; and fractional separation already exists in code (untested). Verified:
+%% tooling LP == compute_ktns on 60/60 random (instance, sequence) pairs, all LP optima
+%% integral (_verification/verify_bbc2.py).
+The implementation (\texttt{src/BBC/branch\_and\_benders\_cut\_cplex.py}) is exact and
+supports \emph{two} cut families: by default, classical \textbf{LP-duality Benders cuts}
+from the dual subproblem (DSP) of an exact tooling LP (\cref{sec:cuts}); optionally
+(\texttt{use\_combinatorial\_cuts}), the cheaper but weaker KTNS-based combinatorial cut
+(\cref{prop:cut}). Because the DSP is an LP whose feasible region does not depend on
+$x$, valid cuts exist at \emph{fractional} master points too; a relaxation-callback
+implementation exists but is untested --- the open questions are empirical
+(\cref{sec:open}).
 \end{mdframed}
 
 \vspace{0.3cm}
@@ -183,30 +196,73 @@ order the $n$ \emph{jobs}, where it is unproblematic and exact.
 \label{sec:cuts}
 % -----------------------------------------------------------------------------
 
-The subproblem has no linear-programming dual (KTNS is a combinatorial algorithm), so the
-cuts are \emph{logic-based} Benders cuts \cite{Vanderbeck2010}. Given an integer master
-incumbent with sequence $\sigma$, arc set $A(\sigma)=\{(i,j):x_{ij}=1\}$, evaluate
-$q=\KTNS(\sigma)$. If $\theta<q$ the incumbent is infeasible for the true cost and we add:
+%% TODO-VERIFY(Claude-Fable 2026-06-10): this section was rewritten. The earlier draft
+%% claimed "the subproblem has no LP dual (KTNS is a combinatorial algorithm)" --- FALSE:
+%% the tooling decision for a fixed (or fractional) x has an exact LP description, and
+%% the implementation's default cuts are precisely its LP dual (the DSP). The KTNS
+%% no-good cut is the optional secondary mode. Also fixed: an off-by-one in prop:cut
+%% (|A(sigma)| = n+1 for the depot cycle, not n; the CODE is correct).
+Although KTNS itself is a combinatorial algorithm, the tooling decision admits an exact
+\emph{linear program}: for nodes $J\cup\{0\}$, variables $y_{jt}\ge0$ (tool $t$ in the
+magazine at job $j$) and $z_{jt}\ge0$ (tool $t$ inserted at $j$), with
+\begin{align*}
+  \min\ \sum_{j\in J}\sum_{t\in T_j} z_{jt}\quad\text{s.t.}\quad
+  & y_{jt}-y_{it}-z_{jt}\ \le\ 1-x_{ij} && \forall i\ne j\in J,\ t\in T,\\
+  & y_{jt}-z_{jt}\ \le\ 1-x_{0j} && \forall j\in J,\ t\in T\ \ (y_{0t}\equiv0),\\
+  & \textstyle\sum_t y_{jt}\le b;\quad y_{jt}=1\ (t\in T_j);\quad z_{jt}=0\ (t\notin T_j).
+\end{align*}
+The depot rows with $y_{0t}\equiv0$ start the magazine \emph{empty} and break the
+wrap-around (no row for $j\to0$), so for an integer depot cycle $\bar x$ encoding
+$\sigma$ this LP equals the optimal number of insertions from an empty magazine ---
+verified to coincide with \texttt{compute\_ktns}$(\sigma)$, with \emph{integral} LP optima,
+on $60/60$ random pairs (\texttt{\_verification/verify\_bbc2.py}); the theoretical basis
+is the interval-matrix/TU integrality of the fixed-sequence tooling LP
+\cite{Crama1994,Catanzaro2015} (TODO: pin the exact theorem variant for these
+persistence constraints). Its dual is the \textbf{DSP} of the implementation
+(variables $\lambda_{ijt}\ge0$, $\mu_j\ge0$, $\nu_{jt}$ free, $\eta_{jt}$ free), with
+objective
+\[
+  \max\ \sum_{i\ne j,\,t}(\bar x_{ij}-1)\,\lambda_{ijt}\;-\;b\sum_j\mu_j\;+\;
+  \sum_{j}\sum_{t\in T_j}\nu_{jt}.
+\]
+Since $\bar x$ enters only the \emph{objective}, the dual feasible region is independent
+of $x$; weak duality therefore gives, for any dual-feasible
+$(\bar\lambda,\bar\mu,\bar\nu,\bar\eta)$, the \textbf{classical Benders optimality cut}
+\[
+  \theta\ \ge\ \sum_{i\ne j,\,t}(x_{ij}-1)\,\bar\lambda_{ijt}\;-\;b\sum_j\bar\mu_j\;+\;
+  \sum_{j}\sum_{t\in T_j}\bar\nu_{jt},
+\]
+valid for \emph{every} $x$ --- integer or fractional --- and tight at the incumbent
+$\bar x$ by strong duality. This is the default cut of the implementation
+(\texttt{\_build\_benders\_cut\_sparsepair}); it binds on a whole half-space of
+sequences, unlike the no-good cut below.
+
+\medskip
+The \emph{combinatorial} alternative (\texttt{use\_combinatorial\_cuts}): given an
+integer incumbent with sequence $\sigma$ and arc set
+$A(\sigma)=\{(i,j):\bar x_{ij}=1\}$ (the depot cycle, $|A(\sigma)|=n+1$), evaluate
+$q=\KTNS(\sigma)$; if $\theta<q$ add:
 
 \begin{thmbox}
 \begin{proposition}[Validity of the combinatorial optimality cut]
 \label{prop:cut}
-For the sequence $\sigma$ with $q=\KTNS(\sigma)$ and $|A(\sigma)|=n$ (a depot cycle), the
-inequality
+For the sequence $\sigma$ with $q=\KTNS(\sigma)$ and $|A(\sigma)|=n+1$ (the depot cycle),
+the inequality
 \[
   \theta \ \ge\ q\Bigl(1-\!\!\sum_{(i,j)\in A(\sigma)}\!\!\bigl(1-x_{ij}\bigr)\Bigr)
-  \;=\; q\Bigl(\textstyle\sum_{(i,j)\in A(\sigma)} x_{ij}-(n-1)\Bigr)
+  \;=\; q\Bigl(\textstyle\sum_{(i,j)\in A(\sigma)} x_{ij}-n\Bigr)
 \]
 is valid: it forces $\theta\ge q$ whenever the master reproduces $\sigma$ exactly, and is
-slack ($\le 0$ on the right) for every other sequence.
+slack ($\le 0$ on the right) for every other sequence. (This matches the implementation:
+\texttt{rhs} $=q\,(1-\texttt{n\_arcs})$ with $\texttt{n\_arcs}=n+1$.)
 \end{proposition}
 \end{thmbox}
 \begin{proofbox}
 \begin{proof}
-If $x$ reproduces $\sigma$ then $\sum_{(i,j)\in A(\sigma)}x_{ij}=n$, the right-hand side is
-$q$, and $\theta\ge q=\KTNS(\sigma)$ is exactly the subproblem optimum (\cref{thm:ktns}),
+If $x$ reproduces $\sigma$ then $\sum_{(i,j)\in A(\sigma)}x_{ij}=n+1$, the right-hand side
+is $q$, and $\theta\ge q=\KTNS(\sigma)$ is exactly the subproblem optimum (\cref{thm:ktns}),
 hence valid. If $x$ omits at least one arc of $\sigma$ then
-$\sum_{(i,j)\in A(\sigma)}x_{ij}\le n-1$, the right-hand side is $\le 0\le\theta$, so the cut
+$\sum_{(i,j)\in A(\sigma)}x_{ij}\le n$, the right-hand side is $\le 0\le\theta$, so the cut
 imposes nothing. No feasible sequence is wrongly excluded.
 \end{proof}
 \end{proofbox}
@@ -238,9 +294,12 @@ BBC is a single branch-and-bound tree on the master with a lazy-constraint callb
 \begin{enumerate}[label=(\alph*),leftmargin=2em]
 \item extract the sequence $\sigma\gets\sigma(x)$; if $x$ contains a subtour, add a subtour
   cut and reject;
-\item compute $q\gets \KTNS(\sigma)$ \ ($O(n|T|)$, exact by \cref{thm:ktns});
-\item if $\theta<q$, add the optimality cut of \cref{prop:cut} (lifted if possible) and
-  reject the incumbent;
+\item \textbf{default:} solve the DSP at $\bar x$ (an LP; one model per thread, objective
+  coefficients updated per call), obtaining value $q$ and duals
+  $(\bar\lambda,\bar\mu,\bar\nu,\bar\eta)$; \ \textbf{option:} $q\gets\KTNS(\sigma)$
+  ($O(n|T|)$, exact by \cref{thm:ktns});
+\item if $\theta<q$, add the classical dual cut (default) or the cut of \cref{prop:cut}
+  (combinatorial mode) and reject the incumbent;
 \item otherwise accept it --- a genuine optimal-tooling schedule of cost $q=\theta$.
 \end{enumerate}
 \item Continue until the tree is exhausted; return the incumbent, of cost $\ZSSP$.
@@ -255,12 +314,17 @@ The integer-cut BBC of \cref{sec:algo} terminates and returns $\ZSSP$.
 \end{thmbox}
 \begin{proofbox}
 \begin{proof}
-Every accepted incumbent satisfies $\theta=q=\KTNS(\sigma)$, hence corresponds to a real
-schedule of cost $\theta$; thus the returned value is $\ge\ZSSP$. Conversely the cuts of
-\cref{prop:cut} never remove a sequence's true cost (they are valid, \cref{prop:cut}), so the
-master remains a relaxation and its optimum is $\le\ZSSP$. Finiteness: there are finitely
-many sequences; each rejected incumbent adds a cut that forbids re-accepting that sequence
-with too small a $\theta$, so no sequence is rejected twice for the same reason.
+Every accepted incumbent satisfies $\theta\ge q$, where $q$ is the true tooling optimum of
+$\sigma$: in combinatorial mode $q=\KTNS(\sigma)$ by \cref{thm:ktns}; in default mode $q$
+is the DSP value, which equals the tooling LP value by strong duality and hence the
+integer tooling optimum by the integrality of the tooling LP at Hamiltonian $\bar x$
+(\cref{sec:cuts}; numerically confirmed). Thus the returned value is attainable and
+$\ge\ZSSP$. Conversely both cut families are valid for every $x$ --- the dual cut by weak
+duality (the dual feasible set does not depend on $x$), the combinatorial cut by
+\cref{prop:cut} --- so the master remains a relaxation and its optimum is $\le\ZSSP$.
+Finiteness: there are finitely many sequences; each rejection adds a cut that is tight at
+the rejected $(\bar x,\theta)$ and enforces $\theta\ge q$ there permanently, so no
+sequence is rejected twice.
 \end{proof}
 \end{proofbox}
 
@@ -277,15 +341,16 @@ with too small a $\theta$, so no sequence is rejected twice for the same reason.
 \midrule
 Compact ILP (Part I) & --- & --- & yes (weak LP) \\
 DW / column generation (Part II) & pricing (set-union knapsack / SSP) & \textbf{NP-hard} & yes \\
-Cluster-MTZ (Part IV) & --- & --- & \emph{conditional} (exchange arg.) \\
+Cluster-MTZ (Part IV) & --- & --- & \textbf{no} (settled; per-config MTZ exact) \\
 \textbf{Branch-and-Benders (this Part)} & tooling via KTNS & \textbf{poly $O(n|T|)$} & yes \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 BBC is the only route here whose subproblem is provably polynomial and whose exactness is
-unconditional. Its weakness is dual: the logic-based cuts can be weak, so the master bound
-may improve slowly without lifting. This is the mirror image of Part~IV (cheap polynomial
+unconditional. Its weakness: cuts are separated only at integer incumbents (until
+fractional separation is validated), so the node LP bound may improve slowly; the
+combinatorial cuts in particular bind on single sequences. This is the mirror image of Part~IV (cheap polynomial
 constraints, but a conditional/heuristic model) and of Part~II (a strong LP bound, but an
 NP-hard subproblem).
 
@@ -295,16 +360,24 @@ NP-hard subproblem).
 % -----------------------------------------------------------------------------
 
 \begin{openproblem}
-\textbf{OP (fractional Benders cuts; cf.\ \texttt{09\_open\_problems.tex}, OP\,8).} The implemented BBC separates cuts
-only at \emph{integer} incumbents, so the LP relaxation at a node is bounded only by the
-pairwise inequality \eqref{eq:m_pair} plus previously added integer cuts. Develop a
-separation that produces a \emph{valid} cut at a \emph{fractional} master point
-$\bar x$ --- e.g.\ from a relaxation of the KTNS recursion (a min-cost-flow / interval-matrix
-lower bound on the tooling cost as a function of fractional arc usage), or from the totally
-unimodular tooling LP of Catanzaro et al.\ for fixed-support sequences. Such user cuts would
-tighten the bound \emph{before} branching and are the most promising avenue for scaling BBC
-beyond the sizes the integer-cut version reaches. Whether a polynomially separable family of
-fractional Benders cuts exists for the KTNS subproblem is open.
+\textbf{OP (fractional Benders cuts; cf.\ \texttt{09\_open\_problems.tex}, OP\,8).}
+%% TODO-VERIFY(Claude-Fable 2026-06-10): rewritten. The earlier text claimed the
+%% EXISTENCE of fractional cuts was open; in fact the DSP cut is already valid at
+%% fractional x-bar (dual feasible set independent of x), and _handle_relaxation
+%% implements exactly this (untested). The open questions are empirical/structural.
+Fractional separation \emph{exists} canonically: the DSP cut of \cref{sec:cuts} is valid
+at any fractional $\bar x$, and the relaxation handler
+(\texttt{use\_fractional\_cuts}, \texttt{\_handle\_relaxation}) implements it ---
+\emph{untested} (it requires presolve off and the thread-safe worker-LP-reuse pattern of
+\texttt{bendersatsp2.py}). The open questions are: (i)~\emph{empirical} --- does
+fractional separation pay on the Catanzaro Tabela1C benchmarks (bound improvement vs.\
+node-LP cost, cut management)? (ii)~\emph{structural} --- the DSP value at fractional
+$\bar x$ may be a weak bound; characterise its strength against the SSPMF root bound
+$|U|-b$, and search for \emph{stronger} polynomially separable families (e.g.\ from a
+min-cost-flow relaxation of the KTNS recursion, or lifted combinatorial cuts over
+order-critical arc subsets $S\subseteq A(\sigma)$); (iii)~\emph{triplet bounds}
+$w_{ijk}=\max(0,|T_i\cup T_j\cup T_k|-b)$ on consecutive triplets as static root
+strengthening. These are the practical levers for scaling BBC.
 \end{openproblem}
 
 \begin{remark}[Relation to the gap analysis]
@@ -322,9 +395,43 @@ inequality to strengthen the root.
 
 The CPLEX implementation is \texttt{src/BBC/branch\_and\_benders\_cut\_cplex.py} (public API
 in \texttt{branch\_and\_benders\_cut.py}; shared subtour/sequence/KTNS utilities in
-\texttt{bbc\_common.py}). The KTNS evaluation and subtour detection are in the lazy callback;
-the dummy depot gives the free initial load, so the reported objective is the number of
-inter-job switches (consistent with the convention of Parts~I and~V). Comparison baselines
+\texttt{bbc\_common.py}). Subtour detection and cut separation run in the lazy callback.
+
+\begin{warnbox}
+\textbf{Objective convention (corrected).}
+%% TODO-VERIFY(Claude-Fable 2026-06-10): the earlier claim "the dummy depot gives the
+%% free initial load, so the reported objective is the number of inter-job switches"
+%% is WRONG: the DSP forces y_{0t}=0 (EMPTY depot magazine), so theta counts ALL
+%% insertions including the first job's load; compute_ktns (used by the combinatorial
+%% mode) starts from an empty magazine too --- the two modes are mutually CONSISTENT,
+%% verified LP==compute_ktns 60/60 (_verification/verify_bbc2.py).
+The DSP enforces an \emph{empty} depot magazine ($y_{0t}=0$), so the BBC objective counts
+\emph{all} insertions, including the first job's load --- the empty-start convention, not
+the free-initial-load convention of Parts~I and~V. The two are equivalent up to a
+\emph{sequence-independent} constant: by the cost identity of Part~V
+(\texttt{05}, Lemma ``Cost identity''), empty-start cost $=$ free-initial cost
+$+\min(b,|U|)$ for every sequence, since exactly $\min(b,|U|)$ first-time insertions are
+absorbed by a free initial fill. Hence the \emph{argmin is unaffected} and BBC is exact in
+both conventions, but reported objectives must be shifted by $\min(b,|U|)$ when compared
+against free-initial baselines.
+%% TODO-VERIFY(Claude-Fable 2026-06-10, second audit): the action item below is now
+%% RESOLVED by reading all models: cell 6b applies NO adjustment and needs none ---
+%% BBC, repo-LSS (y[0,t]=0), repo-SSPMF (k=0 charges all required tools), and
+%% precompute_jgp_gsp.py (compute_ktns) are ALL empty-start and mutually consistent.
+\textbf{Verified consistency (second audit):} the cell-6b comparison and the entire
+benchmark pipeline (including the JGP$+$GSP precompute) use the empty-start convention
+uniformly, so the cross-solver tables and the \emph{gap} columns are correct as-is
+(gaps are convention-invariant). What is \emph{not} invariant is the \emph{ratio}:
+$H/\ZSSP$ computed from benchmark CSVs is deflated by the common shift and must be
+converted (subtract $\min(b,|U|)$ from both) before comparison with the free-initial
+theory of Part~V. Two external caveats remain: the GTSP reference solver (notebook
+cell~6) is free-initial, so its objective differs from the cell-6b table by exactly
+$\min(b,|U|)$; and the \emph{published} conventions of Laporte (2004) and da Silva
+(2024) should be verified before quoting their tables against repo numbers (the repo
+implementations force an empty depot magazine, which may deviate from the papers).
+\end{warnbox}
+
+\noindent Comparison baselines
 (LSS, SSPMF) are in \texttt{lss\_formulation.py} and \texttt{sspmf\_formulation.py}.
 
 \bibliographystyle{abbrvnat}

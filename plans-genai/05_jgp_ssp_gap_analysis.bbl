@@ -26,11 +26,12 @@ G.~Cornu{\'e}jols.
 \newblock Number~74 in CBMS-NSF Regional Conference Series in Applied
   Mathematics. SIAM, 2001.
 
-\bibitem[Crama et~al.(1994)Crama, Kolen, Oerlemans, and Spieksma]{Crama1994}
-Y.~Crama, A.~W.~J. Kolen, A.~G. Oerlemans, and F.~C.~R. Spieksma.
-\newblock Minimizing the number of tool switches on a flexible machine.
-\newblock \emph{International Journal of Flexible Manufacturing Systems},
-  6\penalty0 (1):\penalty0 33--54, 1994.
+\bibitem[Crama and Oerlemans(1994)]{Crama1994Column}
+Y.~Crama and A.~G. Oerlemans.
+\newblock A column generation approach to job grouping for flexible
+  manufacturing systems.
+\newblock \emph{European Journal of Operational Research}, 78\penalty0
+  (1):\penalty0 58--80, 1994.
 
 \bibitem[da~Silva and Yanasse(2024)]{daSilva2024}
 A.~A.~C. da~Silva and H.~H. Yanasse.

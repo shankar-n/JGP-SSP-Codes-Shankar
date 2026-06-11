@@ -137,7 +137,10 @@ A set of jobs $G\subseteq J$ is \emph{feasible} if all its tools fit simultaneou
 $\bigl|\bigcup_{j\in G}T_j\bigr|\le b$.
 \end{definition}
 
-\begin{definition}[JGP as set covering/partitioning \cite{Crama1994,Catanzaro2015}]
+%% TODO-VERIFY(Claude-Fable 2026-06-10): citation corrected. The job GROUPING problem is
+%% the subject of Crama & Oerlemans (Crama1994Column), not of the tool-SWITCHING paper
+%% Crama1994 (whose conclusion explicitly notes the LACK of grouping-type bounds).
+\begin{definition}[JGP as set covering/partitioning \cite{Crama1994Column,Catanzaro2015}]
 Let $\mathcal{S}$ be the family of feasible groups and $y_G\in\{0,1\}$. The JGP is
 \[
   \ZJGP=\min\Bigl\{\textstyle\sum_{G\in\mathcal{S}}y_G:\
@@ -148,7 +151,11 @@ $\Kstar=\ZJGP$.
 \end{definition}
 
 \begin{remark}[Hardness and exact solution]
-The JGP is NP-hard \cite{Crama1994}. It is solved exactly by the ARF MILP of
+The JGP is NP-hard \cite{Crama1994Column}.
+%% TODO-VERIFY(Claude-Fable 2026-06-10): cite changed from Crama1994 (SSP paper, which
+%% does not treat JGP hardness) to Crama1994Column. Confirm the NP-hardness theorem is
+%% actually stated there (it may itself cite an earlier source).
+It is solved exactly by the ARF MILP of
 Catanzaro et al.\ \cite{Catanzaro2015} and by Branch-and-Price \cite{Otiai2024}; the
 pricing subproblem generates maximal feasible groups (a set-union knapsack).
 \end{remark}
@@ -238,7 +245,12 @@ formula is exact.
 Two elementary but distinct lower bounds control $\ZSSP$. Both are used repeatedly.
 
 \begin{thmbox}
-\begin{theorem}[Grouping lower bound \cite{Crama1994}]
+%% TODO-VERIFY(Claude-Fable 2026-06-10): attribution to Crama1994 removed --- that
+%% paper's conclusion explicitly states tight lower bounds were NOT available, and a
+%% pdftotext search finds no K*-1 bound in it. Candidate true sources: Tang & Denardo
+%% 1988 Part II (minimisation of switching instants) or Burger et al. 2015 (printing2);
+%% locate before citing externally. The proof below is self-contained.
+\begin{theorem}[Grouping lower bound]
 \label{thm:lb_k}
 $\ZSSP\ge \Kstar-1.$
 \end{theorem}
@@ -269,7 +281,9 @@ insertion. Therefore the number of insertions is at least $|U|-b$.
 \begin{remark}[Relation to the SSPMF bound]
 \label{rem:msc}
 $|U|-b$ is exactly the $M-C$ linear-programming lower bound of the multicommodity-flow
-formulation (SSPMF) of da Silva et al.\ \cite{daSilva2024} ($M=|U|$ tools, $C=b$ capacity);
+formulation (SSPMF) of da Silva et al.\ \cite{daSilva2024} ($M=|U|$ tools, $C=b$ capacity
+--- the identification $M=|U|$ assumes every tool is required by some job, w.l.o.g.\ after
+deleting unused tools);
 \cref{thm:lb_tools} gives the elementary combinatorial proof. Combining the two bounds,
 \[
   \boxed{\ \ZSSP\ \ge\ \max\bigl(\Kstar-1,\ |U|-b\bigr).\ }
@@ -277,7 +291,9 @@ formulation (SSPMF) of da Silva et al.\ \cite{daSilva2024} ($M=|U|$ tools, $C=b$
 \end{remark}
 
 \begin{thmbox}
-\begin{theorem}[Grouping upper bound \cite{Crama1994}]
+%% TODO-VERIFY(Claude-Fable 2026-06-10): same attribution issue as thm:lb_k; cite
+%% removed pending a verified source. Proof below is self-contained.
+\begin{theorem}[Grouping upper bound]
 \label{thm:ub}
 $\ZSSP\le b\,(\Kstar-1).$
 \end{theorem}
@@ -521,7 +537,9 @@ supremum $4/3$ at $g=1$.
 \item Rings of length $k=6,7,8$ give ratios $4/3,\,5/4,\,6/5$; shorter rings have gap $0$.
 \end{itemize}
 No $b=3$ instance with ratio $>4/3$ is known. A proof (or refutation) is the main open
-problem of this note. For $b\ge4$ the extremal ratio is \emph{not} bounded by $4/3$: a
+problem of this note; \cref{sec:generalb} gives a general-$b$ programme (unconditional
+bound \cref{thm:uncond}, conjecture \cref{conj:gapK}, and a conditional route to $4/3$,
+\cref{prop:43route}). For $b\ge4$ the extremal ratio is \emph{not} bounded by $4/3$: a
 broadened search reaches (exactly) $4/3$ at $b=4$ and $3/2$ at $b=5$, so $\sup_I H/\ZSSP$
 appears to grow with $b$ --- the $4/3$ bound is a $b=3$ phenomenon.
 \end{openproblem}
@@ -566,14 +584,28 @@ i.e.\ precisely the penalty for restricting the heuristic to JGP-\emph{optimal}
 ($\le$) Any feasible grouping together with a GSP ordering and one configuration per group
 is a feasible SSP schedule of cost $\mathrm{GTSP}(\mathcal{G})$, so
 $\ZSSP\le\min_{\mathcal{G}}\mathrm{GTSP}(\mathcal{G})$.
-($\ge$) Let $\sigma$ be an optimal SSP schedule and $C_{(1)},\dots,C_{(m)}$ the distinct
-full configurations visited by its KTNS trajectory, in order of first use. Assign each job
-to the configuration that is loaded while it is processed; the jobs assigned to $C_{(i)}$
-have tool union contained in $C_{(i)}$, hence form a feasible group, and these groups
-partition $J$. The configurations $C_{(1)},\dots,C_{(m)}$ in order constitute a GTSP path
-over this grouping of cost exactly $\ZSSP$, so
-$\min_{\mathcal{G}}\mathrm{GTSP}(\mathcal{G})\le\ZSSP$. Equality follows. (Confirmed on
-$1306$ instances with no exception; \texttt{plans-genai/\_verification/study\_op.py}.)
+($\ge$)
+%% TODO-VERIFY(Claude-Fable 2026-06-10): proof repaired. The earlier argument took the
+%% distinct configurations "in order of first use", which is wrong when the optimal
+%% trajectory REVISITS a configuration (the first-use path then has different cost) or
+%% passes through a configuration serving NO job (which has no group, so the sequence is
+%% not a GTSP path over the constructed grouping). Fixed via the normal-form reduction,
+%% as in Part IV (04_mtz_formulation.tex, Lemma "Normal form of optimal schedules").
+Let $\sigma$ be an optimal SSP schedule with full-magazine trajectory $M_1,\dots,M_n$
+(one state per job; full w.l.o.g.). Bring it into \emph{normal form}: collapse consecutive
+equal states; if a configuration recurs at a later, non-consecutive visit, reassign the
+jobs served there to its first visit (the configuration is identical) and delete the later
+visit, joining its neighbours $X\to C\to Y$ into $X\to Y$ --- by the triangle inequality
+$|Y\setminus X|\le|C\setminus X|+|Y\setminus C|$ the cost does not increase; delete any
+state serving no job by the same shortcut. The result is a sequence of pairwise-distinct
+configurations $C_{(1)},\dots,C_{(m)}$, each serving at least one job; it is itself a
+feasible schedule of cost $\le\ZSSP$, hence exactly $\ZSSP$ by optimality. Assign each job
+to the configuration serving it: the jobs of $C_{(i)}$ have tool union contained in
+$C_{(i)}$, hence form a feasible group, and these groups partition $J$. The configurations
+$C_{(1)},\dots,C_{(m)}$ in order constitute a GTSP path over this grouping of cost exactly
+$\ZSSP$, so $\min_{\mathcal{G}}\mathrm{GTSP}(\mathcal{G})\le\ZSSP$. Equality follows.
+(Confirmed on $1306$ instances with no exception;
+\texttt{plans-genai/\_verification/study\_op.py}.)
 \end{proof}
 \end{proofbox}
 
@@ -617,7 +649,8 @@ $H\le |U|-b\le\ZSSP\le H$ by \cref{thm:lb_tools} and $H\ge\ZSSP$.
 \begin{remark}[Verified picture for $b=3$]
 Across the $10691$-instance edge family, every zero-gap instance meets one of the two
 bounds (the heuristic GTSP cost equals $\max(\Kstar-1,|U|-b)$), and every positive-gap
-instance has $\Kstar=3$. So $\Kstar\le2$ already forces $\mathrm{gap}=0$ in this family.
+instance has $\Kstar=3$. So $\Kstar\le2$ already forces $\mathrm{gap}=0$ in this family
+(now a theorem for all instances and all $b$: \cref{cor:K2}).
 A full structural characterisation of the zero-gap set (a necessary-and-sufficient
 condition) is open.
 \end{remark}
@@ -665,6 +698,196 @@ otherwise loses. The right object to optimise is therefore not $\ZJGP$ but the j
 (grouping, GSP) cost; this is the subject of Part~VI
 (\texttt{06\_grouping\_selection.tex}).
 \end{remark}
+
+% =============================================================================
+\section{General-$b$ Bounds on the Ratio}
+\label{sec:generalb}
+% =============================================================================
+
+%% TODO-VERIFY(Claude-Fable 2026-06-10): this section is NEW (written to address the
+%% open problem for general b). All "Theorem/Lemma/Corollary" claims carry full proofs
+%% and were additionally machine-checked on ~1380 instances
+%% (_verification/verify_ratio_section.py); the Conjecture is clearly marked as such.
+
+Throughout this section $m=|U|$, $q=m-b$, and $K^{*}\ge2$ (the case $\Kstar=1$ is
+trivial, $H=\ZSSP=0$). Recall $\ZSSP\ge\max(\Kstar-1,\,q)$ (\cref{rem:msc}).
+
+\subsection{The cost identity and re-insertions}
+
+\begin{thmbox}
+\begin{lemma}[Cost identity]
+\label{lem:costid}
+W.l.o.g.\ every magazine state of a full-magazine schedule (and every GSP configuration)
+is a subset of $U$ (pad within $U$; possible since $m\ge b$ when $\Kstar\ge2$). Then the
+cost of any such schedule equals
+\[
+  \mathrm{cost} \;=\; (m-b)\;+\;R,
+\]
+where $R\ge0$ counts the \emph{re-insertions}: insertions of tools previously present and
+evicted (including evicted tools of the free initial load).
+\end{lemma}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+The initial load holds $b$ tools of $U$ for free. Each of the remaining $m-b$ tools of
+$U$ is required by some job, hence inserted at least once. Splitting the total insertions
+into first-time insertions (exactly $m-b$) and all others (by definition $R$) gives the
+identity.
+\end{proof}
+\end{proofbox}
+
+\noindent Consequently $\ZSSP=q+R_{\mathrm{opt}}$ and $H=q+R_{H}$, so
+$\mathrm{gap}=R_{H}-R_{\mathrm{opt}}$: \emph{the gap is exactly the excess re-insertions
+forced by the $\Kstar$-grouping}. This makes the bridge mechanism of \cref{def:bridge}
+quantitative.
+
+\subsection{Unconditional bounds}
+
+\begin{thmbox}
+\begin{lemma}[Transition cap]
+\label{lem:transcap}
+In any GSP path with configurations $\subseteq U$, every transition costs
+$|C_{k+1}\setminus C_k|\le\min(b,\,q)$. Hence
+$H\le(\Kstar-1)\cdot\min(b,\,q)$.
+\end{lemma}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+$|C_{k+1}\setminus C_k|\le|C_{k+1}|=b$ and
+$|C_{k+1}\setminus C_k|\le|U\setminus C_k|=m-b=q$ since $C_{k+1}\subseteq U$ and
+$|C_k|=b$. A covering configuration within $U$ exists for every group, so the heuristic
+may be restricted to such configurations w.l.o.g.
+\end{proof}
+\end{proofbox}
+
+\begin{thmbox}
+\begin{theorem}[Unconditional ratio bound]
+\label{thm:uncond}
+For every uniform-SSP instance with $\Kstar\ge2$,
+\[
+  \frac{H}{\ZSSP}\ \le\ \frac{(\Kstar-1)\min(b,q)}{\max(\Kstar-1,\,q)}
+  \ \le\ \min\bigl(b,\ \Kstar-1,\ q\bigr).
+\]
+\end{theorem}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+$\ZSSP\ge\max(\Kstar-1,q)\ge1$, so divide \cref{lem:transcap} by it. For the second
+inequality: $(\Kstar-1)\,q/\max(\Kstar-1,q)=\min(\Kstar-1,q)$ exactly, and
+$\min(b,q)\le q$ gives the $\min(\Kstar-1,q)$ part, while
+$(\Kstar-1)/\max(\Kstar-1,q)\le1$ and $\min(b,q)\le b$ give the $b$ part.
+\end{proof}
+\end{proofbox}
+
+\begin{thmbox}
+\begin{corollary}[Zero-gap classes, all $b$]
+\label{cor:K2}
+(i) If $\Kstar=2$ then $\mathrm{gap}=0$ (the ratio bound is $\le\Kstar-1=1$); in fact
+$H=\ZSSP=m-b$, attained by padding $C_1$ with tools of $T^{(2)}$ and $C_2$ with tools of
+$C_1$. (ii) If $m\le b+1$ then $\mathrm{gap}=0$. (iii) If $\Kstar=3$ then $H/\ZSSP\le2$.
+\end{corollary}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+All three are instances of \cref{thm:uncond} ($\Kstar-1=1$; $q\le1$; $\Kstar-1=2$).
+For the explicit construction in (i): $C_1=T^{(1)}\cup P$ with
+$P\subseteq T^{(2)}\setminus T^{(1)}$, $|P|=b-|T^{(1)}|$ (possible since $m\ge b$), and
+$C_2=T^{(2)}\cup(\text{pad from }C_1)$; then $|C_2\setminus C_1|=|T^{(2)}\setminus C_1|
+=(m-|T^{(1)}|)-(b-|T^{(1)}|)=m-b\le\ZSSP\le H$.
+\end{proof}
+\end{proofbox}
+
+\begin{remark}
+\cref{cor:K2}(i) upgrades the empirical observation of \cref{sec:zerogap} (``$\Kstar\le2$
+forces $\mathrm{gap}=0$ in the $b=3$ edge family'') to a theorem for \emph{all} instances
+and \emph{all} $b$. Worst cases therefore require $\Kstar\ge3$, consistent with every
+positive-gap instance found so far having $\Kstar\in\{3,4\}$.
+\end{remark}
+
+\subsection{The excess re-insertion conjecture}
+
+All known extremal instances satisfy a much stronger bound than \cref{thm:uncond}, with
+\emph{equality}:
+
+\begin{thmbox}
+\begin{conjecture}[Excess re-insertions; generalises the $\Kstar{=}3$, $b{=}3$ conjecture]
+\label{conj:gapK}
+For every uniform-SSP instance with $\Kstar\ge2$,
+\[
+  \mathrm{gap}\;=\;H-\ZSSP\;\le\;\Kstar-2 .
+\]
+\end{conjecture}
+\end{thmbox}
+
+\begin{openproblem}
+\textbf{Evidence for \cref{conj:gapK}.}
+$\Kstar=2$ is \emph{proved} (\cref{cor:K2}). Every known extremal witness attains the
+bound with equality: the $6$-ring ($\Kstar{=}3$, $\mathrm{gap}{=}1$), the $b{=}4$ witness
+($\Kstar{=}3$, $\mathrm{gap}{=}1$), the $b{=}5$ witness ($\Kstar{=}4$, $\mathrm{gap}{=}2$);
+the $g$-copy family has $\mathrm{gap}=g\le3g-2$. No violation in $\sim\!1380$ instances
+($b\in\{2,3,4\}$, mixed job sizes; \texttt{\_verification/verify\_ratio\_section.py}),
+nor anywhere in the earlier exhaustive searches. The first open case is $\Kstar=3$ for
+general $b$: $\mathrm{gap}\le1$.
+\end{openproblem}
+
+\begin{thmbox}
+\begin{proposition}[Consequences of \cref{conj:gapK}]
+\label{prop:conj_consequences}
+If \cref{conj:gapK} holds, then for every instance and every $b$:
+\[
+  \frac{H}{\ZSSP}\ \le\ 1+\frac{\Kstar-2}{\max(\Kstar-1,\,q)}
+  \ \le\ 2-\frac{1}{\Kstar-1}\ <\ 2 ,
+\]
+i.e.\ the JGP\,+\,GSP heuristic is a $(2-\varepsilon)$-approximation \emph{universally in
+$b$}. Moreover all known extremal witnesses have $q=\Kstar$ and
+$\mathrm{gap}=\Kstar-2$, where the first bound evaluates to $2-2/\Kstar$ ---
+reproducing exactly the observed extremal ratios $4/3$ ($\Kstar{=}3$) and
+$3/2$ ($\Kstar{=}4$).
+\end{proposition}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+Divide $H\le\ZSSP+\Kstar-2$ by $\ZSSP\ge\max(\Kstar-1,q)$; the second inequality takes
+$q\ge1$. At $q=\Kstar$: $1+(\Kstar-2)/\Kstar=2-2/\Kstar$.
+\end{proof}
+\end{proofbox}
+
+\begin{thmbox}
+\begin{proposition}[A route to the $4/3$ conjecture]
+\label{prop:43route}
+Assume (a) \cref{conj:gapK}, and (b) every positive-gap $b=3$ instance has $\Kstar=3$ and
+$\ZSSP\ge3$ (verified exhaustively on the $10691$-instance edge family, where positive gap
+forces $\Kstar=3$, $|U|=6$, $\ZSSP=3$; open in general). Then \cref{conj:ratio} holds:
+$H/\ZSSP\le4/3$ for $b=3$.
+\end{proposition}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+Zero-gap instances have ratio $1$. For a positive-gap instance, (a) and (b) give
+$\mathrm{gap}\le\Kstar-2=1$ and $H/\ZSSP=1+\mathrm{gap}/\ZSSP\le1+1/3=4/3$.
+\end{proof}
+\end{proofbox}
+
+\begin{openproblem}
+\textbf{Open problems raised by this section.}
+\begin{itemize}
+\item \emph{Prove \cref{conj:gapK}}, starting with $\Kstar=3$ (claim: $\mathrm{gap}\le1$
+for \emph{all} $b$). By \cref{lem:costid} this says: some JGP-optimal grouping and order
+forces at most $\Kstar-2$ more re-insertions than the SSP optimum.
+\item \emph{Achievability of ratio $2$.} \cref{prop:conj_consequences} caps the ratio at
+$2-1/(\Kstar-1)$; approaching $2$ needs $\Kstar\to\infty$ with $q\approx\Kstar-1$ and
+near-maximal gap \emph{simultaneously}. The $g$-copy construction fails: its tools
+decouple, $\ZSSP$ grows linearly per copy, and the ratio \emph{decreases} to $7/6$. A
+family with a \emph{shared} bridge structure across unboundedly many groups (or a proof
+that none exists, yielding a bound strictly below $2$) would settle
+$\sup_{b}\sup_{I}H/\ZSSP$.
+\item \emph{The per-$b$ extremal curve.} Known suprema: $4/3$ ($b{=}3$), $\ge4/3$
+($b{=}4$), $\ge3/2$ ($b{=}5$), all of the form $2-2/\Kstar$ at witnesses with
+$q=\Kstar$. Determine $\sup_I H/\ZSSP$ as a function of $b$; in particular whether
+$q=\Kstar-1$ extremal instances (which would give the larger value $2-1/(\Kstar-1)$)
+exist for any $b$.
+\end{itemize}
+\end{openproblem}
 
 % =============================================================================
 \section{Conflict-Graph Structure: What It Does and Does Not Predict}
@@ -736,4 +959,5 @@ natural primal bounds to seed any of these solvers.
 \bibliographystyle{abbrvnat}
 \bibliography{references}
 % =============================================================================
+% Revision note: verified and corrected by Claude-Fable on 2026-06-10; see TODO-VERIFY tags.
 \end{document}

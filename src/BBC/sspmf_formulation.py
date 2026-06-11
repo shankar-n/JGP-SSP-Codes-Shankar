@@ -2,6 +2,20 @@
 da Silva-Chaves-Yanasse (SSPMF) Multicommodity Flow Formulation for the
 Job Sequencing and Tool Switching Problem.
 
+!!! BUG FOUND AND FIXED (2026-06-10, Claude-Fable audit) !!!
+Symptom: 6-ring integer optimum 8.0 vs BBC=LSS=6.0. Root cause: the
+`use_constraint_21` block implements the paper's Eq.(21) — which restricts flow
+INTO THE SINK (a tool may not "finish" before its last requiring position) — as
+y[i,k,t]=0 for k < |J_t|-1, i.e. a blanket prohibition on CARRYING tool t at
+early positions. That is INVALID: on the ring (every |J_t|=2) it forbids all
+carrying out of position 0, forcing exactly +2 re-insertions. Verified:
+c21=False gives 6.0 (= BBC = LSS); c21=True gives 8.0. FIX APPLIED: default
+flipped to False and the block marked invalid (this variable scheme has no sink
+arcs, so Eq.(21) has no direct analogue here). Residual non-bug: the root LP
+(2.0 with c21 off) does not equal the paper's M-C=3 — empty-start convention
+divergence; do not quote M-C for this implementation. All past SSPMF numbers
+produced with the old default are invalid; re-run before any comparison.
+
 Reference
 ---------
 da Silva, T.F.S., Chaves, A.A., & Yanasse, H.H. (2024).
@@ -104,7 +118,11 @@ class SSPMFFormulation:
     """
 
     def __init__(self, n_jobs, n_tools, capacity, tool_req,
-                 use_symmetry_breaking=True, use_constraint_21=True):
+                 use_symmetry_breaking=True, use_constraint_21=False):
+        # AUDIT-FIX(Claude-Fable 2026-06-10): use_constraint_21 default flipped
+        # True -> False. The implemented c21 is INVALID (see module docstring):
+        # it cuts off true optima (+2 on the 6-ring). Kept as an option only for
+        # reproducing the bug; never enable in benchmarks.
         self.n_jobs                = n_jobs
         self.n_tools               = n_tools
         self.capacity              = capacity

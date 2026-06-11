@@ -130,3 +130,47 @@ k : Z*  H  K*  gap  ratio
 - CONSEQUENCE for column generation: do NOT use cluster-aggregated MTZ. Use either
   (a) per-CONFIGURATION MTZ u_C - u_{C'} + N x_{CC'} <= N-1 (standard, exact), or
   (b) lazy SEC/PCTSP cuts (Part II, exact). The BBC job-indexed MTZ (Part VIII) is fine.
+
+## ============ VERIFICATION CAMPAIGN (2026-06-10, Claude-Fable session) ============
+All scripts below live in this folder; every doc/code change is flagged %% TODO-VERIFY.
+- Per-configuration MTZ EXACTNESS PROVED (Part IV thm:perconfig); numerics: covering-walk
+  optimum == ssp_opt on 397/397 random instances (verify_mtz_doc.py CHECK2).
+  Cluster-MTZ ILP additionally UNSOUND as written (parasitic cycles fake coverage,
+  CHECK4) and coverage rows must sum over V+ (CHECK1: OMTZ=2 only under V+ semantics).
+  Aggregate Desrochers-Laporte lifting INVALID (CHECK3 counterexample).
+- Gap doc (05): proofs repaired (grouping-exactness revisits/job-less configs);
+  rings k=3..8, 18 ring partitions, subopt path, retraction triple all re-verified
+  (verify_gap_doc.py). NEW general-b section: PROVED ratio <= min(b, K*-1, |U|-b);
+  K*<=2 => gap=0 (all b); CONJECTURE gap <= K*-2 (OP11): 0 violations in ~1380
+  instances (verify_ratio_section.py); all extremal witnesses attain equality.
+- BBC code audit: Benders cut OMITTED depot-arc duals lambda_d -> over-tight cuts;
+  193 invalid-cut witnesses via degenerate-vertex construction (verify_bbc_audit.py
+  T3). FIXED in branch_and_benders_cut_cplex.py + bbc_common.py.
+  >>> RE-RUN all benchmarks predating 2026-06-10; archive raw_results.csv first
+  (benchmark_runner RESUMES and would keep stale rows). <<<
+  DSP verified exact: tooling LP == compute_ktns 60/60, integral (verify_bbc2.py).
+- CONVENTIONS: BBC / repo-LSS / repo-SSPMF / compute_ktns / precompute_jgp_gsp are
+  all EMPTY-START; GTSP reference (cell 6) and ALL plans-genai numbers are
+  FREE-INITIAL. Identity: empty_start = free_initial + min(b,|U|) per sequence.
+  Gaps are convention-invariant; RATIOS are NOT (convert before comparing to 4/3
+  or gap<=K*-2 theory). Published Laporte/da Silva conventions still unverified.
+- Part X (10_position_formulations.tex): PCF exact, plain LP == 0 (proved; verified
+  verify_posform.py), counting rows give LP == |U|-b exactly on all tests; PTF exact,
+  LP STRICTLY EXCEEDS |U|-b on an above-both-bounds instance (2.10 vs 2) and is
+  tight (=Z*=3) on the 6-ring (verify_posform_f2.py).
+- Smaller fixes: heuristics.nearest_neighbor infinite loop (fixed); ARF extraction
+  comment resolved (range(h,n) is correct); 01-03 corrected (LP-collapse citation
+  -> Laporte2004; SSPMF mislabel; false 2^k-symmetry theorem replaced; I-N depot
+  cluster added; Metric Barrier weakened to weight-preserving embeddings).
+- >>> repo-SSPMF BUG FOUND, DIAGNOSED, FIXED (2026-06-10): symptom 8.0 vs
+  BBC=LSS=6.0 on the 6-ring. Cause: c21 mistranslated the paper's SINK-flow
+  restriction (Eq.21) into y[i,k,t]=0 for k<|J_t|-1, i.e. a carry prohibition --
+  invalid, +2 on the ring -- AND it was ON by default. Fix: default flipped to
+  False, block marked invalid. Verified: c21=False -> 6.0 = BBC = LSS.
+  Residual (non-bug): root LP with c21 off = 2.0 != paper M-C=3 (empty-start
+  convention divergence; never quote M-C for this implementation). All past
+  SSPMF numbers produced under the old default are invalid; re-run. <<<
+- Smoke battery otherwise PASSED in-sandbox with CPLEX Community Edition:
+  BBC both cut modes = 6.0 on 6-ring (= free-init 3 + min(b,|U|) 3, convention
+  identity confirmed end-to-end); dual_bound stat fixed (get_best_objective) and
+  verified (6.0, gap 0.0%); LSS = 6.0; raw_results.csv archived.
