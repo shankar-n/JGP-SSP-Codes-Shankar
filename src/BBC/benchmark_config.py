@@ -49,7 +49,8 @@ ALL_SETS = PRIMARY_SETS + SECONDARY_SETS
 #   comb_cuts      — use KTNS combinatorial cuts (vs. LP Benders at integer nodes)
 #   frac_cuts      — add Benders user cuts at LP relaxation nodes (novel contribution)
 #   triplet_bounds — add O(n³) triplet lower bound constraints to master problem root
-#   lp_reuse       — FIXED to False throughout (confound elimination)
+#   lp_reuse       — FIXED to True throughout (verified to give identical optima to
+#                    fresh-model; held constant as a confound control, NOT ablated)
 #
 # The full-factorial 2³ design lets us isolate marginal value of each flag
 # and report clean ablation results.
@@ -68,10 +69,24 @@ BBC_CONFIGS = [
     # Prior-work baselines
     {"label": "LSS",       "solver": "LSS"},
     {"label": "SSPMF",     "solver": "SSPMF"},
+    {"label": "CATZ-F4",   "solver": "CATZ"},    # Catanzaro et al. 2015, Formulation 4 (verified vs brute)
 ]
 
 # On secondary sets, skip SSPMF (prohibitively slow for J=15)
 SECONDARY_CONFIGS = [c for c in BBC_CONFIGS if c["label"] != "SSPMF"]
+
+# ── Difficulty ordering + early-stop ─────────────────────────────────────────
+# The runner processes instances EASIEST-FIRST (sort key: J asc, T asc, density
+# asc, then loosest capacity), so we solve as many as possible before reaching
+# the hard region.  For each solver config INDEPENDENTLY, after this many
+# consecutive non-optimal results (time_limit / error / no incumbent) on
+# increasingly hard instances, the remaining (harder) instances are skipped for
+# THAT config — we don't waste cluster time on instances it clearly can't solve.
+# Set to 0 to disable early-stop (run everything).  Trade-off: worst-case wasted
+# time before a config bails is ~ N x time_limit, so on the cluster a larger N is
+# cheap (array tasks run in parallel) and safer against difficulty-ordering noise.
+# Override per-run with --max-consecutive-timeouts.
+MAX_CONSECUTIVE_TIMEOUTS = 8
 
 # ── Output paths ──────────────────────────────────────────────────────────────
 OUTPUT_DIR   = _HERE
@@ -87,7 +102,8 @@ COLUMNS = [
     "solver", "config", "comb_cuts", "frac_cuts", "triplet_bounds",
     # Results
     "status",    # 'optimal' | 'time_limit' | 'error' | 'load_error'
-    "obj",       # switch cost (None if no feasible solution found)
+    "obj",       # solver's NATIVE objective (empty-start for BBC/LSS/Catanzaro; free-initial Z_M for SSPMF)
+    "obj_ktns",  # CANONICAL empty-start switches of the returned sequence (compute_ktns); compare solvers on THIS
     "time_s",    # wall-clock solve time
     "gap_pct",   # MIP gap at termination (0 if optimal; None for LSS/SSPMF)
     # B&B diagnostics (BBC only; None for LSS/SSPMF)

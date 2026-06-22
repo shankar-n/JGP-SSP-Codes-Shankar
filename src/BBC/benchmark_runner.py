@@ -57,6 +57,7 @@ from benchmark_config import (
     COLUMNS, BBC_DIAG_COLS, RAW_CSV,
     get_instances, get_configs_for_set,
     PRIMARY_SETS, SECONDARY_SETS, ALL_SETS,
+    MAX_CONSECUTIVE_TIMEOUTS,
 )
 
 
@@ -81,7 +82,7 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue, verb
     import time as _time
     import traceback
 
-    from utils import load_ssp_instance
+    from utils import load_ssp_instance, compute_ktns
 
     # ── Load instance ──────────────────────────────────────────────────────
     try:
@@ -115,6 +116,14 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue, verb
     }
     null_diag = {c: None for c in BBC_DIAG_COLS}
 
+    def _ktns_of(seq):
+        # Canonical EMPTY-START switch count of a returned sequence. Lets us compare
+        # all solvers in one convention regardless of each model's native objective
+        # (esp. SSPMF, whose Z_M is free-initial). None if no valid permutation.
+        if seq is not None and sorted(seq) == list(range(J)):
+            return compute_ktns(list(seq), tool_req, C)[0]
+        return None
+
     try:
         solver_name = config["solver"]
 
@@ -130,11 +139,12 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue, verb
                 parallel               = False,
             )
             solver.build_master_problem(verbose=verbose)
-            status, obj_val, _seq = solver.solve(time_limit=time_limit, verbose=verbose)
+            status, obj_val, seq = solver.solve(time_limit=time_limit, verbose=verbose)
             st = solver.solve_stats
             result_queue.put({**base,
                 "status":   str(status),
                 "obj":      obj_val,
+                "obj_ktns": _ktns_of(seq),
                 "time_s":   st.get("wall_time_s"),
                 "gap_pct":  st.get("mip_gap_pct"),
                 "nodes":         st.get("nodes"),
@@ -155,9 +165,9 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue, verb
             solver = LSSFormulation(J, T, C, tool_req)
             solver.build_model(verbose=verbose)
             t0 = _time.perf_counter()
-            status, obj_val, _seq = solver.solve(time_limit=time_limit, verbose=verbose)
+            status, obj_val, seq = solver.solve(time_limit=time_limit, verbose=verbose)
             result_queue.put({**base,
-                "status": str(status), "obj": obj_val,
+                "status": str(status), "obj": obj_val, "obj_ktns": _ktns_of(seq),
                 "time_s": round(_time.perf_counter() - t0, 4),
                 "gap_pct": None, **null_diag, "notes": "",
             })
@@ -169,9 +179,22 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue, verb
             solver = SSPMFFormulation(J, T, C, tool_req, use_constraint_21=False)
             solver.build_model(verbose=verbose)
             t0 = _time.perf_counter()
-            status, obj_val, _seq = solver.solve(time_limit=time_limit, verbose=verbose)
+            status, obj_val, seq = solver.solve(time_limit=time_limit, verbose=verbose)
             result_queue.put({**base,
-                "status": str(status), "obj": obj_val,
+                "status": str(status), "obj": obj_val, "obj_ktns": _ktns_of(seq),
+                "time_s": round(_time.perf_counter() - t0, 4),
+                "gap_pct": None, **null_diag, "notes": "",
+            })
+
+        # ── Catanzaro F4 (Catanzaro, Gouveia, Labbé 2015) ──────────────────
+        elif solver_name == "CATZ":
+            from catanzaro_formulation import CatanzaroFormulation
+            solver = CatanzaroFormulation(J, T, C, tool_req)
+            solver.build_model(verbose=verbose)
+            t0 = _time.perf_counter()
+            status, obj_val, seq = solver.solve(time_limit=time_limit, verbose=verbose)
+            result_queue.put({**base,
+                "status": str(status), "obj": obj_val, "obj_ktns": _ktns_of(seq),
                 "time_s": round(_time.perf_counter() - t0, 4),
                 "gap_pct": None, **null_diag, "notes": "",
             })
@@ -214,18 +237,54 @@ def _append_row(csv_path, row):
         writer.writerow(row)
 
 
+def _load_completed_status(csv_path):
+    """Return {(instance_stem, config_label): status_lower} from an existing CSV."""
+    status = {}
+    if not csv_path.exists():
+        return status
+    with open(csv_path, newline="") as f:
+        for row in csv.DictReader(f):
+            status[(row["instance"], row["config"])] = str(row.get("status", "")).lower()
+    return status
+
+
+def _instance_features(path):
+    """Cheap (J, T, C, density) read from an instance file, for difficulty sorting."""
+    try:
+        with open(path) as f:
+            J, T, C = (int(v) for v in f.readline().split()[:3])
+            ones = sum(line.count('1') for line in f)
+        density = ones / (J * T) if J * T else 0.0
+        return J, T, C, density
+    except Exception:
+        return 10**6, 10**6, 0, 1.0      # unparseable -> sort last (treat as hardest)
+
+
+def _difficulty_key(path):
+    """Easiest-first ordering key: small J, small T, sparse, then loosest capacity."""
+    J, T, C, density = _instance_features(path)
+    return (J, T, round(density, 4), -int(C))
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Main runner
 # ─────────────────────────────────────────────────────────────────────────────
 
 def build_work_queue(sets, config_filter=None, only_sets=None):
     """
-    Return a list of (benchmark_set, instance_path, config_dict, time_limit) tuples.
+    Return a list of (benchmark_set, instance_path, config_dict, time_limit) tuples,
+    ordered EASIEST-FIRST by instance difficulty so early-stop triggers only in the
+    hard region.  Instance-major, config-minor: all configs of an easy instance are
+    queued before any config of a harder instance.
     """
-    work = []
+    insts = []
     for bset, ipath, tl in get_instances(sets):
         if only_sets and bset not in only_sets:
             continue
+        insts.append((bset, ipath, tl))
+    insts.sort(key=lambda r: _difficulty_key(r[1]))      # easiest first
+    work = []
+    for bset, ipath, tl in insts:
         configs = get_configs_for_set(bset)
         if config_filter:
             configs = [c for c in configs if c["label"] in config_filter]
@@ -235,49 +294,83 @@ def build_work_queue(sets, config_filter=None, only_sets=None):
 
 
 def run_benchmark(sets=None, config_filter=None, only_sets=None,
-                  output_csv=None, dry_run=False, verbose=False, limit=None):
+                  output_csv=None, dry_run=False, verbose=False, limit=None,
+                  max_consecutive_timeouts=None):
     """
-    Main entry point.  Runs all pending (instance, config) pairs sequentially,
-    each in an isolated subprocess with hard timeout.
+    Main entry point.  Runs pending (instance, config) pairs EASIEST-FIRST, each in
+    an isolated subprocess with a hard timeout.  Resumable: CSV-completed pairs are
+    skipped but still seed the early-stop counters.
+
+    Early-stop: for each config INDEPENDENTLY, after `max_consecutive_timeouts`
+    consecutive non-optimal results on increasingly hard instances, the remaining
+    harder instances are skipped for that config.  None -> config default
+    (MAX_CONSECUTIVE_TIMEOUTS); 0 -> disabled.
     """
     if sets is None:
         sets = ALL_SETS
     csv_path = Path(output_csv) if output_csv else RAW_CSV
+    if max_consecutive_timeouts is None:
+        max_consecutive_timeouts = MAX_CONSECUTIVE_TIMEOUTS
 
-    work = build_work_queue(sets, config_filter, only_sets)
-    completed = _load_completed(csv_path)
-
-    pending = [
-        (bset, ipath, cfg, tl)
-        for bset, ipath, cfg, tl in work
-        if (Path(ipath).stem, cfg["label"]) not in completed
-    ]
+    work = build_work_queue(sets, config_filter, only_sets)   # easiest-first
+    completed_status = _load_completed_status(csv_path)
 
     if limit is not None:
-        # Limit by unique instances, keeping all configs per instance
-        unique_insts = list(dict.fromkeys((bset, ipath) for bset, ipath, _, _ in pending))[:limit]
+        # Limit to the N easiest unique instances (all their configs)
+        unique_insts = list(dict.fromkeys((bset, ipath) for bset, ipath, _, _ in work))[:limit]
         inst_set = set(unique_insts)
-        pending = [(bset, ipath, cfg, tl) for bset, ipath, cfg, tl in pending
-                   if (bset, ipath) in inst_set]
+        work = [w for w in work if (w[0], w[1]) in inst_set]
 
-    total          = len(work)
-    n_already_done = len(completed)
-    n_limit_excl   = (total - n_already_done - len(pending)) if limit is not None else 0
+    pending = [w for w in work
+               if (Path(w[1]).stem, w[2]["label"]) not in completed_status]
+    n_already_done = len(work) - len(pending)
+
     print(f"\nBBC Benchmark Runner")
-    limit_note = f", {n_limit_excl} excluded by --limit={limit}" if limit is not None else ""
-    print(f"  Work queue : {total} pairs  ({n_already_done} done in CSV, {len(pending)} to run{limit_note})")
+    es_note = (f"early-stop after {max_consecutive_timeouts} consecutive non-optimal / config"
+               if max_consecutive_timeouts else "early-stop DISABLED")
+    print(f"  Work queue : {len(work)} pairs  ({n_already_done} done in CSV, {len(pending)} to run)")
+    print(f"  Order      : easiest-first;  {es_note}")
     print(f"  Output CSV : {csv_path}")
     if dry_run:
-        print(f"\n  [DRY RUN] — first 10 pending pairs:")
+        print(f"\n  [DRY RUN] — first 10 pending pairs (easiest-first):")
         for row in pending[:10]:
             print(f"    {row[0]:<12}  {Path(row[1]).stem:<30}  {row[2]['label']}")
         return
 
     ctx = multiprocessing.get_context("spawn")
 
-    for idx, (bset, ipath, cfg, tl) in enumerate(pending, 1):
+    consec  = {}     # config_label -> consecutive non-optimal count (difficulty order)
+    stopped = set()  # config_labels that have hit the cap
+
+    def _optimal(s):
+        return "optimal" in (s or "").lower()
+
+    def _bump(label, status_str):
+        if _optimal(status_str):
+            consec[label] = 0
+        else:
+            consec[label] = consec.get(label, 0) + 1
+            if max_consecutive_timeouts and consec[label] >= max_consecutive_timeouts:
+                stopped.add(label)
+
+    n_run = n_skipped = 0
+    for bset, ipath, cfg, tl in work:
         inst_name = Path(ipath).stem
-        print(f"[{idx:>5}/{len(pending)}]  {bset:<12}  {inst_name:<35}  {cfg['label']}", flush=True)
+        label     = cfg["label"]
+        key       = (inst_name, label)
+
+        # Already in CSV: seed the counter from its recorded status; don't re-run.
+        if key in completed_status:
+            _bump(label, completed_status[key])
+            continue
+
+        # Config already early-stopped: skip this (harder) pending pair silently.
+        if label in stopped:
+            n_skipped += 1
+            continue
+
+        n_run += 1
+        print(f"[{n_run:>5}/{len(pending)}]  {bset:<12}  {inst_name:<35}  {label}", flush=True)
 
         q = ctx.Queue()
         p = ctx.Process(target=_worker, args=(ipath, bset, cfg, tl, q, verbose))
@@ -296,7 +389,7 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None,
             row = {
                 "instance": inst_name, "benchmark_set": bset,
                 "J": None, "T": None, "C": None, "density": None,
-                "solver": cfg["solver"], "config": cfg["label"],
+                "solver": cfg["solver"], "config": label,
                 "comb_cuts": cfg.get("comb_cuts"), "frac_cuts": cfg.get("frac_cuts"),
                 "triplet_bounds": cfg.get("triplet_bounds"),
                 "status": "time_limit", "obj": None,
@@ -318,7 +411,7 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None,
                 row = {
                     "instance": inst_name, "benchmark_set": bset,
                     "J": None, "T": None, "C": None, "density": None,
-                    "solver": cfg["solver"], "config": cfg["label"],
+                    "solver": cfg["solver"], "config": label,
                     "comb_cuts": cfg.get("comb_cuts"), "frac_cuts": cfg.get("frac_cuts"),
                     "triplet_bounds": cfg.get("triplet_bounds"),
                     "status": "error", "obj": None,
@@ -329,8 +422,13 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None,
                 print(f"         → CRASH (no result in queue): {e}")
 
         _append_row(csv_path, row)
+        _bump(label, row.get("status", ""))
+        if label in stopped and consec.get(label, 0) == max_consecutive_timeouts:
+            print(f"         [early-stop] '{label}': {max_consecutive_timeouts} consecutive "
+                  f"non-optimal → skipping remaining harder instances for this config")
 
-    print(f"\nDone. Results at: {csv_path}")
+    tail = f", {n_skipped} skipped by early-stop" if n_skipped else ""
+    print(f"\nDone. Ran {n_run}{tail}. Results at: {csv_path}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -356,7 +454,10 @@ def main():
     parser.add_argument("--verbose", "-v", action="store_true",
         help="Pass verbose=True to each solver")
     parser.add_argument("--limit", "-n", type=int, default=None,
-        help="Limit pilot run to N instances (all configs still run per instance)")
+        help="Limit pilot run to the N easiest instances (all configs per instance)")
+    parser.add_argument("--max-consecutive-timeouts", type=int, default=None,
+        help="Early-stop a config after N consecutive non-optimal results on harder "
+             "instances (default: benchmark_config.MAX_CONSECUTIVE_TIMEOUTS; 0 disables)")
     args = parser.parse_args()
 
     if args.sets == "primary":
@@ -374,6 +475,7 @@ def main():
         dry_run=args.dry_run,
         verbose=args.verbose,
         limit=args.limit,
+        max_consecutive_timeouts=args.max_consecutive_timeouts,
     )
 
 

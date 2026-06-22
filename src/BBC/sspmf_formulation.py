@@ -1,92 +1,41 @@
 """
-da Silva-Chaves-Yanasse (SSPMF) Multicommodity Flow Formulation for the
-Job Sequencing and Tool Switching Problem.
-
-!!! BUG FOUND AND FIXED (2026-06-10, Claude-Fable audit) !!!
-Symptom: 6-ring integer optimum 8.0 vs BBC=LSS=6.0. Root cause: the
-`use_constraint_21` block implements the paper's Eq.(21) — which restricts flow
-INTO THE SINK (a tool may not "finish" before its last requiring position) — as
-y[i,k,t]=0 for k < |J_t|-1, i.e. a blanket prohibition on CARRYING tool t at
-early positions. That is INVALID: on the ring (every |J_t|=2) it forbids all
-carrying out of position 0, forcing exactly +2 re-insertions. Verified:
-c21=False gives 6.0 (= BBC = LSS); c21=True gives 8.0. FIX APPLIED: default
-flipped to False and the block marked invalid (this variable scheme has no sink
-arcs, so Eq.(21) has no direct analogue here). Residual non-bug: the root LP
-(2.0 with c21 off) does not equal the paper's M-C=3 — empty-start convention
-divergence; do not quote M-C for this implementation. All past SSPMF numbers
-produced with the old default are invalid; re-run before any comparison.
+SSPMF — da Silva, Chaves & Yanasse (2024) multicommodity-flow model for the SSP.
 
 Reference
 ---------
-da Silva, T.F.S., Chaves, A.A., & Yanasse, H.H. (2024).
-"A multicommodity flow formulation for the job sequencing and tool
-switching problem."  (Submitted / working paper.)
+T. T. da Silva, A. A. Chaves, H. H. Yanasse, "A New Multicommodity Flow Model
+for the Job Sequencing and Tool Switching Problem" (2024).
+PDF: references/Useless/MTSP_Article.pdf  (model = eqs (1)-(16), Section 3).
 
-Model Description
------------------
-The SSPMF formulation models the SSP as a multicommodity flow problem on a
-specially constructed graph G(V, A).
+This is a FAITHFUL transcription of the base model (1)-(16). Verified: it
+recovers the optimal job SEQUENCE on every tested instance (== brute force).
 
-Graph G
--------
-Nodes V = {0, 1, ..., N, N+1, N+2}  where:
-  - 0          : origin (artificial first node)
-  - 1..N       : job nodes  (0-indexed in this code: 0..N-1)
-  - N+1 (sink) : artificial last node  → tool loaded but not ejected
-  - N+2 (aux)  : auxiliary node        → tool never loaded
-
-Commodities: one per tool t ∈ {0,...,M-1}
+Graph G(V,A), V = {0,1,...,N, N+1, N+2}: 0 = origin, N+1 = sink, N+2 = auxiliary.
+Arcs: (i,i+1) i=0..N (capacity C); (i,N+2) i=0..N-2; (N+2,i) i=1..N-1; (i,N+1) i=1..N-1.
 
 Variables
 ---------
-x[i,k]  ∈ {0,1}   job i is processed in position k  (assignment matrix)
-y[i,k,t] ≥ 0      flow of commodity t on arc (i → k)
+x_ik in {0,1} : job i is processed in position k        (i,k = 0..N-1 here, 1-indexed in paper)
+y_(u,v),t     : 1 unit of commodity (tool) t flows on arc (u,v)
 
-Note: the paper uses a position-based assignment model, so arcs correspond to
-consecutive (position, position+1) pairs rather than job-to-job arcs directly.
+Objective (1)  — FREE-INITIAL convention
+----------------------------------------
+  min Z_M = Σ_t [ Σ_{i=1..N-1} y_(i,N+1),t  +  Σ_{i=1..N-2} y_(i,N+2),t ]
+This counts tools LEAVING the magazine; the initial fill (arc (0,1), C tools) and
+the initially-held-out tools (arc (0,N+2), M-C tools) are NOT counted, so
 
-Objective (Eq. 1)
------------------
-    min Σ_t Σ_{i=1}^{N} Σ_{k=2}^{N+1} y[i,k,t]   ← flow into sink (switches)
-      + Σ_t Σ_{i=1}^{N} Σ_{k=2}^{N+2} y[i,N+2,t]  ← flow into aux  (handled below)
+        Z_M  =  (empty-start KTNS switches)  −  (initial magazine load).
 
-For implementation simplicity we count the total tool switches directly via
-the x-variables and the KTNS cost function, but model it exactly via the flow
-as in the paper.
+Its LP-relaxation lower bound is M-C (Theorem 3.1). To compare against the other
+solvers (BBC/LSS/Catanzaro, which are EMPTY-START) the benchmark re-evaluates the
+returned SEQUENCE with compute_ktns (empty-start) — see benchmark_runner's
+`obj_ktns` column. Do NOT compare raw `Z_M` directly to empty-start objectives.
 
-Simplified objective (used here):
-    min Σ_{t} Σ_{position k} [flow from node at position k to sink]
-which equals the total number of tool loads/switches.
-
-Implementation note
--------------------
-The paper's exact formulation uses flow variables indexed by (job i, position k,
-tool t).  Building this exactly requires O(N² × M) variables.  We implement
-the compact version which only creates variables for arcs that exist in G.
-
-Symmetry-breaking (Eq. 20)
---------------------------
-Job p — the job with the most tools among those with index ≤ ⌈N/2⌉ — is
-fixed to the first ⌈N/2⌉ positions.
-
-Constraint (21)
----------------
-y[k, N+1, t] = 0  for k = 1,...,|J_t|-1
-(tools that have more jobs ahead cannot yet flow to sink)
-
-LP relaxation lower bound
--------------------------
-The LP relaxation gives LB = M - C (proven tight; M = total tools, C = capacity).
-
-Solver support
---------------
-CPLEX only (raw cplex API).  Pure MIP — no lazy constraints needed.
-Gurobi and SCIP backends have been archived to
-_archived/sspmf_formulation_gurobi_scip.py.
+Solver: CPLEX only. Honors CPLEX_THREADS for reproducible timings.
 """
 
+import os
 import sys
-import math
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -102,302 +51,153 @@ from utils import load_ssp_instance
 
 
 class SSPMFFormulation:
-    """
-    SSPMF multicommodity flow formulation for SSP (da Silva 2024).
+    """da Silva et al. (2024) SSPMF — faithful base model (1)-(16)."""
 
-    Parameters
-    ----------
-    n_jobs   : int
-    n_tools  : int
-    capacity : int  (magazine capacity C)
-    tool_req : dict {job: [tools]}
-    use_symmetry_breaking : bool
-        Fix the job with most tools to the first ⌈N/2⌉ positions (Eq. 20).
-    use_constraint_21 : bool
-        Add constraint (21): flow to sink is 0 for early positions of each tool.
-    """
-
-    def __init__(self, n_jobs, n_tools, capacity, tool_req,
-                 use_symmetry_breaking=True, use_constraint_21=False):
-        # AUDIT-FIX(Claude-Fable 2026-06-10): use_constraint_21 default flipped
-        # True -> False. The implemented c21 is INVALID (see module docstring):
-        # it cuts off true optima (+2 on the 6-ring). Kept as an option only for
-        # reproducing the bug; never enable in benchmarks.
-        self.n_jobs                = n_jobs
-        self.n_tools               = n_tools
-        self.capacity              = capacity
-        self.tool_req              = tool_req
-        self.use_symmetry_breaking = use_symmetry_breaking
-        self.use_constraint_21     = use_constraint_21
-
-        # Tool sets per job
-        self.T = {j: set(tool_req.get(j, [])) for j in range(n_jobs)}
-
-        # Jobs that require each tool: J_t = {j : t in T_j}
-        self.J_t = {t: [j for j in range(n_jobs) if t in self.T[j]]
-                    for t in range(n_tools)}
-
-        # Special nodes
-        self.origin = n_jobs          # node 0 in paper = n_jobs in 0-index
-        self.sink   = n_jobs + 1      # N+1
-        self.aux    = n_jobs + 2      # N+2
-
-        # Symmetry-breaking: find job p with most tools among first ⌈N/2⌉ indices
-        self._sym_job = self._find_symmetry_job()
-
+    def __init__(self, n_jobs, n_tools, capacity, tool_req, use_constraint_21=False):
+        self.N = n_jobs
+        self.M = n_tools
+        self.C = capacity
+        self.tool_req = tool_req
+        self.T = {i: set(tool_req.get(i, [])) for i in range(n_jobs)}
+        # use_constraint_21: optional symmetry-breaking (Prop 4.1 / eq 20). NOT
+        # implemented in this faithful base (the base (1)-(16) is already exact);
+        # accepted for API compatibility. Add the symmetry cut later if needed
+        # for speed, verifying it preserves the optimum first.
+        self.use_constraint_21 = use_constraint_21
         if not HAS_CPLEX:
-            raise ImportError(
-                "SSPMF requires IBM CPLEX.  Install the cplex Python package "
-                "(ships with IBM CPLEX Studio).\n"
-                "Gurobi/SCIP backends have been archived to "
-                "_archived/sspmf_formulation_gurobi_scip.py."
-            )
-
-    def _find_symmetry_job(self):
-        """
-        Find job p with the most tools among jobs with index ≤ ⌈N/2⌉.
-        Used for the symmetry-breaking constraint.
-        """
-        half = math.ceil(self.n_jobs / 2)
-        best_job   = 0
-        best_count = len(self.T[0])
-        for j in range(1, half):
-            if len(self.T[j]) > best_count:
-                best_count = len(self.T[j])
-                best_job   = j
-        return best_job
+            raise ImportError("SSPMF requires IBM CPLEX (cplex Python API).")
 
     def build_model(self, verbose=True):
-        """Build the SSPMF model with CPLEX."""
         self._build_cplex(verbose)
 
     def solve(self, time_limit=3600, verbose=True):
-        """Solve the SSPMF model."""
         return self._solve_cplex(time_limit, verbose)
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # CPLEX implementation
-    # ─────────────────────────────────────────────────────────────────────────
-
+    # ── build ───────────────────────────────────────────────────────────────
     def _build_cplex(self, verbose=True):
-        """Build the SSPMF model with raw CPLEX."""
-        N = self.n_jobs
-        M = self.n_tools
-        C = self.capacity
-        T = range(M)
-        J = range(N)
-        K = range(N)
+        N, M, C, T = self.N, self.M, self.C, self.T
+        S, X = N + 1, N + 2
+        self._S, self._X = S, X
 
-        self._cpx = cplex.Cplex()
+        cpx = cplex.Cplex()
         if not verbose:
-            self._cpx.set_log_stream(None)
-            self._cpx.set_results_stream(None)
-            self._cpx.set_warning_stream(None)
-        self._cpx.objective.set_sense(self._cpx.objective.sense.minimize)
+            cpx.set_log_stream(None); cpx.set_results_stream(None); cpx.set_warning_stream(None)
+        cpx.objective.set_sense(cpx.objective.sense.minimize)
+        thr = int(os.environ.get("CPLEX_THREADS", "0"))
+        if thr:
+            cpx.parameters.threads.set(thr)
 
-        col = 0
-        self._x_cpx = {}
-        self._y_cpx = {}
-        self._z_cpx = {}
+        # ── arcs ──────────────────────────────────────────────────────────
+        arcs = set()
+        for i in range(0, N):
+            arcs.add((i, i + 1))            # consec (0,1)..(N-1,N)
+        arcs.add((N, S))                     # consec (N, N+1)
+        for i in range(0, N - 1):
+            arcs.add((i, X))                 # to-aux (i, N+2), i=0..N-2
+        for i in range(1, N):
+            arcs.add((X, i))                 # from-aux (N+2, i), i=1..N-1
+        for i in range(1, N):
+            arcs.add((i, S))                 # to-sink (i, N+1), i=1..N-1
 
-        # x variables
-        for i in J:
-            for k in K:
-                self._cpx.variables.add(obj=[0.0], lb=[0.0], ub=[1.0], types=['B'],
-                                         names=[f'x_{i}_{k}'])
-                self._x_cpx[i, k] = col; col += 1
+        y = {}; x = {}; col = 0
+        for (u, v) in arcs:
+            for t in range(M):
+                o = 0.0
+                if v == S and 1 <= u <= N - 1:   # (1): Σ y_(i,N+1) , i=1..N-1
+                    o = 1.0
+                if v == X and 1 <= u <= N - 2:   # (1): Σ y_(i,N+2) , i=1..N-2
+                    o = 1.0
+                cpx.variables.add(obj=[o], lb=[0.0], ub=[1.0], types=['B'], names=[f'y_{u}_{v}_{t}'])
+                y[u, v, t] = col; col += 1
+        for i in range(N):
+            for k in range(N):
+                cpx.variables.add(obj=[0.0], lb=[0.0], ub=[1.0], types=['B'], names=[f'x_{i}_{k}'])
+                x[i, k] = col; col += 1
 
-        # y variables
-        for i in J:
-            for k in K:
-                for t in T:
-                    self._cpx.variables.add(obj=[0.0], lb=[0.0], ub=[1.0], types=['C'],
-                                             names=[f'y_{i}_{k}_{t}'])
-                    self._y_cpx[i, k, t] = col; col += 1
+        def C_add(idx, co, sense, rhs):
+            cpx.linear_constraints.add(lin_expr=[SparsePair(idx, co)], senses=[sense], rhs=[rhs])
 
-        # z variables (objective)
-        for k in K:
-            for t in T:
-                self._cpx.variables.add(obj=[1.0], lb=[0.0], ub=[1.0], types=['B'],
-                                         names=[f'z_{k}_{t}'])
-                self._z_cpx[k, t] = col; col += 1
+        # (2)(3) assignment
+        for i in range(N):
+            C_add([x[i, k] for k in range(N)], [1.0] * N, 'E', 1.0)
+        for k in range(N):
+            C_add([x[i, k] for i in range(N)], [1.0] * N, 'E', 1.0)
+        # flow conservation (4)-(9), per commodity t
+        for t in range(M):
+            # (4) origin
+            C_add([y[0, 1, t], y[0, X, t]], [1.0, 1.0], 'E', 1.0)
+            # (5) nodes i=1..N-2
+            for i in range(1, N - 1):
+                idx = [y[i - 1, i, t]]; co = [1.0]
+                if (X, i, t) in y: idx.append(y[X, i, t]); co.append(1.0)
+                idx.append(y[i, i + 1, t]); co.append(-1.0)
+                if (i, S, t) in y: idx.append(y[i, S, t]); co.append(-1.0)
+                if (i, X, t) in y: idx.append(y[i, X, t]); co.append(-1.0)
+                C_add(idx, co, 'E', 0.0)
+            # (6) node N-1
+            idx = [y[N - 2, N - 1, t]]; co = [1.0]
+            if (X, N - 1, t) in y: idx.append(y[X, N - 1, t]); co.append(1.0)
+            idx.append(y[N - 1, N, t]); co.append(-1.0)
+            if (N - 1, S, t) in y: idx.append(y[N - 1, S, t]); co.append(-1.0)
+            C_add(idx, co, 'E', 0.0)
+            # (7) node N
+            C_add([y[N - 1, N, t], y[N, S, t]], [1.0, -1.0], 'E', 0.0)
+            # (8) Σ_{i=1..N} y_(i,N+1) = 1   (tosink i=1..N-1 + consec (N,N+1))
+            idx = [y[i, S, t] for i in range(1, N) if (i, S, t) in y] + [y[N, S, t]]
+            C_add(idx, [1.0] * len(idx), 'E', 1.0)
+            # (9) auxiliary node N+2
+            inn = [y[i, X, t] for i in range(0, N - 1) if (i, X, t) in y]
+            out = [y[X, i, t] for i in range(1, N) if (X, i, t) in y]
+            C_add(inn + out, [1.0] * len(inn) + [-1.0] * len(out), 'E', 0.0)
+        # (10) x_ik <= y_(k,k+1),t  for t in T_i  (tools of job i present on its position arc)
+        for i in range(N):
+            for k in range(N):
+                for t in T[i]:
+                    C_add([x[i, k], y[k, k + 1, t]], [1.0, -1.0], 'L', 0.0)
+        # (11) Σ_t y_(k,k+1),t = C  (magazine always full)
+        for k in range(N):
+            C_add([y[k, k + 1, t] for t in range(M)], [1.0] * M, 'E', float(C))
 
-        self._cpx_n_vars = col
-
-        # Assignment
-        for i in J:
-            idx  = [self._x_cpx[i, k] for k in K]
-            self._cpx.linear_constraints.add(
-                lin_expr=[SparsePair(idx, [1.0]*N)], senses=['E'], rhs=[1.0],
-                names=[f'assign_job_{i}'])
-        for k in K:
-            idx = [self._x_cpx[i, k] for i in J]
-            self._cpx.linear_constraints.add(
-                lin_expr=[SparsePair(idx, [1.0]*N)], senses=['E'], rhs=[1.0],
-                names=[f'assign_pos_{k}'])
-
-        # z lower/upper bounds, carry_link, capacity, symmetry, c21
-        for k in K:
-            for t in T:
-                req_idx   = [self._x_cpx[i, k] for i in self.J_t[t]]
-                carry_idx = [self._y_cpx[i, k-1, t] for i in J] if k > 0 else []
-
-                # z >= req - carry_in
-                idx   = [self._z_cpx[k, t]] + req_idx + carry_idx
-                coeff = [1.0] + [-1.0]*len(req_idx) + [1.0]*len(carry_idx)
-                self._cpx.linear_constraints.add(
-                    lin_expr=[SparsePair(idx, coeff)], senses=['G'], rhs=[0.0],
-                    names=[f'z_lb_{k}_{t}'])
-
-                # z <= req
-                idx   = [self._z_cpx[k, t]] + req_idx
-                coeff = [1.0] + [-1.0]*len(req_idx)
-                self._cpx.linear_constraints.add(
-                    lin_expr=[SparsePair(idx, coeff)], senses=['L'], rhs=[0.0],
-                    names=[f'z_ub_{k}_{t}'])
-
-        # Carry link
-        for i in J:
-            for k in K:
-                for t in T:
-                    self._cpx.linear_constraints.add(
-                        lin_expr=[SparsePair([self._y_cpx[i,k,t], self._x_cpx[i,k]],
-                                              [1.0, -1.0])],
-                        senses=['L'], rhs=[0.0], names=[f'carry_link_{i}_{k}_{t}'])
-
-        # Capacity: y_{i,k,t} represents the FULL outgoing magazine state at
-        # position k (including required tools kept for future positions).
-        # Total tools kept ≤ C.  The previous |T_i|·x + Σy ≤ C was wrong:
-        # it double-counted required tools that also appear in y.
-        for k in K:
-            carry_idx = [self._y_cpx[i,k,t] for i in J for t in T]
-            self._cpx.linear_constraints.add(
-                lin_expr=[SparsePair(carry_idx, [1.0]*len(carry_idx))],
-                senses=['L'], rhs=[float(C)],
-                names=[f'mag_{k}'])
-
-        # Physical feasibility: can only carry forward a tool that is already
-        # in the magazine (incoming carry) or was just loaded at this position.
-        #   Σ_i y_{i,k,t} ≤ Σ_i y_{i,k-1,t} + z_{k,t}   (k > 0)
-        #   Σ_i y_{i,0,t} ≤ z_{0,t}                       (k = 0)
-        for k in K:
-            for t in T:
-                y_out_idx   = [self._y_cpx[i, k, t]   for i in J]
-                y_out_coeff = [1.0] * len(y_out_idx)
-                z_idx       = [self._z_cpx[k, t]]
-                z_coeff     = [-1.0]
-                if k > 0:
-                    y_in_idx   = [self._y_cpx[i, k-1, t] for i in J]
-                    y_in_coeff = [-1.0] * len(y_in_idx)
-                else:
-                    y_in_idx   = []
-                    y_in_coeff = []
-                idx   = y_out_idx   + z_idx   + y_in_idx
-                coeff = y_out_coeff + z_coeff + y_in_coeff
-                self._cpx.linear_constraints.add(
-                    lin_expr=[SparsePair(idx, coeff)],
-                    senses=['L'], rhs=[0.0],
-                    names=[f'phys_{k}_{t}'])
-
-        # Symmetry-breaking
-        if self.use_symmetry_breaking:
-            p    = self._sym_job
-            half = math.ceil(N / 2)
-            idx  = [self._x_cpx[p, k] for k in range(half)]
-            self._cpx.linear_constraints.add(
-                lin_expr=[SparsePair(idx, [1.0]*len(idx))], senses=['E'], rhs=[1.0],
-                names=['sym_break'])
-
-        # Constraint 21
-        if self.use_constraint_21:
-            for t in T:
-                n_jt = len(self.J_t[t])
-                for k in range(n_jt - 1):
-                    for i in J:
-                        self._cpx.linear_constraints.add(
-                            lin_expr=[SparsePair([self._y_cpx[i,k,t]], [1.0])],
-                            senses=['E'], rhs=[0.0], names=[f'c21_{i}_{k}_{t}'])
-
+        self._cpx, self._x = cpx, x
         if verbose:
-            print(f"SSPMF model built (CPLEX): {N} jobs, {M} tools, "
-                  f"{self._cpx_n_vars} variables")
+            print(f"SSPMF built (CPLEX): N={N} M={M} C={C}, {col} variables")
 
+    # ── solve ───────────────────────────────────────────────────────────────
     def _solve_cplex(self, time_limit, verbose):
-        self._cpx.parameters.timelimit.set(float(time_limit))
-        self._cpx.solve()
-        status_code = self._cpx.solution.get_status()
-        status_str  = self._cpx.solution.status[status_code]
-        N = self.n_jobs
+        cpx, x, N = self._cpx, self._x, self.N
+        cpx.parameters.timelimit.set(float(time_limit))
+        cpx.solve()
+        code = cpx.solution.get_status()
+        status_str = cpx.solution.status[code]
         try:
-            obj_val  = self._cpx.solution.get_objective_value()
-            all_vals = self._cpx.solution.get_values()
+            obj_val = cpx.solution.get_objective_value()   # Z_M (free-initial)
             seq = [None] * N
             for i in range(N):
                 for k in range(N):
-                    if all_vals[self._x_cpx[i, k]] > 0.5:
+                    if cpx.solution.get_values(x[i, k]) > 0.5:
                         seq[k] = i
-            sequence = seq if None not in seq else None
+            if any(s is None for s in seq):
+                seq = None
         except Exception:
-            obj_val  = None
-            sequence = None
+            obj_val, seq = None, None
         if verbose:
-            print(f"[SSPMF] Status: {status_str}, Obj: {obj_val}, Seq: {sequence}")
-        return status_str, obj_val, sequence
+            print(f"[SSPMF] {status_str}  Z_M={obj_val} (free-initial)  seq={seq}")
+        return status_str, obj_val, seq
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# LP relaxation lower bound
-# ─────────────────────────────────────────────────────────────────────────────
-
-def sspmf_lp_lower_bound(n_tools, capacity, tool_req):
-    """
-    Compute the LP relaxation lower bound for SSPMF.
-
-    The proven lower bound is:  LB = M - C
-    where M = total number of (job, tool) pairs across all jobs
-          C = magazine capacity.
-
-    Actually the bound is: LB = Σ_j |T_j| - C (total tool requirements minus capacity).
-    Per paper: LB = M - C where M = Σ_j |T_j|.
-
-    Parameters
-    ----------
-    n_tools  : int  (not used directly; M computed from tool_req)
-    capacity : int
-    tool_req : dict {job: [tools]}
-
-    Returns
-    -------
-    float
-    """
-    M = sum(len(v) for v in tool_req.values())
-    return max(0, M - capacity)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Convenience function
-# ─────────────────────────────────────────────────────────────────────────────
-
-def solve_sspmf(instance_path, time_limit=3600, verbose=True,
-                use_symmetry_breaking=True, use_constraint_21=True):
-    """Load an instance and solve it with the SSPMF formulation."""
+def solve_sspmf(instance_path, time_limit=3600, verbose=True, use_constraint_21=False):
+    """Load an instance and solve it with the SSPMF model."""
     n_jobs, n_tools, capacity, A, tool_req = load_ssp_instance(instance_path)
     if verbose:
-        lb = sspmf_lp_lower_bound(n_tools, capacity, tool_req)
-        print(f"[SSPMF] Instance: {Path(instance_path).name}  "
-              f"Jobs={n_jobs} Tools={n_tools} Cap={capacity}  LP_LB={lb}")
-    f = SSPMFFormulation(n_jobs, n_tools, capacity, tool_req,
-                         use_symmetry_breaking=use_symmetry_breaking,
-                         use_constraint_21=use_constraint_21)
+        print(f"[SSPMF] {Path(instance_path).name}  J={n_jobs} T={n_tools} C={capacity}")
+    f = SSPMFFormulation(n_jobs, n_tools, capacity, tool_req, use_constraint_21=use_constraint_21)
     f.build_model(verbose=verbose)
     return f.solve(time_limit=time_limit, verbose=verbose)
 
 
 if __name__ == "__main__":
-    instance_file = (
-        Path(__file__).parent.parent / "Instances" / "Shankar" / "shankar-example.txt"
-    )
-    if instance_file.exists():
-        solve_sspmf(str(instance_file), verbose=True)
+    inst = Path(__file__).parent.parent.parent / "data" / "Shankar" / "shankar-example.txt"
+    if inst.exists():
+        solve_sspmf(str(inst), verbose=True)
     else:
-        print(f"Instance not found: {instance_file}")
+        print(f"Instance not found: {inst}")

@@ -4,6 +4,28 @@
 
 ---
 
+## Current Focus (2026-06-15) — BBC exact-solver paper ONLY
+
+Active objective: finish + benchmark the **BBC exact solver** → one paper. Critical path:
+SLURM runbook (frontalhpc2025) → repo cleanup → fix stale docs → Catanzaro baseline decision →
+pre-cluster integration test (`test_solver.py` + small pilot on CPLEX hardware) → run campaign → analysis (ablation tables + plots).
+
+**Cluster how-to (don't lose this):** `src/BBC/cluster/SLURM_RUNBOOK.md` — step-by-step SLURM + CPLEX-in-venv setup; with `run_campaign.sbatch` (job array, one task per config), `probe.sh`, `merge_results.sh`. Submit from **frontalhpc2025**; the venv lives in shared `$HOME` (numpy + CPLEX Python API installed from the cluster's local CPLEX Studio). `cplex` CLI is on PATH but the Python API + numpy must be pip-installed into the venv.
+
+Verified 2026-06-15: BBC optima correct on small instances (brute-force + SSPMF agree, both cut families; DSP obj == `compute_ktns`); `lp_reuse` and `frac_cuts` give correct optima; **LSS switch-count bug FIXED** (objective now counts insertions of ALL tools, not just required ones — verified 7/7 vs brute via standalone; re-run `test_solver.py` on full CPLEX to confirm in-repo). `benchmark_runner` now runs **easiest-first** with **per-config early-stop** after `MAX_CONSECUTIVE_TIMEOUTS` consecutive non-optimal results.
+
+Baselines (all CPLEX, all **thread-pinned** via the `CPLEX_THREADS` env var for reproducible/comparable timings). Cross-solver dry run via the rewritten `test_solver.py` (BBC/LSS/SSPMF/CATZ vs brute), 2026-06-15:
+- **BBC** ✓, **Catanzaro-F4** ✓ (`catanzaro_formulation.py`, Catanzaro 2015 F4 — F5 tighter-LP but doesn't scale), **LSS** ✓ (`lss_formulation.py`, Laporte 2004 (10)-(20) faithful: objective over T_i, switch-def (15) over ALL t [the real bug fix], (17) as base constraint, + faithfully-transcribed VIs (23)-(25), `use_valid_ineq=True`), **SSPMF** ✓ (`sspmf_formulation.py`, da Silva 2024 multicommodity flow (1)-(16) faithful; native objective `Z_M`). Each recovers the optimal SEQUENCE == brute on ring + random instances (verified standalone; BBC/Catanzaro also confirmed in-repo).
+- **Convention (IMPORTANT)**: native objectives differ — BBC/LSS/Catanzaro/`compute_ktns` are EMPTY-START; SSPMF's `Z_M` is FREE-INITIAL (= empty-start − initial magazine load; LP bound M−C). The campaign now records **`obj_ktns` = `compute_ktns(returned sequence)`** (empty-start) per solver; **compare solvers on `obj_ktns`, not raw `obj`**.
+- Earlier mistakes corrected this session: my over-edits to LSS (objective rewrite, VI/(17) drop) were reverted to the faithful Laporte model; SSPMF was NOT actually buggy in da Silva's math — the repo's empty-start-forcing modification was, so it's been replaced by the faithful (1)-(16).
+- NB: this sandbox's Linux mount truncates just-edited files, so LSS/SSPMF were verified via standalone scripts mirroring the repo. **Run `test_solver.py` on the CPLEX machine to confirm all 4 vs brute in-repo before the campaign.**
+
+Grid is 11 configs (8 BBC ablation + LSS + SSPMF + CATZ-F4); sbatch array `0-10`. Legacy `benchmark.py`, the pre-fix CSV, and `_archived/`/`old/`/`plans-genai/archive/` were deleted (recoverable via git).
+
+**PARKED until the BBC paper is done** — these are separate future papers / where-SOTA-lacks directions, NOT on the BBC critical path: gap theory (`05_jgp_ssp_gap_analysis`), grouping selection (`06`), collapse variants (`07`), position formulations Part X (`10`), the ring `K>K*` experiment, and ML / CG-seed ideas. Concrete to-do for each is in `plans-genai/12_work_plan.md` (§A,B,C,E), `11_research_directions.md`, and `09_open_problems.tex`. Do not pick these up unless explicitly asked.
+
+---
+
 ## Skills — Load Before Specialised Work
 
 | Situation                                                      | Load skill                       |

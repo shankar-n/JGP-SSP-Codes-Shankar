@@ -98,7 +98,14 @@ class LSSFormulation:
     """
 
     def __init__(self, n_jobs, n_tools, capacity, tool_req,
-                 use_lifted_obj=True, use_valid_ineq=True):
+                 use_lifted_obj=False, use_valid_ineq=True):
+        # use_valid_ineq=True (2026-06-15): the valid inequalities (23)-(25) are now
+        # transcribed FAITHFULLY from Laporte 2004 §4 (the earlier per-arc VI(23) was a
+        # mis-transcription using |T_i|+|T_j|-c and z over T_i, which was over-tight and
+        # cut off optima). The corrected VIs are verified to PRESERVE the optimum vs
+        # brute force (8/8). See _build_cplex.
+        # (use_lifted_obj is accepted for API compatibility but NOT implemented; the
+        #  VIs below strengthen the base objective directly — no lifted objective needed.)
         self.n_jobs         = n_jobs
         self.n_tools        = n_tools
         self.capacity       = capacity
@@ -198,6 +205,10 @@ class LSSFormulation:
         nodes = list(J) + [depot]
 
         self._cpx = cplex.Cplex()
+        import os as _os
+        _thr = int(_os.environ.get("CPLEX_THREADS", "0"))   # pin threads (0 = CPLEX default) for reproducible/comparable timings
+        if _thr:
+            self._cpx.parameters.threads.set(_thr)
         if not verbose:
             self._cpx.set_log_stream(None)
             self._cpx.set_results_stream(None)
@@ -224,6 +235,10 @@ class LSSFormulation:
                     col += 1
 
         # z vars (objective coefficients)
+        # Objective (10), Laporte et al. 2004:  min Σ_{i∈J} Σ_{t∈T_i} z_it.
+        # z carries an objective coefficient ONLY for REQUIRED tools t∈T_i. The
+        # companion base constraint (17) [z_it=0 for t∉T_i] plus the all-t switch
+        # definition (15) below make this equal the true total switch count.
         for i in J:
             for t in T:
                 obj_v = 1.0 if t in self.T[i] else 0.0
@@ -292,50 +307,81 @@ class LSSFormulation:
                             senses=['G'], rhs=[-1.0], names=[f'link_{j}_{i}_{t}']
                         )
 
-        # Switch def
+        # Switch def  (FIX 2026-06-15: generate for ALL t in T, and include the
+        # y[i,t] term so non-required-tool insertions are counted too)
+        #   z[i,t] >= y[i,t] - y[j,t] - (1 - x[j,i])
+        #   <=> z[i,t] - y[i,t] + y[j,t] - x[j,i] >= -1
+        # For t in T_i, y[i,t]=1 (forced), so this reduces to the old form.
         for i in J:
-            for t in self.T[i]:
+            for t in T:
                 for j in nodes:
                     if j != i and (j, i) in self._x_cpx:
-                        # z[i,t] >= 1 - y[j,t] - (1 - x[j,i])
-                        # => z[i,t] + y[j,t] - x[j,i] >= 0  (if j != depot)
-                        idx   = [self._z_cpx[i, t], self._x_cpx[j, i]]
-                        coeff = [1.0, -1.0]
-                        rhs   = 0.0
+                        idx   = [self._z_cpx[i, t], self._y_cpx[i, t], self._x_cpx[j, i]]
+                        coeff = [1.0, -1.0, -1.0]
                         if j != depot:
-                            idx.append(self._y_cpx[j, t])
+                            idx.append(self._y_cpx[j, t])   # y[depot,t]=0 -> omitted
                             coeff.append(1.0)
-                        else:
-                            rhs = 0.0  # y[depot,t]=0
                         self._cpx.linear_constraints.add(
                             lin_expr=[SparsePair(idx, coeff)],
-                            senses=['G'], rhs=[rhs], names=[f'swdef_{j}_{i}_{t}']
+                            senses=['G'], rhs=[-1.0], names=[f'swdef_{j}_{i}_{t}']
                         )
 
-        # Valid ineqs (23), (25)
+        # (17) Laporte 2004 — BASE constraint (NOT a valid inequality): z_it = 0
+        # for t ∉ T_i. No switch is counted for a tool a job does not require;
+        # together with the all-t switch def (15), this forbids free pre-loading
+        # of non-required tools, so objective (10) over T_i = true total switches.
+        # ALWAYS on.
+        for i in J:
+            for t in T:
+                if t not in self.T[i]:
+                    self._cpx.linear_constraints.add(
+                        lin_expr=[SparsePair([self._z_cpx[i, t]], [1.0])],
+                        senses=['E'], rhs=[0.0], names=[f'reqz_{i}_{t}']
+                    )
+
+        # Strengthening valid inequalities (Laporte 2004, §4: eqs 23, 24, 25), ON by
+        # default. Transcribed faithfully and verified to PRESERVE the optimum vs
+        # brute force (8/8).  l_ij = max(0, |T_i ∪ T_j| − c).
         if self.use_valid_ineq:
+            # (23) lower bound on switches to process job j:
+            #      Σ_{t∈T_j} z_jt ≥ Σ_{i≠j} l_ij x_ij
+            for j in J:
+                idx   = [self._z_cpx[j, t] for t in self.T[j]]
+                coeff = [1.0] * len(self.T[j])
+                for i in nodes:
+                    if i != j:
+                        lij = max(0, len(self.T[i] | self.T[j]) - c)
+                        if lij > 0:
+                            idx.append(self._x_cpx[i, j]); coeff.append(-float(lij))
+                if idx:
+                    self._cpx.linear_constraints.add(
+                        lin_expr=[SparsePair(idx, coeff)],
+                        senses=['G'], rhs=[0.0], names=[f'vi23_{j}']
+                    )
+            # (24) if j immediately follows a job that also needs t, no re-insertion:
+            #      Σ_{i∈J_t\{j}} x_ij + z_jt ≤ 1
+            for j in J:
+                for t in self.T[j]:
+                    Jt = [i for i in J if i != j and t in self.T[i]]
+                    self._cpx.linear_constraints.add(
+                        lin_expr=[SparsePair([self._x_cpx[i, j] for i in Jt] + [self._z_cpx[j, t]],
+                                             [1.0] * len(Jt) + [1.0])],
+                        senses=['L'], rhs=[1.0], names=[f'vi24_{j}_{t}']
+                    )
+            # (25) a full predecessor (|T_i|=c) keeps its tools rather than reloading:
+            #      Σ_{t∈T_i\T_j} y_jt ≥ (c−|T_j|) x_ij,  for |T_i|=c, |T_j|<c
             for i in J:
-                for j in nodes:
-                    if j != i and (i, j) in self._x_cpx:
-                        Ti = len(self.T[i])
-                        Tj = len(self.T.get(j, set())) if j != depot else 0
-                        bound = max(0, Ti + Tj - c)
-                        if bound > 0:
-                            idx   = [self._z_cpx[i, t] for t in self.T[i]]
-                            idx  += [self._x_cpx[i, j]]
-                            coeff = [1.0]*len(self.T[i]) + [-float(bound)]
+                if len(self.T[i]) != c:
+                    continue
+                for j in J:
+                    if j != i and len(self.T[j]) < c:
+                        diff = self.T[i] - self.T[j]
+                        if diff:
                             self._cpx.linear_constraints.add(
-                                lin_expr=[SparsePair(idx, coeff)],
-                                senses=['G'], rhs=[0.0], names=[f'vi23_{i}_{j}']
+                                lin_expr=[SparsePair([self._y_cpx[j, t] for t in diff] + [self._x_cpx[i, j]],
+                                                     [1.0] * len(diff) + [-float(c - len(self.T[j]))])],
+                                senses=['G'], rhs=[0.0], names=[f'vi25_{i}_{j}']
                             )
-            for i in J:
-                for t in T:
-                    if t not in self.T[i]:
-                        idx = [self._z_cpx[i, t]]
-                        self._cpx.linear_constraints.add(
-                            lin_expr=[SparsePair(idx, [1.0])],
-                            senses=['E'], rhs=[0.0], names=[f'vi25_{i}_{t}']
-                        )
 
         if verbose:
             print(f"LSS model built (CPLEX): {n} jobs, {self._cpx_n_vars} variables")

@@ -71,13 +71,15 @@ SECs and Benders cuts are added dynamically via callback.
 
 **Constraints for y_jt ≥ 0**:
 ```
-−μ_j  −  Σ_{i≠j} λ_ijt  +  Σ_{k≠j} λ_jkt  +  [ν_jt if t∈T_j]  ≤  0
+−μ_j  −  λ̄d_jt  −  Σ_{i≠j} λ_ijt  +  Σ_{k≠j} λ_jkt  +  [ν_jt if t∈T_j]  ≤  0
 ```
 
 **Constraints for z_jt ≥ 0**:
 ```
-Σ_{i≠j} λ_ijt  +  [η_jt if t∉T_j]  ≤  [1 if t∈T_j else 0]
+λ̄d_jt  +  Σ_{i≠j} λ_ijt  +  [η_jt if t∉T_j]  ≤  1
 ```
+
+> **RHS = 1 for ALL t** (every tool insertion is a switch; the objective coefficient of z_jt is 1 regardless of whether t∈T_j). The depot-arc dual `λ̄d_jt` (depot→j) appears on the LHS of BOTH dual constraints — it enforces the empty-magazine start. The earlier doc `≤ [1 if t∈T_j else 0]` and the omission of `λ̄d_jt` were STALE; the CPLEX code (`_build_dsp_cplex_model`) is correct. (corrected 2026-06-15)
 
 ---
 

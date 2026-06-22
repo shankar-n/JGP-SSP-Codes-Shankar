@@ -590,6 +590,10 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
             )
 
         self.cpx = cplex.Cplex()
+        import os as _os
+        _thr = int(_os.environ.get("CPLEX_THREADS", "0"))   # pin threads (0 = CPLEX default) for reproducible/comparable timings
+        if _thr:
+            self.cpx.parameters.threads.set(_thr)
         if not verbose:
             self.cpx.set_log_stream(None)
             self.cpx.set_results_stream(None)

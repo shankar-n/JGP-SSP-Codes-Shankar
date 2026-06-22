@@ -28,6 +28,13 @@ Note
 ----
 jgp_gsp_gap is populated ONLY if the exact optimum is already in raw_results.csv.
 Otherwise it is left NULL — run precompute after the benchmark, or join manually.
+
+IMPORTANT (label): jgp_gsp_gap here is a HEURISTIC UPPER BOUND computed from a
+SINGLE JGP-optimal grouping (whatever solve_jgp_arf returns) and the best GSP
+ordering of THAT grouping. It is NOT the theoretical gap, which is the minimum
+over ALL optimal groupings (enumerate via the Go BFS / PORTA — see plans-genai).
+Use this column only as "how good is the deployable 2-phase heuristic vs the
+exact optimum", never for a worst-case / theoretical gap claim.
 """
 
 import argparse
