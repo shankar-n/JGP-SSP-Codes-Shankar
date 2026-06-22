@@ -1,0 +1,665 @@
+%% =====================================================================
+%% Part X (continued): PCF' and Branch-and-Price for the position-indexed
+%% formulations of the uniform SSP.
+%%
+%% STATUS / PROVENANCE (read me):
+%%   AI-assisted draft (Claude), 2026-06-22, companion to
+%%   10_position_formulations.tex (Part X), which is left UNTOUCHED.
+%%   This file is standalone (own preamble) and compiles on its own.
+%%   Per repo norms (CLAUDE.md): plans-genai files are NOT verified ground
+%%   truth. PCF' exactness and LP-invariance are PROVED here and checked
+%%   numerically (verify_pcf_prime.py, 6-ring). The pricing reduced-cost
+%%   derivations (Sec.3-4) are NEW; their sign conventions are the easiest
+%%   thing to get wrong and are flagged %% TODO-VERIFY and cross-checked by
+%%   a column-generation sanity run (RMP LP == full LP).
+%% =====================================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{natbib}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{enumitem}
+\usepackage{mdframed}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+
+\definecolor{navyblue}{RGB}{26,58,92}
+\definecolor{midblue}{RGB}{44,95,138}
+\definecolor{lightblue}{RGB}{232,240,248}
+\definecolor{proofgray}{RGB}{242,242,242}
+\definecolor{opencolor}{RGB}{235,245,235}
+\definecolor{openborder}{RGB}{0,120,0}
+\definecolor{warncolor}{RGB}{255,245,220}
+\definecolor{warnborder}{RGB}{180,100,0}
+
+\hypersetup{colorlinks=true,linkcolor=midblue,citecolor=midblue,urlcolor=midblue,
+  pdftitle={SSP Part X (cont.): PCF-prime and Branch-and-Price}}
+
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\color{navyblue}\textit{Part X (cont.): PCF$'$ and Branch-and-Price}}
+\fancyhead[R]{\small\color{navyblue}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}{\large\bfseries\color{navyblue}}{}{0em}{}[\color{navyblue}\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{midblue}}{}{0em}{}
+
+\newmdenv[backgroundcolor=lightblue,linecolor=navyblue,linewidth=1.2pt,
+  leftline=true,rightline=false,topline=false,bottomline=false,
+  innerleftmargin=12pt,innerrightmargin=8pt,innertopmargin=8pt,
+  innerbottommargin=8pt,skipabove=10pt,skipbelow=6pt]{thmbox}
+\newmdenv[backgroundcolor=proofgray,linecolor=midblue,linewidth=0.8pt,
+  leftline=true,rightline=false,topline=false,bottomline=false,
+  innerleftmargin=10pt,innerrightmargin=8pt,innertopmargin=6pt,
+  innerbottommargin=6pt,skipabove=6pt,skipbelow=6pt]{proofbox}
+\newmdenv[backgroundcolor=lightblue,linecolor=navyblue,linewidth=1.5pt,roundcorner=3pt,
+  innerleftmargin=14pt,innerrightmargin=14pt,innertopmargin=10pt,innerbottommargin=10pt,
+  skipabove=12pt,skipbelow=8pt]{formbox}
+\newmdenv[backgroundcolor=warncolor,linecolor=warnborder,linewidth=1.2pt,
+  leftline=true,rightline=false,topline=false,bottomline=false,
+  innerleftmargin=12pt,innerrightmargin=8pt,innertopmargin=8pt,
+  innerbottommargin=8pt,skipabove=10pt,skipbelow=6pt]{warnbox}
+\newmdenv[backgroundcolor=opencolor,linecolor=openborder,linewidth=1.2pt,
+  leftline=true,rightline=false,topline=false,bottomline=false,
+  innerleftmargin=12pt,innerrightmargin=8pt,innertopmargin=8pt,
+  innerbottommargin=8pt,skipabove=10pt,skipbelow=6pt]{openproblem}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\ZSSP}{Z_{\mathrm{SSP}}^{*}}
+\newcommand{\RC}{\overline{c}}
+\newcommand{\hd}{\mathrm{hd}}
+\newcommand{\tl}{\mathrm{tl}}
+\newcommand{\ins}{\mathrm{ins}}
+\setlist[itemize]{noitemsep,topsep=4pt}
+\setlist[enumerate]{noitemsep,topsep=4pt}
+
+\begin{document}
+
+\begin{center}
+  {\color{navyblue}\rule{\textwidth}{2pt}}\\[0.4cm]
+  {\LARGE\bfseries\color{navyblue}The Job Sequencing and Tool Switching Problem}\\[0.2cm]
+  {\large\bfseries\color{navyblue}Part X (continued): PCF$'$ and Branch-and-Price}\\[0.1cm]
+  {\large\itshape\color{midblue}A symmetry-reduced position formulation, and column-generation
+   algorithms for PCF and PTF}\\[0.3cm]
+  {\color{navyblue}\rule{\textwidth}{2pt}}
+\end{center}
+
+\vspace{0.3cm}
+\begin{mdframed}[backgroundcolor=lightblue,linecolor=navyblue,linewidth=1pt,
+  innerleftmargin=14pt,innerrightmargin=14pt,innertopmargin=8pt,innerbottommargin=8pt]
+\small\textbf{Scope and status.} This note continues \emph{Part X: Position-Indexed
+Formulations} (\texttt{10\_position\_formulations.tex}); all notation, the free-initial-load
+convention, the value $\ZSSP$, the trajectory normal form, and the formulations PCF and PTF
+are taken from there and used without restating their proofs. It contributes four things.
+\textbf{(1)} A symmetry-reduced variant \textbf{PCF$'$} of PCF: relax ``one configuration per
+position'' to ``at most one'', and force the empty positions to a suffix. We prove PCF$'$ is
+exact and --- importantly --- that its LP bound is \emph{unchanged} at $|U|-b$: the
+modification removes equivalent integer solutions (shrinks the branch-and-bound tree) but does
+\emph{not} strengthen the root relaxation. \textbf{(2)} A self-contained
+\textbf{branch-and-price primer}, written for a reader new to column generation.
+\textbf{(3)} The \textbf{pricing subproblems} for PCF$'$ and PTF, derived from the LP duals:
+PCF$'$ prices a single $b$-subset with job-coverage bonuses (a job-grouping pricing problem);
+PTF prices a \emph{coupled pair} of $b$-subsets (bilinear), the algorithmic price of its
+stronger bound. \textbf{(4)} \textbf{Implementation instructions} (SCIP/PySCIPOpt first) for a
+later session. Proofs in Sec.~\ref{sec:pcfp} are complete and numerically checked. The PCF$'$ reduced cost
+(Sec.~\ref{sec:pricepcf}) has been \textbf{verified against solver ground truth} on seven
+instances --- a sign error in an earlier draft was caught and corrected. The PTF reduced cost
+(Sec.~\ref{sec:priceptf}) has \textbf{now also been verified}: its compact arc model is exact
+($\mathrm{IP}=\ZSSP$) and its printed reduced cost matches solver ground truth on all non-$\bot$
+arcs across five instances, with its signs --- unlike PCF$'$'s --- already correct.
+This is an AI-assisted draft, not verified ground truth (repo norm).
+\end{mdframed}
+
+\vspace{0.3cm}
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Recap and notation}\label{sec:recap}
+% =====================================================================
+Jobs $J=\{1,\dots,n\}$ with tool sets $T_j\subseteq T$, $|T_j|\le b\le|T|$;
+$U=\bigcup_jT_j$; configurations $V=\{C\subseteq T:|C|=b\}$;
+$H_j=\{C\in V:T_j\subseteq C\}$; transition cost $d(C,C')=|C'\setminus C|$. The
+free-initial-load value $\ZSSP$ counts insertions after a cost-free first configuration. From
+Part~X we reuse, verbatim, the two formulations and one lemma.
+
+\textbf{PCF} (position--configuration). Binary $y_C^k$ ($C\in V$, $k=1,\dots,n$): configuration
+$C$ occupies position $k$. Continuous $w_t^k\ge0$ ($t\in T$, $k=2,\dots,n$): an insertion of
+tool $t$ at position $k$. Write $a_t^k:=\sum_{C\ni t}y_C^k$ (the ``presence mass'' of $t$ at
+position $k$). The model is
+\begin{align}
+  \min\ & \textstyle\sum_{t\in T}\sum_{k=2}^{n} w_t^k \notag\\
+  \text{(P)}\quad & \textstyle\sum_{C\in V} y_C^k = 1 && k=1,\dots,n \label{eq:P}\\
+  \text{(C)}\quad & \textstyle\sum_{k=1}^{n}\sum_{C\in H_j} y_C^k \ \ge\ 1 && j\in J \label{eq:C}\\
+  \text{(W)}\quad & w_t^k \ \ge\ a_t^k - a_t^{k-1} && t\in T,\ k=2,\dots,n \label{eq:W}\\
+  \text{(T)}\quad & \textstyle\sum_{k=2}^{n} w_t^k \ \ge\ 1 - a_t^1 && t\in U. \label{eq:T}
+\end{align}
+Part~X proves PCF is exact, that its plain LP (dropping \eqref{eq:T}) is $0$, and that with the
+\emph{tool-counting rows} \eqref{eq:T} the LP equals $|U|-b$.
+
+\textbf{PTF} (position--transition). Binary $z^k_{(C,C')}$ on the diagonal-free arc set
+$A=\{(C,C'):C\neq C'\in V\}\cup\{(C,\bot):C\in V\}\cup\{(\bot,\bot)\}$, $k=1,\dots,n-1$, carries
+the cost $d(C,C')$ directly; per-tool ``head $=$ tail'' rows chain the steps. PTF is exact and
+its LP can strictly exceed $|U|-b$. We restate it in full in Sec.~\ref{sec:priceptf}.
+
+\textbf{Normal form (Part X).} Every feasible instance has an optimal schedule whose magazine
+trajectory is a sequence of $m\le n$ \emph{pairwise distinct} configurations
+$C_{(1)},\dots,C_{(m)}$, each serving at least one job, of cost $\sum_{l<m}d(C_{(l)},C_{(l+1)})$.
+This lemma is the engine of every exactness argument below.
+
+% =====================================================================
+\section{PCF$'$: a symmetry-reduced PCF}\label{sec:pcfp}
+% =====================================================================
+The dominant symmetry of PCF is \emph{padding}. To fill $n$ positions with a length-$m$
+trajectory ($m<n$) one inserts $n-m$ repeated configurations, and they may be placed at many
+positions: the single physical schedule $D_1D_2D_3$ has encodings
+$D_1D_1D_2D_3$, $D_1D_2D_2D_3$, $D_1D_2D_3D_3,\dots$, all of equal cost. A solver explores these
+as distinct nodes. Sec.~\ref{sec:pcfp} removes the padding freedom.
+
+\subsection{The formulation}
+\begin{formbox}
+\textbf{PCF$'$.} Same variables as PCF. Replace the assignment equation \eqref{eq:P} by an
+inequality and add a contiguity row:
+\begin{align}
+  \min\ & \textstyle\sum_{t\in T}\sum_{k=2}^{n} w_t^k \notag\\
+  \text{[P$'$]}\quad & \textstyle\sum_{C\in V} y_C^k \ \le\ 1 && k=1,\dots,n \label{eq:Pp}\\
+  \text{[G]}\quad & \textstyle\sum_{C\in V} y_C^{k+1} \ \le\ \sum_{C\in V} y_C^{k} && k=1,\dots,n-1 \label{eq:G}\\
+  & \text{and \eqref{eq:C}, \eqref{eq:W}, \eqref{eq:T} unchanged.}\notag
+\end{align}
+Call position $k$ \emph{used} if $\sum_C y_C^k=1$ and \emph{empty} if $\sum_C y_C^k=0$.
+Row count $2n+(n-1)|T|+|U|+(n-1)=O(n|T|)$, still fixed in advance.
+\end{formbox}
+
+\begin{remark}[reading \eqref{eq:G}]\label{rem:prefix}
+At any integer point $\sum_C y_C^k\in\{0,1\}$, and \eqref{eq:G} makes this sequence
+non-increasing in $k$: a block of $1$s followed by $0$s. Hence the used positions are a
+\emph{prefix} $\{1,\dots,p\}$ and the empties are a \emph{suffix}. The free initial
+configuration sits at position $1$.
+\end{remark}
+
+\subsection{Exactness}
+\begin{thmbox}
+\begin{proposition}[PCF$'$ is exact]\label{prop:pcfp-exact}
+The optimum of PCF$'$ with binary $y$ equals $\ZSSP$.
+\end{proposition}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+($\le$) Take a normal-form schedule $D_1,\dots,D_m$ ($m\le n$, distinct). Set $y^l_{D_l}=1$ for
+$l=1,\dots,m$, leave positions $m{+}1,\dots,n$ empty, and $w_t^k=\max(0,a_t^k-a_t^{k-1})$.
+Rows \eqref{eq:Pp} hold ($=1$ on the prefix, $=0$ after); \eqref{eq:G} holds (prefix);
+\eqref{eq:C},\eqref{eq:W},\eqref{eq:T} hold exactly as in the PCF proof. Objective: for
+$k=2,\dots,m$, $\sum_t\max(0,a_t^k-a_t^{k-1})=d(D_{k-1},D_k)$; the transition $m\to m{+}1$ is
+full$\to$empty, so $a_t^{m+1}-a_t^m=-[t\in D_m]\le0$ and contributes $0$; later steps contribute
+$0$. The total is $\sum_{l<m}d(D_l,D_{l+1})=\ZSSP$. Hence $\min\le\ZSSP$.
+
+($\ge$) Take any integer-feasible PCF$'$ point. By \cref{rem:prefix} the used positions form a
+prefix $1,\dots,p$, each holding exactly one configuration (integral, $\sum_C y_C^k=1$ there),
+giving a trajectory $D_1,\dots,D_p$; empty positions hold no configuration. By \eqref{eq:W} the
+objective is $\ge\sum_{k=2}^{p}\sum_t\max(0,a_t^k-a_t^{k-1})=\sum_{k=2}^{p}d(D_{k-1},D_k)$, the
+empty suffix adding $0$. By \eqref{eq:C} every job is covered by some $D_k$ with $k\le p$ (empty
+positions contribute nothing to \eqref{eq:C}). Assign each job to a covering position, order
+jobs by position: the resulting schedule has KTNS cost $\le$ the trajectory cost $\le$ the
+objective, so $\ZSSP\le$ objective. Hence $\min\ge\ZSSP$.
+\end{proof}
+\end{proofbox}
+
+\subsection{The bound does not change}
+This is the load-bearing fact for branch-and-price: PCF$'$ is \emph{not} a stronger relaxation
+than PCF, so the only thing it can buy a tree-search solver is fewer equivalent nodes.
+
+\begin{thmbox}
+\begin{proposition}[LP invariance]\label{prop:pcfp-lp}
+Let $\mathrm{LP}(\cdot)$ denote the linear-relaxation value.
+\begin{enumerate}[label=(\alph*)]
+\item The feasible region of PCF is contained in that of PCF$'$; hence
+      $\mathrm{LP}(\mathrm{PCF}')\le\mathrm{LP}(\mathrm{PCF})$ for both the plain and the full model.
+\item Without \eqref{eq:T}, $\mathrm{LP}(\mathrm{PCF}')=0$.
+\item With \eqref{eq:T}, $\mathrm{LP}(\mathrm{PCF}')\ge|U|-b$. Consequently
+      $\mathrm{LP}(\mathrm{PCF}')=|U|-b$ on every instance where $\mathrm{LP}(\mathrm{PCF})=|U|-b$
+      --- i.e.\ on all instances tested in Part~X (reconfirmed for the $6$-ring in
+      Sec.~\ref{sec:impl}).
+\end{enumerate}
+\end{proposition}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+(a) Any PCF-feasible point has $\sum_C y_C^k=1$ for all $k$, so $\sum_C y_C^k\le1$
+(\,\eqref{eq:Pp}\,) and $\sum_C y_C^{k+1}=1\le1=\sum_C y_C^{k}$ (\,\eqref{eq:G}\,) hold; the
+remaining rows are shared. So $\{\text{PCF}\}\subseteq\{\text{PCF}'\}$ and minimising over the
+larger set can only lower the value.
+
+(b) The PCF plain-LP-zero certificate --- pick $C_j\in H_j$ and set
+$y^k=\frac1n\sum_j\delta_{C_j}$ at \emph{every} position, $w=0$ --- has $\sum_C y_C^k=1$ for all
+$k$, hence satisfies \eqref{eq:Pp} and \eqref{eq:G}; its objective is $0$, and $\mathrm{LP}\ge0$
+trivially.
+
+(c) Summing \eqref{eq:T} over $t\in U$ and using
+$\sum_{t\in U}a_t^1\le\sum_{t\in T}a_t^1=\sum_C|C|\,y_C^1=b\sum_C y_C^1\le b$ (now with
+``$\le b$'' from \eqref{eq:Pp}, not ``$=b$'') gives objective
+$\ge|U|-\sum_{t\in U}a_t^1\ge|U|-b$ at every PCF$'$ point. With (a),
+$|U|-b\le\mathrm{LP}(\mathrm{PCF}')\le\mathrm{LP}(\mathrm{PCF})$, so equality holds wherever the
+right side equals $|U|-b$.
+\end{proof}
+\end{proofbox}
+
+\subsection{Why each piece is exactly what it is}
+\begin{remark}[contiguity \eqref{eq:G} is for \emph{correctness}, not decoration]\label{rem:G-needed}
+Relaxing \eqref{eq:P} to \eqref{eq:Pp} \emph{without} \eqref{eq:G} breaks the model. Suppose an
+empty position sat in the interior, $\dots D_{k-1},\varnothing,D_{k+1}\dots$. Two failures: the
+cost row \eqref{eq:W} reads the empty$\to$full re-entry as $a_t^{k+1}-a_t^k=1$ for \emph{every}
+tool of $D_{k+1}$ and charges a spurious full reload of $b$; and the counting rows \eqref{eq:T},
+whose free-load term $a_t^1$ is pinned to position $1$, would mis-attribute the cost-free load if
+position~$1$ were empty. Forcing the empties to a suffix (\,\eqref{eq:G}\,) keeps the free
+configuration at position~$1$ and makes every used-to-used step a genuine transition. So
+\eqref{eq:G} is not optional symmetry-breaking; it is what makes the relaxed model mean what PCF
+means.
+\end{remark}
+
+\begin{remark}[``each configuration at most once'' is \emph{not} added as rows]\label{rem:once}
+The normal form licenses restricting to schedules whose configurations are pairwise distinct,
+i.e.\ $\sum_k y_C^k\le1$ for every $C\in V$. We deliberately do \emph{not} impose it, for three
+reasons. (i)~\emph{Coupling}: with the equality \eqref{eq:P} still in force it would require $n$
+\emph{distinct} configurations to fill $n$ positions --- infeasible or strictly suboptimal
+whenever the optimal trajectory has $m<n$ configurations; it only makes sense \emph{together
+with} the relaxation \eqref{eq:Pp}. (ii)~\emph{It destroys the design}: as explicit rows it is
+one constraint \emph{per configuration}, i.e.\ $|V|=\binom{|T|}{b}$ rows --- exponential ---
+which is exactly the row blow-up that the position formulations were built to avoid. (iii)~\emph{It
+is redundant for optimality}: a non-adjacent repeat $D_1D_2D_1D_3$ re-pays the return cost
+$d(D_2,D_1)\ge0$ and is dominated, so an optimal solution never uses one. The pair
+\eqref{eq:Pp}+\eqref{eq:G} already gives each trajectory a \emph{unique} encoding (prefix
+$D_1\cdots D_m$, then empties). If distinctness is ever wanted at a node it is enforced by
+\emph{branching} (Sec.~\ref{sec:bp}), never by adding the rows.
+\end{remark}
+
+\begin{remark}[what is bought, and what is not]\label{rem:bought}
+\eqref{eq:Pp}+\eqref{eq:G} collapse the padding orbit to one representative, which removes
+equivalent nodes from a branch-and-bound / branch-and-price tree. By
+\cref{prop:pcfp-lp} they do \emph{not} change the root bound $|U|-b$. The bound weakness is a
+\emph{different} defect, addressed only by a stronger relaxation (PTF, or new valid inequalities
+--- Part~X OP-X2). Keep the two concerns separate: PCF$'$ attacks symmetry; PTF attacks the bound.
+\end{remark}
+
+\begin{warnbox}
+\textbf{Verified} (\texttt{verify\_pcf\_prime.py}, full-enumeration MILP via PuLP/CBC,
+2026-06-22). On the $6$-ring ($b{=}3$, $|U|-b=3$, brute-force KTNS $\ZSSP=3$): for \emph{both}
+PCF and PCF$'$, plain LP $=0.000$, LP with \eqref{eq:T} $=3.000=|U|-b$, and
+$\mathrm{IP}=3.000=\ZSSP$. PCF$'$ reproduces PCF on every metric, confirming
+\cref{prop:pcfp-exact} and \cref{prop:pcfp-lp}: exactness holds and the relaxation is unchanged.
+\end{warnbox}
+
+% =====================================================================
+\section{Branch-and-price, from the ground up}\label{sec:bp}
+% =====================================================================
+This section assumes no prior exposure to column generation. The reader who knows
+\citet{Barnhart1998} and \citet{Lubbecke2005} can skip to Sec.~\ref{sec:pricepcf}.
+
+\subsection{The problem column generation solves}
+Both PCF$'$ and PTF have a \emph{polynomial} number of rows but an \emph{exponential} number of
+columns: one $y_C^k$ per configuration $C\in V$ (PCF$'$), or one $z^k_{(C,C')}$ per arc (PTF),
+and $|V|=\binom{|T|}{b}$ is astronomically large. We cannot even write the LP down. Column
+generation (CG) solves such an LP \emph{without enumerating its columns}.
+
+\subsection{The mechanics}
+Work with a \emph{restricted master problem} (RMP): the same rows, but only a small subset
+$\Omega$ of the columns. Then iterate:
+\begin{enumerate}
+\item Solve the RMP \emph{linear relaxation}. This yields a primal solution and, crucially, a
+      vector of \emph{dual values} (one per row).
+\item \emph{Pricing.} A column not in $\Omega$ can improve the LP only if its \emph{reduced cost}
+      is negative. For a minimisation with columns at lower bound $0$,
+      \[
+        \RC(\text{column})\;=\;(\text{objective coefficient})\;-\;\sum_{\text{rows }r}
+        \pi_r\,(\text{coefficient of the column in row }r),
+      \]
+      where $\pi_r$ are the duals from step~1. Instead of scanning all columns we \emph{optimise}:
+      find the single column of \emph{minimum} reduced cost by solving a \emph{pricing
+      subproblem} over the implicit description of a column (here: choose a configuration, or an
+      arc).
+\item If $\min\RC\ge0$, no column can improve the LP: the RMP LP value equals the
+      \emph{full} LP value and CG stops. Otherwise add the offending column(s) to $\Omega$ and
+      return to step~1.
+\end{enumerate}
+The art is entirely in step~2: the pricing subproblem must (a) have the same optimum as a brute
+scan over all columns, and (b) be solvable quickly. Sections~\ref{sec:pricepcf}
+and~\ref{sec:priceptf} derive it for our two models.
+
+\subsection{Dantzig--Wolfe view of PCF$'$ and PTF}
+CG is the algorithmic face of a Dantzig--Wolfe reformulation \citep{Vanderbeck2010}: the
+``hard'' combinatorial object --- the configuration set $V$ --- is pushed into the columns, while
+the coupling constraints (coverage, counting, chaining) stay in the master as the fixed
+$O(n|T|)$ rows. This is precisely the property Part~X engineered: \emph{rows fixed in advance,
+columns generated on demand}. A generated configuration (PCF$'$) or arc (PTF) drops into existing
+rows and never creates a new one. Historically this is the same move \citet{Crama1994Column} used
+to price job groups for flexible manufacturing systems; our pricing problems are close relatives.
+
+\subsection{From an LP method to an exact integer method}
+CG solves one LP --- the relaxation at one node. To obtain an \emph{integer} optimum we run
+branch-and-bound and solve \emph{every node's} LP by column generation. That is
+\emph{branch-and-price} \citep{Barnhart1998}. The one genuinely new difficulty is that branching
+decisions must be compatible with pricing:
+\begin{itemize}
+\item \textbf{Naive branching on a single column} ($y_C^k\!=\!0$ or $1$). Fixing $y_C^k=0$
+      \emph{forbids} a column; the pricer must then be prevented from regenerating it, so the
+      pricing oracle has to carry a growing list of forbidden columns. Fixing variables this way
+      also yields lopsided, deep trees. Usable but clumsy.
+\item \textbf{Robust branching} (recommended). Branch on an \emph{original}, polynomially-many
+      quantity whose effect on the pricer is merely a change of one dual. For PCF$'$ the natural
+      choice is the \emph{tool-presence} variable $a_t^k=\sum_{C\ni t}y_C^k\in\{0,1\}$: ``is tool
+      $t$ in the magazine at position $k$?''. Branching $a_t^k=0\,/\,1$ adds one bound; in the
+      pricer it just shifts the weight $\rho_t^k$ of tool $t$ at position $k$
+      (Sec.~\ref{sec:pricepcf}), leaving the oracle's \emph{structure} untouched. ``Robust''
+      means exactly this: the subproblem keeps its form.
+\item \textbf{Ryan--Foster branching} \citep{Ryan1981}. For set-partition-flavoured masters,
+      branch on whether two elements are forced \emph{together} or \emph{apart} (here: two jobs
+      sharing a position, or a job pinned to/away from a position). It partitions the LP feasible
+      set cleanly and is pricing-compatible. A standard fallback when single-bound branching
+      stalls.
+\end{itemize}
+
+\subsection{Symmetry, revisited in the CG setting}
+The position index is the source of symmetry. Three points decide how to treat it under CG.
+First, the contiguity rows \eqref{eq:G} are \emph{master} rows in the original variables
+($n-1$ of them); they are fully CG-compatible --- they simply contribute $n-1$ extra duals to the
+reduced cost. Keep them. Second, the ``at-most-once'' rows are \emph{not} CG-compatible
+(exponentially many, one per configuration); do not add them (\cref{rem:once}). Third, piling on
+further static lexicographic order cuts tends to \emph{fight} the pricer, because they impose an
+ordering the subproblem does not respect. The textbook resolution \citep{Vanderbeck2010,
+Lubbecke2005} is that the Dantzig--Wolfe reformulation already aggregates identical
+subproblems, and any \emph{residual} symmetry is broken in the \emph{branching rule} (branch on
+$a_t^k$, or Ryan--Foster), not by more cuts. \textbf{Recommendation:} keep \eqref{eq:G}; handle
+the rest by branching.
+
+\subsection{Why the bound is the whole game}
+Branch-and-bound effort grows with the \emph{integrality gap} $\ZSSP-\mathrm{LP}_{\text{root}}$.
+Here PCF$'$ has $\mathrm{LP}_{\text{root}}=|U|-b$, which can sit far below $\ZSSP$, so its tree
+can be large; PTF has $\mathrm{LP}_{\text{root}}>|U|-b$, a smaller tree, but a harder pricing
+subproblem (Sec.~\ref{sec:priceptf}). \emph{Stronger bound vs.\ cheaper pricing} is the central
+engineering trade-off of this whole programme. (The $6$-ring is deceptively kind: there
+$|U|-b=3=\ZSSP$, so even PCF$'$ has a zero root gap. General instances do not.)
+
+% =====================================================================
+\section{Pricing subproblem for PCF$'$}\label{sec:pricepcf}
+% =====================================================================
+\subsection{What is generated, what is structural}
+The continuous insertion variables $w_t^k$ number $(n-1)|T|=O(n|T|)$ --- polynomially many ---
+so they live in the master at all times. The exponential family is $\{y_C^k\}$: \emph{these are
+the generated columns}, one per (configuration $C$, position $k$).
+
+\subsection{Duals and the reduced cost of a column}
+Attach a dual to each master row of the PCF$'$ LP: $\alpha_k$ to \eqref{eq:Pp} ($\le0$),
+$\gamma_k$ to \eqref{eq:G} ($\le0$), $\pi_j\ge0$ to coverage \eqref{eq:C}, $\mu_{t,k}\ge0$ to the
+cost rows \eqref{eq:W}, and $\lambda_t\ge0$ to the counting rows \eqref{eq:T}. Collecting the
+coefficient of a single column $y_C^k$ in every row (it has objective coefficient $0$):
+\begin{itemize}
+\item \eqref{eq:Pp} at position $k$: coefficient $+1$.
+\item \eqref{eq:G}: $y_C^k$ appears in row $k{-}1$ as the $+\sum_C y_C^k$ term (coeff $+1$, for
+      $k\ge2$) and in row $k$ as the $-\sum_C y_C^k$ term (coeff $-1$, for $k\le n-1$).
+\item coverage \eqref{eq:C}: coefficient $+1$ for every job $j$ with $T_j\subseteq C$ (i.e.\
+      $C\in H_j$).
+\item cost rows \eqref{eq:W}: through $a_t^k=\sum_{C\ni t}y_C^k$, the column contributes to
+      $-a_t^k$ in row $(t,k)$ (coeff $-1$, each $t\in C$, $k\ge2$) and to $+a_t^{k}$ in row
+      $(t,k{+}1)$ (coeff $+1$, each $t\in C$, $k\le n-1$).
+\item counting rows \eqref{eq:T}: only the $+a_t^1$ term, so only at $k=1$ (coeff $+1$, each
+      $t\in C\cap U$).
+\end{itemize}
+Hence the reduced cost is
+\begin{equation}\label{eq:rc-pcf}
+  \RC(C,k)\;=\;\underbrace{-\alpha_k-\gamma_{k-1}[k\ge2]+\gamma_k[k\le n-1]}_{\textstyle\beta_k\ \text{(depends only on }k)}
+  \;-\;\sum_{t\in C}\rho_t^{\,k}\;-\;\sum_{j:\,T_j\subseteq C}\pi_j,
+\end{equation}
+where the per-tool, per-position weight is
+\begin{equation}\label{eq:rho}
+  \rho_t^{\,k}\;:=\;-\,\mu_{t,k}[k\ge2]\;+\;\mu_{t,k+1}[k\le n-1]\;+\;\lambda_t\,[k=1]\,[t\in U].
+\end{equation}
+\emph{(\textbf{Verified \& corrected} 2026-06-22, \texttt{verify\_pricing.py}: this reduced cost
+was checked against CBC's ground-truth reduced costs on the $6$-ring and six random small
+instances, matching to $<10^{-9}$ over every column. An earlier draft had the three per-tool
+signs in \eqref{eq:rho} flipped (a per-column error of $4$--$6$); the signs above are the
+corrected, verified ones. The position constant $\beta_k$ and the additive structure --- all the
+pricing oracle actually needs --- were confirmed correct.)}
+
+\subsection{The pricing problem is a $b$-subset with coverage bonuses}
+By \eqref{eq:rc-pcf}, for a \emph{fixed} position $k$ the most negative reduced cost is obtained
+by \emph{maximising} the configuration-dependent part:
+\begin{equation}\label{eq:price-pcf}
+  \boxed{\;\max_{\,C\subseteq T,\ |C|=b}\ \ \sum_{t\in C}\rho_t^{\,k}\;+\;\sum_{j:\,T_j\subseteq C}\pi_j\;}
+\end{equation}
+and a column prices in iff $\beta_k-(\text{this max})<0$ for some $k$. In words: choose $b$ tools
+to collect tool rewards $\rho_t^k$ \emph{plus} a bonus $\pi_j\ge0$ for every job whose
+\emph{entire} tool set lands inside $C$. This is the job-grouping pricing class --- exactly the
+``single set with job-coverage bonuses'' of Part~X.
+
+\paragraph{Exact MILP.} Binary $x_t=[t\in C]$ and $u_j=[T_j\subseteq C]$:
+\begin{align}
+  \max\ & \textstyle\sum_{t\in T}\rho_t^{\,k}\,x_t+\sum_{j\in J}\pi_j\,u_j
+   \quad\text{s.t.}\quad \textstyle\sum_t x_t=b,\quad u_j\le x_t\ \ (\forall t\in T_j),\quad
+   x_t\in\{0,1\},\ u_j\in[0,1].\notag
+\end{align}
+Because $\pi_j\ge0$, at the optimum $u_j=\min_{t\in T_j}x_t=[T_j\subseteq C]$ automatically, so
+$u_j$ may stay continuous. Solve once per position $k$ (or jointly with $k$ as an index).
+
+\paragraph{Complexity and shortcuts.} The bonus term makes \eqref{eq:price-pcf} a budgeted
+maximum-coverage variant --- NP-hard in $b$ in general --- but for \emph{fixed} $b$ it is
+polynomial: enumerate the $\binom{|T|}{b}$ candidate subsets. At SSP magazine sizes this is
+milliseconds, and a closed enumeration is often faster than invoking a MILP solver. In
+production: a greedy heuristic pricer (add the tool of best marginal reward, repair to
+$|C|=b$) returns columns cheaply, with the exact MILP/enumeration run \emph{only} when the
+heuristic finds none --- the exact solve is mandatory before declaring CG converged.
+
+\paragraph{Branching link.} Branching on $a_t^k$ (Sec.~\ref{sec:bp}) injects its branching dual
+additively into $\rho_t^{\,k}$ in \eqref{eq:rho}; the pricer \eqref{eq:price-pcf} is unchanged in
+form. That is what makes the scheme robust.
+
+\begin{warnbox}
+\textbf{Verified} (\texttt{verify\_pricing.py}, 2026-06-22). The reduced cost \eqref{eq:rc-pcf}
+with the corrected weights \eqref{eq:rho} reproduces the ground-truth reduced cost (computed
+definitionally from the model duals, and cross-checked against CBC's own $\overline{c}_j$) on the
+$6$-ring and six random instances ($J\le6$, $|T|\le7$, $b\in\{2,3\}$): maximum discrepancy
+$<10^{-9}$ over \emph{all} columns, while complementary slackness ($\overline{c}\ge0$ everywhere,
+$=0$ on basic columns) independently confirms the dual extraction. The previously printed signs
+gave a discrepancy of $4$--$6$ per column --- exactly the class of bug this check exists to catch,
+and the reason PTF's \eqref{eq:rc-ptf} is not trusted until its own run.
+\end{warnbox}
+
+% =====================================================================
+\section{Pricing subproblem for PTF}\label{sec:priceptf}
+% =====================================================================
+\subsection{The formulation, restated}
+With $\hd_t^k=\sum_{(C,C')\in A:\,t\in C'}z^k$, $\tl_t^k=\sum_{(C,C')\in A:\,t\in C}z^k$, and
+$\ins_t^k=\sum_{(C,C')\in A:\,t\in C'\setminus C}z^k$ ($t\in\bot$ always false), PTF is
+\begin{align}
+  \min\ & \textstyle\sum_{k=1}^{n-1}\sum_{(C,C')\in A} d(C,C')\,z^k_{(C,C')} \notag\\
+  \text{(Pz)}\ & \textstyle\sum_{(C,C')\in A} z^k_{(C,C')} = 1 && k=1,\dots,n-1 \label{eq:Pz}\\
+  \text{(cons)}\ & \hd_t^k = \tl_t^{k+1} && t\in T,\ k\le n-2 \label{eq:cons}\\
+  \text{(abs)}\ & \textstyle\sum_{(C,\bot)\in A} z^k \ \le\ z^{k+1}_{(\bot,\bot)} && k\le n-2 \label{eq:abs}\\
+  \text{(Cz)}\ & \textstyle\sum_{T_j\subseteq C} z^1_{(C,C')}+\sum_{k}\sum_{T_j\subseteq C'} z^k_{(C,C')} \ \ge\ 1 && j\in J \label{eq:Cz}\\
+  \text{(Tz)}\ & \textstyle\sum_{k=1}^{n-1}\ins_t^k \ \ge\ 1-\tl_t^1 && t\in U. \label{eq:Tz}
+\end{align}
+The columns are arcs $z^k_{(C,C')}$; there is no separate $w$. Compared with PCF$'$, two things
+change the pricing: the cost sits \emph{on the column} ($d(C,C')=|C'\setminus C|$), and the
+chaining rows \eqref{eq:cons} couple a column's \emph{head} tools to the next step's \emph{tail}.
+
+\subsection{Duals and the reduced cost of an arc}
+Duals: $\sigma_k$ (free) on \eqref{eq:Pz}; $\delta_{t,k}$ (free) on \eqref{eq:cons};
+$\phi_k\le0$ on \eqref{eq:abs}; $\pi_j\ge0$ on \eqref{eq:Cz}; $\lambda_t\ge0$ on \eqref{eq:Tz}.
+For a non-$\bot$ arc $z^k_{(C,C')}$ (objective coefficient $d(C,C')=\sum_t[t\in C'][t\notin C]$),
+collecting coefficients:
+\begin{itemize}
+\item \eqref{eq:Pz} at $k$: $+1\Rightarrow\sigma_k$.
+\item \eqref{eq:cons}: this column is the \emph{head} of step $k$, so $+1$ in row $(t,k)$ for each
+      $t\in C'$ (if $k\le n-2$); and the \emph{tail} of step $k$, so $-1$ in row $(t,k{-}1)$ for
+      each $t\in C$ (if $2\le k\le n-1$).
+\item coverage \eqref{eq:Cz}: at $k=1$, $+1$ for jobs with $T_j\subseteq C$ (first tail); at any
+      $k$, $+1$ for jobs with $T_j\subseteq C'$ (head).
+\item counting \eqref{eq:Tz}: $+\lambda_t$ for each $t\in C'\setminus C$ (the $\ins$ term), and at
+      $k=1$ additionally $+\lambda_t$ for each $t\in C$ (the $\tl_t^1$ term).
+\end{itemize}
+Therefore
+\begin{equation}\label{eq:rc-ptf}
+\begin{aligned}
+  \RC(C,C',k)\;=\;&\sum_{t}[t\in C'\setminus C]\,(1-\lambda_t)\ -\ \sigma_k
+   \ -\ \sum_{t\in C'}\delta_{t,k}[k\le n-2]\ +\ \sum_{t\in C}\delta_{t,k-1}[2\le k\le n-1]\\
+   &-\ \sum_{j:\,T_j\subseteq C'}\pi_j\ -\ [k=1]\sum_{j:\,T_j\subseteq C}\pi_j\ -\ [k=1]\sum_{t\in C}\lambda_t.
+\end{aligned}
+\end{equation}
+\emph{(\textbf{Verified} 2026-06-22, \texttt{verify\_ptf\_pricing.py}: unlike PCF$'$, the printed
+signs of \eqref{eq:rc-ptf} are correct --- it reproduces CBC's ground-truth reduced costs on all
+non-$\bot$ arcs over the $6$-ring and four random instances, exact to $<10^{-9}$. $\bot$-arcs
+$z^k_{(C,\bot)}$, $z^k_{(\bot,\bot)}$ have $d=0$ and only the $\sigma,\phi,\delta,\pi$
+contributions of their single real endpoint --- a handful of cheap columns priced by inspection,
+confirmed to price $\ge0$ at the LP optimum.)}
+
+\subsection{Pricing is a \emph{coupled pair} of $b$-subsets}
+The decisive term is $\sum_t[t\in C'\setminus C](1-\lambda_t)$: it is \emph{bilinear} in the
+indicator of $C$ and the indicator of $C'$. Unlike PCF$'$, the pricing problem cannot separate
+into one set --- it must choose two $b$-subsets $C\neq C'$ at once, with the cost and the $\ins$
+reward both living on the \emph{difference} $C'\setminus C$. This is the algorithmic cost of
+PTF's stronger LP bound.
+
+\paragraph{Linearised MILP (per step $k$).} Binaries $x_t=[t\in C]$, $x'_t=[t\in C']$, and a
+linearisation $p_t=[t\in C'\setminus C]=x'_t(1-x_t)$ via the standard McCormick inequalities:
+\begin{align*}
+  \min\ \ & \sum_t (1-\lambda_t)\,p_t-\sigma_k-\sum_t\delta_{t,k}[k\le n-2]\,x'_t
+    +\sum_t\delta_{t,k-1}[2\le k\le n-1]\,x_t\\
+    &\quad-\sum_j\pi_j\,u'_j-[k=1]\sum_j\pi_j\,u_j-[k=1]\sum_t\lambda_t\,x_t\\
+  \text{s.t.}\ \ & \textstyle\sum_t x_t=b,\ \ \sum_t x'_t=b,\qquad
+    p_t\le x'_t,\ \ p_t\le 1-x_t,\ \ p_t\ge x'_t-x_t,\ \ p_t\ge0,\\
+    & u'_j\le x'_t\ (\forall t\in T_j),\quad u_j\le x_t\ (\forall t\in T_j),\quad
+    \textstyle\sum_t p_t\ge 1\ \ (\text{enforces }C\neq C'),\\
+    & x_t,x'_t\in\{0,1\},\ \ u_j,u'_j\in[0,1].
+\end{align*}
+Here $u'_j=[T_j\subseteq C']$, $u_j=[T_j\subseteq C]$, and $\sum_t p_t=d(C,C')\ge1$ excludes the
+diagonal. The model has $2|T|$ binaries plus $|T|$ linearisation variables --- strictly larger
+and harder than the PCF$'$ pricer \eqref{eq:price-pcf}.
+
+\paragraph{Heuristic pricing.} Alternate: fix $C$ (e.g.\ from a PCF$'$-style single-set pricer)
+and optimise $C'$ (now a pure $b$-subset problem), then fix $C'$ and optimise $C$; iterate a few
+rounds. Use the exact coupled MILP only as the convergence-guaranteeing fallback. Degeneracy from
+the $n-1$ identical step rows \eqref{eq:Pz} should be expected; stabilisation
+(\citealp{Lubbecke2005}) or dual smoothing helps.
+
+\begin{warnbox}
+\textbf{Verified} (\texttt{verify\_ptf\_pricing.py}, 2026-06-22). \emph{Model first}: the full-arc
+PTF MILP returns $\mathrm{IP}=\ZSSP$ on the $6$-ring and four random instances (brute-force KTNS),
+so the diagonal-free/absorbing formulation is implemented faithfully. \emph{Then the reduced
+cost}: the printed \eqref{eq:rc-ptf} reproduces the ground-truth reduced cost (definitional, and
+CBC's $\overline{c}_j$, themselves agreeing to $8\times10^{-15}$) on \emph{every} non-$\bot$ arc
+across all five instances --- maximum discrepancy $0$ --- with optimality ($\overline{c}\ge0$,
+$=0$ on basic arcs, $\bot$-arcs included) holding throughout. So, in contrast to PCF$'$
+(\cref{eq:rho}), PTF's printed signs needed no correction. On the $6$-ring the PTF LP equals
+$3=\ZSSP$ (tight), consistent with Part~X.
+\end{warnbox}
+
+% =====================================================================
+\section{Implementation plan (SCIP / PySCIPOpt first)}\label{sec:impl}
+% =====================================================================
+We will build this together in a later session; this section fixes the design so that session is
+mechanical.
+
+\subsection{Why SCIP, not CPLEX, for the prototype}
+SCIP exposes a first-class \emph{pricer} plugin: in PySCIPOpt one subclasses \texttt{Pricer} and
+implements \texttt{pricerredcost} (reduced-cost pricing) and \texttt{pricerfarkas} (Farkas
+pricing for infeasible RMPs); SCIP runs the branch-and-bound and calls back for columns. GCG ---
+the generic branch-price-and-cut solver built on SCIP --- goes further and can detect a
+Dantzig--Wolfe structure automatically, letting us test the reformulation with almost no pricing
+code. CPLEX has \emph{no} native column-generation loop: one would drive branch-and-bound through
+the generic-callback interface and manage the RMP and pricing by hand --- substantially more
+plumbing and easy to get subtly wrong. Plan: prototype and validate in SCIP/PySCIPOpt; only port
+the winner to CPLEX if we need parity with the existing BBC timings (CLAUDE.md: CPLEX is the
+repo's primary solver, all baselines thread-pinned).
+
+\subsection{Components (PCF$'$ first)}
+\begin{enumerate}
+\item \textbf{Instance load.} \texttt{utils.load\_ssp\_instance(path)} $\to(J,T,C,A,T_j)$;
+      start with \texttt{data/Shankar/shankar-example.txt} (the $6$-ring).
+\item \textbf{Restricted master.} Rows \eqref{eq:Pp},\eqref{eq:G},\eqref{eq:C},\eqref{eq:W},
+      \eqref{eq:T}; structural $w_t^k$; seed columns from a feasible schedule
+      (\texttt{heuristics.warmstart\_from\_jgp} or \texttt{greedy\_ffd} $\to$ a job sequence
+      $\to$ its per-position configurations). A feasible seed (covering every job) gives valid
+      duals immediately and avoids leaning on Farkas pricing early.
+\item \textbf{Pricer.} In \texttt{pricerredcost}: read $\alpha,\gamma,\pi,\mu,\lambda$; form
+      $\rho_t^{\,k}$ \eqref{eq:rho} and $\beta_k$; for each position $k$ solve
+      \eqref{eq:price-pcf} (enumeration for small $b$, else the MILP); add every column with
+      $\RC<-\varepsilon$. Implement \texttt{pricerfarkas} too, or guarantee initial feasibility so
+      it is trivial.
+\item \textbf{Branching.} Begin with SCIP's default on the $a_t^k$ presence variables (introduce
+      them as bounded auxiliaries tied to $y$ through the existing \eqref{eq:W} linkage, or via a
+      small constraint handler); escalate to Ryan--Foster only if needed.
+\item \textbf{Extract and validate.} On an integral leaf, read the prefix trajectory
+      $D_1,\dots,D_p$, flatten to a schedule, and assert
+      \texttt{compute\_ktns(sequence)} $=$ objective. Mismatch $\Rightarrow$ a modelling or
+      sign bug, stop.
+\end{enumerate}
+
+\subsection{PTF differences}
+Columns are arcs; the pricer solves the coupled-pair MILP of Sec.~\ref{sec:priceptf}; chaining
+\eqref{eq:cons} and absorption \eqref{eq:abs} are ordinary master rows. Expect slower pricing and
+more degeneracy; budget for stabilisation.
+
+\subsection{Phased milestones (each gates the next)}
+\begin{description}
+\item[P0 --- compact sanity \textnormal{[\textbf{DONE} 2026-06-22]}.] \emph{Verified} by
+      \texttt{verify\_pcf\_prime.py}, \texttt{verify\_pricing.py}, \texttt{verify\_ptf\_pricing.py}
+      (in \texttt{plans-genai/\_verification/}); a sign bug in PCF$'$ pricing was caught and fixed.
+      Build PCF$'$ as a \emph{full}
+      MILP with \emph{all} $\binom{|T|}{b}$ configurations enumerated (only tiny $|T|$), on the
+      $6$-ring and a few random instances. Assert $\mathrm{IP}=\ZSSP$ (cross-check
+      \texttt{compute\_ktns} / brute force), plain LP $=0$, LP with \eqref{eq:T} $=|U|-b$. This
+      validates \cref{prop:pcfp-exact,prop:pcfp-lp} \emph{before} any CG code exists.
+\item[P1 --- PCF$'$ CG at the root.] Implement the pricer; assert the CG root LP equals the P0
+      compact LP. This is the \emph{sign check} for \eqref{eq:rc-pcf}--\eqref{eq:rho}: if the
+      reduced-cost algebra is wrong, the two LP values diverge.
+\item[P2 --- PCF$'$ full branch-and-price.] Add branching; assert the integer optimum equals
+      brute force / the BBC solver on the $6$-ring and randoms; log node counts against a plain
+      compact PCF solve to quantify the symmetry win.
+\item[P3 --- PTF.] Repeat P1--P2 with the coupled pricer; confirm the root LP exceeds $|U|-b$ on
+      the Part~X ``above-bounds'' instance.
+\item[P4 --- benchmark.] Compare against BBC / SSPMF on a Tabela1C subset, recording
+      \texttt{obj\_ktns} (empty-start) per the repo convention, threads pinned.
+\end{description}
+
+\subsection{Token / session economy}
+Load the \texttt{ssp-bbc-expert} skill at the start of the implementation session (it carries the
+CPLEX/repo context); keep \texttt{verify\_pcf\_prime.py} and the pricer in
+\texttt{src/BBC/} next to the existing solvers; and run the P0/P1 verification in an isolated
+subagent so its solver output does not consume the main session's context.
+
+% =====================================================================
+\section{Open problems}\label{sec:op}
+% =====================================================================
+\begin{openproblem}
+\textbf{OP-X5 (pricing complexity).} The PCF$'$ pricer \eqref{eq:price-pcf} is polynomial for
+fixed $b$ (enumeration) but a budgeted-coverage problem in general. Is it NP-hard as a function
+of $b$? Characterise its relation to the job-grouping pricing of \citet{Crama1994Column}, and
+decide whether a combinatorial (non-MILP) oracle exists at the magazine sizes of the Tabela1C
+benchmarks.
+\end{openproblem}
+\begin{openproblem}
+\textbf{OP-X6 (pricing-compatible symmetry breaking).} Prove that branching on $a_t^k$ (or a
+Ryan--Foster rule on job/position pairs) preserves both pricing oracles \emph{and} eliminates the
+residual position symmetry not already killed by \eqref{eq:G}; quantify the interaction between
+\eqref{eq:G} and the branching rule (do they ever over-constrain jointly?).
+\end{openproblem}
+\begin{openproblem}
+\textbf{OP-X7 (does the stronger bound pay?).} Empirically, net of pricing cost, does PTF's
+stronger root LP (Sec.~\ref{sec:priceptf}, Part~X) yield smaller branch-and-price trees than
+PCF$'$, or does the coupled-pair pricer erase the advantage? Settle on the Tabela1C subset and on
+the disjoint-ring family (Part~V) where the gap grows.
+\end{openproblem}
+
+\bibliographystyle{abbrvnat}
+\bibliography{references}
+\end{document}

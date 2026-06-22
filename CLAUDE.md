@@ -24,6 +24,8 @@ Grid is 11 configs (8 BBC ablation + LSS + SSPMF + CATZ-F4); sbatch array `0-10`
 
 **PARKED until the BBC paper is done** — these are separate future papers / where-SOTA-lacks directions, NOT on the BBC critical path: gap theory (`05_jgp_ssp_gap_analysis`), grouping selection (`06`), collapse variants (`07`), position formulations Part X (`10`), the ring `K>K*` experiment, and ML / CG-seed ideas. Concrete to-do for each is in `plans-genai/12_work_plan.md` (§A,B,C,E), `11_research_directions.md`, and `09_open_problems.tex`. Do not pick these up unless explicitly asked.
 
+**ACTIVE side-thread (2026-06-22) — B&P for position formulations (NOT parked):** branch-and-price extension of PCF′/PTF is in progress. Theory: `plans-genai/10b_position_branch_and_price.tex`. P0 done — compact models + pricing formulas verified against solver ground truth (PCF′ `eq:rho` had a sign bug, now fixed; PTF correct). Live status, verified formulas, and the resume point: **`src/BNP/README_RESUME.md`** (read this first to continue). B&P code lives in `src/BNP/` (parallel to `src/BBC/`); common code is reused from `src/SSP/` as-is. Verify scripts: `plans-genai/_verification/verify_{pcf_prime,pricing,ptf_pricing}.py`. Next step: P1 (PySCIPOpt PCF′ pricer).
+
 ---
 
 ## Skills — Load Before Specialised Work
