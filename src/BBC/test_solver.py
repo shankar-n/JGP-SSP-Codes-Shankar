@@ -45,12 +45,17 @@ def brute(n, tool_req, C):
 
 
 # ── solver adapters: each returns (obj, sequence); ImportError => skipped ──────
-def _run_bbc(n, m, C, tr):
-    from branch_and_benders_cut_cplex import BranchAndBendersCutSSP_CPLEX
-    s = BranchAndBendersCutSSP_CPLEX(n, m, C, tr)
-    s.build_master_problem(verbose=False)
-    _st, ob, seq = s.solve(time_limit=TIME_LIMIT, verbose=False)
-    return ob, seq
+def _make_bbc(comb, frac, trip):
+    """Adapter for one BBC flag combination (comb_cuts, frac_cuts, triplet_bounds)."""
+    def _run(n, m, C, tr):
+        from branch_and_benders_cut_cplex import BranchAndBendersCutSSP_CPLEX
+        s = BranchAndBendersCutSSP_CPLEX(n, m, C, tr, worker_lp_reuse=True,
+                                         use_combinatorial_cuts=comb, use_fractional_cuts=frac,
+                                         use_triplet_bounds=trip, parallel=False)
+        s.build_master_problem(verbose=False)
+        _st, ob, seq = s.solve(time_limit=TIME_LIMIT, verbose=False)
+        return ob, seq
+    return _run
 
 def _run_lss(n, m, C, tr):
     from lss_formulation import LSSFormulation
@@ -73,7 +78,11 @@ def _run_catz(n, m, C, tr):
     _st, ob, seq = s.solve(time_limit=TIME_LIMIT, verbose=False)
     return ob, seq
 
-SOLVERS = [("BBC", _run_bbc), ("LSS", _run_lss), ("SSPMF", _run_sspmf), ("CATZ-F4", _run_catz)]
+# All 8 BBC ablation flag combos (comb x frac x triplet) -- so a cut/bound bug in any
+# config is caught vs brute force, not discovered mid-campaign. Plus the 3 baselines.
+_BBC_FLAGS = [(c, f, t) for c in (False, True) for f in (False, True) for t in (False, True)]
+SOLVERS = ([(f"BBC[c{int(c)}f{int(f)}t{int(t)}]", _make_bbc(c, f, t)) for (c, f, t) in _BBC_FLAGS]
+           + [("LSS", _run_lss), ("SSPMF", _run_sspmf), ("CATZ-F4", _run_catz)])
 
 
 def instances():
