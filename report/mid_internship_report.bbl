@@ -1,0 +1,215 @@
+\begin{thebibliography}{32}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Applegate et~al.(2006)Applegate, Bixby, Chv{\'a}tal, and
+  Cook]{Applegate2006}
+David~L. Applegate, Robert~E. Bixby, Va{\v{s}}ek Chv{\'a}tal, and William~J.
+  Cook.
+\newblock \emph{The Traveling Salesman Problem: A Computational Study}.
+\newblock Princeton University Press, 2006.
+
+\bibitem[Barnhart et~al.(1998)Barnhart, Johnson, Nemhauser, Savelsbergh, and
+  Vance]{Barnhart1998}
+Cynthia Barnhart, Ellis~L. Johnson, George~L. Nemhauser, Martin W.~P.
+  Savelsbergh, and Pamela~H. Vance.
+\newblock Branch-and-price: Column generation for solving huge integer
+  programs.
+\newblock \emph{Operations Research}, 46\penalty0 (3):\penalty0 316--329, 1998.
+
+\bibitem[Belady(1966)]{Belady1966}
+L{\'a}szl{\'o}~A. Belady.
+\newblock A study of replacement algorithms for a virtual-storage computer.
+\newblock \emph{IBM Systems Journal}, 5\penalty0 (2):\penalty0 78--101, 1966.
+
+\bibitem[Bengio et~al.(2021)Bengio, Lodi, and Prouvost]{Bengio2021}
+Yoshua Bengio, Andrea Lodi, and Antoine Prouvost.
+\newblock Machine learning for combinatorial optimization: a methodological
+  tour d'horizon.
+\newblock \emph{European Journal of Operational Research}, 290\penalty0
+  (2):\penalty0 405--421, 2021.
+
+\bibitem[Catanzaro et~al.(2015)Catanzaro, Gouveia, and
+  Labb{\'e}]{Catanzaro2015}
+Daniele Catanzaro, Luis Gouveia, and Martine Labb{\'e}.
+\newblock Improved integer linear programming formulations for the job
+  sequencing and tool switching problem.
+\newblock \emph{European Journal of Operational Research}, 244\penalty0
+  (3):\penalty0 766--777, 2015.
+
+\bibitem[Chudnovsky et~al.(2006)Chudnovsky, Robertson, Seymour, and
+  Thomas]{Chudnovsky2006}
+Maria Chudnovsky, Neil Robertson, Paul Seymour, and Robin Thomas.
+\newblock The strong perfect graph theorem.
+\newblock \emph{Annals of Mathematics}, 164\penalty0 (1):\penalty0 51--229,
+  2006.
+
+\bibitem[Colares and Wagler(2026)]{Colares2026Exact}
+Rafael Colares and Annegret Wagler.
+\newblock Exact formulations for the job sequencing and tool switching problem.
+\newblock \emph{Working Paper, Universit{\'e} Clermont Auvergne, LIMOS}, 2026.
+
+\bibitem[Colares et~al.(2026)Colares, Souza, and Wagler]{Colares2026Tool}
+Rafael Colares, Mauricio~de Souza, and Annegret Wagler.
+\newblock The tool switching problem.
+\newblock \emph{Preprint, Universit{\'e} Clermont Auvergne, LIMOS}, 2026.
+
+\bibitem[Crama and Oerlemans(1994)]{Crama1994Column}
+Yves Crama and A.~G. Oerlemans.
+\newblock A column generation approach to job grouping for flexible
+  manufacturing systems.
+\newblock \emph{European Journal of Operational Research}, 78\penalty0
+  (1):\penalty0 58--80, 1994.
+
+\bibitem[Crama et~al.(1994)Crama, Kolen, Oerlemans, and Spieksma]{Crama1994}
+Yves Crama, Antoon W.~J. Kolen, Alwin~G. Oerlemans, and Frits C.~R. Spieksma.
+\newblock Minimizing the number of tool switches on a flexible machine.
+\newblock \emph{International Journal of Flexible Manufacturing Systems},
+  6\penalty0 (1):\penalty0 33--54, 1994.
+
+\bibitem[da~Silva and Yanasse(2024)]{daSilva2024}
+Ant{\^o}nio Augusto~Chaves da~Silva and Horacio~Hideki Yanasse.
+\newblock A multicommodity flow model and exact methods for the job sequencing
+  and tool switching problem.
+\newblock \emph{Preprint (compiled 2024); see also Computers \& Operations
+  Research}, 2024.
+\newblock SSPMF multicommodity-flow formulation; LP lower bound $M-C$.
+
+\bibitem[Desrochers and Laporte(1991)]{DesrochersLaporte1991}
+Martin Desrochers and Gilbert Laporte.
+\newblock Improvements and extensions to the {Miller--Tucker--Zemlin} subtour
+  elimination constraints.
+\newblock \emph{Operations Research Letters}, 10\penalty0 (1):\penalty0 27--36,
+  1991.
+
+\bibitem[Fischetti et~al.(1997)Fischetti, Salazar-Gonz{\'a}lez, and
+  Toth]{Fischetti1997}
+Matteo Fischetti, Juan~Jos{\'e} Salazar-Gonz{\'a}lez, and Paolo Toth.
+\newblock A branch-and-cut algorithm for the symmetric generalized traveling
+  salesman problem.
+\newblock \emph{Operations Research}, 45\penalty0 (3):\penalty0 378--394, 1997.
+
+\bibitem[Gasse et~al.(2019)Gasse, Ch{\'e}telat, Ferroni, Charlin, and
+  Lodi]{Gasse2019}
+Maxime Gasse, Didier Ch{\'e}telat, Nicola Ferroni, Laurent Charlin, and Andrea
+  Lodi.
+\newblock Exact combinatorial optimization with graph convolutional neural
+  networks.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, volume~32, 2019.
+
+\bibitem[Ghiani et~al.(2010)Ghiani, Grieco, and Guerriero]{Ghiani2010}
+Gianpaolo Ghiani, Antonio Grieco, and Emanuela Guerriero.
+\newblock Solving the job sequencing and tool switching problem as a nonlinear
+  least cost hamiltonian cycle problem.
+\newblock \emph{Networks}, 55\penalty0 (4):\penalty0 379--385, 2010.
+
+\bibitem[Goldschmidt et~al.(1994)Goldschmidt, Nehme, and Yu]{Goldschmidt1994}
+Olivier Goldschmidt, David Nehme, and Gang Yu.
+\newblock Note on the set-union knapsack problem.
+\newblock \emph{Naval Research Logistics}, 41\penalty0 (6):\penalty0 833--842,
+  1994.
+
+\bibitem[Helsgaun(2015)]{Helsgaun2015}
+Keld Helsgaun.
+\newblock Solving the equality generalized traveling salesman problem using the
+  lin--kernighan--helsgaun algorithm.
+\newblock \emph{Mathematical Programming Computation}, 7\penalty0 (3):\penalty0
+  269--287, 2015.
+
+\bibitem[Jans and Desrosiers(2013)]{Jans2013}
+Roel Jans and Jacques Desrosiers.
+\newblock Efficient symmetry breaking formulations for the job grouping
+  problem.
+\newblock \emph{Computers \& Operations Research}, 40\penalty0 (4):\penalty0
+  1132--1142, 2013.
+
+\bibitem[Laporte et~al.(2004)Laporte, Salazar-Gonz{\'a}lez, and
+  Semet]{Laporte2004}
+Gilbert Laporte, Juan~Jos{\'e} Salazar-Gonz{\'a}lez, and Fr{\'e}d{\'e}ric
+  Semet.
+\newblock Exact algorithms for the job sequencing and tool switching problem.
+\newblock \emph{IIE Transactions}, 36\penalty0 (1):\penalty0 37--45, 2004.
+
+\bibitem[L{\"u}bbecke and Desrosiers(2005)]{Lubbecke2005}
+Marco~E. L{\"u}bbecke and Jacques Desrosiers.
+\newblock Selected topics in column generation.
+\newblock \emph{Operations Research}, 53\penalty0 (6):\penalty0 1007--1023,
+  2005.
+
+\bibitem[Mecler et~al.(2021)Mecler, Subramanian, and Vidal]{Mecler2021}
+Jordana Mecler, Anand Subramanian, and Thibaut Vidal.
+\newblock A simple and effective hybrid genetic search for the job sequencing
+  and tool switching problem.
+\newblock \emph{Computers \& Operations Research}, 127:\penalty0 105153, 2021.
+
+\bibitem[Miller et~al.(1960)Miller, Tucker, and Zemlin]{Miller1960}
+Clair~E. Miller, Albert~W. Tucker, and Richard~A. Zemlin.
+\newblock Integer programming formulation of traveling salesman problems.
+\newblock \emph{Journal of the ACM}, 7\penalty0 (4):\penalty0 326--329, 1960.
+
+\bibitem[Morabit et~al.(2021)Morabit, Desaulniers, and Lodi]{Morabit2021}
+Mouad Morabit, Guy Desaulniers, and Andrea Lodi.
+\newblock Machine-learning-based column selection for column generation.
+\newblock \emph{Transportation Science}, 55\penalty0 (4):\penalty0 815--831,
+  2021.
+
+\bibitem[Moreira(2026)]{Moreira2026}
+Bernardo Bastos~Pereira Moreira.
+\newblock A new combinatorial approach to solve the job sequencing and tool
+  switching problem.
+\newblock Master's thesis, Universidade Federal de Minas Gerais (UFMG), Belo
+  Horizonte, Brazil, 2026.
+
+\bibitem[Noon and Bean(1993)]{Noon1993}
+Charles~E. Noon and James~C. Bean.
+\newblock An efficient transformation of the generalized traveling salesman
+  problem.
+\newblock \emph{INFOR: Information Systems and Operational Research},
+  31\penalty0 (1):\penalty0 39--44, 1993.
+
+\bibitem[Otiai(2026)]{Otiai2026}
+Felipe Otiai.
+\newblock Flexible manufacturing systems: Job grouping and tool management.
+\newblock Master's thesis, Federal University of Minas Gerais, 2026.
+
+\bibitem[Pop et~al.(2024)Pop, Cosma, Sabo, and Pop~Sitar]{Pop2024}
+Petric{\u{a}}~C. Pop, Ovidiu Cosma, Cosmin Sabo, and Corina Pop~Sitar.
+\newblock The generalized traveling salesman problem: A comprehensive review.
+\newblock \emph{European Journal of Operational Research}, 314\penalty0
+  (3):\penalty0 819--835, 2024.
+
+\bibitem[Privault and Finke(1995)]{Privault1995}
+Caroline Privault and Gerd Finke.
+\newblock Modelling a tool switching problem on a single nc-machine.
+\newblock \emph{Journal of Intelligent Manufacturing}, 6\penalty0 (2):\penalty0
+  87--94, 1995.
+
+\bibitem[Privault and Finke(2000)]{Privault2000}
+Caroline Privault and Gerd Finke.
+\newblock K-server problems with bulk requests: An application to tool
+  switching in manufacturing.
+\newblock \emph{Annals of Operations Research}, 96\penalty0 (1/4):\penalty0
+  255--269, 2000.
+
+\bibitem[Ryan and Foster(1981)]{Ryan1981}
+D.~M. Ryan and B.~A. Foster.
+\newblock An integer programming approach to scheduling.
+\newblock \emph{Computer Scheduling of Public Transport}, pages 269--280, 1981.
+
+\bibitem[Tang and Denardo(1988)]{Tang1988}
+Christopher~S. Tang and Eric~V. Denardo.
+\newblock Models arising from a flexible manufacturing machine, part i:
+  Minimization of the number of tool switches.
+\newblock \emph{Operations Research}, 36\penalty0 (5):\penalty0 767--777, 1988.
+
+\bibitem[Vanderbeck and Wolsey(2010)]{Vanderbeck2010}
+Fran{\c{c}}ois Vanderbeck and Laurence~A. Wolsey.
+\newblock Reformulation and decomposition of integer programs.
+\newblock In Michael J{\"u}nger et~al., editors, \emph{50 Years of Integer
+  Programming 1958--2008}, pages 431--502. Springer, Berlin, Heidelberg, 2010.
+
+\end{thebibliography}
