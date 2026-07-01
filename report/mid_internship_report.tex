@@ -42,8 +42,7 @@
 \newcommand{\rset}[1]{\{#1\}}
 
 \title{\textbf{Exact and Structural Methods for the\\
-Job Sequencing and Tool Switching Problem}\\[4pt]
-\large Mid-internship report}
+Job Sequencing and Tool Switching Problem}}
 \author{%
   Shankar Narayanan\thanks{\texttt{shajaganbpgc@gmail.com}}\\[6pt]
   \normalsize Project advisors: Dr.\ Rafael Colares \quad Prof.\ Annegret Wagler\\
@@ -56,27 +55,25 @@ Job Sequencing and Tool Switching Problem}\\[4pt]
 \maketitle
 
 \begin{abstract}
-The Job Sequencing and Tool Switching Problem (SSP) asks for an ordering of a set
-of jobs on a single flexible machine, together with a tool-loading policy for a
-capacitated tool magazine, that minimises the number of tool switches. This report
-develops \emph{exact} and \emph{structural} methods for the SSP. Two pillars
-organise the work, joined by a single geometric lens---the equivalence between the
-SSP and a generalised travelling-salesman problem over tool \emph{configurations}.
-The first pillar is a structural analysis of the natural two-phase heuristic (group
-the jobs, then order the groups): we prove that the SSP optimum equals the minimum
-generalised-TSP cost over \emph{all} feasible groupings, which shows the
-heuristic's optimality gap to be exactly the price of insisting on a
-minimum-cardinality grouping; we then give matching lower bounds, a family on which
-the gap grows without bound, an unconditional approximation-ratio bound, and two
-conjectures supported by exhaustive computation. The second pillar is exact
-computation: a branch-and-Benders-cut algorithm whose subproblem is the polynomial
-tool-loading oracle, and a family of position-indexed formulations with a fixed,
-polynomial row set together with an exact branch-and-price. We close with an
-objective assessment of why a configuration-based branch-and-price for the SSP is
-\emph{bound-limited} rather than implementation-limited. Results established here
-are stated as theorems and propositions; results supported by exhaustive
-enumeration but not yet proved are stated as conjectures, with the scope of the
-supporting experiments made explicit. Longer proofs are collected in the appendix.
+The Job Sequencing and Tool Switching Problem (SSP) seeks an ordering of jobs on a
+single flexible machine, together with a tool-loading policy for a capacitated
+magazine, that minimises the number of tool switches. For a fixed order the loading is
+solved exactly by a classical greedy rule, so the difficulty lies in the ordering, and
+the problem is NP-hard. We study the SSP through its configuration view---jobs as
+clusters of magazine-filling tool sets---along two lines. The first asks how far the
+standard group-then-sequence heuristic can be from optimal: we prove that the SSP
+optimum equals the minimum configuration-walk cost over \emph{all} feasible groupings,
+so that the heuristic's gap is exactly the price of using a minimum-cardinality
+grouping; we then give matching lower bounds, a family on which the gap grows without
+bound, a $b$-approximation guarantee, and two conjectures supported by exhaustive
+enumeration. The second develops exact methods---a branch-and-Benders-cut algorithm
+that exploits the polynomial loading subproblem, and position-indexed formulations
+(PCF, PCF$'$, PTF) with a fixed row set and a branch-and-price. A single quantity, the
+coverage bound $\lvert\U\rvert-b$, links the two: it is the value every configuration
+relaxation attains and, as the gap analysis shows, the exact optimum on a large part
+of the instance space---so it both bounds the heuristic and limits configuration-based
+exact methods. Results proved here are stated as theorems; those resting on enumeration
+are stated as conjectures; the large-scale benchmark is in progress.
 \end{abstract}
 
 \tableofcontents
@@ -114,25 +111,32 @@ daSilva2024} become difficult beyond moderate sizes. This structure---an easy in
 problem nested inside a hard ordering problem---is precisely what decomposition
 methods are designed to exploit, and it motivates both pillars of this work.
 
-\paragraph{Two pillars and a common lens.}
-The report is organised around two complementary questions.
-\begin{enumerate}[noitemsep,topsep=2pt]
-  \item \textbf{How good is the natural heuristic?} A widely used two-phase method
-  first partitions the jobs into the fewest groups whose tool requirements each fit
-  in the magazine (the Job Grouping Problem, JGP), then orders the groups by solving
-  a travelling-salesman-type problem, and finally reads off a schedule. We ask how
-  far this heuristic can be from optimal, and when it is exact.
-  \item \textbf{How does one solve the SSP exactly, and how fast?} We develop a
-  branch-and-Benders-cut algorithm and a family of position-indexed formulations
-  with an exact branch-and-price, and assess their competitiveness.
-\end{enumerate}
-Both pillars are most naturally expressed in one geometry. A \emph{tool
-configuration} is a magazine-filling set of tools; the SSP is then a generalised
-travelling-salesman problem (GTSP) that must visit, in some order, one configuration
-able to serve each job, paying for the tools that change between consecutive
-configurations \citep{Colares2026Exact}. This configuration--GTSP equivalence
-(Section~\ref{sec:prelim}) is the thread tying the heuristic analysis to the exact
-formulations, and we establish it once, at the outset.
+\paragraph{The grouping view, and the questions it forces.}
+The SSP is inseparable from a simpler relative, the Job Grouping Problem (JGP), which
+asks only how few magazine configurations suffice to serve every job. Grouping
+suggests both the standard heuristic---group the jobs, then order the groups---and a
+route to exact solution, because a \emph{configuration} (a magazine-filling set of
+tools) is a natural unit to reason about: the SSP becomes a generalised
+travelling-salesman problem that visits, in some order, one configuration able to
+serve each job, paying for the tools that change between consecutive configurations
+\citep{Colares2026Exact}. Two questions follow. First, how good is the heuristic---how
+far can group-then-sequence be from the true optimum, and when is it exact? Second,
+how well can the SSP be solved exactly through configurations---branch-and-price is
+very effective for the JGP because its set-covering relaxation is tight
+\citep{Otiai2026}, so does the configuration view yield an equally strong exact method
+for the SSP, or is it blocked because the natural configuration relaxation collapses
+to the elementary bound $\lvert\U\rvert-b$?
+
+\paragraph{A single quantity links the two.}
+These questions share an answer in that coverage bound $\lvert\U\rvert-b$, the number
+of used tools in excess of the magazine capacity. It is at once the value every
+configuration relaxation attains and, as the gap analysis shows, the exact optimum on
+a large part of the instance space. Where it is tight, exact configuration methods
+close at the root and the heuristic tends to be exact; where it is loose, the
+heuristic's gap can open and the same methods branch heavily. That coincidence,
+developed in Sections~\ref{sec:gap} and~\ref{sec:comp}, is the connecting thread of
+this report, and the configuration view that produces it is established once, in
+Section~\ref{sec:prelim}.
 
 \paragraph{Contributions.}
 The principal results are the following.
@@ -450,17 +454,17 @@ bounding ideas of \citet{Ghiani2010} and the hybrid genetic search of
 %==============================================================================
 \section{Structural analysis of the heuristic gap}\label{sec:gap}
 %==============================================================================
-The two-phase heuristic was seen on the running instance to cost one more than the
-optimum (Example~\ref{ex:ring-group}), with the loss occurring in the grouping
-phase. This section makes that observation precise and general. We first prove that
-admitting \emph{arbitrary} groupings renders the configuration framework exact, so
-the heuristic's entire gap is the price of insisting on a minimum-cardinality
-grouping (Section~\ref{ssec:exact}); we then show the gap is genuinely present and
-can grow without bound (Section~\ref{ssec:unbounded}), prove that the heuristic is
-nonetheless a $b$-approximation and state two sharpening conjectures
-(Section~\ref{ssec:ratio}), exhibit a cost regime in which the gap vanishes
-(Section~\ref{ssec:collapse}), and isolate the algorithmic question this leaves open
-(Section~\ref{ssec:grouping-sel}).
+The group-then-sequence heuristic is the standard practical method for the SSP, yet how
+far it can be from optimal has not been analysed. The obstacle is that the heuristic
+commits to a \emph{minimum-cardinality} grouping before it sequences, whereas the true
+optimum may be served by a larger grouping with cheaper transitions; the gap is
+precisely the difference between the two. This is what the running instance shows
+(Example~\ref{ex:ring-group}), and the coverage bound $\lvert\U\rvert-b$ that will limit
+the exact methods of Section~\ref{sec:exact} reappears here as the value that makes the
+gap vanish. Making the comparison exact lets us bound the gap tightly---it is the price
+of minimality, unbounded in absolute terms but within a factor $b$---record two sharper
+conjectures, and identify the algorithmic question, which grouping to sequence, that a
+better heuristic would have to answer.
 
 \subsection{The gap is the price of minimum-cardinality grouping}\label{ssec:exact}
 We attach a cost to a grouping by ordering its configurations optimally.
@@ -637,14 +641,16 @@ route to closing the gap in practice.
 %==============================================================================
 \section{Exact methods}\label{sec:exact}
 %==============================================================================
-Exact methods for the SSP follow two complementary routes. The first keeps the
-sequencing variables and \emph{decomposes}: a master problem fixes the order while a
-subproblem prices the loading. Because the loading subproblem is polynomial
-(Proposition~\ref{prop:ktns}), this decomposition can be driven to a certified
-optimum with exact cuts (Section~\ref{ssec:bbc}). The second \emph{reformulates} the
-problem over configurations in a form whose row set is fixed and whose columns are
-generated (Section~\ref{ssec:pos}). We first record the compact baselines against
-which both are measured.
+The gap analysis showed that $\lvert\U\rvert-b$ is often the exact optimum; the question
+here is whether exact methods can exploit that, and what happens where the bound is
+loose. Two routes present themselves. Because the loading subproblem is polynomial
+(Proposition~\ref{prop:ktns}), a Benders decomposition can fix the order in a master and
+settle the loading exactly in the subproblem, generating cuts (Section~\ref{ssec:bbc}).
+Alternatively the problem can be reformulated over configurations and solved by column
+generation---but the natural configuration formulation has exponentially many subtour
+constraints, and making it tractable is the obstacle that the position-indexed
+formulations of Section~\ref{ssec:pos} resolve. We first record the compact formulations
+that serve as baselines.
 
 \subsection{Compact formulations and the coverage relaxation}\label{ssec:compact}
 Several compact integer formulations are available. \citet{Catanzaro2015} give a
@@ -755,14 +761,28 @@ separation on or off, triplet bounds on or off---whose ablation is reported in
 Section~\ref{ssec:bench}.
 
 \subsection{Position-indexed formulations}\label{ssec:pos}
-\paragraph{Motivation.}
-The configuration view of Section~\ref{ssec:gtsp} invites a column-generation model
-whose columns are configurations. A naive master indexes configurations by sequence
-position and eliminates subtours with Miller--Tucker--Zemlin constraints; but those
-constraints reference the configuration variables, so the row set grows and changes
-as columns are added. We seek instead masters whose row set is \emph{fixed} and
-polynomial in $(n,\lvert T\rvert)$, so that column generation only ever adds columns
-to existing rows. Two such formulations are developed.
+\paragraph{From the configuration model to a polynomial row set.}
+The configuration formulation of Section~\ref{ssec:gtsp}, in the form proposed by
+\citet{Colares2026Exact}, is the natural exact model over configurations, but as
+originally written its subtour elimination is not valid; the correction, using
+prize-collecting travelling-salesman constraints \citep{Moreira2026}, restores validity
+at the price of \emph{exponentially many} constraints---one per subset of configurations.
+To recover a polynomial constraint count, a Miller--Tucker--Zemlin reformulation
+\citep{Miller1960,DesrochersLaporte1991} is the natural next step, but it does not escape
+the dilemma.
+\begin{proposition}\label{prop:mtz}
+A per-configuration MTZ potential is exact but leaves one potential per configuration,
+hence exponentially many; aggregating the potentials to one per job is polynomial but no
+longer exact---it can exclude the optimum.
+\end{proposition}
+\noindent The aggregated form fails under job domination: if $T_i\subseteq T_j$, every
+configuration serving $j$ also serves $i$, so a transition between two such
+configurations places $\{i,j\}$ at both ends and forces the potentials of $i$ and $j$
+into a two-cycle no ordering can satisfy; a four-job instance with $b=3$ has optimum $1$
+that the aggregated model values at $2$. Neither MTZ variant yields a tractable exact
+model. The position-indexed formulations below take a different route: they fix, in
+advance, a row set polynomial in $(n,\lvert T\rvert)$, so column generation only ever
+adds columns to existing rows, and they carry no subtour constraints at all.
 
 \paragraph{Position--configuration formulation (PCF).}
 Let $y_C^{k}\in\{0,1\}$ indicate that configuration $C$ occupies position $k$
@@ -908,24 +928,6 @@ The contrast---PCF$'$ pairing a weak bound with a cheap single-set pricer, PTF a
 stronger bound with a costly coupled-pair pricer---is the central trade-off assessed
 in Section~\ref{ssec:assess}.
 
-\subsection{Configuration-level subtour constraints}\label{ssec:mtz}
-A configuration-indexed travelling-salesman model with Miller--Tucker--Zemlin (MTZ)
-subtour constraints \citep{Miller1960,DesrochersLaporte1991} admits two natural
-levels of aggregation, which differ in correctness.
-\begin{proposition}\label{prop:mtz}
-Per-configuration MTZ constraints (one potential per configuration) are exact.
-Cluster-aggregated MTZ constraints (one potential per job) are not: they can exclude
-the optimum.
-\end{proposition}
-\noindent The aggregated form fails under job domination: if $T_i\subseteq T_j$,
-every configuration serving $j$ also serves $i$, so a transition between two such
-configurations places $\{i,j\}$ at both ends and forces the potentials of $i$ and $j$
-into a two-cycle that no ordering can satisfy. A four-job instance with $b=3$ has an
-optimum of $1$ that the aggregated model values at $2$. One should therefore use the
-per-configuration form or lazily separated generalised subtour cuts; the
-position-indexed formulations above sidestep the issue, carrying no subtour
-constraints at all.
-
 %==============================================================================
 \section{Computational study}\label{sec:comp}
 %==============================================================================
@@ -1019,8 +1021,9 @@ their large-scale comparison is under way.
 \paragraph{Closing the gap theory.}
 The most consequential open question is the gap bound $H-\Zst\le\Kst-2$
 (Conjecture~\ref{conj:gap}): a proof, a proof of the $\Kst=3$ case for all $b$, or a
-counterexample would each settle the worst-case behaviour of the standard heuristic,
-which the literature has not analysed. Its constructive counterpart is the
+counterexample would each settle the worst-case behaviour of the group-then-sequence
+decomposition, for which no worst-case analysis is known (the approximation results
+reported for the SSP concern other heuristics). Its constructive counterpart is the
 grouping-selection problem of Section~\ref{ssec:grouping-sel}---since some grouping
 attains the optimum, can one be found, or approximated, more cheaply than by solving
 the SSP outright?
@@ -1055,6 +1058,39 @@ Machine-learning acceleration of pricing and branching
 pursuing here only if the benchmark data expose a concrete learning signal---such as
 the pronounced imbalance between zero-gap and positive-gap instances that the
 structural results predict---rather than as an end in itself.
+
+%==============================================================================
+\section{Planned work}\label{sec:planned}
+%==============================================================================
+What follows is not yet done; it sets out the remaining work and the order in which it
+will be taken up over the balance of the project. Firm dates are left open---a substantial
+mid-summer break intervenes---but the phasing is fixed by dependency, and the intention is
+to conclude ahead of the project's formal end.
+
+\paragraph{First, and already under way --- the computational campaigns.}
+Two benchmark campaigns are running: the branch-and-Benders-cut ablation across its cut
+families, and the position-indexed branch-and-price in its PCF and PTF variants, both
+against the compact baselines and both recording the root relaxation alongside the
+optimum. Completing them and their analysis is the immediate priority, since which method
+merits further development turns on the resulting bound-tightness data.
+
+\paragraph{Next --- the gap theory.}
+With that data in hand, the central target is the gap bound $H-\Zst\le\Kst-2$
+(Conjecture~\ref{conj:gap}): a proof, a proof of the $\Kst=3$ case for all $b$, or a
+counterexample. In parallel, the enumerated pool of optimal groupings will be used to
+attack the grouping-selection question (Section~\ref{ssec:grouping-sel})---whether a
+grouping attaining the optimum can be found more cheaply than by solving the SSP.
+
+\paragraph{Then --- stronger relaxations and the polyhedral view.}
+Where the campaigns find the coverage bound loose, the work turns to the PTF relaxation,
+characterising the instances on which it exceeds $\lvert\U\rvert-b$ and the valid
+inequalities that strengthen it, and to the clutter, blocker, and hypergraph structure of
+the configuration system behind the gap analysis (Remark~\ref{rem:perfect})---the newest
+of the directions.
+
+\paragraph{Throughout --- consolidation.}
+The strongest of these threads will be consolidated toward a publication, with the
+verification record kept current as the work proceeds.
 
 %==============================================================================
 \appendix
