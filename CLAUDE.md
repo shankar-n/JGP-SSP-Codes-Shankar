@@ -54,7 +54,7 @@ Grid is 11 configs (8 BBC ablation + LSS + SSPMF + CATZ-F4); sbatch array `0-10`
 
 **Open problems**:
 
-1. Tight gap bound for fixed `K*` and `b` (conjecture: gap ≤ 1 when `K*=3, b=3`)
+1. Tight gap bound for fixed `K*` and `b` — **major update 2026-07-02**: gap ≤ 1 for `K*=3, b≤4` is now a THEOREM; the general conjecture gap ≤ K\*−2 (OP11) is **REFUTED** (b=5, K\*=3, gap=2 witness); the K*=3 quantitative law `gap ≤ max(0, min(q,⌊(2b−q)/3⌋)−R)` is proved and tight at every known extremum; open: is it the exact worst case, and K\*≥4. See `plans-genai/_verification/VERIFIED_FACTS.md` (2026-07-02 block) + 05 §K*=3.
 2. Grouping selection: do sub-optimal groupings (`K > K*`) ever beat the JGP+GSP heuristic?
 3. MTZ vs. GSECs: LP relaxation bound comparison
 4. Fractional Benders cuts for BBC
@@ -168,5 +168,5 @@ Benchmark sets:
 - BBC CPLEX: complete, subtour detection fixed, FREE bounds on ν/η fixed
 - Gap analysis: ring counterexample + unbounded gap proved
 - Golang BFS enumerator: working
-- **In progress**: tight gap bound (now generalised: gap ≤ K\*−2 conjecture, OP11), fractional Benders cuts (implemented, untested), MTZ vs. GSEC LP comparison, experiments at b=4, |T|=8, |J|=8
+- **In progress**: exact extremal gap law (gap ≤ K\*−2 REFUTED 2026-07-02; K*=3 quantitative bounds proved & tight — see VERIFIED_FACTS), fractional Benders cuts (implemented, untested), MTZ vs. GSEC LP comparison, experiments at b=4, |T|=8, |J|=8
 - **Verification campaign (2026-06-10, Claude-Fable)**: plans-genai 01–10 all verified/corrected (changes flagged `%% TODO-VERIFY`); BBC code audited — **Benders-cut depot-dual bug FIXED: re-run all pre-fix benchmarks and archive old `raw_results.csv` first (the runner resumes and would skip stale rows)**; conventions unified (repo exact solvers + `compute_ktns` are all EMPTY-START = free-initial + min(b,|U|); GTSP reference is free-initial); cluster-MTZ settled NOT exact, per-configuration MTZ proved exact; Part X (PCF/PTF) added — PTF LP can exceed |U|−b

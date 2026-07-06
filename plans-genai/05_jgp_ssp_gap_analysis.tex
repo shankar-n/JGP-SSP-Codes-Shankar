@@ -837,6 +837,25 @@ For every uniform-SSP instance with $\Kstar\ge2$,
 \end{conjecture}
 \end{thmbox}
 
+\begin{warnbox}
+\textbf{REFUTED (2026-07-02).} \cref{conj:gapK} is \textbf{false}.
+Counterexample ($b=5$, $U=\{0,\dots,8\}$, $\Kstar=3$):
+$T=(\{0,1,2,4,7\},\{0,4,5\},\{1,5\},\{2,6,8\},\{3,4,5,8\})$ has $q=4$,
+$\ZSSP=4$, $H=6$: gap $2>\Kstar-2=1$, ratio $3/2$. A second witness with the
+same profile: $T=(\{0,2,3\},\{0,6,7,8\},\{1,2,4,6\},\{1,3\},\{2,5,7\},
+\{4,8\})$. Both verified exhaustively by two independent implementations
+(\texttt{\_verification/verify\_gapK\_refutation.py}). They sit exactly on the
+boundary $2b=q+3R+6$ of the proved regimes and attain \cref{thm:k3count}'s
+bound with equality. The earlier evidence ($\sim$1380 instances,
+$b\in\{2,3,4\}$) covered precisely the region where the bound is a
+\emph{theorem}; $b=5$ had never been tested. Consequences:
+\cref{prop:conj_consequences} has a false hypothesis and is void; the
+quantitative bounds \cref{thm:k3count} and \cref{thm:genk} are the standing
+worst-case results, tight at every known extremal instance; ratio $3/2$
+occurs already at $\Kstar=3$, so the $2-2/\Kstar$ extremal pattern is dead;
+the open question is the exact extremal law.
+\end{warnbox}
+
 \begin{openproblem}
 \textbf{Evidence for \cref{conj:gapK}.}
 $\Kstar=2$ is \emph{proved} (\cref{cor:K2}). Every known extremal witness attains the
@@ -844,9 +863,10 @@ bound with equality: the $6$-ring ($\Kstar{=}3$, $\mathrm{gap}{=}1$), the $b{=}4
 ($\Kstar{=}3$, $\mathrm{gap}{=}1$), the $b{=}5$ witness ($\Kstar{=}4$, $\mathrm{gap}{=}2$);
 the $g$-copy family has $\mathrm{gap}=g\le3g-2$. No violation in $\sim\!1380$ instances
 ($b\in\{2,3,4\}$, mixed job sizes; \texttt{\_verification/verify\_ratio\_section.py}),
-nor anywhere in the earlier exhaustive searches. The $\Kstar=3$ case is now
-\emph{proved} for every $b\le4$ and, in general, outside an explicit corner: see
-\cref{ssec:k3}, in particular \cref{thm:k3count}.
+nor anywhere in the earlier exhaustive searches. The $\Kstar=3$ case is
+\emph{proved} for every $b\le4$ and, in general, outside an explicit corner
+(\cref{ssec:k3}, \cref{thm:k3count}); \textbf{in that corner the conjecture
+fails} --- see the refutation box above.
 \end{openproblem}
 
 \subsection{Partial resolution of \cref{conj:gapK}: the $\Kstar=3$ case}
@@ -1032,9 +1052,10 @@ tight at the $6$-ring and at the $b=4$ extremal witness. Consequently:
 \begin{itemize}
 \item[(a)] \cref{conj:gapK} holds at $\Kstar=3$ for \emph{every} instance with
 $b\le4$ (for $b=4$, $q=2$, $R=0$ combine with \cref{thm:k3regions}(ii));
-\item[(b)] at $\Kstar=3$ the conjecture is open only in the corner
-$2b\ge q+3R+6$ with $R\le q-2$ --- necessarily $b\ge5$ --- and there only outside
-the mergeable case of \cref{thm:k3regions}(iii);
+\item[(b)] at $\Kstar=3$ the bound $\mathrm{gap}\le1$ can fail only in the
+corner $2b\ge q+3R+6$ with $R\le q-2$ --- necessarily $b\ge5$ --- and there
+only outside the mergeable case of \cref{thm:k3regions}(iii); it \emph{does}
+fail there (refutation box below);
 \item[(c)] at $b=3$ the former assumption (a) of \cref{prop:43route} is
 discharged: $\mathrm{gap}\le1$ is a theorem for $\Kstar=3$, $b=3$.
 \end{itemize}
@@ -1140,6 +1161,8 @@ Divide $H\le\ZSSP+\Kstar-2$ by $\ZSSP\ge\max(\Kstar-1,q)$; the second inequality
 $q\ge1$. At $q=\Kstar$: $1+(\Kstar-2)/\Kstar=2-2/\Kstar$.
 \end{proof}
 \end{proofbox}
+\noindent\textbf{[Void as of 2026-07-02:} the hypothesis \cref{conj:gapK} is
+refuted --- see the box in \cref{ssec:k3}. Kept for the record.\textbf{]}
 
 \begin{thmbox}
 \begin{proposition}[A route to the $4/3$ conjecture]
@@ -1161,14 +1184,15 @@ $\mathrm{gap}\le\Kstar-2=1$ and $H/\ZSSP=1+\mathrm{gap}/\ZSSP\le1+1/3=4/3$.
 \begin{openproblem}
 \textbf{Open problems raised by this section.}
 \begin{itemize}
-\item \emph{Prove \cref{conj:gapK}}. The $\Kstar=3$ case is settled for every
-$b\le4$ and, in general, outside the corner $2b\ge q+3R+6$, $R\le q-2$
-(\cref{thm:k3count}); what remains is that corner ($b\ge5$, minus the mergeable
-case of \cref{thm:k3regions}(iii)) and general $\Kstar\ge4$. The natural lever
-for general $\Kstar$ is to extend \cref{lem:overlap} from triples to
-$\Kstar$-tuples with the order-dependent wrap sum of \cref{lem:pathR}; the
-counting identity $\sum x=2b-q-2c_3$ has a $\Kstar$-analogue, but the wrap sum
-is no longer a plain minimum over orderings.
+\item \emph{The exact extremal law} (replaces ``prove \cref{conj:gapK}'',
+which is now refuted). At $\Kstar=3$ every known extremal instance attains
+$\min(q,\lfloor(2b-q)/3\rfloor)-R$ (\cref{thm:k3count}); decide whether that
+is the true worst case. At $\Kstar\ge4$ the best bound is \cref{thm:genk};
+the lever is extending \cref{lem:overlap} from triples to $\Kstar$-tuples
+with the order-dependent wrap sum of \cref{lem:pathR} (the counting identity
+$\sum x=2b-q-2c_3$ has a $\Kstar$-analogue; the min-over-orderings does not).
+Directed search on the proved-region boundaries found both refuting
+witnesses; continue exactly there.
 \item \emph{Achievability of ratio $2$.} \cref{prop:conj_consequences} caps the ratio at
 $2-1/(\Kstar-1)$; approaching $2$ needs $\Kstar\to\infty$ with $q\approx\Kstar-1$ and
 near-maximal gap \emph{simultaneously}. The $g$-copy construction fails: its tools

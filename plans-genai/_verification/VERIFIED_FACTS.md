@@ -174,3 +174,35 @@ All scripts below live in this folder; every doc/code change is flagged %% TODO-
   BBC both cut modes = 6.0 on 6-ring (= free-init 3 + min(b,|U|) 3, convention
   identity confirmed end-to-end); dual_bound stat fixed (get_best_objective) and
   verified (6.0, gap 0.0%); LSS = 6.0; raw_results.csv archived.
+
+## ============ Session 2026-07-02 (Claude-Fable): gap theory — proofs + REFUTATION ============
+Scripts: verify_k3_gap.py (extended), verify_k3_overlap.py, verify_clutter_q3_and_genK.py,
+verify_smallz_and_b3census.py, verify_gapK_refutation.py. All claims below machine-checked.
+- PROVED (K*=3): exact H formula H = q + min over feasible 3-groupings/configs(⊆U) of
+  min(x_ab,x_bc,x_ca), x_uv=|(Cu∩Cv)\Cw|. (1462 inst, 0 viol.)
+- PROVED (K*=3): gap <= max(0, min(q, floor((2b-q)/3)) - R)  [overlap counting].
+  => gap<=K*-2 is a THEOREM for all b<=4 at K*=3, and outside the corner 2b>=q+3R+6, R<=q-2.
+- PROVED (K*=3, walks): Z*=q => p<=q+1 configs, p=K* => gap 0; q<=2 & Z*=q => gap 0;
+  q=3 & Z*=q => gap<=1 when two of the four walk groups are mergeable.
+- PROVED (all K*>=2): gap <= max(0, floor(q(b(K-1)-q)/(b+q)) - R)  [runs identity +
+  random ordering + Jensen]. (1489 inst, 0 viol.)
+- PROVED (all b,K*): Z*<=2 => gap=0.
+- PROVED (b=3): H/Z* <= 4/3 for every K*<=3. Conj 4/3 reduces to K*>=4.
+- FALSIFIED assumption: 'positive gap at b=3 => K*=3' does NOT extend beyond the edge
+  family: 9 mixed-size K*=4 witnesses, e.g. T=({0,2,5},{0,3,6},{1,2},{1,4},{1,6})
+  Z*=4 H=5 ratio 5/4. No 4/3 violation seen (max K*>=4 ratio: 5/4).
+- **REFUTED: gap <= K*-2 (OP11) IS FALSE.** Witnesses (b=5, K*=3, |U|=9, q=4, R=0):
+  W1 T=({0,1,2,4,7},{0,4,5},{1,5},{2,6,8},{3,4,5,8});
+  W2 T=({0,2,3},{0,6,7,8},{1,2,4,6},{1,3},{2,5,7},{4,8}).
+  Both: Z*=4 (free-initial), H=6, gap=2>1, ratio 3/2. Verified exhaustively by two
+  independent implementations. Both sit ON the proved-region boundary 2b=q+3R+6 and
+  attain the counting bound with equality. Prior evidence (~1380 inst) was b in {2,3,4}
+  = exactly the proved region; b=5 was never tested. Ratio 3/2 now occurs at K*=3;
+  the 2-2/K* extremal pattern is dead.
+- Q3 ANSWERED NO: circuit clutter + (b,|U|,n) does NOT determine the gap. Witnesses
+  (b=4,|U|=7,n=4, same clutter, same K*=3, Z*=3): I0=({0,2,6},{1,2,3},{2,3,4,5},{3,4,5})
+  gap 0; I1=({0,1,3,6},{1,4,5,6},{2,4},{3,5}) gap 1.
+- Structure: K* = chromatic number of the circuit hypergraph; conflict graph = 2-circuits
+  (chi <= K*, strict at the star); the group complex is not a matroid.
+- OPEN: exact extremal law at K*=3 (is the counting bound tight everywhere?); K*>=4
+  beyond thm:genk; 4/3 at K*>=4 (b=3); clutter Q1 (idealness), Q2 (blocker-bridge).
