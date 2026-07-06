@@ -65,11 +65,9 @@ class SSPInstanceGenerator:
         then the previous choice of Tj was cancelled, and a new set Tj was
         generated."
         """
-        last_set = None
         for _ in range(max_attempts):
             tj       = random.randint(min_tools, max_tools)
             tool_set = set(random.sample(range(1, M + 1), tj))
-            last_set = tool_set
 
             if not any(
                 tool_set.issubset(prev) or prev.issubset(tool_set)
@@ -77,9 +75,18 @@ class SSPInstanceGenerator:
             ):
                 return tool_set
 
-        print(f"Warning: max_attempts reached for job {job_id}; "
-              "returning last generated set (inclusion constraint relaxed).")
-        return last_set
+        # Do NOT fall back to an inclusion-violating set: both Crama (1994) and
+        # Laporte (2004) guarantee the anti-inclusion property (so the
+        # Tang-Denardo dominance rule never applies). A silent violation would
+        # corrupt any benchmark claiming that property. (Changed 2026-07-02;
+        # previously returned the last set with only a printed warning.)
+        raise RuntimeError(
+            f"Could not draw an inclusion-free tool set for job {job_id} after "
+            f"{max_attempts} attempts (M={M}, tools per job in "
+            f"[{min_tools},{max_tools}], {len(existing_tool_sets)} jobs placed). "
+            "The parameter combination is too tight for the Crama/Laporte "
+            "anti-inclusion scheme; enlarge M or the [min,max] interval."
+        )
 
     # ── Crama-style generator ─────────────────────────────────────────────────
 

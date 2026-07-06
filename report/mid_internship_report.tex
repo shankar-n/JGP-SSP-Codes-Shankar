@@ -1,6 +1,6 @@
 %==============================================================================
 % Exact and Structural Methods for the Job Sequencing and Tool Switching Problem
-% Mid-internship report.
+% Mid-term project report.
 %
 % Build:  pdflatex mid_internship_report && bibtex mid_internship_report &&
 %         pdflatex mid_internship_report && pdflatex mid_internship_report
@@ -47,7 +47,7 @@ Job Sequencing and Tool Switching Problem}}
   Shankar Narayanan\thanks{\texttt{shajaganbpgc@gmail.com}}\\[6pt]
   \normalsize Project advisors: Dr.\ Rafael Colares \quad Prof.\ Annegret Wagler\\
   \normalsize Academic supervisor: Dr.\ Renaud Chicoisne%
-  % TODO: add laboratory (e.g.\ LIMOS, Universit\'e Clermont Auvergne) and internship dates.
+  % TODO: add laboratory (e.g.\ LIMOS, Universit\'e Clermont Auvergne) and project dates.
 }
 \date{\today}
 
@@ -65,8 +65,9 @@ standard group-then-sequence heuristic can be from optimal: we prove that the SS
 optimum equals the minimum configuration-walk cost over \emph{all} feasible groupings,
 so that the heuristic's gap is exactly the price of using a minimum-cardinality
 grouping; we then give matching lower bounds, a family on which the gap grows without
-bound, a $b$-approximation guarantee, and two conjectures supported by exhaustive
-enumeration. The second develops exact methods---a branch-and-Benders-cut algorithm
+bound, a worst-case ratio guarantee of $\min(b,\ \Kst-1,\ \lvert\U\rvert-b)$ together
+with zero-gap classes valid for every capacity, and two conjectures, one now proved
+at $\Kst=3$ for all $b\le4$ and, in general, outside an explicit corner regime. The second develops exact methods---a branch-and-Benders-cut algorithm
 that exploits the polynomial loading subproblem, and position-indexed formulations
 (PCF, PCF$'$, PTF) with a fixed row set and a branch-and-price. A single quantity, the
 coverage bound $\lvert\U\rvert-b$, links the two: it is the value every configuration
@@ -108,21 +109,27 @@ underlying metric, and the capacity constraint couples positions that are far ap
 in the sequence. The joint problem is NP-hard \citep{Crama1994,Laporte2004}, and
 even the strongest compact integer formulations \citep{Catanzaro2015,Laporte2004,%
 daSilva2024} become difficult beyond moderate sizes. This structure---an easy inner
-problem nested inside a hard ordering problem---is precisely what decomposition
-methods are designed to exploit, and it motivates both pillars of this work.
+problem nested inside a hard ordering problem---is what decomposition methods are
+designed to exploit, and both lines of this work, the structural analysis and the
+exact methods, rest on it.
 
 \paragraph{The grouping view, and the questions it forces.}
-The SSP is inseparable from a simpler relative, the Job Grouping Problem (JGP), which
+The SSP is closely tied to a simpler relative, the Job Grouping Problem (JGP), which
 asks only how few magazine configurations suffice to serve every job. Grouping
 suggests both the standard heuristic---group the jobs, then order the groups---and a
 route to exact solution, because a \emph{configuration} (a magazine-filling set of
 tools) is a natural unit to reason about: the SSP becomes a generalised
 travelling-salesman problem that visits, in some order, one configuration able to
 serve each job, paying for the tools that change between consecutive configurations
-\citep{Colares2026Exact}. Two questions follow. First, how good is the heuristic---how
-far can group-then-sequence be from the true optimum, and when is it exact? Second,
+\citep{Colares2026Exact}. Two questions follow, and the literature answers neither.
+First, how good is the heuristic? Group-then-sequence is the method of choice in
+applications---in colour printing, where the SSP appears verbatim, it comes close to
+optimal on industrial instances \citep{Burger2015}, and the strongest metaheuristics
+seed from JGP solutions \citep{Mecler2021}---but its record is entirely empirical:
+how far it can be from the optimum, and when it is exact, has not been analysed.
+Second,
 how well can the SSP be solved exactly through configurations---branch-and-price is
-very effective for the JGP because its set-covering relaxation is tight
+effective for the JGP because its set-covering relaxation is tight
 \citep{Otiai2026}, so does the configuration view yield an equally strong exact method
 for the SSP, or is it blocked because the natural configuration relaxation collapses
 to the elementary bound $\lvert\U\rvert-b$?
@@ -147,17 +154,22 @@ The principal results are the following.
   heuristic's optimality gap is exactly the cost of restricting attention to
   minimum-cardinality groupings.
   \item \emph{Gap quantification}: we prove the matching lower bounds $\Zst\ge
-  \max(\Kst-1,\lvert\U\rvert-b)$ and that the two-phase heuristic is a
-  $b$-approximation; we exhibit a family on which the gap grows linearly without
-  bound; and we state two conjectures---$H/\Zst\le 4/3$ for $b=3$, and
-  $\mathrm{gap}\le\Kst-2$---each unfalsified by exhaustive enumeration over many
-  thousands of instances.
+  \max(\Kst-1,\lvert\U\rvert-b)$, the worst-case guarantee $H/\Zst\le\min(b,\
+  \Kst-1,\ \lvert\U\rvert-b)$, and zero-gap classes valid for every $b$ ($\Kst\le2$,
+  or $\lvert\U\rvert\le b+1$); we exhibit a family on which the gap grows linearly
+  without bound; and we state two conjectures---$H/\Zst\le 4/3$ for $b=3$, and
+  $\mathrm{gap}\le\Kst-2$, the latter implying a $(2-\varepsilon)$-approximation for
+  every $b$---each unfalsified by exhaustive enumeration over many thousands of
+  instances. At $\Kst=3$ we give an exact expression for the heuristic cost and
+  prove the gap conjecture for every $b\le4$ and, in general, outside an
+  explicitly delimited corner regime; at $b=3$ the $4/3$ conjecture thereby
+  reduces to a single structural assumption.
   \item \emph{A collapse theorem}: under a per-changeover magazine setup cost, the
   heuristic becomes exact once the ratio of setup cost to switch cost exceeds an
   explicit threshold.
   \item \emph{Exact methods} (Section~\ref{sec:exact}): a branch-and-Benders-cut
-  solver whose subproblem is the polynomial KTNS oracle, verified optimal against
-  exhaustive search; and position-indexed formulations (PCF, its symmetry-reduced
+  solver whose subproblem is the polynomial KTNS oracle; and position-indexed
+  formulations (PCF, its symmetry-reduced
   variant PCF$'$, and the transition model PTF) with a fixed $O(n\lvert T\rvert)$ row
   set, their pricing subproblems, and an exact branch-and-price.
   \item \emph{An objective competitiveness assessment} (Section~\ref{sec:comp}):
@@ -172,9 +184,10 @@ two-phase heuristic and the configuration--GTSP lens, proves the two structural
 lower bounds, fixes the switch-cost convention, and reviews the literature.
 Section~\ref{sec:gap} develops the structural theory of the heuristic gap;
 Section~\ref{sec:exact} presents the exact methods; Section~\ref{sec:comp} reports
-the experimental design, the verification of correctness, and the competitiveness
-assessment; and Section~\ref{sec:concl} concludes with open problems and future
-directions. Longer proofs are deferred to Appendix~\ref{app:proofs}.
+the experimental design and the competitiveness
+assessment; Section~\ref{sec:concl} concludes; and Section~\ref{sec:planned} sets
+out the work planned for the remainder of the project, phased by dependency. Longer
+proofs are deferred to Appendix~\ref{app:proofs}.
 
 %==============================================================================
 \section{Preliminaries}\label{sec:prelim}
@@ -382,12 +395,14 @@ $\Zst\ge\max\rset{\Kst-1,\ \lvert\U\rvert-b}$.
 slack on others (Section~\ref{sec:gap}). The coverage bound $\lvert\U\rvert-b$ is
 exactly the value to which the multicommodity-flow relaxation of \citet{daSilva2024}
 collapses---a fact central to the assessment of Section~\ref{ssec:assess}. The two
-are genuinely different measurements: on the $6$-ring, $\Kst-1=2$ while
+measure different things: on the $6$-ring, $\Kst-1=2$ while
 $\lvert\U\rvert-b=6-3=3$, so the coverage bound is tight ($\Zst=3$ free-initial,
 Example~\ref{ex:ring}) and the grouping bound is slack, whereas on instances built
 from many nearly tool-disjoint groups the reverse holds. Neither dominates in
-general, and Section~\ref{sec:gap} shows that their maximum, though always valid, is
-not always attained.
+general, and their maximum, though always valid, is not always attained: over
+$21{,}569$ enumerated instances with jobs of sizes $\{2,3\}$ at $b=3$, $2{,}410$
+have $\Zst$ strictly above both bounds, and the $8$-job sliding-window ring at $b=4$
+($T_j=\{j,j+1,j+2\}$ modulo $8$, $\lvert\U\rvert=8$) has $\Zst=5>\max(3,\,4)$.
 
 \subsection{Switch-cost convention}\label{ssec:conv}
 Formulations in the literature charge the initial magazine fill differently, and
@@ -451,11 +466,41 @@ Constructive and metaheuristic upper bounds include the branch-and-bound and
 bounding ideas of \citet{Ghiani2010} and the hybrid genetic search of
 \citet{Mecler2021}, which seeds its population from JGP solutions.
 
+\paragraph{The decomposition in practice.}
+The group-then-sequence decomposition is not merely a theoretical device. In colour
+printing the SSP appears verbatim---ink cartridges are the tools, the cartridge rack
+the magazine---and \citet{Burger2015} solve the industrial problem by exactly this
+decomposition, modelling the grouping as unicost set covering and the sequencing as a
+travelling-salesman problem, enumerating optimal groupings by Stirling-number
+arguments, and measuring the decomposition's suboptimality empirically: it is small
+on their instances, consistent with earlier reports they survey. What the literature
+does not contain is a \emph{worst-case} analysis of the decomposition---bounds on its
+gap or ratio, extremal instances, or conditions for exactness; the
+approximation-flavoured results that exist for the SSP concern other heuristics.
+Section~\ref{sec:gap} supplies that analysis.
+
+\paragraph{What remains open, and the route taken here.}
+Three observations from the preceding paragraphs set the agenda. First, the
+decomposition heuristic has a strong empirical record but no worst-case theory;
+Section~\ref{sec:gap} builds one. Second, on the exact side the strongest compact
+relaxation equals the elementary coverage bound $\lvert\U\rvert-b$
+\citep{daSilva2024}, and the configuration relaxation collapses to the same value on
+most instances \citep{Moreira2026}; progress therefore requires either a method that
+does not lean on the linear relaxation---the Benders route of Section~\ref{ssec:bbc},
+whose strength is an exact polynomial subproblem---or a formulation whose relaxation
+can exceed the bound, the position--transition route of Section~\ref{ssec:pos}.
+Third, the configuration view that is so effective for the JGP \citep{Otiai2026}
+lacks a tractable exact SSP counterpart, the natural model carrying exponentially
+many corrected subtour constraints (Section~\ref{ssec:pos}); that is the opening the
+position-indexed formulations address.
+
 %==============================================================================
 \section{Structural analysis of the heuristic gap}\label{sec:gap}
 %==============================================================================
-The group-then-sequence heuristic is the standard practical method for the SSP, yet how
-far it can be from optimal has not been analysed. The obstacle is that the heuristic
+The group-then-sequence heuristic is the standard practical method for the SSP, and
+where it has been tested against exact optima its measured suboptimality is small
+\citep{Burger2015}; a worst-case analysis, however, does not exist. The source of the
+gap is that the heuristic
 commits to a \emph{minimum-cardinality} grouping before it sequences, whereas the true
 optimum may be served by a larger grouping with cheaper transitions; the gap is
 precisely the difference between the two. This is what the running instance shows
@@ -488,9 +533,7 @@ $\displaystyle \Zst=\min_{\mathcal{P}}\gamma(\mathcal{P})$, the minimum taken ov
 The proof (Appendix~\ref{app:proofs}) is a pair of constructions: any feasible
 grouping, processed group by group, is a schedule of cost $\gamma(\mathcal{P})$,
 giving ``$\le$''; and any optimal schedule, its jobs grouped by the magazine under
-which they run, is a feasible grouping of no greater cost, giving ``$\ge$''. The
-identity was confirmed by exhaustive enumeration of $1{,}306$ instances without
-exception.
+which they run, is a feasible grouping of no greater cost, giving ``$\ge$''.
 \begin{corollary}[The heuristic gap]\label{cor:gap}
 Writing $H=\min\{\gamma(\mathcal{P}):\lvert\mathcal{P}\rvert=\Kst\}$ for the best
 two-phase cost,
@@ -518,8 +561,10 @@ grouping phase never offers it to the sequencer.
 \end{example}
 
 \subsection{The gap is real and unbounded}\label{ssec:unbounded}
-Table~\ref{tab:rings} collects the $k$-ring ($T_j=\{j,j+1\}$ modulo $k$, $b=3$) for
-$k=3,\dots,8$: the gap first appears at $k=6$, where the ratio is largest.
+Corollary~\ref{cor:gap} locates the gap; the next question is whether it actually
+occurs, and how large it can grow. Table~\ref{tab:rings} collects the $k$-ring
+($T_j=\{j,j+1\}$ modulo $k$, $b=3$) for $k=3,\dots,8$: the gap first appears at
+$k=6$, where the ratio is largest.
 \begin{table}[h]\centering
 \begin{tabular}{cccccc}
 \toprule
@@ -544,7 +589,7 @@ $(7g-3)/(6g-3)$ decreases from $4/3$ at $g=1$ towards $7/6$.
 The proof (Appendix~\ref{app:proofs}) pairs the coverage bound $\Zst\ge\lvert\U
 \rvert-b=6g-3$ with a sequential schedule attaining it, and counts the heuristic's
 cost as $g$ within-copy contributions of $4$ and $g-1$ inter-copy transitions of
-$3$. The values were verified for $g=1,\dots,4$.
+$3$.
 \begin{remark}[Perfectness does not predict the gap]\label{rem:perfect}
 One might hope that polyhedral regularity of an instance governs its gap; it does
 not. Form the \emph{conflict graph} on the jobs, joining $i$ and $j$ when they cannot
@@ -555,44 +600,231 @@ for the $5$-ring it is the odd cycle $C_5$, which is imperfect
 the size of the gap are therefore independent.
 \end{remark}
 
-\subsection{A worst-case guarantee and two conjectures}\label{ssec:ratio}
-Although unbounded in absolute terms, the gap is bounded in ratio.
-\begin{proposition}\label{prop:Hub}
-$H\le b(\Kst-1)$.
-\end{proposition}
+\subsection{Worst-case analysis on general instances}\label{ssec:ratio}
+Although unbounded in absolute terms, the gap is bounded in ratio---and everything
+in this subsection holds for \emph{every} instance and every capacity, not only for
+the ring families that witness the extremes. Throughout, $q=\lvert\U\rvert-b$,
+$\Kst\ge2$ (at $\Kst=1$ the heuristic is trivially exact, and then $q\le0$), and
+costs are free-initial.
+
+\begin{lemma}[Cost identity]\label{lem:costid}
+Restrict every magazine state to a subset of $\U$ (always possible when $\Kst\ge2$,
+and never worse). The free-initial cost of any full-magazine schedule then equals
+$q+R$, where $R\ge0$ counts \emph{re-insertions}: insertions of tools that were
+present earlier and evicted.
+\end{lemma}
 \begin{proof}
-A minimum-cardinality grouping has $\Kst$ configurations; any ordering of them has
-$\Kst-1$ transitions, each changing at most $b$ tools since every configuration has
-size $b$. Hence $\gamma\le b(\Kst-1)$ for that grouping, and $H$ is no larger.
+Each of the $q$ tools of $\U$ outside the initial load is required by some job, so
+it is inserted at least once; splitting all insertions into first-time ones (exactly
+$q$) and the rest (by definition $R$) gives the identity.
 \end{proof}
-\begin{theorem}[$b$-approximation]\label{thm:bapprox}
-$\displaystyle \frac{H}{\Zst}\le\frac{b(\Kst-1)}{\max(\Kst-1,\ \lvert\U\rvert-b)}\le
-b$.
+\noindent Hence $\Zst=q+R_{\mathrm{opt}}$ and $H=q+R_H$, so the gap
+$H-\Zst=R_H-R_{\mathrm{opt}}$ is \emph{exactly the excess re-insertions} that the
+minimum-cardinality grouping forces. The $6$-ring's single extra switch is one such
+re-insertion: tool $t_1$, needed in the first and the last group but not in the
+middle one, is evicted at a group boundary and reloaded, where the optimal schedule
+keeps it resident throughout (Example~\ref{ex:ring-why}).
+
+\begin{lemma}[Transition cap]\label{lem:transcap}
+In any ordering of configurations contained in $\U$, every transition inserts at
+most $\min(b,\,q)$ tools; hence $H\le(\Kst-1)\min(b,\,q)$.
+\end{lemma}
+\begin{proof}
+A transition into $C_{k+1}$ inserts $\lvert C_{k+1}\setminus C_k\rvert\le\lvert
+C_{k+1}\rvert=b$ tools, and also at most $\lvert\U\setminus C_k\rvert=q$ tools,
+since $C_{k+1}\subseteq\U$ and $\lvert C_k\rvert=b$. A covering configuration inside
+$\U$ exists for every group, so some minimum-cardinality grouping uses only such
+configurations, and $H$ is at most its cost.
+\end{proof}
+
+\begin{theorem}[Worst-case guarantee]\label{thm:uncond}
+For every instance with $\Kst\ge2$,
+\[
+  \frac{H}{\Zst}\ \le\ \frac{(\Kst-1)\min(b,\,q)}{\max(\Kst-1,\ q)}
+  \ \le\ \min\bigl(b,\ \Kst-1,\ q\bigr).
+\]
 \end{theorem}
 \begin{proof}
-Immediate from Proposition~\ref{prop:Hub} and Corollary~\ref{cor:lb}, since
-$\max(\Kst-1,\lvert\U\rvert-b)\ge\Kst-1$.
+Divide Lemma~\ref{lem:transcap} by $\Zst\ge\max(\Kst-1,q)\ge1$
+(Corollary~\ref{cor:lb}). For the second inequality,
+$(\Kst-1)\,q/\max(\Kst-1,q)=\min(\Kst-1,q)$ and $\min(b,q)\le q$ give the
+$\min(\Kst-1,q)$ part, while $(\Kst-1)/\max(\Kst-1,q)\le1$ and $\min(b,q)\le b$
+give the $b$ part.
 \end{proof}
-The true worst case appears far smaller. Exhaustive enumeration supports two
-sharper statements.
+\noindent This subsumes the immediate $b$-approximation ($H\le b(\Kst-1)$ divided
+by $\Zst\ge\Kst-1$): the guarantee tightens automatically on instances with few
+groups or with few tools in excess of the capacity.
+
+\begin{corollary}[Zero-gap classes, every $b$]\label{cor:zerogap}
+(i) If $\Kst=2$ the gap is zero; indeed $H=\Zst=q$. (ii) If $\lvert\U\rvert\le b+1$
+the gap is zero. (iii) If $\Kst=3$ then $H/\Zst\le2$.
+\end{corollary}
+\begin{proof}
+All three are instances of Theorem~\ref{thm:uncond}, whose ratio bound is
+$\Kst-1=1$, $q\le1$, and $\Kst-1=2$ respectively. For the equality in (i), pad the
+first group's configuration to size $b$ with tools of the second group's
+requirement and pad the second configuration from the first; the single transition
+then inserts exactly the $q$ tools of $\U$ missing from the first configuration, so
+$H\le q\le\Zst\le H$ by the coverage bound.
+\end{proof}
+\noindent Worst cases therefore require $\Kst\ge3$---consistent with every
+positive-gap instance found in enumeration having $\Kst\in\{3,4\}$.
+
+The theorem's cap is far above the worst case actually observed. Exhaustive
+enumeration supports two sharper statements.
 \begin{conjecture}[$b=3$ ratio]\label{conj:43}
 For every instance with $b=3$, $H/\Zst\le 4/3$.
 \end{conjecture}
 \noindent Checked by exhaustive enumeration of the $b=3$ two-tools-per-job family
 with $m\le6$ ($10{,}691$ instances) and of mixed size-$\{2,3\}$ jobs with $m\le5$ (a
-further $6{,}065$): the maximum ratio is exactly $4/3$, attained only by the
+further $6{,}065$): the maximum ratio is exactly $4/3$, attained at the
 $6$-ring, with no counterexample.
 \begin{conjecture}[gap bound]\label{conj:gap}
 For every instance with $\Kst\ge2$, $\ H-\Zst\le\Kst-2$.
 \end{conjecture}
-\noindent No violation arose over ${\sim}1{,}380$ enumerated instances; it is
-consistent with $\Kst\le2$ forcing zero gap, and with the family of
-Proposition~\ref{prop:unbounded}, where $\Kst=3g$ and the gap $g$ satisfies $g\le
-3g-2$.
-\begin{remark}[Dependence on $b$]\label{rem:bdep}
+\noindent No violation arose over ${\sim}1{,}380$ enumerated instances
+($b\in\{2,3,4\}$, mixed job sizes). The case $\Kst=2$ is proved
+(Corollary~\ref{cor:zerogap}); every known extremal witness attains the bound with
+equality; and the unbounded family of Proposition~\ref{prop:unbounded} satisfies it
+with room to spare ($\Kst=3g$, gap $g\le3g-2$). At $\Kst=3$ the conjecture is now
+\emph{proved} for every instance with $b\le4$ and, in general, outside an explicit
+corner regime; the next results give the exact heuristic cost at $\Kst=3$ and the
+settled regimes.
+
+\begin{proposition}[Exact heuristic cost at $\Kst=3$]\label{prop:hk3}
+If $\Kst=3$ then, with configurations restricted to subsets of $\U$,
+\[
+  H\;=\;q\;+\;\min\ \min\bigl(x_{ab},\,x_{bc},\,x_{ca}\bigr),
+  \qquad x_{uv}=\lvert(C_u\cap C_v)\setminus C_w\rvert,
+\]
+the outer minimum over feasible $3$-groupings and configuration choices. Hence the
+gap equals $\min\{\cdot\}-R_{\mathrm{opt}}$, and it vanishes exactly when some
+minimum-cardinality grouping admits configurations whose smallest pairwise overlap
+outside the third is at most $R_{\mathrm{opt}}$.
+\end{proposition}
+\begin{proof}
+The three configurations of a feasible $3$-grouping are distinct (equal ones would
+merge two groups, contradicting $\Kst=3$) and cover $\U$. For a path
+$(C_a,C_b,C_c)$, splitting the cost into first-time insertions and re-insertions
+(Lemma~\ref{lem:costid}) gives cost $q+\lvert(C_a\cap C_c)\setminus C_b\rvert$: the
+re-inserted tools are exactly those of $C_c$ present in $C_a$ but absent from
+$C_b$. Minimising over the three orderings selects the cheapest middle
+configuration, and $H$ minimises over groupings and configuration choices.
+\end{proof}
+\noindent This turns grouping selection at $\Kst=3$
+(Section~\ref{ssec:grouping-sel}) into an explicit criterion: seek the grouping
+minimising the smallest pairwise configuration overlap outside the third.
+
+\begin{lemma}[Overlap counting]\label{lem:overlap}
+Any three configurations $C_a,C_b,C_c\subseteq\U$ of size $b$ with
+$C_a\cup C_b\cup C_c=\U$ satisfy
+$\min(x_{ab},x_{bc},x_{ca})\le\lfloor(2b-q)/3\rfloor$.
+\end{lemma}
+\begin{proof}
+Count tools by the number of configurations containing them: with $a$ tools in
+exactly one configuration, $\sum x:=x_{ab}+x_{bc}+x_{ca}$ in exactly two, and
+$c_3$ in all three, the tool count gives $a+\sum x+c_3=b+q$ and the degree sum
+gives $a+2\sum x+3c_3=3b$; subtracting, $\sum x=2b-q-2c_3\le2b-q$. The minimum is
+at most the mean $\sum x/3$, and it is an integer.
+\end{proof}
+
+\begin{proposition}[Progress on Conjecture~\ref{conj:gap} at $\Kst=3$]\label{prop:k3}
+Let $\Kst=3$ and $R_{\mathrm{opt}}=\Zst-q$. Then
+\[
+  \mathrm{gap}\ \le\ \max\Bigl(0,\ \min\bigl(q,\
+  \lfloor(2b-q)/3\rfloor\bigr)-R_{\mathrm{opt}}\Bigr),
+\]
+and the bound is attained by the $6$-ring and by the $b=4$ extremal witness.
+Consequently the conjectured $\mathrm{gap}\le1$ holds
+(i) for \emph{every} instance with $b\le4$;
+(ii) whenever $2b\le q+3R_{\mathrm{opt}}+5$;
+(iii) whenever $R_{\mathrm{opt}}\ge q-1$; and
+(iv) at $\Zst=q=3$ also when two of the four walk groups have combined
+requirement fitting one magazine.
+At $\Kst=3$ the conjecture is therefore open only in the corner
+$2b\ge q+3R_{\mathrm{opt}}+6$ with $R_{\mathrm{opt}}\le q-2$---necessarily
+$b\ge5$---and there only outside the case of (iv).
+\end{proposition}
+\begin{proof}
+The configurations of any feasible $3$-grouping (one exists) cover $\U$, so
+Proposition~\ref{prop:hk3} with Lemma~\ref{lem:overlap} gives
+$H\le q+\lfloor(2b-q)/3\rfloor$, while Lemma~\ref{lem:transcap} gives
+$H\le2\min(b,q)\le q+q$; subtracting $\Zst=q+R_{\mathrm{opt}}$ yields the display.
+For (i) at $b=3$: $\lfloor(6-q)/3\rfloor\le1$ for all $q\ge1$. At $b=4$: the
+display is $\le1$ for $q\ge3$; for $q=2$, either $R_{\mathrm{opt}}\ge1$ (display
+$\le1$) or $\Zst=q\le2$, in which case the gap vanishes (Appendix~\ref{app:proofs});
+$q\le1$ is Corollary~\ref{cor:zerogap}(ii). Parts (ii) and (iii) read off the
+display; part (iv) is proved in Appendix~\ref{app:proofs}.
+\end{proof}
+
+\begin{proposition}[A quantitative bound for every $\Kst$]\label{prop:genk}
+For every instance with $\Kst\ge2$,
+\[
+  \mathrm{gap}\ \le\ \max\Bigl(0,\
+  \Bigl\lfloor\frac{q\,\bigl(b(\Kst-1)-q\bigr)}{b+q}\Bigr\rfloor
+  -R_{\mathrm{opt}}\Bigr).
+\]
+\end{proposition}
+\begin{proof}
+Fix a minimum-cardinality grouping; its configurations
+$C_1,\dots,C_{\Kst}\subseteq\U$ are pairwise distinct (else two groups would
+merge) and cover $\U$. In an ordering $\sigma$ the path cost is
+$q+\sum_t(\mathrm{runs}_\sigma(t)-1)$, where $\mathrm{runs}_\sigma(t)$ counts
+the maximal blocks of consecutive configurations containing $t$: every block
+start after the first is a re-insertion (Lemma~\ref{lem:costid}). Let $d_t$ be
+the number of configurations containing $t$, so $\sum_t d_t=\Kst b$ over
+$b+q$ tools. Under a uniformly random ordering
+$\mathbb{E}[\mathrm{runs}(t)-1]=(d_t-1)(\Kst-d_t)/\Kst$; this is concave in
+$d_t$, so by Jensen the expected total excess is at most
+$q\,(b(\Kst-1)-q)/(b+q)$. Some ordering achieves at most the mean, the total
+is an integer, and subtracting $\Zst=q+R_{\mathrm{opt}}$ gives the claim.
+\end{proof}
+\noindent At $\Kst=3$ this and Proposition~\ref{prop:k3} are incomparable, and
+both are tight at the $6$-ring. The bound grows linearly in $\Kst$, so it does
+not by itself approach the conjectured $\Kst-2$; but it is unconditional and,
+to our knowledge, the first quantitative worst-case bound on the decomposition
+valid for every $\Kst$---on the $b=5$ extremal witness it gives $4$ where the
+transition cap gives $8$.
+
+\begin{proposition}[Consequences of Conjecture~\ref{conj:gap}]\label{prop:conseq}
+If Conjecture~\ref{conj:gap} holds, then for every instance and every $b$,
+\[
+  \frac{H}{\Zst}\ \le\ 1+\frac{\Kst-2}{\max(\Kst-1,\ q)}\ \le\ 2-\frac{1}{\Kst-1}
+  \ <\ 2,
+\]
+so the two-phase heuristic would be a $(2-\varepsilon)$-approximation universally
+in $b$. All known extremal witnesses have $q=\Kst$ and gap $\Kst-2$, where the
+first bound evaluates to $2-2/\Kst$---reproducing exactly the observed extremal
+ratios $4/3$ ($\Kst=3$) and $3/2$ ($\Kst=4$).
+\end{proposition}
+\begin{proof}
+Divide $H\le\Zst+\Kst-2$ by $\Zst\ge\max(\Kst-1,q)$; the second inequality follows
+from $\max(\Kst-1,q)\ge\Kst-1$. At $q=\Kst$ the first bound is
+$1+(\Kst-2)/\Kst=2-2/\Kst$.
+\end{proof}
+
+\begin{proposition}[A route to the $4/3$ conjecture]\label{prop:43route}
+Assume only that every positive-gap $b=3$ instance has $\Kst=3$ and $\Zst\ge3$
+(as holds throughout the $10{,}691$-instance edge family, where a positive gap
+forces $\Kst=3$ and $\lvert\U\rvert=6$; open in general). Then
+Conjecture~\ref{conj:43} follows---Conjecture~\ref{conj:gap} is not needed, its
+$b=3$, $\Kst=3$ case being part of Proposition~\ref{prop:k3}(i).
+\end{proposition}
+\begin{proof}
+Zero-gap instances have ratio $1$; a positive-gap instance has, by
+Proposition~\ref{prop:k3}(i), gap $\le1$ and
+$H/\Zst=1+\mathrm{gap}/\Zst\le1+1/3=4/3$.
+\end{proof}
+
+\begin{remark}[The extremal curve in $b$]\label{rem:bdep}
 The constant $4/3$ is specific to $b=3$. The extremal ratio is non-decreasing in
-$b$, reaching $3/2$ at $b=5$ (an instance with $\Kst=4$, $\lvert\U\rvert=9$,
-$\Zst=4$, $H=6$); a tight general-$b$ bound is open.
+$b$: it reaches $4/3$ already at $b=4$ and $3/2$ at $b=5$ (a witness with $\Kst=4$,
+$\lvert\U\rvert=9$, $\Zst=4$, $H=6$), and every known extremum is of the form
+$2-2/\Kst$ at a witness with $q=\Kst$. Whether the supremum approaches the cap $2$
+of Proposition~\ref{prop:conseq} as $b$ grows is open; it would require a shared
+bridge structure across unboundedly many groups, which the disjoint-copy family of
+Proposition~\ref{prop:unbounded} cannot provide---there the copies decouple and the
+ratio \emph{decreases} to $7/6$.
 \end{remark}
 
 \subsection{Collapse under a setup cost}\label{ssec:collapse}
@@ -635,8 +867,8 @@ should ask on \emph{which} grouping to run the sequencing phase. Admitting a sin
 extra group already recovers the ring optimum; in general the trade-off is between
 more configuration changes and cheaper individual transitions. Characterising the
 groupings that attain $\min_{\mathcal{P}}\gamma(\mathcal{P})$, or giving an efficient
-rule that improves on the minimum-cardinality choice, is open and is the most direct
-route to closing the gap in practice.
+rule that improves on the minimum-cardinality choice, is open; the planned work
+returns to it (Section~\ref{sec:planned}).
 
 %==============================================================================
 \section{Exact methods}\label{sec:exact}
@@ -653,7 +885,9 @@ formulations of Section~\ref{ssec:pos} resolve. We first record the compact form
 that serve as baselines.
 
 \subsection{Compact formulations and the coverage relaxation}\label{ssec:compact}
-Several compact integer formulations are available. \citet{Catanzaro2015} give a
+Three compact formulations from the literature serve as the baselines of the
+computational study and as the yardstick against which relaxation strength is
+measured. \citet{Catanzaro2015} give a
 family F1--F5 in job--position and ordering variables, the tighter members adding
 linear-ordering and overlap inequalities; we use F4 as a baseline.
 \citet{Laporte2004} formulate the problem with tool-state variables and a
@@ -664,7 +898,8 @@ by its relaxation.
 The linear relaxation of the multicommodity-flow formulation equals the coverage
 bound $\lvert\U\rvert-b$ of Proposition~\ref{prop:lb2}.
 \end{proposition}
-\noindent Established by \citet{daSilva2024} and reconfirmed here, this matters
+\noindent Established by \citet{daSilva2024}, and matched exactly by the position
+formulation's relaxation with counting rows (Proposition~\ref{prop:pcf}), this matters
 twice: the compact relaxation is no stronger than the elementary counting bound; and
 since $\lvert\U\rvert-b$ equals $\Zst$ on many families (Section~\ref{sec:gap}), the
 model is fast exactly where that bound is tight and weak where it is not---a
@@ -751,25 +986,16 @@ polynomial oracle, with no dual computation. Finally, \emph{triplet bounds}
 generalise $w_{ij}$ to ordered triples of jobs, contributing $O(n^{3})$ valid
 inequalities that strengthen the root relaxation.
 
-\paragraph{Correctness.}
-The subproblem's value equals $\KTNS$ by total unimodularity and
-Proposition~\ref{prop:ktns}; this was confirmed numerically (the loading program and
-the combinatorial oracle agreeing on all $60$ random tests), and the resulting
-solver returns the exhaustive-search optimum on every small instance. The cut
-families form a full-factorial design---combinatorial versus dual cuts, fractional
-separation on or off, triplet bounds on or off---whose ablation is reported in
-Section~\ref{ssec:bench}.
-
 \subsection{Position-indexed formulations}\label{ssec:pos}
 \paragraph{From the configuration model to a polynomial row set.}
-The configuration formulation of Section~\ref{ssec:gtsp}, in the form proposed by
-\citet{Colares2026Exact}, is the natural exact model over configurations, but as
-originally written its subtour elimination is not valid; the correction, using
-prize-collecting travelling-salesman constraints \citep{Moreira2026}, restores validity
-at the price of \emph{exponentially many} constraints---one per subset of configurations.
-To recover a polynomial constraint count, a Miller--Tucker--Zemlin reformulation
-\citep{Miller1960,DesrochersLaporte1991} is the natural next step, but it does not escape
-the dilemma.
+The configuration formulation of Section~\ref{ssec:gtsp}, formalised by
+\citet{Colares2026Exact}, is the natural exact model over configurations. As first
+stated, however, its subtour elimination is invalid; the correction of
+\citet{Moreira2026}, through prize-collecting travelling-salesman constraints,
+restores exactness at the price of \emph{exponentially many} constraints, one per
+subset of configurations. A Miller--Tucker--Zemlin reformulation
+\citep{Miller1960,DesrochersLaporte1991} is the standard device for removing such
+constraints, but here it trades one obstacle for another.
 \begin{proposition}\label{prop:mtz}
 A per-configuration MTZ potential is exact but leaves one potential per configuration,
 hence exponentially many; aggregating the potentials to one per job is polynomial but no
@@ -812,8 +1038,7 @@ rows (T) it equals $\lvert\U\rvert-b$.
 position, satisfies (P), (Cov) and (W) at zero cost. The counting rows (T)---each
 tool of $\U$ is inserted at least once unless present at position one---restore the
 coverage bound, matching the multicommodity model (Proposition~\ref{prop:sspmf-lp})
-with one extra family of rows; both facts were confirmed computationally on the ring
-and on random instances.
+with one extra family of rows.
 
 \paragraph{Position--transition formulation (PTF).}
 To exceed the coverage bound we index \emph{transitions} rather than positions.
@@ -847,7 +1072,7 @@ strictly greater.
 \end{proposition}
 \noindent On an instance whose optimum exceeds both bounds of
 Corollary~\ref{cor:lb}, the PTF relaxation returns $2.10$ against a coverage bound of
-$2$; on the $6$-ring it is tight at $\Zst=3$ (both computed exactly). PTF is thus the
+$2$; on the $6$-ring it is tight at $\Zst=3$. PTF is thus the
 first relaxation in this family to improve on the elementary bound, and it does so
 with a fixed, polynomial row set.
 
@@ -889,8 +1114,7 @@ variables $a_t^{k}=\sum_{C\ni t}y_C^{k}\in\{0,1\}$ already appearing in (W): fix
 $a_t^{k}$ to $0$ or $1$ forbids or forces tool $t$ at position $k$, which in the
 pricing subproblem merely shifts one dual weight and leaves the oracle's \emph{form}
 unchanged. This \emph{robust} branching keeps pricing and branching compatible at
-every node, and the resulting algorithm returns the optimum $\Zst$ on the ring and on
-random instances.
+every node.
 
 \paragraph{Pricing PCF$'$: a $b$-subset with coverage bonuses.}
 Let $\alpha_k,\gamma_k\le0$, $\pi_j,\mu_{t,k},\lambda_t\ge0$ be the duals of (P$'$),
@@ -911,10 +1135,7 @@ i.e.\ choosing $b$ tools to collect per-tool rewards plus a bonus for each job w
 \citep{Goldschmidt1994}---the grouping-pricing class of \citet{Crama1994Column}%
 ---solved by enumerating the $\binom{\lvert T\rvert}{b}$ subsets at magazine sizes, or
 by a compact mixed-integer program. The branching dual of $a_t^{k}$ enters additively
-in $\rho_t^{\,k}$, so branching does not change the oracle. This reduced cost was
-verified against the solver's own dual values on the ring and several random instances
-(matching to machine precision)---a process that caught and corrected a sign error in
-$\rho_t^{\,k}$ in an earlier derivation.
+in $\rho_t^{\,k}$, so branching does not change the oracle.
 
 \paragraph{Pricing PTF: a coupled pair of subsets.}
 For PTF a column is an arc $(C,C')$, and its reduced cost contains the bilinear term
@@ -923,8 +1144,7 @@ tools of $C$ and $C'$. The pricer cannot therefore separate into a single set: i
 choose \emph{two} $b$-subsets $C\ne C'$ at once, a bilinear selection linearised by
 McCormick on the products $x'_t(1-x_t)$ and solved as a mixed-integer program with
 $2\lvert T\rvert$ binaries. This heavier pricing is the algorithmic price of PTF's
-stronger bound, and its reduced cost was likewise verified against the solver duals.
-The contrast---PCF$'$ pairing a weak bound with a cheap single-set pricer, PTF a
+stronger bound. The contrast---PCF$'$ pairing a weak bound with a cheap single-set pricer, PTF a
 stronger bound with a costly coupled-pair pricer---is the central trade-off assessed
 in Section~\ref{ssec:assess}.
 
@@ -932,41 +1152,24 @@ in Section~\ref{ssec:assess}.
 \section{Computational study}\label{sec:comp}
 %==============================================================================
 The methods of Section~\ref{sec:exact} have been implemented and are being
-benchmarked. We report the correctness verification, which is complete, and the
-experimental design; the large-scale comparison is in progress, and its tables are
-the report's only deferred content.
-
-\subsection{Verification of correctness}\label{ssec:verif}
-Because the structural results and the solvers all rest on the loading cost, the cost
-evaluator is validated first. KTNS (Proposition~\ref{prop:ktns}) was checked against
-an independent exact dynamic program over the magazine state on $8{,}000$ random
-sequences, with no disagreement. Each exact method---the branch-and-Benders-cut
-solver, the compact formulations of Section~\ref{ssec:compact}, and the
-position-indexed branch-and-price---was then required to return the exhaustive-search
-optimum on small instances; this cross-solver regression net exposes a formulation
-error as a disagreement on a tiny instance, and is run before any campaign. For the
-position-indexed models in particular, exactness and the relaxation values of
-Propositions~\ref{prop:pcf} and~\ref{prop:pcfprime} were checked by full configuration
-enumeration on the ring, and each pricing reduced cost was matched to the solver's own
-dual values before the branch-and-price was trusted. All
-objective values are reduced to the empty-start convention through
-Proposition~\ref{prop:conv} before comparison, so that models with different native
-conventions are placed on one scale.
+benchmarked. We report the experimental design; the large-scale comparison is in
+progress, and its tables are the report's only deferred content.
 
 \subsection{Experimental design}\label{ssec:bench}
 The benchmark draws on the standard SSP instance families of \citet{Catanzaro2015}
 ($n=8$--$15$ jobs, $m=5$--$15$ tools, $b=3$--$5$), \citet{Crama1994} ($n=10$, $m=10$,
-$b=4$) and \citet{Laporte2004} ($n=8$--$15$, $m=15$, $b=5$), spanning a range of tool
-densities and capacities. Three things are measured. \emph{(i)}~The
+$b=4$) and \citet{Laporte2004} ($n=8$--$15$, $m=10$--$15$, $b=4$--$5$), spanning a
+range of tool densities and capacities. Three things are measured. \emph{(i)}~The
 branch-and-Benders-cut solver is run as a full-factorial ablation of its cut
 families---combinatorial against dual optimality cuts, fractional separation on or
 off, triplet bounds on or off---against the three compact baselines. \emph{(ii)}~The
-position-indexed branch-and-price is run in its PCF and PTF variants. \emph{(iii)}~For
+position-indexed branch-and-price is run in its PCF$'$ and PTF variants. \emph{(iii)}~For
 every solver and instance the \emph{root linear-relaxation value} is recorded
-alongside the optimum, so that bound tightness can be studied directly. The common
-metric is the empty-start KTNS cost of the returned sequence, well defined for every
-method regardless of its native objective. Runs are single-threaded for reproducible
-timing, with a per-instance time limit, and are sharded across a compute cluster.
+alongside the optimum where the solver exposes it reliably, so that bound tightness
+can be studied directly. The common metric is the empty-start KTNS cost of the
+returned sequence, well defined for every method regardless of its native objective.
+Runs are pinned to a fixed solver thread count per task for reproducible timing,
+with a per-instance time limit, and are sharded across a compute cluster.
 
 \subsection{Results}\label{ssec:results}
 The campaigns are executing at the time of writing. The completed study will report,
@@ -977,7 +1180,7 @@ the shared metric; and the distribution of the root-relaxation gap, which the
 following subsection argues is the decisive quantity.
 
 \subsection{The competitiveness of configuration branch-and-price}\label{ssec:assess}
-A guiding question of the exact-methods pillar is whether a configuration-based
+A guiding question for the exact methods is whether a configuration-based
 branch-and-price can be made fast for the SSP, and the structural results already
 constrain the answer. By Propositions~\ref{prop:sspmf-lp} and~\ref{prop:pcf} the
 configuration relaxation collapses to the coverage bound $\lvert\U\rvert-b$, and by
@@ -985,18 +1188,18 @@ the gap theory of Section~\ref{sec:gap} this bound equals $\Zst$ on a large part
 the instance space. Where the root bound already equals the optimum branching is
 unnecessary; where it does not, a relaxation no stronger than $\lvert\U\rvert-b$
 forces a search tree that faster pricing or branching cannot avoid. The contrast with
-the Job Grouping Problem is sharp: there the set-covering relaxation is strong enough
+the Job Grouping Problem is telling: there the set-covering relaxation is strong enough
 that an analogous branch-and-price closes benchmark instances in a handful of nodes
 \citep{Otiai2026}, whereas for the SSP the corresponding configuration relaxation does
 not improve on the trivial bound on most instances \citep{Moreira2026}. A
 configuration branch-and-price for the SSP is therefore \emph{bound-limited} rather
 than implementation-limited. The position--transition formulation, the first in the
-family to exceed $\lvert\U\rvert-b$ (Proposition~\ref{prop:ptf}), is exactly the
-structural lever this diagnosis points to; but it pays off only where the gap opens,
-and broadening that improvement is taken up in Section~\ref{sec:concl}.
+family to exceed $\lvert\U\rvert-b$ (Proposition~\ref{prop:ptf}), is the structural
+lever this diagnosis points to; but it pays off only where the gap opens, and
+broadening that improvement is part of the planned work (Section~\ref{sec:planned}).
 
 %==============================================================================
-\section{Conclusions and future directions}\label{sec:concl}
+\section{Conclusions}\label{sec:concl}
 %==============================================================================
 
 \subsection{Summary}
@@ -1007,34 +1210,23 @@ structural side we proved that admitting arbitrary groupings makes the configura
 framework exact (Theorem~\ref{thm:grouping}), so that the two-phase heuristic's gap is
 exactly the price of a minimum-cardinality grouping (Corollary~\ref{cor:gap}); we
 bounded that gap from below and above (Corollary~\ref{cor:lb},
-Theorem~\ref{thm:bapprox}), showed it can grow without bound
+Theorem~\ref{thm:uncond}), isolated zero-gap classes valid for every capacity
+(Corollary~\ref{cor:zerogap}), showed the gap can grow without bound
 (Proposition~\ref{prop:unbounded}), and exhibited a setup-cost regime in which it
 vanishes identically (Theorem~\ref{thm:collapse}). Two conjectures---a $4/3$ ratio at
-$b=3$ and a gap of at most $\Kst-2$---survived exhaustive testing. On the algorithmic
+$b=3$ and a gap of at most $\Kst-2$---survived exhaustive testing; the second is
+proved at $\Kst=3$ for every $b\le4$ and, in general, outside an explicit corner
+regime (Proposition~\ref{prop:k3}), with the heuristic cost at $\Kst=3$ given in
+closed form (Proposition~\ref{prop:hk3}). On the algorithmic
 side we gave a branch-and-Benders-cut solver whose subproblem is exact and
 polynomial, and position-indexed formulations with a fixed row set, among which the
 position--transition model is the first configuration relaxation to improve on the
-coverage bound. The methods are implemented and verified against exhaustive search;
-their large-scale comparison is under way.
+coverage bound. The methods are implemented; their large-scale comparison is under
+way.
 
-\subsection{Future directions}
-\paragraph{Closing the gap theory.}
-The most consequential open question is the gap bound $H-\Zst\le\Kst-2$
-(Conjecture~\ref{conj:gap}): a proof, a proof of the $\Kst=3$ case for all $b$, or a
-counterexample would each settle the worst-case behaviour of the group-then-sequence
-decomposition, for which no worst-case analysis is known (the approximation results
-reported for the SSP concern other heuristics). Its constructive counterpart is the
-grouping-selection problem of Section~\ref{ssec:grouping-sel}---since some grouping
-attains the optimum, can one be found, or approximated, more cheaply than by solving
-the SSP outright?
-
-\paragraph{Stronger relaxations.}
-The competitiveness analysis (Section~\ref{ssec:assess}) locates the obstacle to a
-fast exact configuration method in the weakness of the $\lvert\U\rvert-b$ relaxation.
-The position--transition formulation breaks that barrier on some instances
-(Proposition~\ref{prop:ptf}); a systematic study of its valid inequalities and
-facets, and of the instances on which its bound exceeds $\lvert\U\rvert-b$, is the
-most direct route to an exact method competitive in time and not only in correctness.
+\subsection{Beyond the project horizon}
+The near-term programme is set out in Section~\ref{sec:planned}; three further
+directions fall outside it and are recorded here for the sequel.
 
 \paragraph{The position--transition device beyond the SSP.}
 Nothing in the position--transition construction is specific to tool switching except
@@ -1062,35 +1254,50 @@ structural results predict---rather than as an end in itself.
 %==============================================================================
 \section{Planned work}\label{sec:planned}
 %==============================================================================
-What follows is not yet done; it sets out the remaining work and the order in which it
-will be taken up over the balance of the project. Firm dates are left open---a substantial
-mid-summer break intervenes---but the phasing is fixed by dependency, and the intention is
-to conclude ahead of the project's formal end.
+The preceding sections report what has been done; this section sets out what remains,
+in the order in which it will be carried out. Firm dates are deliberately not
+attached---an extended mid-summer break falls within the remaining period---but the
+phasing is fixed by dependency: each phase consumes the output of the one before it.
+Phase~1 is expected to close before the break, and the aim is to complete the
+programme ahead of the project's formal end.
 
-\paragraph{First, and already under way --- the computational campaigns.}
-Two benchmark campaigns are running: the branch-and-Benders-cut ablation across its cut
-families, and the position-indexed branch-and-price in its PCF and PTF variants, both
-against the compact baselines and both recording the root relaxation alongside the
-optimum. Completing them and their analysis is the immediate priority, since which method
-merits further development turns on the resulting bound-tightness data.
+\paragraph{Phase 1 (under way): complete the computational campaigns.}
+Two campaigns are running: the full-factorial cut ablation of the
+branch-and-Benders-cut solver, and the position-indexed branch-and-price in its
+PCF$'$ and PTF variants, both against the compact baselines and both recording root
+relaxations alongside optima (Section~\ref{ssec:bench}). The deliverable is the
+completed tables and their analysis---solve rates, running times, the marginal value
+of each cut family, and the distribution of root gaps. This phase comes first because
+what follows it is steered by its bound-tightness data.
 
-\paragraph{Next --- the gap theory.}
-With that data in hand, the central target is the gap bound $H-\Zst\le\Kst-2$
-(Conjecture~\ref{conj:gap}): a proof, a proof of the $\Kst=3$ case for all $b$, or a
-counterexample. In parallel, the enumerated pool of optimal groupings will be used to
-attack the grouping-selection question (Section~\ref{ssec:grouping-sel})---whether a
-grouping attaining the optimum can be found more cheaply than by solving the SSP.
+\paragraph{Phase 2: close the gap conjecture.}
+The central theoretical target is Conjecture~\ref{conj:gap}, $H-\Zst\le\Kst-2$. Its
+$\Kst=3$ case is settled for every $b\le4$ and, in general, outside the corner
+$2b\ge q+3R_{\mathrm{opt}}+6$ (Proposition~\ref{prop:k3}); the remaining work is
+that corner (necessarily $b\ge5$), then general $\Kst$---a first unconditional
+bound for every $\Kst$ is Proposition~\ref{prop:genk}, and driving it from its
+linear growth down to the conjectured $\Kst-2$ (derandomising the ordering,
+sharpening the degree profile) is the concrete target---with counterexample
+search directed at exactly those regimes. In parallel, the exact expression of Proposition~\ref{prop:hk3} turns
+grouping selection (Section~\ref{ssec:grouping-sel}) at $\Kst=3$ into a concrete
+criterion, to be tested against the enumerated pool of optimal groupings.
 
-\paragraph{Then --- stronger relaxations and the polyhedral view.}
-Where the campaigns find the coverage bound loose, the work turns to the PTF relaxation,
-characterising the instances on which it exceeds $\lvert\U\rvert-b$ and the valid
-inequalities that strengthen it, and to the clutter, blocker, and hypergraph structure of
-the configuration system behind the gap analysis (Remark~\ref{rem:perfect})---the newest
-of the directions.
+\paragraph{Phase 3: strengthen the position--transition relaxation; the polyhedral
+view.}
+Where Phase~1 finds the coverage bound loose, attention turns to PTF: characterising
+the instances on which its relaxation exceeds $\lvert\U\rvert-b$
+(Proposition~\ref{prop:ptf}) and deriving valid inequalities that widen the margin.
+The polyhedral thread pursued with Prof.~Wagler now has its footing: the feasible
+groups form an independence system whose circuit clutter determines $\Kst$ as a
+hypergraph chromatic number, with the conflict graph as its two-element part---so
+any combinatorial gap criterion must see beyond the conflict graph
+(Remark~\ref{rem:perfect}). The questions ahead are whether idealness of the
+covering clutter characterises the classes with tight relaxation, and whether the
+circuit clutter together with $(b,\lvert\U\rvert)$ determines the gap at all.
 
-\paragraph{Throughout --- consolidation.}
-The strongest of these threads will be consolidated toward a publication, with the
-verification record kept current as the work proceeds.
+\paragraph{Phase 4: consolidation.}
+The closing phase assembles the results into the final report and shapes the
+strongest thread into a manuscript for submission.
 
 %==============================================================================
 \appendix
@@ -1142,6 +1349,43 @@ transition between configurations of different copies costs $3$, the copies bein
 tool-disjoint. Connecting $g$ copies needs at least $g-1$ inter-copy transitions, so
 every ordering costs at least $4g+3(g-1)=7g-3$, attained by keeping each copy's
 configurations consecutive. Thus $H=7g-3$ and $H-\Zst=g$.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:k3}: the walk-based claims]
+Suppose $\Zst=q$ and take an optimal schedule; its walk of distinct configurations
+$D_1,\dots,D_p$ may be assumed, after excising configurations serving no job (the
+transition cost $d$ obeys the triangle inequality
+$d(A,C)\le d(A,B)+d(B,C)$, and no covering walk costs less than $q$), to have every
+configuration serve a job. With zero re-insertions every insertion is first-time,
+so the $p-1$ transitions insert $q$ tools in total and $p\le q+1$; assigning each
+job to a serving configuration exhibits a feasible $p$-grouping, so $p\ge\Kst$;
+and if $p=\Kst$ that grouping is minimum-cardinality of cost $\Zst$, forcing
+$H=\Zst$. In particular, $\Zst=q\le2$ gives $p\le q+1\le3=\Kst$, so the gap
+vanishes---the claim used in part (i).
+
+For (iv), let $q=3$; if $p=3$ the gap vanishes as above, so let $p=4$. Each
+transition inserts exactly one fresh tool: $D_{l+1}\setminus D_l=\{x_{l+1}\}$ and
+$D_l\setminus D_{l+1}=\{e_{l+1}\}$; and zero re-insertion forces
+\emph{persistence}: a tool of $D_i\cap D_j$ ($i<j$) belongs to every intermediate
+$D_l$. Write $U_l$ for the requirement of group $G_l$ and suppose
+$\lvert U_i\cup U_j\rvert\le b$ for some $i<j$. Merging $G_i$ and $G_j$, keeping
+the other two groups with their walk configurations, yields a minimum-cardinality
+grouping; it remains to choose its configuration $C\supseteq U_i\cup U_j$ and an
+ordering whose wrap term $\lvert(\text{first}\cap\text{last})\setminus
+\text{middle}\rvert$ (Proposition~\ref{prop:hk3}) is at most one, giving
+$H\le q+1=\Zst+1$. For $(1,2)$: take $C\subseteq D_1\cup D_2$ (possible, the union
+has size $b{+}1$) and order $(C,D_3,D_4)$; the wrap lies in
+$(D_1\cap D_4\setminus D_3)\cup(D_2\cap D_4\setminus D_3)\subseteq\varnothing\cup
+(D_2\setminus D_3)=\{e_3\}$, using persistence. For $(3,4)$: order $(D_1,D_2,C)$
+with $C\subseteq D_3\cup D_4$; the wrap lies in
+$D_1\cap(D_3\cup D_4)\setminus D_2=\varnothing$ by persistence. For $(1,3)$,
+$(2,4)$, $(1,4)$: the orderings $(C,D_2,D_4)$, $(D_1,D_3,C)$, $(C,D_2,D_3)$ bound
+the wrap by $\{x_3\}$, $\{e_3\}$, $\{x_3\}$ respectively, by the same two facts.
+For $(2,3)$: the set $W=U_2\cup U_3\cup(D_1\cap D_4)$ lies in $D_2\cup\{x_3\}$
+(persistence places $D_1\cap D_4$ inside $D_2\cap D_3$), so $\lvert W\rvert\le
+b{+}1$ and a configuration $C\supseteq U_2\cup U_3$ inside $W$ omits at most one
+element of $D_1\cap D_4$; the ordering $(D_1,C,D_4)$ has wrap
+$\lvert(D_1\cap D_4)\setminus C\rvert\le1$.
 \end{proof}
 
 \begin{proof}[Proof of Proposition~\ref{prop:pcfprime}]

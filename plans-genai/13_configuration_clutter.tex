@@ -1,0 +1,154 @@
+%==============================================================================
+% 13_configuration_clutter.tex — Clutter/blocker foundations for the SSP/JGP
+% grouping structure (Thread D, with Prof. Wagler).
+%
+% STATUS (2026-07-02, Claude-Fable draft): foundations only. The propositions are
+% elementary and proved inline; the questions are open. AI-assisted working
+% scratch, NOT ground truth — verify before citing or building on externally.
+% Machine checks: the star witness and non-matroid witness are hand-verifiable in
+% one line each; both also appear in _verification/VERIFIED_FACTS.md (conflict-
+% graph corrections block).
+%==============================================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=1.1in]{geometry}
+\usepackage[numbers]{natbib}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{question}{Question}
+\newtheorem{remark}{Remark}
+\newcommand{\Kstar}{K^{\ast}}
+
+\title{The grouping structure of the SSP as an independence system:\\
+clutter, blocker, and the right polyhedral questions}
+\author{Working note (Thread D)}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{The group complex and its circuits}
+
+Fix an SSP/JGP instance: jobs $J$, tool sets $T_j$, capacity $b$, $U=\bigcup_j
+T_j$.
+
+\begin{definition}[Group complex]
+Let $\mathcal{F}=\{S\subseteq J:\ \lvert\bigcup_{j\in S}T_j\rvert\le b\}$, the
+family of feasible groups. $\mathcal{F}$ is nonempty (singletons, as
+$\lvert T_j\rvert\le b$) and downward closed, hence an \emph{independence
+system} (abstract simplicial complex) on ground set $J$. Its \emph{circuits}
+$\mathcal{C}$ are the inclusion-minimal infeasible sets; by minimality
+$\mathcal{C}$ is a \emph{clutter}. The JGP value $\Kstar$ is the minimum number
+of faces of $\mathcal{F}$ covering $J$.
+\end{definition}
+
+\begin{proposition}[$\Kstar$ is a hypergraph chromatic number]\label{prop:chrom}
+A set of jobs is feasible iff it contains no circuit; hence $\Kstar$ equals the
+chromatic number of the circuit hypergraph $(J,\mathcal{C})$ (minimum number of
+colours with no monochromatic circuit). The conflict graph $G_{\mathrm{conf}}$
+is exactly the family of \emph{two-element} circuits, so
+$\chi(G_{\mathrm{conf}})\le\Kstar$, and the inequality is strict in general:
+for $T_1=\{0,1\}$, $T_2=\{0,2\}$, $T_3=\{0,3\}$, $b=3$, all pairwise unions have
+size $3$ (no conflicts, $\chi=1$) while the triple union has size $4$, so
+$\{1,2,3\}$ is a $3$-element circuit and $\Kstar=2$.
+\end{proposition}
+\begin{proof}
+A feasible set contains no infeasible subset (downward closure), in particular
+no circuit; conversely a set containing no circuit is feasible, since any
+infeasible set contains a minimal infeasible subset. Colour classes of a proper
+colouring of $(J,\mathcal{C})$ are thus exactly feasible groups, giving the
+identification. Two-element circuits are precisely the conflicting pairs;
+colourings of $(J,\mathcal{C})$ refine colourings of $G_{\mathrm{conf}}$, giving
+the inequality, and the star computes as stated.
+\end{proof}
+
+\begin{proposition}[$\mathcal{F}$ is not a matroid]\label{prop:nonmatroid}
+The exchange axiom fails in general: for $T_1=\{1\}$, $T_2=\{2\}$,
+$T_3=\{3,4\}$, $b=2$, both $\{3\}$ and $\{1,2\}$ index feasible groups, but
+neither $\{3,1\}$ nor $\{3,2\}$ is feasible (unions of size $3$). Hence no
+matroid machinery (rank axioms, greedy optimality, matroid-union covering
+theorems) applies to $\mathcal{F}$ without further hypotheses.
+\end{proposition}
+\begin{proof}
+Immediate: $\lvert T_3\rvert=2\le b$, $\lvert T_1\cup T_2\rvert=2\le b$,
+$\lvert T_3\cup T_i\rvert=3>b$ for $i=1,2$.
+\end{proof}
+
+\begin{remark}[What is already known to fail]
+Perfectness of $G_{\mathrm{conf}}$ does not predict the heuristic gap: the
+$6$-ring's conflict graph is the triangular prism (perfect) with gap $1$, the
+$5$-ring's is $C_5$ (imperfect) with gap $0$ (see 05, verified). Any polyhedral
+criterion for the gap must therefore see more than the two-element circuits ---
+by Proposition~\ref{prop:chrom}, at least the full circuit clutter.
+\end{remark}
+
+\section{The covering side: matrices, LP integrality, blocker}
+
+Let $M$ be the job--group incidence matrix (rows $J$, columns the
+inclusion-\emph{maximal} feasible groups). JGP is the set-covering program
+$\min\{\mathbf 1^\top x: Mx\ge\mathbf 1,\ x\in\{0,1\}^{\cdot}\}$, whose linear
+relaxation is empirically very strong (column-generation solves it with small
+gaps \citep{Crama1994Column,Otiai2026}).
+
+\begin{question}[Idealness / integrality]\label{q:ideal}
+For which instance classes is the covering polyhedron
+$\{x\ge0: Mx\ge\mathbf 1\}$ integral --- equivalently, when does the clutter of
+minimal covers behave ideally in the sense of \citet{Cornuejols2001}? A
+characterisation would explain \emph{when} the JGP relaxation is tight, rather
+than only observing that it usually is. Natural first classes: the $b=3$ edge
+family (jobs $=$ graph edges; groups $=$ edge sets spanning $\le3$ vertices),
+and Helly-type hypotheses on the tool sets under which
+$\chi(G_{\mathrm{conf}})=\Kstar$.
+\end{question}
+
+\begin{question}[Blocker and lower bounds]\label{q:blocker}
+The blocker of the clutter of minimal covers consists of the minimal
+\emph{obstructions}: minimal job sets meeting every cover, i.e.\ witnesses
+forcing $\Kstar\ge k$. Do the ring/prism instances (the extremal gap witnesses
+of 05) carry a distinguished blocker structure --- and is membership of a
+$2$-covered blocker element what forces a bridge tool, connecting the blocker
+directly to the re-insertion count $R$ and to the exact $\Kstar=3$ formula
+$H=q+\min(x_{ab},x_{bc},x_{ca})$ of 05?
+\end{question}
+
+\begin{proposition}[The circuit clutter does not determine the gap ---
+ANSWERED 2026-07-02]\label{prop:notclutter}
+%% Decided by directed enumeration: _verification/verify_clutter_q3_and_genK.py
+%% (66 isomorphism classes over edge-m=5 / mixed b=3 / mixed b=4 families;
+%% exactly one class is mixed, witnesses below re-verified exactly).
+The heuristic gap is \emph{not} a function of the circuit clutter
+$\mathcal{C}$, even together with $(b,\lvert U\rvert,n)$. Witnesses ($b=4$,
+$U=\{0,\dots,6\}$, four jobs, $q=3$):
+\[
+  I_0:\ T=\bigl(\{0,2,6\},\{1,2,3\},\{2,3,4,5\},\{3,4,5\}\bigr),
+  \qquad
+  I_1:\ T=\bigl(\{0,1,3,6\},\{1,4,5,6\},\{2,4\},\{3,5\}\bigr).
+\]
+Both instances have the same circuit clutter up to relabelling (every job pair
+conflicts except the last two; no circuits of size $\ge3$), and moreover the
+same $\Kstar=3$ and the same free-initial $\ZSSP=3$; yet $I_0$ has gap $0$ and
+$I_1$ has gap $1$.
+\end{proposition}
+
+\begin{remark}[Consequence]
+No purely clutter-level (a fortiori no conflict-graph-level) criterion can
+decide zero-gap: the invariant must read \emph{tool-level} structure. This is
+consistent with, and explains the necessity of, the exact $\Kstar=3$ expression
+$H=q+\min\min(x_{ab},x_{bc},x_{ca})$ of 05, whose overlap sizes $x_{uv}$ are
+precisely the tool-level data the clutter forgets. The polyhedral programme
+with Prof.~Wagler should therefore target the \emph{covering} side
+(Question~\ref{q:ideal}, where the clutter is the right object for JGP
+tightness), not a clutter-only gap criterion.
+\end{remark}
+
+\paragraph{Next steps.} (1) \emph{Done:} the gap-from-clutter question is
+settled negatively (Proposition~\ref{prop:notclutter}). (2) For
+Question~\ref{q:ideal}, test integrality of the covering LP on the enumerated
+families ($\le$ a few thousand instances) to locate candidate classes before
+attempting proofs. (3) Bring Question~\ref{q:blocker} and the witnesses above
+to the session with Prof.~Wagler; the prism/$C_5$ pair and the $I_0/I_1$ pair
+are the instructive opening examples.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+\end{document}

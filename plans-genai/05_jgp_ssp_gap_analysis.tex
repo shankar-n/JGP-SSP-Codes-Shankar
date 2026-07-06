@@ -237,6 +237,24 @@ configurations; all worst-case instances in this note are zero-slack, where the 
 formula is exact.
 \end{warnbox}
 
+\begin{remark}[Standing in the literature]
+\label{rem:litposition}
+%% TODO-VERIFY(Claude-Fable 2026-07-02): literature-position remark added this session.
+%% Burger2015 verified (J. Scheduling 18(2):131--145, Springer 10.1007/s10951-014-0400-2)
+%% and added to references.bib; Salonen et al. 2006 deliberately NOT cited directly
+%% (paper not in references/, per skill rule) --- referenced only via Burger's survey.
+The two-phase decomposition studied here is the method of practice, not a straw man:
+in colour printing, an SSP in disguise, \cite{Burger2015} implement exactly
+JGP\,+\,GSP (unicost set covering for the grouping, a TSP over groups for the
+sequencing), enumerate optimal groupings via Stirling numbers, and measure the
+decomposition's suboptimality empirically, finding it small on industrial
+instances---consistent with earlier reports they survey. No \emph{worst-case}
+analysis of the decomposition (gap or ratio bounds, extremal families, exactness
+conditions) appears in the literature, including the survey of \cite{Calmels2018};
+the approximation-flavoured results that exist for the SSP concern other heuristics.
+That missing analysis is what this note develops.
+\end{remark}
+
 % =============================================================================
 \section{Lower and Upper Bounds Relating $\ZSSP$, $\Kstar$ and the Tool Count}
 \label{sec:bounds}
@@ -826,9 +844,280 @@ bound with equality: the $6$-ring ($\Kstar{=}3$, $\mathrm{gap}{=}1$), the $b{=}4
 ($\Kstar{=}3$, $\mathrm{gap}{=}1$), the $b{=}5$ witness ($\Kstar{=}4$, $\mathrm{gap}{=}2$);
 the $g$-copy family has $\mathrm{gap}=g\le3g-2$. No violation in $\sim\!1380$ instances
 ($b\in\{2,3,4\}$, mixed job sizes; \texttt{\_verification/verify\_ratio\_section.py}),
-nor anywhere in the earlier exhaustive searches. The first open case is $\Kstar=3$ for
-general $b$: $\mathrm{gap}\le1$.
+nor anywhere in the earlier exhaustive searches. The $\Kstar=3$ case is now
+\emph{proved} for every $b\le4$ and, in general, outside an explicit corner: see
+\cref{ssec:k3}, in particular \cref{thm:k3count}.
 \end{openproblem}
+
+\subsection{Partial resolution of \cref{conj:gapK}: the $\Kstar=3$ case}
+\label{ssec:k3}
+
+%% TODO-VERIFY(Claude-Fable 2026-07-02): subsection NEW. All statements carry full
+%% proofs; additionally machine-checked on 1462 instances (complete edge family
+%% m<=5; mixed sizes b=3 m=6; b=4 m in {7,8}) with 0 violations:
+%% _verification/verify_k3_gap.py (assertions A1-A5: exact-H formula, tight-coverage
+%% corollary, gap<=q-R, the q=3 case, conjecture consistency).
+
+Throughout, configurations are w.l.o.g.\ subsets of $U$ and $R=\ZSSP-q\ge0$ denotes
+the optimal re-insertion count (\cref{lem:costid}).
+
+\begin{thmbox}
+\begin{lemma}[Path re-insertion formula]
+\label{lem:pathR}
+Let $C_1,\dots,C_p\subseteq U$ be a configuration path ($|C_l|=b$, consecutive
+entries distinct, $\bigcup_l C_l=U$). Its free-initial cost equals
+\[
+  q\;+\;\sum_{l=2}^{p-1}\bigl|\,C_{l+1}\cap(C_1\cup\dots\cup C_{l-1})\setminus
+  C_l\,\bigr| .
+\]
+In particular a three-configuration path $(C_a,C_b,C_c)$ costs
+$q+|(C_a\cap C_c)\setminus C_b|$.
+\end{lemma}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+By the cost identity (\cref{lem:costid}) the cost is $q+R$ with $R$ the
+re-insertions. A tool is re-inserted at step $l+1$ iff it enters $C_{l+1}$ (hence
+lies outside $C_l$) having been present before, i.e.\ it lies in
+$C_1\cup\dots\cup C_{l-1}$. Summing over steps gives the formula.
+\end{proof}
+\end{proofbox}
+
+\begin{thmbox}
+\begin{proposition}[Exact heuristic cost at $\Kstar=3$]
+\label{prop:hk3}
+Let $\Kstar=3$. Then
+\[
+  H\;=\;q\;+\;\min\ \min\bigl(x_{ab},\,x_{bc},\,x_{ca}\bigr),
+  \qquad x_{uv}:=|(C_u\cap C_v)\setminus C_w|\quad(\{u,v,w\}=\{a,b,c\}),
+\]
+the outer minimum over feasible $3$-groupings and configuration choices
+$C_a,C_b,C_c\subseteq U$. Consequently $\mathrm{gap}=\min\{\cdot\}-R$, and
+$\mathrm{gap}=0$ iff some minimum-cardinality grouping admits configurations with
+$\min(x_{ab},x_{bc},x_{ca})\le R$.
+\end{proposition}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+At $\Kstar=3$ the three configurations of any feasible $3$-grouping are distinct
+(two equal configurations would merge their groups into a feasible $2$-grouping)
+and cover $U$. By \cref{lem:pathR} the ordering with $C_w$ in the middle costs
+$q+x_{uv}$; minimising over the three orderings gives $q+\min(x_{ab},x_{bc},
+x_{ca})$, and $H$ minimises this over groupings and configuration choices.
+\end{proof}
+\end{proofbox}
+
+\noindent\emph{Grouping-selection reading.} At $\Kstar=3$ the criterion is now
+explicit: choose the grouping (and configurations) minimising the smallest pairwise
+overlap outside the third configuration; the target to meet is $R$.
+
+\begin{thmbox}
+\begin{lemma}[Tight-coverage walks]
+\label{lem:tightwalk}
+If $\ZSSP=q$, some optimal schedule's walk of distinct configurations has
+$p\le q+1$ configurations, each serving at least one job; hence
+$\Kstar\le p\le q+1$, and if $p=\Kstar$ then $\mathrm{gap}=0$.
+\end{lemma}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+$R=0$, so each of the $p-1$ transitions inserts at least one tool and every
+insertion is first-time; there are $q$ of those, so $p-1\le q$. A configuration
+serving no job can be excised: $d$ satisfies the triangle inequality
+$d(A,C)\le d(A,B)+d(B,C)$, and the cost cannot fall below $q$
+(\cref{thm:lb_tools}), so the shortened walk is still optimal with $R=0$.
+Assigning every job to a configuration serving it exhibits a feasible
+$p$-grouping, whence $p\ge\Kstar$. If $p=\Kstar$ that grouping is
+minimum-cardinality and $H\le\ZSSP$.
+\end{proof}
+\end{proofbox}
+
+\begin{thmbox}
+\begin{theorem}[$\Kstar=3$: proved regimes of \cref{conj:gapK}]
+\label{thm:k3regions}
+Let $\Kstar=3$. Then $\mathrm{gap}\le\Kstar-2=1$ holds in each of the following
+regimes:
+\begin{itemize}
+\item[(i)] $R\ge q-1$; indeed $\mathrm{gap}\le q-R$ unconditionally.
+\item[(ii)] $\ZSSP=q$ and $q\le2$; indeed $\mathrm{gap}=0$.
+\item[(iii)] $\ZSSP=q=3$, provided the walk of \cref{lem:tightwalk} has $p=3$
+configurations (then $\mathrm{gap}=0$) or, at $p=4$, two of its four groups have
+combined tool requirement of size at most $b$.
+\end{itemize}
+Hence at $\Kstar=3$ the conjecture remains open only for $\ZSSP=q\ge4$; for
+$1\le R\le q-2$; and, at $\ZSSP=q=3$, for walks whose four groups are pairwise
+unmergeable.
+\end{theorem}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+(i) By \cref{lem:transcap}, $H\le2\min(b,q)\le2q$, so
+$\mathrm{gap}=H-q-R\le q-R$, which is $\le1$ when $R\ge q-1$.
+
+(ii) By \cref{lem:tightwalk}, $p\le q+1\le3=\Kstar\le p$, so $p=\Kstar$ and the
+gap vanishes.
+
+(iii) $p\le4$; if $p=3$ the gap vanishes by \cref{lem:tightwalk}. Let $p=4$ with
+walk $D_1,\dots,D_4$, groups $G_l$ (the jobs served at $D_l$) and requirements
+$U_l\subseteq D_l$. Since $R=0$ and $q=3$, each transition inserts exactly one
+fresh tool: $D_{l+1}\setminus D_l=\{x_{l+1}\}$ and $D_l\setminus D_{l+1}=
+\{e_{l+1}\}$; and $R=0$ forces \emph{persistence}: $t\in D_i\cap D_j$ ($i<j$)
+implies $t\in D_l$ for all $i\le l\le j$. Suppose $|U_i\cup U_j|\le b$ for some
+$i<j$; merge $G_i$ and $G_j$ (keeping the other two groups with their walk
+configurations) --- a feasible $3$-grouping, hence of minimum cardinality. In each
+case a configuration $C\supseteq U_i\cup U_j$ and an ordering give wrap $\le1$ by
+\cref{lem:pathR}:
+\begin{itemize}
+\item $(1,2)$: $C\subseteq D_1\cup D_2$ (size $b{+}1$, so $C$ exists); order
+$(C,D_3,D_4)$: wrap $\subseteq(D_1\cap D_4\setminus D_3)\cup(D_2\cap D_4\setminus
+D_3)\subseteq\varnothing\cup\{e_3\}$.
+\item $(3,4)$: $C\subseteq D_3\cup D_4$; order $(D_1,D_2,C)$: wrap
+$\subseteq(D_1\cap D_3\setminus D_2)\cup(D_1\cap D_4\setminus D_2)=\varnothing$
+by persistence.
+\item $(2,3)$: $W:=U_2\cup U_3\cup(D_1\cap D_4)\subseteq D_2\cup\{x_3\}$ (by
+persistence $D_1\cap D_4\subseteq D_2\cap D_3$), so $|W|\le b{+}1$; take
+$C\supseteq U_2\cup U_3$ inside $W$, dropping (if $|W|=b{+}1$) one element outside
+$U_2\cup U_3$; order $(D_1,C,D_4)$: wrap $=|(D_1\cap D_4)\setminus C|\le1$.
+\item $(1,3)$: $C\subseteq D_1\cup D_3$; order $(C,D_2,D_4)$: wrap
+$\subseteq\varnothing\cup(D_3\cap D_4\setminus D_2)\subseteq\{x_3\}$.
+\item $(2,4)$: $C\subseteq D_2\cup D_4$; order $(D_1,D_3,C)$: wrap
+$\subseteq(D_1\cap D_2\setminus D_3)\cup\varnothing\subseteq\{e_3\}$.
+\item $(1,4)$: $C\subseteq D_1\cup D_4$; order $(C,D_2,D_3)$: wrap
+$\subseteq\varnothing\cup(D_4\cap D_3\setminus D_2)\subseteq\{x_3\}$.
+\end{itemize}
+In every case $\gamma\le q+1$, so $H\le\ZSSP+1$.
+\end{proof}
+\end{proofbox}
+
+\noindent The $6$-ring realises case (iii) with a mergeable pair ($U_2\cup U_3=
+\{3,4,5\}$) and wrap exactly $1$: the theorem is tight there.
+
+%% TODO-VERIFY(Claude-Fable 2026-07-02, second pass): overlap-counting results NEW.
+%% Lemma checked by exhaustive triple enumeration for 14 (b,q) pairs, b<=6, q<=6 --
+%% tight at every pair (_verification/verify_k3_overlap.py); theorem checked on 822
+%% K*=3 instances, b in {3,4,5}, q<=5, 0 violations (_verification/verify_k3_gap.py).
+
+\begin{thmbox}
+\begin{lemma}[Overlap counting]
+\label{lem:overlap}
+Any three configurations $C_a,C_b,C_c\subseteq U$ of size $b$ with
+$C_a\cup C_b\cup C_c=U$ satisfy
+\[
+  \min\bigl(x_{ab},\,x_{bc},\,x_{ca}\bigr)\ \le\
+  \Bigl\lfloor\tfrac{2b-q}{3}\Bigr\rfloor,
+  \qquad x_{uv}=\lvert(C_u\cap C_v)\setminus C_w\rvert .
+\]
+Exhaustive enumeration attains equality at every tested $(b,q)$.
+\end{lemma}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+Count tools by the number of configurations containing them: with $a$ tools in
+exactly one configuration, $\sum x:=x_{ab}+x_{bc}+x_{ca}$ in exactly two, and
+$c_3$ in all three, the tool count gives $a+\sum x+c_3=b+q$ and the degree sum
+gives $a+2\sum x+3c_3=3b$; subtracting, $\sum x=2b-q-2c_3\le2b-q$. The minimum is
+at most the mean $\sum x/3$, and it is an integer.
+\end{proof}
+\end{proofbox}
+
+\begin{thmbox}
+\begin{theorem}[Quantitative $\Kstar=3$ bound]
+\label{thm:k3count}
+If $\Kstar=3$ then
+\[
+  \mathrm{gap}\ \le\ \max\Bigl(0,\ \min\bigl(q,\
+  \bigl\lfloor\tfrac{2b-q}{3}\bigr\rfloor\bigr)-R\Bigr),
+\]
+tight at the $6$-ring and at the $b=4$ extremal witness. Consequently:
+\begin{itemize}
+\item[(a)] \cref{conj:gapK} holds at $\Kstar=3$ for \emph{every} instance with
+$b\le4$ (for $b=4$, $q=2$, $R=0$ combine with \cref{thm:k3regions}(ii));
+\item[(b)] at $\Kstar=3$ the conjecture is open only in the corner
+$2b\ge q+3R+6$ with $R\le q-2$ --- necessarily $b\ge5$ --- and there only outside
+the mergeable case of \cref{thm:k3regions}(iii);
+\item[(c)] at $b=3$ the former assumption (a) of \cref{prop:43route} is
+discharged: $\mathrm{gap}\le1$ is a theorem for $\Kstar=3$, $b=3$.
+\end{itemize}
+\end{theorem}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+The configurations of any feasible $3$-grouping (one exists) cover $U$, so
+\cref{prop:hk3} with \cref{lem:overlap} gives
+$H\le q+\lfloor(2b-q)/3\rfloor$, while \cref{lem:transcap} gives $H\le2\min(b,q)
+\le q+q$; subtract $\ZSSP=q+R$ and use $\mathrm{gap}\ge0$. For (a) at $b=3$:
+$\lfloor(6-q)/3\rfloor\le1$ for all $q\ge1$. At $b=4$: the bound is $\le1$ for
+$q\ge3$; for $q\le2$, either $R\ge1$ (bound $2-R\le1$) or $\ZSSP=q\le2=\Kstar-1$
+and \cref{thm:k3regions}(ii) gives gap $0$; $q\le1$ is the zero-gap class. (b)
+reads off the display: bound $\ge2$ needs $\lfloor(2b-q)/3\rfloor\ge R+2$ and
+$q\ge R+2$. (c) is (a) restricted to $b=3$.
+\end{proof}
+\end{proofbox}
+
+\subsection{A first general-$\Kstar$ bound}
+\label{ssec:genk}
+
+%% TODO-VERIFY(Claude-Fable 2026-07-02): subsection NEW. Machine-checked on 1489
+%% instances across K* in {2,3,4}, b in {3,4}, 0 violations
+%% (_verification/verify_clutter_q3_and_genK.py, run_gen block).
+
+\begin{thmbox}
+\begin{lemma}[Runs identity]
+\label{lem:runs}
+Let $C_1,\dots,C_p\subseteq U$ be distinct size-$b$ configurations covering $U$,
+in an order $\sigma$. The free-initial path cost equals
+$q+\sum_{t\in U}(\mathrm{runs}_\sigma(t)-1)$, where $\mathrm{runs}_\sigma(t)$ is
+the number of maximal blocks of consecutive configurations containing $t$.
+\end{lemma}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+By the cost identity the cost is $q+R$; every block start after $t$'s first
+block is a re-insertion of $t$, and these are all the re-insertions.
+\end{proof}
+\end{proofbox}
+
+\begin{thmbox}
+\begin{theorem}[Random-ordering bound, all $\Kstar$]
+\label{thm:genk}
+For every instance with $\Kstar\ge2$,
+\[
+  \mathrm{gap}\ \le\ \max\Bigl(0,\
+  \Bigl\lfloor\frac{q\,\bigl(b(\Kstar-1)-q\bigr)}{b+q}\Bigr\rfloor
+  \;-\;R\Bigr).
+\]
+At $\Kstar=3$ this and \cref{thm:k3count} are incomparable (each is tighter on
+part of the range); both are tight at the $6$-ring ($\lfloor 3\cdot3/6\rfloor=1$).
+\end{theorem}
+\end{thmbox}
+\begin{proofbox}
+\begin{proof}
+Fix a minimum-cardinality grouping; its configurations
+$C_1,\dots,C_{\Kstar}\subseteq U$ are pairwise distinct (else merge two groups)
+and cover $U$. Let $d_t$ be the number of configurations containing $t$, so
+$\sum_t d_t=\Kstar b$ over $|U|=b+q$ tools. For a uniformly random ordering,
+$\mathbb{E}[\mathrm{runs}(t)]=d_t/\Kstar+d_t(\Kstar-d_t)/\Kstar$, hence
+$\mathbb{E}[\mathrm{runs}(t)-1]=(d_t-1)(\Kstar-d_t)/\Kstar$. The map
+$d\mapsto(d-1)(\Kstar-d)$ is concave, so by Jensen
+\[
+  \sum_t\frac{(d_t-1)(\Kstar-d_t)}{\Kstar}\ \le\
+  \frac{b+q}{\Kstar}\Bigl(\frac{\Kstar b}{b+q}-1\Bigr)
+  \Bigl(\Kstar-\frac{\Kstar b}{b+q}\Bigr)
+  \;=\;\frac{q\,(b(\Kstar-1)-q)}{b+q}.
+\]
+Some ordering achieves at most the mean; the excess-runs total is an integer;
+apply \cref{lem:runs} and subtract $\ZSSP=q+R$.
+\end{proof}
+\end{proofbox}
+
+\noindent The bound grows linearly in $\Kstar$, so it does not by itself
+approach the conjectured $\Kstar-2$; but it is unconditional, valid for every
+$\Kstar$, and strictly better than the transition cap
+$(\Kstar-1)\min(b,q)-q-R$ whenever $q<b(\Kstar-1)/2$-ish territory---e.g.\ for
+the $b=5$, $\Kstar=4$ extremal witness it gives $\lfloor44/9\rfloor-0=4$
+against the cap's $8$. Derandomising the ordering (greedy block-preserving
+orders) and replacing Jensen by the true extremal degree profile are the two
+places where it can be tightened.
 
 \begin{thmbox}
 \begin{proposition}[Consequences of \cref{conj:gapK}]
@@ -855,10 +1144,11 @@ $q\ge1$. At $q=\Kstar$: $1+(\Kstar-2)/\Kstar=2-2/\Kstar$.
 \begin{thmbox}
 \begin{proposition}[A route to the $4/3$ conjecture]
 \label{prop:43route}
-Assume (a) \cref{conj:gapK}, and (b) every positive-gap $b=3$ instance has $\Kstar=3$ and
-$\ZSSP\ge3$ (verified exhaustively on the $10691$-instance edge family, where positive gap
+Assume only that every positive-gap $b=3$ instance has $\Kstar=3$ and
+$\ZSSP\ge3$ (as holds throughout the $10691$-instance edge family, where positive gap
 forces $\Kstar=3$, $|U|=6$, $\ZSSP=3$; open in general). Then \cref{conj:ratio} holds:
-$H/\ZSSP\le4/3$ for $b=3$.
+$H/\ZSSP\le4/3$ for $b=3$. (The earlier draft also assumed \cref{conj:gapK}; that
+assumption is discharged at $b=3$ by \cref{thm:k3count}(c).)
 \end{proposition}
 \end{thmbox}
 \begin{proofbox}
@@ -871,9 +1161,14 @@ $\mathrm{gap}\le\Kstar-2=1$ and $H/\ZSSP=1+\mathrm{gap}/\ZSSP\le1+1/3=4/3$.
 \begin{openproblem}
 \textbf{Open problems raised by this section.}
 \begin{itemize}
-\item \emph{Prove \cref{conj:gapK}}, starting with $\Kstar=3$ (claim: $\mathrm{gap}\le1$
-for \emph{all} $b$). By \cref{lem:costid} this says: some JGP-optimal grouping and order
-forces at most $\Kstar-2$ more re-insertions than the SSP optimum.
+\item \emph{Prove \cref{conj:gapK}}. The $\Kstar=3$ case is settled for every
+$b\le4$ and, in general, outside the corner $2b\ge q+3R+6$, $R\le q-2$
+(\cref{thm:k3count}); what remains is that corner ($b\ge5$, minus the mergeable
+case of \cref{thm:k3regions}(iii)) and general $\Kstar\ge4$. The natural lever
+for general $\Kstar$ is to extend \cref{lem:overlap} from triples to
+$\Kstar$-tuples with the order-dependent wrap sum of \cref{lem:pathR}; the
+counting identity $\sum x=2b-q-2c_3$ has a $\Kstar$-analogue, but the wrap sum
+is no longer a plain minimum over orderings.
 \item \emph{Achievability of ratio $2$.} \cref{prop:conj_consequences} caps the ratio at
 $2-1/(\Kstar-1)$; approaching $2$ needs $\Kstar\to\infty$ with $q\approx\Kstar-1$ and
 near-maximal gap \emph{simultaneously}. The $g$-copy construction fails: its tools
