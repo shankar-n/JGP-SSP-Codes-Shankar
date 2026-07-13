@@ -51,13 +51,19 @@ echo "[$(date '+%F %T')] host=$(hostname) array_task=$SLURM_ARRAY_TASK_ID config
 python3 -c "import cplex, numpy; print('cplex', cplex.__version__, '| numpy', numpy.__version__)"
 
 # ----------------------------------------------------------------------------
-# Run: this config, all PRIMARY instances, easiest-first, early-stop after 8
-# consecutive non-optimal results.  Its own output CSV.
+# Run: this config, easiest-first, early-stop after 8 consecutive non-optimal
+# results.  Its own output CSV.  Set selection: SETS env var, default primary.
+#   primary   : sbatch cluster/run_campaign.sbatch
+#   secondary : SETS=secondary sbatch --array=0-9 cluster/run_campaign.sbatch
+#               (0-9 drops SSPMF, the last index; too slow at J=15)
+# Same per-config CSV for both -- the runner resumes/skips by (instance,config).
 # ----------------------------------------------------------------------------
+SETS="${SETS:-primary}"
+echo "[$(date '+%F %T')] sets=$SETS"
 python3 benchmark_runner.py \
-    --sets primary \
+    --sets "$SETS" \
     --configs "$CFG" \
-    --output "results/raw_${CFG}.csv" \
+    --output "results/raw_${CFG}_${SETS}.csv" \
     --max-consecutive-timeouts 8
 
 echo "[$(date '+%F %T')] DONE config=$CFG"

@@ -66,7 +66,11 @@
 
 8. On the CPLEX machine: `python src/BBC/test_solver.py` — all four solvers
    (BBC both cut modes / LSS / SSPMF / CATZ) vs brute force must agree
-   **in-repo** (CLAUDE.md requirement, still pending as of 2026-07-02).
+   **in-repo**. Status 2026-07-02: first run surfaced an LSS VI(23) depot
+   KeyError (fixed in lss_formulation.py) and a convention-naive SSPMF
+   comparison in the harness (fixed in test_solver.py; SSPMF itself was
+   correct). Post-fix battery is green in-sandbox; expect **exit code 0** on
+   your machine — exit 2 means solvers were skipped, not passed.
 9. Small pilot via `probe.sh` (one easy Catanzaro instance, one config) —
    check the CSV row: status, `obj == obj_ktns` for empty-start solvers,
    `root_lp_bound` populated, time sane.
@@ -98,9 +102,12 @@
 
 ## 5. Launch order
 
-17. BBC: submit from frontalhpc2025 per `SLURM_RUNBOOK.md`
-    (`sbatch src/BBC/cluster/run_campaign.sbatch`), watch first array task's
-    log, then leave it. Secondary sets only after primary completes.
+17. BBC: submit from frontalhpc2025 per `SLURM_RUNBOOK.md`:
+    `sbatch src/BBC/cluster/run_campaign.sbatch` (primary, array 0-10) and
+    `SETS=secondary sbatch --array=0-9 src/BBC/cluster/run_campaign.sbatch`.
+    Safe to submit both at once (2026-07-02: per-config CSVs are now also
+    per-set, `raw_<CFG>_<SETS>.csv`, so no concurrent writers). Watch the
+    first array task's log, then leave it.
 18. BNP: `sbatch src/BNP/cluster/run_bnp.sbatch` (independent harness; results
     merge offline; comparison to BBC happens at analysis level on `obj_ktns`).
 19. After both: `merge_results.sh`, then `src/BBC/analysis/` for tables/plots;

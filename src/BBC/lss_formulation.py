@@ -348,7 +348,8 @@ class LSSFormulation:
             for j in J:
                 idx   = [self._z_cpx[j, t] for t in self.T[j]]
                 coeff = [1.0] * len(self.T[j])
-                for i in nodes:
+                for i in J:  # jobs only (Laporte (23)); depot has T=empty => l_ij=0.
+                             # FIX 2026-07-02: 'nodes' here raised KeyError on the depot.
                     if i != j:
                         lij = max(0, len(self.T[i] | self.T[j]) - c)
                         if lij > 0:

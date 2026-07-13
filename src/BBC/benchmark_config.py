@@ -21,7 +21,7 @@ _DATA         = _PROJECT_ROOT / "data" / "From_Felipe" / "data"
 # Each entry:  (label, glob_pattern, time_limit_seconds)
 #
 # PRIMARY  (3 600 s TL, all 11 solver configs):
-#   Catanzaro Tabela1C  — 174 instances, J=8-15, T=5-15, c=3-5
+#   Catanzaro Tabela1C  — 171 instances, J=8-15, T=5-15, c=3-5
 #   Crama     Tabela1-4 — 160 instances, J=10,   T=10,   c=4
 #   Laporte   Tabela7   —  80 instances, J=10,   T=10,   c=4
 #

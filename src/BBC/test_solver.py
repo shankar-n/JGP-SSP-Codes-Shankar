@@ -101,6 +101,7 @@ def instances():
 
 def main():
     fails = 0
+    skips = 0
     for name, n, m, C, tr in instances():
         opt = brute(n, tr, C)
         print(f"\n=== {name}: J={n} T={m} C={C} | brute optimum = {opt} ===")
@@ -109,17 +110,27 @@ def main():
                 ob, seq = fn(n, m, C, tr)
             except ImportError as e:
                 print(f"  SKIP  {label:8s} (import: {e})")
+                skips += 1
                 continue
             except Exception as e:
                 print(f"  ERROR {label:8s} {type(e).__name__}: {e}")
                 fails += 1
                 continue
             obr = round(ob) if ob is not None else None
+            # SSPMF's native objective Z_M is FREE-INITIAL (= empty-start minus the
+            # initial magazine load, see sspmf_formulation.py docstring); convert
+            # before comparing. All other solvers are empty-start natively.
+            if label == "SSPMF" and obr is not None:
+                U = set().union(*(set(v) for v in tr.values()))
+                obr += min(C, len(U))
             seq_ok = seq is not None and sorted(seq) == list(range(n))
             kt = compute_ktns(list(seq), tr, C)[0] if seq_ok else None
             ok = (obr == opt) and (kt == opt)
             fails += 0 if ok else 1
             print(f"  {'OK  ' if ok else 'FAIL'}  {label:8s} obj={obr}  seqKTNS={kt}  validperm={seq_ok}")
+    if fails == 0 and skips > 0:
+        print(f"\n*** {skips} solver run(s) SKIPPED (missing imports) — NOT a pass ***")
+        return 2
     print(f"\n{'ALL SOLVERS AGREE WITH BRUTE FORCE' if fails == 0 else f'*** {fails} disagreement(s) — check formulations ***'}")
     return 0 if fails == 0 else 1
 

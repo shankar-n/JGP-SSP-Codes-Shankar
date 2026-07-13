@@ -206,3 +206,20 @@ verify_smallz_and_b3census.py, verify_gapK_refutation.py. All claims below machi
   (chi <= K*, strict at the star); the group complex is not a matroid.
 - OPEN: exact extremal law at K*=3 (is the counting bound tight everywhere?); K*>=4
   beyond thm:genk; 4/3 at K*>=4 (b=3); clutter Q1 (idealness), Q2 (blocker-bridge).
+
+## ============ 2026-07-02 (same session): test_solver failures DIAGNOSED & FIXED ============
+- Shankar's in-repo test_solver.py run (the mandated pre-flight) surfaced two issues;
+  both reproduced in-sandbox with CPLEX CE and fixed:
+  1) LSS: KeyError == n_jobs. Cause: VI(23) loop iterated `nodes` (jobs+depot) but
+     self.T has only real jobs. Depot term is mathematically zero (T_depot=empty =>
+     l_ij=0), so the faithful fix is summing over jobs only. lss_formulation.py
+     patched; a CRASH, never a silent wrong number.
+  2) SSPMF: NOT a bug. Native Z_M is free-initial (documented); its returned sequence
+     was KTNS-optimal in every test. test_solver.py compared raw objectives -- now
+     converts SSPMF via obj + min(C,|U|). The campaign runner was always immune
+     (compares obj_ktns).
+  Also fixed: test_solver printed 'ALL SOLVERS AGREE' when every solver was SKIPPED
+  (missing cplex import); now returns exit code 2 with a warning.
+- Post-fix: full battery green in-sandbox (CPLEX CE): 8 BBC configs + LSS + SSPMF +
+  CATZ-F4, obj == seqKTNS == brute on every instance. Re-run on the CPLEX machine
+  (expect exit 0) before sbatch.
