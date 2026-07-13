@@ -29,36 +29,40 @@ This reports partitions/nodes, your account, and — crucially — whether the C
 **Python API** (`import cplex`) is available and which Python. Paste the output and I'll
 finalize the two ENV lines + partition/time in `cluster/run_campaign.sbatch` so it runs first try.
 
-## Step 2 — Python environment (numpy + CPLEX Python API)  [CONFIRMED NEEDED]
-Probe result: `cplex` CLI present, but `import cplex` and `import numpy` both FAIL. So
-make ONE venv in your shared `$HOME` and install both (the CPLEX API comes from the local
-CPLEX Studio install, NOT from PyPI):
+## Step 2 — ONE conda env `ssp_env` for BOTH campaigns (Miniforge)  [CONFIRMED NEEDED]
+Probe result: `cplex` CLI present, but `import cplex` and `import numpy` both FAIL.
+Follow the cluster's own procedure (https://hpc.isima.fr/doku.php?id=python):
+Miniforge in `$HOME`, one conda env `ssp_env` holding numpy + the CPLEX Python API
+(from the local CPLEX Studio install, NOT PyPI) + pyscipopt (for the BNP campaign):
 ```bash
-# 1. locate the CPLEX Studio root from the CLI that IS on PATH
+# 0. one-time Miniforge install — run from a direct-access server (christmas or l40s02)
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+bash Miniforge3-Linux-x86_64.sh -b -p ~/miniforge3
+rm Miniforge3-Linux-x86_64.sh
+
+# 1. create + activate the env  (do NOT run `conda init` — per the wiki)
+source ~/miniforge3/etc/profile.d/conda.sh
+conda create -n ssp_env python=3.10 -y
+conda activate ssp_env
+
+# 2. locate the CPLEX Studio root from the CLI that IS on PATH
 which cplex                       # e.g. /opt/ibm/ILOG/CPLEX_Studio2211/cplex/bin/x86-64_linux/cplex
 STUDIO=$(dirname "$(dirname "$(dirname "$(dirname "$(readlink -f "$(which cplex)")")")")")
 echo "$STUDIO"                    # confirm -> /opt/ibm/ILOG/CPLEX_StudioXXXX
-ls "$STUDIO/cplex/python"         # supported python versions, e.g.  3.8  3.9  3.10
+ls "$STUDIO/cplex/python"         # supported python versions; 3.10 should be listed
+                                  # (if not, `conda create` with a version that IS listed)
 
-# 2. use a python whose version is IN that list (system python3, or `module load python/3.x`)
-python3 --version
-
-# 3. create venv + install numpy + the CPLEX Python API from the local install
-python3 -m venv "$HOME/ssp-env"
-source "$HOME/ssp-env/bin/activate"
-pip install --upgrade pip numpy
-pip install "$STUDIO/cplex/python/<PYVER>/x86-64_linux"      # <PYVER> = a dir from step 1
-python -c "import cplex, numpy; print('cplex', cplex.__version__, '| numpy', numpy.__version__)"
+# 3. install everything into ssp_env (numpy + SCIP for BNP + the local CPLEX API)
+pip install --upgrade pip numpy pyscipopt
+pip install "$STUDIO/cplex/python/3.10/x86-64_linux"         # match the env's python version
+python -c "import cplex, numpy, pyscipopt; print('cplex', cplex.__version__, '| numpy', numpy.__version__, '| pyscipopt', pyscipopt.__version__)"
 ```
-> **Does the venv exist on the compute nodes too?** Yes — as long as `$HOME` is a shared
-> filesystem, which it is on essentially every SLURM cluster (ISIMA included). The venv
-> lives in `$HOME`; the sbatch runs `source "$HOME/ssp-env/bin/activate"`, so each node
-> mounts the same path and sees it. You do NOT install per-node. Two caveats: (1) if you
-> built the venv from a `module load python/3.x`, put that SAME `module load` in the sbatch
-> *before* the `source ... activate` line (so the base python is on the node PATH);
-> (2) if CPLEX itself is provided by a module rather than a fixed PATH, add that module
-> load too. Verify once on a node:
-> `srun --partition=court --pty bash` → `source ~/ssp-env/bin/activate && python -c "import cplex, numpy"`.
+> **Compute nodes see it too**: `~/miniforge3` sits in shared `$HOME`, and every sbatch
+> script puts the wiki's two lines before python (`source ~/miniforge3/etc/profile.d/conda.sh`
+> then `conda activate ssp_env`). No per-node installs, no `module load` for python.
+> Mind the home quota (conda envs are large — hence ONE env shared by BBC and BNP; per
+> the wiki, do not run `conda init`). Verify once on a node:
+> `srun --partition=court --pty bash` → `source ~/miniforge3/etc/profile.d/conda.sh && conda activate ssp_env && python -c "import cplex, numpy, pyscipopt"`.
 
 ## Step 3 — Archive any pre-fix results (IMPORTANT)
 The runner RESUMES from existing rows. Old results predate the Benders depot-dual fix
@@ -80,7 +84,7 @@ its default and SLURM core-binding still caps it at `--cpus-per-task`.
 
 ## Step 5 — Sanity check BEFORE the big run
 ```bash
-source ~/ssp-env/bin/activate          # or your module loads
+source ~/miniforge3/etc/profile.d/conda.sh && conda activate ssp_env
 cd ~/JGP-SSP-Codes-Shankar/src/BBC
 python3 test_solver.py                                   # cross-solver agreement (confirms LSS fix)
 python3 benchmark_runner.py --sets primary --configs BBC-K --dry-run    # easiest-first order (A0-0 first)

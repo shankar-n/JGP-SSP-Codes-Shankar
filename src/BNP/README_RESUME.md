@@ -62,7 +62,7 @@ only read it as a template). `bnp_benchmark_config.py` (grid PCFp/PTF, instance 
 `MAX_JOBS` cap, early-stop, CSV schema) + `bnp_benchmark_runner.py` (resumable, easiest-first,
 per-solver early-stop, each solve in a timeout-guarded subprocess; computes `obj_ktns` from the
 returned sequence exactly like BBC) + `cluster/` (`run_bnp.sbatch` array shards, `merge_results.sh`,
-`README_BNP_CLUSTER.md` — SCIP venv, no CPLEX). Sequence extraction added to both B&P modules.
+`README_BNP_CLUSTER.md` — shared `ssp_env` conda env per hpc.isima.fr wiki, no CPLEX license needed). Sequence extraction added to both B&P modules.
 **Pilot validated**: ran real Catanzaro instances, PCF′ solved, `obj_ktns` correct (A0-0 = 6 =
 obj + min(b,|U|)), CSV written. Submit:  `sbatch src/BNP/cluster/run_bnp.sbatch`.
 

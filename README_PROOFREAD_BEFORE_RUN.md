@@ -64,7 +64,9 @@
 
 ## 3. Mandated pre-flight (do not skip)
 
-8. On the CPLEX machine: `python src/BBC/test_solver.py` — all four solvers
+8. On the CPLEX machine, inside the env
+   (`source ~/miniforge3/etc/profile.d/conda.sh && conda activate ssp_env`):
+   `python src/BBC/test_solver.py` — all four solvers
    (BBC both cut modes / LSS / SSPMF / CATZ) vs brute force must agree
    **in-repo**. Status 2026-07-02: first run surfaced an LSS VI(23) depot
    KeyError (fixed in lss_formulation.py) and a convention-naive SSPMF
@@ -97,8 +99,9 @@
     built-in convention self-check (`obj_ktns == obj + min(b,|U|)`);
     `root_lp_bound` may be None where SCIP's root value is unreliable
     (known `getDualboundRoot` issue — clamped, documented).
-16. `src/BNP/cluster/run_bnp.sbatch` + `README_BNP_CLUSTER.md` — SCIP venv
-    (no CPLEX needed), array shards, merge script.
+16. `src/BNP/cluster/run_bnp.sbatch` + `README_BNP_CLUSTER.md` — shared
+    `ssp_env` conda env (pyscipopt; no CPLEX license needed for BNP), array
+    shards, merge script.
 
 ## 5. Launch order
 

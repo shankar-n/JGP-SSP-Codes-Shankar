@@ -5,15 +5,17 @@ Standalone PCF′/PTF branch-and-price campaign. **Separate from the BBC campaig
 ships inside `pyscipopt`. Results are compared to BBC offline on the shared metric
 `obj_ktns` (empty-start switches), never by mixing harnesses.
 
-## 1. One-time venv (no license)
+## 1. Environment — the shared `ssp_env` conda env (no license needed for BNP)
+ONE env serves both campaigns. Create it once following
+`src/BBC/cluster/SLURM_RUNBOOK.md` Step 2 (Miniforge/conda, per the cluster wiki
+https://hpc.isima.fr/doku.php?id=python); it includes `pyscipopt` (SCIP ships
+inside the wheel). To use it in any shell:
 ```bash
-python3 -m venv ~/bnp-venv
-source ~/bnp-venv/bin/activate
-pip install --upgrade pip
-pip install pyscipopt numpy
+source ~/miniforge3/etc/profile.d/conda.sh
+conda activate ssp_env
 python -c "import pyscipopt; print('SCIP', pyscipopt.__version__)"
 ```
-Set `BNP_VENV=~/bnp-venv` (the sbatch defaults to this).
+The sbatch activates it the same way — nothing to configure.
 
 ## 2. Smoke test (login node, tiny)
 ```bash

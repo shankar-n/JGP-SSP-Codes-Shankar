@@ -25,8 +25,11 @@ mkdir -p logs cluster/results
 export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 
-# Activate the BNP venv (created once; see cluster/README_BNP_CLUSTER.md)
-source "${BNP_VENV:-$HOME/bnp-venv}/bin/activate"
+# Activate the SHARED conda env `ssp_env` (same env as the BBC campaign; created
+# once per src/BBC/cluster/SLURM_RUNBOOK.md Step 2, following the cluster wiki
+# https://hpc.isima.fr/doku.php?id=python).
+source ~/miniforge3/etc/profile.d/conda.sh
+conda activate ssp_env
 
 # Optional J>MAX_JOBS extension run:  MINJ=26 MAXJ=45 sbatch cluster/run_bnp.sbatch
 # (distinct CSV suffix -> safe to run concurrently with the main job; the OS

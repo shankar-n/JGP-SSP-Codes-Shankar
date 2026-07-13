@@ -33,10 +33,11 @@ mkdir -p logs results
 # ENVIRONMENT  ——  EDIT THESE TWO LINES to match your cluster setup.
 # Confirm what you need first with cluster/probe.sh (see SLURM_RUNBOOK.md, Step 1).
 # ----------------------------------------------------------------------------
-# (a) Python with the CPLEX Python API + numpy on PATH. Typical options:
-#       source "$HOME/ssp-env/bin/activate"          # a venv you created, OR
-#       module load python/3.x cplex/22.x            # if the cluster provides modules
-source "$HOME/ssp-env/bin/activate"
+# (a) Python env: the shared conda env `ssp_env` (Miniforge, per the cluster wiki
+#     https://hpc.isima.fr/doku.php?id=python — created in SLURM_RUNBOOK.md Step 2;
+#     same env serves the BNP campaign).
+source ~/miniforge3/etc/profile.d/conda.sh
+conda activate ssp_env
 # (b) Pin CPLEX to the cores SLURM gave us (reproducible, comparable solve times):
 export OMP_NUM_THREADS="$SLURM_CPUS_PER_TASK"
 export CPLEX_THREADS="$SLURM_CPUS_PER_TASK"          # all 4 solvers honor this (thread pin built in); 0/unset = CPLEX default
