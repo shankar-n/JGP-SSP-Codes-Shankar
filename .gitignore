@@ -56,3 +56,7 @@ data/MTSP*
 *.snm
 
 *.csv
+
+*.pyc
+*.pyd
+
