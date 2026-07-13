@@ -28,7 +28,13 @@ export MKL_NUM_THREADS=1
 # Activate the BNP venv (created once; see cluster/README_BNP_CLUSTER.md)
 source "${BNP_VENV:-$HOME/bnp-venv}/bin/activate"
 
+# Optional J>MAX_JOBS extension run:  MINJ=26 MAXJ=45 sbatch cluster/run_bnp.sbatch
+# (distinct CSV suffix -> safe to run concurrently with the main job; the OS
+#  timeout guard + early-stop bound the cost; expect mostly time_limit rows.)
+SUFFIX="${MAXJ:+_J${MINJ:-0}-${MAXJ}}"
 python bnp_benchmark_runner.py \
     --sets all \
+    ${MAXJ:+--max-jobs "$MAXJ" --max-nv 1e18} \
+    ${MINJ:+--min-jobs "$MINJ"} \
     --task-id "${SLURM_ARRAY_TASK_ID}" --num-tasks "${NUM_TASKS}" \
-    --output "cluster/results/bnp_task${SLURM_ARRAY_TASK_ID}.csv"
+    --output "cluster/results/bnp_task${SLURM_ARRAY_TASK_ID}${SUFFIX}.csv"

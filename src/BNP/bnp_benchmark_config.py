@@ -47,10 +47,13 @@ CONFIGS = [
 # no such cap because CPLEX handles much larger compact models.)
 MAX_JOBS = 25
 # Also skip instances whose configuration space |V| = C(T, b) is astronomically
-# large (Otiai ~1e57): a pure backstop against queueing a hopeless model. For the
-# current sets every |V|>1e9 instance already has J>MAX_JOBS, so this is redundant
-# with the J cap -- it only bites if MAX_JOBS is raised. (Verified against the data:
-# Catanzaro/Crama J<=25 all have |V|<=5e6; Laporte max |V|~3.3e6, all kept.)
+# large: a backstop against queueing a hopeless ENUMERATE-pricer path (the MILP
+# pricer does not depend on |V|, but at these sizes the B&P prototype is untested).
+# MEASURED 2026-07-02: primary contains 160 files with J in {30,40} (the large
+# Catanzaro/Crama series, T up to 60, |V| up to ~1e17) -- BOTH caps trip there, so
+# exactly those 160 are skipped. All 80 Laporte7 and all 1010 secondary files
+# (J<=15) are kept. The skipped sizes are still covered by the BBC campaign
+# (compact solvers, no cap); the B&P is benchmarked on the J<=25 subset.
 MAX_NV = 1_000_000_000
 # Per solver, after this many consecutive non-optimal results on increasingly
 # hard instances, skip the remaining (harder) ones for that solver. 0 disables.

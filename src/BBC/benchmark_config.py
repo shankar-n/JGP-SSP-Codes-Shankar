@@ -21,13 +21,15 @@ _DATA         = _PROJECT_ROOT / "data" / "From_Felipe" / "data"
 # Each entry:  (label, glob_pattern, time_limit_seconds)
 #
 # PRIMARY  (3 600 s TL, all 11 solver configs):
-#   Catanzaro Tabela1C  — 171 instances, J=8-15, T=5-15, c=3-5
-#   Crama     Tabela1-4 — 160 instances, J=10,   T=10,   c=4
-#   Laporte   Tabela7   —  80 instances, J=10,   T=10,   c=4
+#   Catanzaro Tabela1C  — 171 instances, J=8-40,  T=5-60,  c=3-30
+#   Crama     Tabela1-4 — 160 instances, J=10-40, T=10-60, c=4-30
+#   Laporte   Tabela7   —  80 instances, J=10-15, T=10-20, c=4-12
+#   (ranges measured from the files 2026-07-02 — both sets INCLUDE the large
+#    30x40 / 40x60 series; earlier comments understated this)
 #
 # SECONDARY (600 s TL, 10 configs = all except SSPMF, which is too slow at J=15;
 #            8 BBC + LSS + CATZ-F4 — see SECONDARY_CONFIGS below):
-#   Laporte   Tabela3-5 — ~1010 instances, J=8-15, T=15, c=5
+#   Laporte   Tabela3-5 — 1010 instances, J=8/9/15 (per Tabela), T=15-25, c=5-20
 
 PRIMARY_SETS = [
     ("Catanzaro", str(_DATA / "Catanzaro" / "Tabela1C" / "*.txt"), 3600),

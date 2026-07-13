@@ -1251,13 +1251,16 @@ progress, and its tables are the report's only deferred content.
 
 \subsection{Experimental design}\label{ssec:bench}
 The benchmark draws on the standard SSP instance families of \citet{Catanzaro2015}
-($n=8$--$15$ jobs, $m=5$--$15$ tools, $b=3$--$5$), \citet{Crama1994} ($n=10$, $m=10$,
-$b=4$) and \citet{Laporte2004} ($n=8$--$15$, $m=10$--$15$, $b=4$--$5$), spanning a
-range of tool densities and capacities. Three things are measured. \emph{(i)}~The
+($n=8$--$40$ jobs, $m=5$--$60$ tools, $b=3$--$30$), \citet{Crama1994}
+($n=10$--$40$, $m=10$--$60$, $b=4$--$30$) and \citet{Laporte2004} ($n=8$--$15$,
+$m=10$--$25$, $b=4$--$20$), spanning a wide range of sizes, tool densities and
+capacities. Three things are measured. \emph{(i)}~The
 branch-and-Benders-cut solver is run as a full-factorial ablation of its cut
 families---combinatorial against dual optimality cuts, fractional separation on or
 off, triplet bounds on or off---against the three compact baselines. \emph{(ii)}~The
-position-indexed branch-and-price is run in its PCF$'$ and PTF variants. \emph{(iii)}~For
+position-indexed branch-and-price is run in its PCF$'$ and PTF variants, on the
+instances with at most $25$ jobs---the prototype's validated range; the compact
+solvers and the Benders algorithm face the full sets. \emph{(iii)}~For
 every solver and instance the \emph{root linear-relaxation value} is recorded
 alongside the optimum where the solver exposes it reliably, so that bound tightness
 can be studied directly. The common metric is the empty-start KTNS cost of the

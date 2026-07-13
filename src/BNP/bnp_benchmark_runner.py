@@ -121,7 +121,11 @@ def _features(path):
         return 10**6, 10**6, 0, 1.0
 
 
-def build_work_queue(sets, config_filter=None, only_sets=None):
+def build_work_queue(sets, config_filter=None, only_sets=None,
+                     max_jobs=None, max_nv=None, min_jobs=None):
+    mj = MAX_JOBS if max_jobs is None else max_jobs
+    mv = MAX_NV if max_nv is None else max_nv
+    lo = 0 if min_jobs is None else min_jobs
     insts = [(b, p, tl) for b, p, tl in get_instances(sets)
              if not only_sets or b in only_sets]
     feats = {p: _features(p) for _, p, _ in insts}
@@ -129,7 +133,7 @@ def build_work_queue(sets, config_filter=None, only_sets=None):
         T_, b_ = f[1], f[2]
         return math.comb(T_, b_) if 0 <= b_ <= T_ else 10**18
     kept = [(b, p, tl) for b, p, tl in insts
-            if feats[p][0] <= MAX_JOBS and _nv(feats[p]) <= MAX_NV]
+            if lo <= feats[p][0] <= mj and _nv(feats[p]) <= mv]
     n_skip = len(insts) - len(kept)
     kept.sort(key=lambda r: (feats[r[1]][0], feats[r[1]][1], round(feats[r[1]][3], 4), -feats[r[1]][2]))
     work = []
@@ -144,11 +148,13 @@ def build_work_queue(sets, config_filter=None, only_sets=None):
 
 def run_benchmark(sets=None, config_filter=None, only_sets=None, output_csv=None,
                   dry_run=False, limit=None, max_consecutive_timeouts=None,
-                  task_id=None, num_tasks=None):
+                  task_id=None, num_tasks=None, max_jobs=None, max_nv=None,
+                  min_jobs=None):
     sets = sets or ALL_SETS
     csv_path = Path(output_csv) if output_csv else RAW_CSV
     mct = MAX_CONSECUTIVE_TIMEOUTS if max_consecutive_timeouts is None else max_consecutive_timeouts
-    work, n_skip = build_work_queue(sets, config_filter, only_sets)
+    work, n_skip = build_work_queue(sets, config_filter, only_sets,
+                                    max_jobs=max_jobs, max_nv=max_nv, min_jobs=min_jobs)
     if limit is not None:
         uniq = list(dict.fromkeys((b, p) for b, p, _, _ in work))[:limit]
         s = set(uniq); work = [w for w in work if (w[0], w[1]) in s]
@@ -159,7 +165,7 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None, output_csv=None
     done = _completed(csv_path)
     pending = [w for w in work if (Path(w[1]).stem, w[2]["label"]) not in done]
     print(f"BNP runner | queue {len(work)} ({len(work)-len(pending)} done, {len(pending)} to run) "
-          f"| {n_skip} skipped (J>{MAX_JOBS} or |V|>{MAX_NV:.0e}) | early-stop {mct or 'off'} | CSV {csv_path}")
+          f"| {n_skip} skipped (J outside [{0 if min_jobs is None else min_jobs},{MAX_JOBS if max_jobs is None else max_jobs}] or |V|>{(MAX_NV if max_nv is None else max_nv):.0e}) | early-stop {mct or 'off'} | CSV {csv_path}")
     if dry_run:
         for b, p, c, tl in pending[:12]:
             print(f"   {b:<11} {Path(p).stem:<28} {c['label']}  tl={tl}")
@@ -221,12 +227,16 @@ def main():
     ap.add_argument("--max-consecutive-timeouts", type=int, default=None)
     ap.add_argument("--task-id", type=int, default=None, help="SLURM array index (0-based)")
     ap.add_argument("--num-tasks", type=int, default=None, help="SLURM array size")
+    ap.add_argument("--max-jobs", type=int, default=None, help="override MAX_JOBS size cap")
+    ap.add_argument("--min-jobs", type=int, default=None, help="only instances with J >= this (extension runs)")
+    ap.add_argument("--max-nv", type=float, default=None, help="override MAX_NV cap")
     a = ap.parse_args()
     sets = {"primary": PRIMARY_SETS, "secondary": SECONDARY_SETS, "all": ALL_SETS}[a.sets]
     run_benchmark(sets=sets, config_filter=set(a.configs) if a.configs else None,
                   only_sets=set(a.only_sets) if a.only_sets else None, output_csv=a.output,
                   dry_run=a.dry_run, limit=a.limit, max_consecutive_timeouts=a.max_consecutive_timeouts,
-                  task_id=a.task_id, num_tasks=a.num_tasks)
+                  task_id=a.task_id, num_tasks=a.num_tasks,
+                  max_jobs=a.max_jobs, max_nv=a.max_nv, min_jobs=a.min_jobs)
 
 
 if __name__ == "__main__":
