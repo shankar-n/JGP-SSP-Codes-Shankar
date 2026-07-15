@@ -1,0 +1,22 @@
+Exception ignored in: <Finalize object, dead>
+Traceback (most recent call last):
+  File "/home/local.isima.fr/snjagannat/miniforge3/envs/ssp_env/lib/python3.10/multiprocessing/util.py", line 224, in __call__
+    res = self._callback(*self._args, **self._kwargs)
+  File "/home/local.isima.fr/snjagannat/miniforge3/envs/ssp_env/lib/python3.10/multiprocessing/synchronize.py", line 87, in _cleanup
+    sem_unlink(name)
+FileNotFoundError: [Errno 2] No such file or directory
+Exception ignored in: <Finalize object, dead>
+Traceback (most recent call last):
+  File "/home/local.isima.fr/snjagannat/miniforge3/envs/ssp_env/lib/python3.10/multiprocessing/util.py", line 224, in __call__
+    res = self._callback(*self._args, **self._kwargs)
+  File "/home/local.isima.fr/snjagannat/miniforge3/envs/ssp_env/lib/python3.10/multiprocessing/synchronize.py", line 87, in _cleanup
+    sem_unlink(name)
+FileNotFoundError: [Errno 2] No such file or directory
+Exception ignored in: <Finalize object, dead>
+Traceback (most recent call last):
+  File "/home/local.isima.fr/snjagannat/miniforge3/envs/ssp_env/lib/python3.10/multiprocessing/util.py", line 224, in __call__
+    res = self._callback(*self._args, **self._kwargs)
+  File "/home/local.isima.fr/snjagannat/miniforge3/envs/ssp_env/lib/python3.10/multiprocessing/synchronize.py", line 87, in _cleanup
+    sem_unlink(name)
+FileNotFoundError: [Errno 2] No such file or directory
+slurmstepd-node37: error: Detected 2 oom_kill events in StepId=14574.batch. Some of the step tasks have been OOM Killed.
