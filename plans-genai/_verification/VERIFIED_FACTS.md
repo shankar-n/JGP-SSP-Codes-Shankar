@@ -223,3 +223,25 @@ verify_smallz_and_b3census.py, verify_gapK_refutation.py. All claims below machi
 - Post-fix: full battery green in-sandbox (CPLEX CE): 8 BBC configs + LSS + SSPMF +
   CATZ-F4, obj == seqKTNS == brute on every instance. Re-run on the CPLEX machine
   (expect exit 0) before sbatch.
+
+## ============ 2026-07-15: campaign triage (first full BBC+BNP run) ============
+- INTEGRITY CLEAN: over 806 (set,instance) pairs with >=1 optimal row, cross-solver
+  obj_ktns disagreements = 0; empty-start identity obj==obj_ktns holds on every
+  optimal row; 0 BNP convention-warns. (analysis/triage_results.py; NB an earlier
+  triage draft keyed by instance stem only -- Laporte sets reuse stems -> 200 FAKE
+  disagreements; keying fixed to (set,instance).)
+- BBC primary collapse is a RESULT, not a bug: on J=10,T=10,C=5-7 files w_ij==0 =>
+  root LP = 2 = dual bound after 3600s / ~250k nodes / ~75k Benders cuts (incumbent
+  = true optimum found; proof never closes). Matches the bound-limited thesis.
+  Ablation discriminates: LP-cut family >> comb-cut family (K-configs solved ~1).
+- +F ablation arm NEVER FIRED: cuts_frac=0 everywhere. Cause: presolve not disabled
+  for user cuts (bendersatsp2 requirement). FIXED in branch_and_benders_cut_cplex.py
+  (presolve off iff use_fractional_cuts); test_solver green. Rerun of the 4 +F
+  configs required for the F-axis to mean anything (delete results/raw_*+F*_*.csv
+  first -- the runner resumes and would skip).
+- LSS: 8 'subprocess crash' (empty note, likely OOM) on Catanzaro B*-4/B*-7 series.
+- BNP: PCFp 188 optimal, PTF 144; many timeouts (expected, prototype); note TWO
+  status spellings 'timelimit' (SCIP path) vs 'time_limit' (OS-guard path) --
+  normalize in analysis.
+- merge_results.sh + probe.sh had CRLF endings (bash: 'invalid option name...pipefail')
+  -- converted to LF; .gitattributes added (*.sh/*.sbatch/*.py eol=lf).

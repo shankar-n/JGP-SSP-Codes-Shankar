@@ -75,7 +75,10 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue):
             result_queue.put({**base, "status": "error", "notes": f"unknown solver {config['solver']}"})
             return
         status, obj, nodes, ncols, seq, rlp = branch_and_price(J, T, C, Tj, timelimit=time_limit)
-        opt = "optimal" in str(status).lower()
+        status = str(status)
+        if "time" in status.lower():
+            status = "time_limit"          # normalize SCIP's 'timelimit' vs guard's 'time_limit'
+        opt = "optimal" in status.lower()
         ok = ktns_of(seq)
         note = ""
         if opt and obj is not None and ok is not None:        # self-check: empty-start == free-initial + initial load

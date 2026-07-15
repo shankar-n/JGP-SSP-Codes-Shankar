@@ -1171,6 +1171,13 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
 
         self.cpx.parameters.timelimit.set(float(time_limit))
 
+        if self.use_fractional_cuts:
+            # User cuts added at relaxation nodes must remain valid for the
+            # presolved model; without disabling presolve CPLEX silently makes
+            # them unusable (bendersatsp2 pattern / design note). Symptom in
+            # the 2026-07-02 campaign: every +F config recorded cuts_frac = 0.
+            self.cpx.parameters.preprocessing.presolve.set(0)
+
         # ── Register modern generic callback ──────────────────────────────
         # _thread_dsps already lives on self — no _cb_ref needed, no race.
         cb = BendersCutCallback(self)
