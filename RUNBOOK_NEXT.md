@@ -4,7 +4,7 @@
 > with the repo synced and, where python is invoked by hand, the env active:
 > `source ~/miniforge3/etc/profile.d/conda.sh && conda activate ssp_env`.
 
-## Phase A — finish the campaigns (cluster, ~1 night)
+## Phase A — finish the campaigns  [COMPLETE 2026-07-15: +F structurally inactive (0 frac cuts); LSS crashes -> timeouts at 32GB (2 residual errors); BNP n>=30: zero solves. Final numbers in report tab:solves + VERIFIED_FACTS.]
 
 **A0. Sync the repo to the cluster.** Today's fixes it carries: presolve-off for
 fractional cuts (branch_and_benders_cut_cplex.py), CRLF fix (merge_results.sh,
@@ -27,10 +27,13 @@ Success signature: `cuts_frac > 0` in the new rows. Either outcome is a finding
 ```bash
 cd <repo>/src/BBC
 python3 cluster/strip_error_rows.py results/raw_LSS_primary.csv
-sbatch --array=8 --mem=32G cluster/run_campaign.sbatch
+sbatch --array=8 --mem-per-cpu=8192 cluster/run_campaign.sbatch
 ```
-(`--array=8` = LSS only; resume re-attempts exactly the stripped rows, early-stop
-counters re-seed from the CSV so no budget is wasted.)
+(`--array=8` = LSS only. NOTE: the script's header already sets
+`--mem-per-cpu=4096`, and SLURM forbids mixing `--mem` with `--mem-per-cpu` —
+so raise memory by overriding the SAME option: 8192 MB/core x 4 cores = 32 GB.
+Resume re-attempts exactly the stripped rows; early-stop counters re-seed from
+the CSV so no budget is wasted.)
 
 **A3. BNP J>25 extension** — SKIP if you already submitted it:
 ```bash
@@ -53,13 +56,23 @@ each solved by at least one exact solver, each with Z*_free strictly above the
 coverage bound |U|−b — i.e., exactly the instances where a stronger relaxation
 can pay, with ground-truth optima attached for free.
 
-**B2. NEXT (Claude, code+proof):** in `ptf_bp.py`:
-  (i) grouping cut  Σ(config-changing arcs) ≥ K*−1  with K* from `solve_jgp_arf`
-      (validity = the grouping lower bound; to be stated + verified vs brute);
-  (ii) warm-start columns from the JGP+GSP / greedy sequence (incumbent from
-      the start, prunes the a-branching tree);
-  (iii) root-gap instrumentation: log (|U|−b, PTF root LP, Z*) per instance.
-  Each verified against the P0 scripts + brute before hand-off.
+**B2. REVISED 2026-07-15 — the PTF study, done properly (methodology first).**
+The earlier B2 (grouping cut / warm starts) was engineering ahead of science and
+is withdrawn as a research step (the grouping cut binds almost nowhere on the
+testbed: K*−1 ≤ q on typical benchmarks). Correct order:
+  (i)  polytope study on small witnesses with everything known (6-ring, I0/I1,
+       the b=5 refutation witnesses): enumerate integer points, PORTA/lrs for
+       the full facet list;
+  (ii) collect the ACTUAL fractional root solutions from the solver on those
+       instances; identify which facet classes cut them;
+  (iii) interpret the classes combinatorially (ring symmetry orbits), prove
+       validity in general, ideally facetness under stated conditions;
+  (iv) separation algorithm + complexity;
+  (v)  ONLY THEN implementation and evaluation on the 419-instance testbed
+       (root-gap closure = the metric).
+Steps (i)-(iii) are the Wagler-collaboration content; the blocking-duality
+section added to plans-genai/13 (odd-ring non-idealness) is the session opener.
+Warm starts / instrumentation remain useful engineering but are not the study.
 
 **B3. THEN (you, cluster):** benchmark `PTF` vs `PTF+cuts` on the 419-instance
 testbed (exact command supplied with B2; ~overnight at 600 s TL).
@@ -72,7 +85,7 @@ If not, the paper reports the honest current state; nothing else changes.
 **B5. Optional, with Prof. Wagler:** PORTA facet mining on the 6-ring PTF
 polytope (Windows, `tools/porta-1.4.1`); input files prepared on request.
 
-## Phase C — paper
+## Phase C — paper  [§5.3 written 2026-07-15; deck prepared; remaining: compile + read-through]
 
 After A4 lands: §5.3 tables + results narrative get built from the merged CSVs
 (solve rates, ablation incl. the real F-axis, bound-tightness ≈48%/52% split,

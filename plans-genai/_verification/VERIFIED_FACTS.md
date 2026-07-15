@@ -245,3 +245,30 @@ verify_smallz_and_b3census.py, verify_gapK_refutation.py. All claims below machi
   normalize in analysis.
 - merge_results.sh + probe.sh had CRLF endings (bash: 'invalid option name...pipefail')
   -- converted to LF; .gitattributes added (*.sh/*.sbatch/*.py eol=lf).
+
+## ============ 2026-07-15: blocking duality on rings (Wagler-session prep) ============
+- Cluster clutter A = {A_j} on ground set of maximal groups; blocker b(A) = minimal
+  group-covers; K* = min |B|, B in b(A). Circuit-blocker identity: b(circuits) =
+  minimal complements of maximal feasible groups (3-line proof, 13_ section).
+- VERIFIED (hand dual + CBC, k=5..9): k-ring, b=3: fractional cover tau* = k/2,
+  K* = ceil(k/2) => JGP covering LP TIGHT for even k, GAP 1/2 for every odd k.
+  So the set-covering relaxation behind JGP B&P (Crama/Otiai) has its first
+  integrality-gap family at the 5-ring; odd circular structure = first obstruction
+  (parallel to odd holes). Clutter = wrong invariant for the SSP gap
+  (prop:notclutter) but the right one for JGP tightness.
+
+## ============ 2026-07-15 (later): Phase A complete — FINAL campaign numbers ============
+- +F rerun (presolve off): cuts_frac = 0 across the campaign AND in controlled
+  in-sandbox runs (6-ring: 443 integer-candidate Benders cuts, 0 fractional).
+  => fractional Benders cuts are STRUCTURALLY inactive for this master/DSP pair
+  (loading LP collapses at fractional orderings). F-axis verdict: inactive by
+  structure, not by bug.
+- LSS 32GB retry: 6/8 B-series crashes became honest time_limits; 2 residual errors.
+- BNP J26-45 extension: 192 pairs, ALL time_limit — zero optima at n>=30 (measured).
+- FINAL solved/attempted: SSPMF 138/165 primary (strongest primary — da Silva's
+  SOTA claim REPLICATES); LSS 91/98 prim + 668/678 sec; CATZ-F4 91/99 + 455/490;
+  BBC-LP 1/9 + 26/48 (best Benders); BBC-K family 1/9 + 0/8; PCF' 94/379 pooled
+  (15% root-closed, median 89 nodes); PTF 72/351. Cross-solver disagreements: 0/806.
+  Coverage bound tight on 386/806 = 47.9% of solved (upper-biased).
+- One CSV (raw_BBC-K+F_primary.csv) had NUL corruption (killed writer); cleaned.
+- Report §5 updated to final results (tab:solves); Phase 1 marked complete.

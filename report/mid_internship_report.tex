@@ -76,7 +76,7 @@ coverage bound $\lvert\U\rvert-b$, links the two: it is the value every configur
 relaxation attains and, as the gap analysis shows, the exact optimum on a large part
 of the instance space---so it both bounds the heuristic and limits configuration-based
 exact methods. Results proved here are stated as theorems; those resting on enumeration
-are stated as conjectures; the large-scale benchmark is in progress.
+are stated as conjectures; the large-scale benchmark is complete and reported.
 \end{abstract}
 
 \tableofcontents
@@ -1245,9 +1245,8 @@ in Section~\ref{ssec:assess}.
 %==============================================================================
 \section{Computational study}\label{sec:comp}
 %==============================================================================
-The methods of Section~\ref{sec:exact} have been implemented and are being
-benchmarked. We report the experimental design; the large-scale comparison is in
-progress, and its tables are the report's only deferred content.
+The methods of Section~\ref{sec:exact} have been implemented and benchmarked in
+full; this section reports the design and the results.
 
 \subsection{Experimental design}\label{ssec:bench}
 The benchmark draws on the standard SSP instance families of \citet{Catanzaro2015}
@@ -1269,12 +1268,79 @@ Runs are pinned to a fixed solver thread count per task for reproducible timing,
 with a per-instance time limit, and are sharded across a compute cluster.
 
 \subsection{Results}\label{ssec:results}
-The campaigns are executing at the time of writing. The completed study will report,
-across the instance families: solve rates and running times for each method; the
-marginal contribution of each cut family in the branch-and-Benders-cut ablation; the
-comparison of the position-indexed branch-and-price against the compact baselines on
-the shared metric; and the distribution of the root-relaxation gap, which the
-following subsection argues is the decisive quantity.
+Table~\ref{tab:solves} reports instances solved to proven optimality over
+instances attempted under the early-stop protocol (a configuration abandons a
+set after eight consecutive failures on increasingly hard instances, so its
+unattempted instances are at least as hard as those at which it stopped). All
+optimality claims are mutually consistent: across the $806$ instances solved by
+at least one method, no two methods disagree on the canonical cost.
+
+\begin{table}[h]\centering
+\begin{tabular}{lcc}
+\toprule
+Configuration & Primary ($411$) & Secondary ($1{,}010$)\\
+\midrule
+SSPMF                & $138/165$ & (not run, by design)\\
+LSS                  & $91/98$   & $668/678$\\
+CATZ-F4              & $91/99$   & $455/490$\\
+BBC-LP (best Benders)& $1/9$     & $26/48$\\
+BBC-K family         & $1/9$     & $0/8$\\
+\midrule
+PCF$'$ branch-and-price & \multicolumn{2}{c}{$94/379$ pooled, $n\le25$}\\
+PTF branch-and-price    & \multicolumn{2}{c}{$72/351$ pooled, $n\le25$}\\
+\bottomrule
+\end{tabular}
+\caption{Solved/attempted per configuration. Primary: $3600$\,s limit;
+secondary: $600$\,s. The branch-and-price pools both sets on its validated
+range $n\le25$; on the $n\ge30$ files (run separately) it solved none.}
+\label{tab:solves}
+\end{table}
+
+\paragraph{Compact models.}
+The multicommodity-flow model is the strongest method on the primary families,
+replicating its state-of-the-art claim \citep{daSilva2024}: its relaxation
+equals the coverage bound, so it closes bound-tight instances directly and
+penetrates deepest into the hard tail. The striking secondary finding is the
+$2004$ formulation of \citet{Laporte2004} under a modern solver: it matches
+Catanzaro's F4 on the primary families (both halting at the same wall, the
+$n=15$ instances with $m\ge30$, where memory or time is exhausted) and
+dominates the secondary suite. Modern solver technology has largely erased the
+$2004$--$2015$ formulation gap at classic sizes; published comparisons against
+older formulations should be read with the solver generation in mind.
+
+\paragraph{The Benders algorithm.}
+The branch-and-Benders-cut solver finds the optimal schedule early but cannot
+prove it: on capacity-loose instances (where every pairwise bound $w_{ij}$
+vanishes) the master's dual bound remains frozen at its trivial root value
+after the full hour, ${\sim}250{,}000$ nodes and ${\sim}75{,}000$ optimality
+cuts, while on instances with informative root bounds it converges in minutes.
+The ablation is one-sided: the dual-cut family is the only active axis
+(LP-cut configurations solve $26$ of $48$ attempted secondary instances, the
+combinatorial-cut family none); triplet bounds are neutral; and fractional
+Benders cuts are \emph{structurally inactive}---zero violated cuts were found
+across the campaign and in controlled runs with presolve disabled, consistent
+with the loading subproblem's value collapsing to the pairwise bound at
+fractional orderings. The method is bound-limited exactly in the sense of
+Section~\ref{ssec:assess}.
+
+\paragraph{The branch-and-price.}
+PCF$'$ proves optimality on $94$ of $379$ attempted instances (about $15\%$ of
+them at the root; median $89$ nodes), PTF on $72$ of $351$ with its heavier
+pricer; neither reaches $n\ge30$. Consistent with
+Proposition~\ref{prop:pcfprime}, the solves concentrate where the coverage
+bound is tight, and the prototype's value is diagnostic rather than
+competitive: it measures exactly where the configuration relaxation carries
+information.
+
+\paragraph{Bound tightness.}
+Among the $806$ instances solved by any method, the coverage bound
+$\lvert\U\rvert-b$ equals the optimum on $386$ ($47.9\%$)---an upper-biased
+estimate, since unsolved instances skew loose. The dichotomy of
+Section~\ref{sec:gap} is thus not a corner phenomenon: the standard benchmark
+suites split roughly in half between the regime where the heuristic tends to
+be exact and exact methods close at the root, and the regime where both must
+work---which is where the position--transition relaxation and the planned
+polyhedral work aim.
 
 \subsection{The competitiveness of configuration branch-and-price}\label{ssec:assess}
 A guiding question for the exact methods is whether a configuration-based
@@ -1322,8 +1388,8 @@ of the grouping system computes $\Kst$ yet provably does not determine the gap
 side we gave a branch-and-Benders-cut solver whose subproblem is exact and
 polynomial, and position-indexed formulations with a fixed row set, among which the
 position--transition model is the first configuration relaxation to improve on the
-coverage bound. The methods are implemented; their large-scale comparison is under
-way.
+coverage bound. The methods are implemented, and their large-scale comparison is
+complete (Section~\ref{ssec:results}).
 
 \subsection{Beyond the project horizon}
 The near-term programme is set out in Section~\ref{sec:planned}; three further
@@ -1359,17 +1425,16 @@ The preceding sections report what has been done; this section sets out what rem
 in the order in which it will be carried out. Firm dates are deliberately not
 attached---an extended mid-summer break falls within the remaining period---but the
 phasing is fixed by dependency: each phase consumes the output of the one before it.
-Phase~1 is expected to close before the break, and the aim is to complete the
-programme ahead of the project's formal end.
+Phase~1 is complete; the aim is to finish the programme ahead of the project's
+formal end.
 
-\paragraph{Phase 1 (under way): complete the computational campaigns.}
-Two campaigns are running: the full-factorial cut ablation of the
-branch-and-Benders-cut solver, and the position-indexed branch-and-price in its
-PCF$'$ and PTF variants, both against the compact baselines and both recording root
-relaxations alongside optima (Section~\ref{ssec:bench}). The deliverable is the
-completed tables and their analysis---solve rates, running times, the marginal value
-of each cut family, and the distribution of root gaps. This phase comes first because
-what follows it is steered by its bound-tightness data.
+\paragraph{Phase 1 (complete): the computational campaigns.}
+Both campaigns---the full-factorial Benders ablation and the position-indexed
+branch-and-price, against the compact baselines---ran to completion under the
+early-stop protocol; the results and their reading are in
+Section~\ref{ssec:results}. The bound-tightness split measured there
+($47.9\%$ tight among solved instances) is the datum that steers the phases
+below.
 
 \paragraph{Phase 2: the exact extremal gap law.}
 With the $\Kst-2$ bound refuted (Proposition~\ref{prop:refute}), the standing

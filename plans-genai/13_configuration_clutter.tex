@@ -141,13 +141,89 @@ with Prof.~Wagler should therefore target the \emph{covering} side
 tightness), not a clutter-only gap criterion.
 \end{remark}
 
+\section{The blocking pair and its LP duality (preparation for Prof.~Wagler)}
+%% Added 2026-07-15 after Shankar relayed that Prof. Wagler asked for the
+%% blocker/clutter analysis "for the dual", posed on the ring instance. The
+%% reconstruction below is the standard blocking-duality reading of that
+%% request; the ring computations are verified (hand dual + CBC, k=5..9).
+
+Fix an instance and let $\mathcal{G}$ be the (finite) set of inclusion-maximal
+feasible groups. Two clutters pair up by blocking duality:
+
+\begin{definition}[Cluster clutter and its blocker]
+On ground set $\mathcal{G}$, let
+$\mathcal{A}=\{A_j: j\in J\}$ (minimalised), where
+$A_j=\{G\in\mathcal{G}: j\in G\}$ is the \emph{cluster} of job $j$. A
+transversal of $\mathcal{A}$ is a set of groups meeting every $A_j$ --- i.e.\
+a \emph{cover} of $J$ --- so the blocker $b(\mathcal{A})$ is the clutter of
+minimal group-covers, and $\Kstar=\min\{|B|:B\in b(\mathcal{A})\}$.
+\end{definition}
+
+\noindent The associated LP pair is the JGP covering relaxation and its dual
+packing:
+\[
+  \tau^*=\min\Bigl\{\textstyle\sum_G x_G:\ \sum_{G\ni j}x_G\ge1\ \forall j,\
+  x\ge0\Bigr\}
+  \;=\;
+  \nu^*=\max\Bigl\{\textstyle\sum_j y_j:\ \sum_{j\in G}y_j\le1\ \forall G,\
+  y\ge0\Bigr\},
+\]
+and $\mathcal{A}$ is \emph{ideal} exactly when $\tau^*=\Kstar$ for all
+non-negative weightings; by Lehman's theorem idealness holds for
+$\mathcal{A}$ iff it holds for $b(\mathcal{A})$ --- the covering and cluster
+sides stand or fall together. This is the precise sense in which the blocker
+is ``the dual''.
+
+\begin{proposition}[Circuit--group blocking identity]\label{prop:circblocker}
+On ground set $J$, the blocker of the circuit clutter $\mathcal{C}$ is the
+clutter of minimal complements of maximal feasible groups:
+$b(\mathcal{C})=\{J\setminus G:\ G\in\mathcal{G}\}^{\min}$.
+\end{proposition}
+\begin{proof}
+$S$ meets every circuit iff $J\setminus S$ contains no circuit iff
+$J\setminus S$ is feasible; $S$ is a minimal such set iff $J\setminus S$ is
+maximal feasible.
+\end{proof}
+
+\begin{proposition}[Odd rings are the first non-ideal family]\label{prop:oddring}
+On the $k$-ring with $b=3$ (jobs $=$ edges of $C_k$; maximal groups $=$
+adjacent edge pairs), $\tau^*=k/2$ while $\Kstar=\lceil k/2\rceil$: the
+covering LP is tight for even $k$ and has gap $\tfrac12$ for every odd $k$.
+\end{proposition}
+\begin{proof}
+Primal: weight $\tfrac12$ on each of the $k$ adjacent-pair groups covers each
+edge exactly once, so $\tau^*\le k/2$. Dual: $y_j=\tfrac12$ is feasible (each
+group contains at most two jobs), so $\nu^*\ge k/2$; LP duality gives
+$\tau^*=k/2$. The integer optimum is $\lceil k/2\rceil$.
+(Verified computationally for $k=5,\dots,9$.)
+\end{proof}
+
+\begin{remark}[Why this matters, and what to ask]
+(i) The JGP set-covering relaxation is the engine of the whole
+branch-and-price line and is reported empirically tight
+\citep{Crama1994Column,Otiai2026}; \cref{prop:oddring} exhibits its
+integrality gap already on the $5$-ring --- \emph{odd circular structure is
+the first obstruction family}, in exact parallel to odd holes in perfection
+theory. (ii) Our gap-side result (\cref{prop:notclutter}: the clutter cannot
+decide the SSP heuristic gap) and this covering-side result split the
+programme cleanly: \textbf{the clutter is the wrong invariant for the gap but
+the right one for JGP tightness}. Questions for the session: is
+$\mathcal{A}$ ideal precisely when no odd-ring-like structure appears as a
+minor? Does Lehman's machinery (or the MFMC property) characterise the
+instance classes where Otiai-style branch-and-price closes at the root? And
+does the width--length inequality on $(\mathcal{A},b(\mathcal{A}))$ say
+anything about $\Kstar-1$ versus $q$ --- the two lower bounds of the gap
+theory?
+\end{remark}
+
 \paragraph{Next steps.} (1) \emph{Done:} the gap-from-clutter question is
-settled negatively (Proposition~\ref{prop:notclutter}). (2) For
-Question~\ref{q:ideal}, test integrality of the covering LP on the enumerated
-families ($\le$ a few thousand instances) to locate candidate classes before
-attempting proofs. (3) Bring Question~\ref{q:blocker} and the witnesses above
-to the session with Prof.~Wagler; the prism/$C_5$ pair and the $I_0/I_1$ pair
-are the instructive opening examples.
+settled negatively (Proposition~\ref{prop:notclutter}). (2) \emph{Done in
+first form:} the blocking pair is set up with the odd-ring non-idealness
+(\cref{prop:oddring}) as the opening result for the Wagler session; extend
+the computation across the enumerated families to map where $\tau^*<\Kstar$.
+(3) Bring Question~\ref{q:blocker}, the witnesses above, and
+\cref{prop:oddring} to the session; the prism/$C_5$ pair, the $I_0/I_1$ pair,
+and the odd rings are the instructive examples.
 
 \bibliographystyle{plainnat}
 \bibliography{references}
