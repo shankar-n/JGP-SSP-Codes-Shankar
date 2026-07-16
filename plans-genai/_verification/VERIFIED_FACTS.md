@@ -272,3 +272,55 @@ verify_smallz_and_b3census.py, verify_gapK_refutation.py. All claims below machi
   Coverage bound tight on 386/806 = 47.9% of solved (upper-biased).
 - One CSV (raw_BBC-K+F_primary.csv) had NUL corruption (killed writer); cleaned.
 - Report §5 updated to final results (tab:solves); Phase 1 marked complete.
+
+## ============ 2026-07-16: theory-first restructure + spectrum completed ============
+- PROVED + verified (verify_lowrho_spectrum.py, 40 exhaustive n=4 instances, 0 viol):
+  lem:lowrho -- rho < 1/(n-1) => every optimum of switches + rho*changeovers is
+  switch-optimal. With thm:collapse this pins BOTH ends of the setup-cost spectrum:
+  pure SSP below 1/(n-1), collapse onto JGP-grouping above the gap; transition
+  confined to [1/(n-1), H-Z*]. Answers the core of CLAUDE.md open problem 5.
+- Report restructured theory-first: abstract/contributions reordered (methods last);
+  refutation reframed as determination of the extremal law; five-step arc stated in
+  the Section-3 opener; blocking-duality + odd-ring non-idealness moved INTO the
+  report (prop:circblocker, prop:oddring in ssec:clutter); Section-5 opener states
+  the pre-posed Benders question + instrument framing.
+- Literature-claim scrub: "approximation results ... concern other heuristics"
+  SOFTENED in 2.7 and 6.2 to "no worst-case guarantee published for any SSP
+  heuristic" (no such results could be sourced; the old wording implied they exist).
+- Advisor deck: Beamer (report/JGP-SSP_midterm_slides.tex/.pdf, 13 frames, TikZ ring,
+  native math, \note{} speaker notes) replaces the pptx as the canonical deck.
+
+## ============ 2026-07-16 (later): readability rewrite + coverage row LIVE ============
+- Report readability pass (cold read): abstract rewritten plain-language around the
+  two questions; contributions split (guarantees vs extremal law); reading-guide
+  sentence added; Section-3 six-step arc; the 13-result mega-subsection split:
+  NEW ssec:law "The extremal law at K*=3" (hk3, k3, genk, smallZ, refute, 43route,
+  bdep) with a context-reset opener; ssec:ratio retitled "Worst-case guarantees".
+- "Planned work" -> "Remaining work": credits completed items, lists exactly three
+  remaining (extremal law [open math], polyhedral programme [Wagler-gated],
+  corrected-Benders re-run [queued]). ALL paper/manuscript mentions removed from
+  report and deck per Shankar's instruction.
+- COVERAGE ROW IMPLEMENTED in branch_and_benders_cut_cplex.py (theta >= |U|,
+  'theta_coverage'): test_solver green (all 11 configs == brute), and on the
+  6-ring the BBC proof now closes AT THE ROOT WITH ZERO CUTS (was 443 Benders
+  cuts). Bound-tight instances should now close at root in the cluster re-run:
+  delete results/raw_BBC-*.csv (all 8 configs, both sets) before resubmitting
+  arrays 0-7 (the old rows would be resumed-over otherwise).
+
+## ============ 2026-07-16 (remaining-work push): extremal law + idealness + master ============
+- EXTREMAL LAW hunts (verify_extremal_hunt.py): counting bound min(q,floor((2b-q)/3))-R
+  gains NEW ATTAINMENT at (b,q,R)=(5,2,1) and (5,3,1) [gap 1 = bound]. At the R=0
+  corners (5,3) [bound 2; 243 K*=3 instances] and (6,3) [bound 3; 74 instances]
+  directed search finds ONLY gap 1 -- first evidence the bound may be loose there.
+  Naive sharpening gap <= q-2-R REFUTED by (5,2,1). A candidate lemma
+  "b<=2q-2 => gap<=q-2-R" checked and found SUBSUMED by the counting bound (not new).
+  Status: exact law open, concentrated at R=0, b>=2q-1.
+- IDEALNESS SCAN (jgp covering LP, tau* vs K*): NON-integral on 152/627 = 24.2% of
+  the b=3 edge family, 1.7% mixed-b3, 6.0% mixed-b4; non-integrality occurs OFF-RING:
+  witness T=({0,1,3},{2,3},{2,4},{2,5},{3,4,5}), b=3: tau*=3.5 < K*=4. So odd rings
+  are the first PROVABLE family but not the only obstruction shape -- Q1 (idealness
+  characterisation) is rich; dataset prepared for the Wagler session.
+- CORRECTED MASTER on real files: bound-tight => root closure (6-ring 0 cuts vs 443);
+  bound-loose (A0-0, opt=|U|+1) => root lifted to |U|, search remains (5.7k cuts in a
+  30s CE run). Aggregate effect = the queued cluster re-run (arrays 0-7, delete
+  raw_BBC-*.csv first).

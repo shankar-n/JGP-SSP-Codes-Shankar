@@ -1140,6 +1140,20 @@ against the cap's $8$. Derandomising the ordering (greedy block-preserving
 orders) and replacing Jensen by the true extremal degree profile are the two
 places where it can be tightened.
 
+\begin{warnbox}
+\textbf{Extremal-law status (2026-07-16, verify\_extremal\_hunt.py).}
+Attainment of $\min(q,\lfloor(2b-q)/3\rfloor)-R$ now confirmed at FIVE points:
+$(b,q,R)=(3,3,0),(4,3,0),(5,4,0)$ and NEW $(5,2,1),(5,3,1)$. At the $R=0$
+corners $(5,3)$ [cap $2$; $243$ $\Kstar{=}3$ instances searched] and $(6,3)$
+[cap $3$; $74$ instances] only gap $1$ was found --- first evidence the
+counting bound may be loose at $R=0$, $b\ge2q-1$; a gap-$3$ instance at
+$(6,3)$ would give ratio $2$ at $\Kstar=3$ and is the single most valuable
+object to search for. Two dead ends recorded so that they are not retried:
+the sharpening $\mathrm{gap}\le q-2-R$ is REFUTED by $(5,2,1)$, and the
+candidate lemma ``$b\le2q-2\Rightarrow\mathrm{gap}\le q-2-R$'' is subsumed by
+\cref{thm:k3count} (identical regime, identical strength).
+\end{warnbox}
+
 \begin{thmbox}
 \begin{proposition}[Consequences of \cref{conj:gapK}]
 \label{prop:conj_consequences}

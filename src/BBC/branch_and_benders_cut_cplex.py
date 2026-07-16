@@ -664,6 +664,21 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
             senses=['G'], rhs=[0.0], names=['theta_lb']
         )
 
+        # -- Coverage bound: theta >= |U|  (ADDED 2026-07-16) ------------------
+        # Every tool used by some job is inserted at least once from the empty
+        # depot magazine, so the empty-start objective is at least |U|.  This is
+        # Proposition lb2 of the report (empty-start form).  The 2026-07 campaign
+        # showed the master's dual bound frozen at the trivial pairwise value on
+        # capacity-loose instances precisely because this row was missing; every
+        # other benchmarked method carries the bound through its own LP.
+        used_tools = set()
+        for req in self.tool_req.values():
+            used_tools.update(req)
+        self.cpx.linear_constraints.add(
+            lin_expr=[SparsePair([self.theta_idx], [1.0])],
+            senses=['G'], rhs=[float(len(used_tools))], names=['theta_coverage']
+        )
+
         # ── Triplet lower bounds: θ ≥ w_ijk·(x_ij + x_jk − 1) ───────────
         # Valid because: if x_ij=x_jk=1 (j between i and k), the three-job
         # segment requires at least w_ijk switches.  For all other x values

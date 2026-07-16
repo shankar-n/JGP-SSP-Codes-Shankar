@@ -49,7 +49,7 @@ cd <repo>/src/BNP && bash cluster/merge_results.sh
 # src/BNP/cluster/results, src/BNP/bnp_results.csv back to the laptop repo
 ```
 
-## Phase B — PTF improvement track (started 2026-07-15)
+## Phase B — PTF improvement track  [2026-07-16: extremal-law hunts done (new attainment at R=1; (5,3)/(6,3) corners resist); idealness scan done (24% non-integral on edge-b3, off-ring witness — see plans-genai/wagler_prep_data.md); coverage row LIVE in BBC master (6-ring: 0 cuts). Remaining: cluster re-run arrays 0-7 (delete raw_BBC-*.csv first); Wagler sessions.]
 
 **B1. DONE — gap-instance testbed.** `src/BNP/gap_testbed.csv`: 419 instances,
 each solved by at least one exact solver, each with Z*_free strictly above the
