@@ -174,7 +174,7 @@ def nearest_neighbor(n_jobs, tool_req, cap, start=0):
     sequence  = [start]
     unvisited.discard(start)
     magazine  = set(tool_req[start])
-    # AUDIT-FIX(Claude-Fable 2026-06-10): removed an INFINITE LOOP here.
+    # AUDIT-FIX(2026-06-10): removed an INFINITE LOOP here.
     # The old code was:
     #     needed_first = set(tool_req[start])
     #     while len(magazine) < cap and needed_first:

@@ -4,11 +4,31 @@
 
 ---
 
-## Current Focus (2026-06-15) — BBC exact-solver paper ONLY
+## Current Focus (2026-07-17) — final report + presentation
 
-Active objective: finish + benchmark the **BBC exact solver** → one paper. Critical path:
-SLURM runbook (frontalhpc2025) → repo cleanup → fix stale docs → Catanzaro baseline decision →
-pre-cluster integration test (`test_solver.py` + small pilot on CPLEX hardware) → run campaign → analysis (ablation tables + plots).
+Active objective: the project report **`report/JGP-SSP_report.tex`** (RENAMED from
+mid_internship_report; it is the LIVING FINAL REPORT) and the Beamer deck
+**`report/JGP-SSP_slides.tex`** (renamed from JGP-SSP_midterm_slides). Facts:
+- **Draft switch**: comment-package environments `gaptheory`/`gapstub` (preamble
+  block "DRAFT SWITCH") toggle §3 in/out; §3 is under Shankar's line-by-line
+  verification and is EXCLUDED from circulated drafts. Full 29pp / circulation 20pp.
+- Campaigns are DONE; §5 was rewritten 2026-07-17 from recomputed CSV numbers —
+  see the 2026-07-17 block of `plans-genai/_verification/VERIFIED_FACTS.md`
+  (387/806 tight = 48.0%; LSS 667/677 secondary; PCFp 94/319, PTF 72/291 at
+  n≤25; 30/30 Benders timeouts held the optimum; wall = n=15 at T≈20).
+- PENDING on cluster merge (corrected-master BBC re-run, jobs 14616/14624):
+  refresh tab:solves BBC rows + Benders diagnosis, THEN rebuild the deck —
+  **deck numbers are stale until that rebuild; do not present it before**.
+- Repo is PUBLIC (github.com/shankar-n/JGP-SSP-Codes-Shankar): `src/` and all
+  readmes are scrubbed of AI mentions (2026-07-17) — keep them that way; the
+  private layer (plans-genai, skills, CLAUDE.md, runbooks) is gitignored for
+  future adds but Shankar chose NOT to untrack existing files.
+- Wagler polyhedral sessions: data in `plans-genai/wagler_prep_data.md`.
+- `plans-genai/08_branch_and_benders.tex` renamed to `14_branch_and_benders.tex`
+  (numbering collision with 08_research_notes.md).
+
+Original campaign critical path (completed): SLURM runbook → repo cleanup → stale
+docs → baseline decision → `test_solver.py` pilot → campaign → analysis.
 
 **Cluster how-to (don't lose this):** `src/BBC/cluster/SLURM_RUNBOOK.md` — step-by-step SLURM + CPLEX setup; with `run_campaign.sbatch` (job array, one task per config), `probe.sh`, `merge_results.sh`. Submit from **frontalhpc2025**. Python env (2026-07-02): ONE shared conda env **`ssp_env`** (Miniforge in `$HOME`, per https://hpc.isima.fr/doku.php?id=python) serves BOTH the BBC and BNP campaigns — numpy + CPLEX Python API (pip-installed from the cluster's local CPLEX Studio; the `cplex` CLI on PATH does not provide it) + pyscipopt. Activate everywhere with `source ~/miniforge3/etc/profile.d/conda.sh && conda activate ssp_env` (never `conda init`).
 
@@ -97,7 +117,7 @@ BBC is the exact solver research. Code is also prototyped in `src/SSP/main-noteb
 | `benchmark.py`, `test_solver.py`    | Legacy runner; cross-solver agreement tests                           |
 | `benchmark_config.py`, `benchmark_runner.py` | Campaign config (single source of truth) + resumable runner   |
 | `precompute_jgp_gsp.py`, `analysis/` | JGP+GSP costs per instance; plots/tables generators                  |
-| `docs-for-claude-code/`             | Design documents — load `ssp-bbc-expert` skill for details            |
+| `docs-internal/`             | Design documents — load `ssp-bbc-expert` skill for details            |
 | `_archived/`                        | Deprecated Gurobi/SCIP backends — do not touch                        |
 
 ### plans-genai/ (AI-generated working scratch — NOT ground truth)

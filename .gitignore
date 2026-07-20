@@ -60,3 +60,32 @@ data/MTSP*
 *.pyc
 *.pyd
 
+__pycache__/
+*.pyc
+*.tmp.*
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.nav
+*.snm
+*.synctex.gz
+_trash_2026-07/
+*.cut
+
+# ---- private working layer (kept local, not published) ----
+CLAUDE.md
+README_PROOFREAD_BEFORE_RUN.md
+RUNBOOK_NEXT.md
+CLEANUP_PLAN.md
+plans-genai/
+skills/
+.vscode/
+report/_archive_2026-07/
+src/BBC/docs-internal/
+src/BNP/README_RESUME.md
+src/BNP/P4_benchmark_results.md
+src/BBC/cluster/SLURM_RUNBOOK.md
+src/BNP/cluster/README_BNP_CLUSTER.md

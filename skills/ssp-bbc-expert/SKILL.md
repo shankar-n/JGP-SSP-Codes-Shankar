@@ -6,12 +6,12 @@
 
 ## Design Documents — Read Before Structural Changes
 
-These are in `src/BBC/docs-for-claude-code/`. Read the relevant one before touching architecture.
+These are in `src/BBC/docs-internal/`. Read the relevant one before touching architecture.
 
 | File | When to Read | What It Contains |
 |---|---|---|
 | `idea.md` | Before any structural change to BBC | The original Benders decomposition blueprint: MP/DSP/cuts derived from scratch, KTNS vs LP dual discussion, lower bound strategy, solver comparison. The authoritative design intent. |
-| `plan-from-gemma.md` | Before re-implementing the callback | Step-by-step implementation plan. **Caution**: written before depot node fix — says "no KTNS" (LP dual only) and uses Gurobi as primary. Both are outdated. CPLEX is primary; the LP DSP is still used as written. |
+| `implementation-plan-draft.md` | Before re-implementing the callback | Step-by-step implementation plan. **Caution**: written before depot node fix — says "no KTNS" (LP dual only) and uses Gurobi as primary. Both are outdated. CPLEX is primary; the LP DSP is still used as written. |
 | `README.md` | For module-level overview or benchmark usage | Architecture summary, deviations from papers, LSS and SSPMF formulation summaries, benchmark CLI, instance format. Corrected 2026-06-10 (conventions section, files table, cut-fix note). |
 | `bbc-solver-stats-and-roadmap.md` | Before benchmarking or adding diagnostics | Which solver stats matter and why; open implementation items with difficulty estimates (NOTE: item C "combinatorial cuts" is already implemented — status drift). Newest doc (Jun 2026). |
 | `benchmark_plan.md` | Before running the benchmark campaign | Instance sets, config grid, experiment checklist. Pairs with `benchmark_config.py`. |
@@ -24,7 +24,7 @@ These are in `src/BBC/docs-for-claude-code/`. Read the relevant one before touch
 
 ## Key Architectural Decision: Depot Node
 
-The master problem models a **Hamiltonian path** via a depot node `d = n_jobs` (with empty tool set). This was **not in the original plan** (plan-from-gemma.md models a cycle on n_jobs nodes). The fix was required because the cycle formulation caused the DSP to compute cycle cost rather than path cost, producing incorrect Benders cuts.
+The master problem models a **Hamiltonian path** via a depot node `d = n_jobs` (with empty tool set). This was **not in the original plan** (implementation-plan-draft.md models a cycle on n_jobs nodes). The fix was required because the cycle formulation caused the DSP to compute cycle cost rather than path cost, producing incorrect Benders cuts.
 
 - Arc set: all `(i,j)` over `range(n_jobs) + [depot]`
 - Degree constraints include depot
@@ -95,7 +95,7 @@ In CPLEX SparsePair form: `θ − Σ coeff_ij·x_ij ≥ rhs` where:
 
 Built in `_build_benders_cut_sparsepair(duals)`.
 
-**CRITICAL (audit fix 2026-06-10, Claude-Fable)**: the depot-arc duals `λ̄d` MUST be in the cut. They were previously omitted (and never extracted from the DSP solution); since the omitted term `Σ_j (x_dj−1)λ̄d_jt ≤ 0`, the truncated cut was OVER-TIGHT and, at degenerate DSP optima (`λ̄d>0` on non-first-job depot arcs — these exist, λd/ν trade off at zero reduced cost), could cut off true optima. 193 witnesses found: `plans-genai/_verification/verify_bbc_audit.py` (T3). All past benchmark results obtained before this fix should be re-run.
+**CRITICAL (audit fix 2026-06-10)**: the depot-arc duals `λ̄d` MUST be in the cut. They were previously omitted (and never extracted from the DSP solution); since the omitted term `Σ_j (x_dj−1)λ̄d_jt ≤ 0`, the truncated cut was OVER-TIGHT and, at degenerate DSP optima (`λ̄d>0` on non-first-job depot arcs — these exist, λd/ν trade off at zero reduced cost), could cut off true optima. 193 witnesses found: `plans-genai/_verification/verify_bbc_audit.py` (T3). All past benchmark results obtained before this fix should be re-run.
 
 ---
 
@@ -159,7 +159,7 @@ _solve_dsp_with_xbar(x_bar, tid)
 - LP relaxation bound: LB = M − C (proven tight)
 - Symmetry-breaking: most-tool job fixed to first ⌈N/2⌉ positions (Eq. 20)
 
-**Objective conventions** (verified by reading all models, 2026-06-10, Claude-Fable — the earlier note here about subtracting `|T_{seq[0]}|` was STALE; no such adjustment exists in the notebook, and that shift would be wrong anyway):
+**Objective conventions** (verified by reading all models, 2026-06-10 — the earlier note here about subtracting `|T_{seq[0]}|` was STALE; no such adjustment exists in the notebook, and that shift would be wrong anyway):
 - BBC (DSP: y_depot=0), repo-LSS (`y[0,t]=0`), repo-SSPMF (k=0: z ≥ req, no carry-in), and `precompute_jgp_gsp.py` (uses `compute_ktns`, empty magazine) ALL use the **empty-start** convention: objective = all insertions including the first job's load. Cell 6b and the benchmark pipeline are therefore **mutually consistent — no adjustment needed between them**.
 - The GTSP reference solver (cell 6, DUMMY node) and ALL plans-genai documents (gap study, VERIFIED_FACTS) use the **free-initial** convention. Conversion: `empty_start = free_initial + min(C, |U|)` for every sequence (constant shift, argmin-safe).
 - Consequences: differences (gaps, e.g. `jgp_gsp_gap`) are convention-invariant; **ratios are NOT** — H/Z* computed from benchmark CSVs is deflated vs. the Part V theory; convert before comparing to the 4/3 / gap≤K*−2 results.
@@ -183,6 +183,6 @@ _solve_dsp_with_xbar(x_bar, tid)
 
 1. **Fractional cuts** (`use_fractional_cuts`): `_handle_relaxation` exists, untested. Study `bendersatsp2.py` LP-reuse + thread-safe pattern before enabling.
 2. **Worker LP reuse benchmarking**: `_solve_dsp_reuse` implemented, not yet compared against fresh model on Catanzaro A/B instances.
-3. **Combinatorial Benders cuts**: `θ ≥ Z*(π)·(1 − Σ_{(i,j)∈π}(1−x_ij))` — cheaper, weaker. IMPLEMENTED (`use_combinatorial_cuts=True`, default False); benchmarking vs DSP cuts still open. <!-- updated 2026-06-10 (Claude-Fable): flag exists in branch_and_benders_cut_cplex.py -->
-5. **Objective convention check** (added 2026-06-10, RESOLVED same day, Claude-Fable): the DSP forces y_depot=0 (EMPTY start), so BBC's θ counts ALL insertions incl. the first job's load — same convention as compute_ktns (verified LP==compute_ktns 60/60, `plans-genai/_verification/verify_bbc2.py`). RESOLVED by reading all models: cell 6b applies NO adjustment and needs none (BBC/LSS/SSPMF/precompute all empty-start, mutually consistent — see "Objective conventions" section above). Remaining: convert ratios before comparing to plans-genai theory; verify published-paper conventions before quoting external tables.
+3. **Combinatorial Benders cuts**: `θ ≥ Z*(π)·(1 − Σ_{(i,j)∈π}(1−x_ij))` — cheaper, weaker. IMPLEMENTED (`use_combinatorial_cuts=True`, default False); benchmarking vs DSP cuts still open. <!-- updated 2026-06-10: flag exists in branch_and_benders_cut_cplex.py -->
+5. **Objective convention check** (added 2026-06-10, RESOLVED same day): the DSP forces y_depot=0 (EMPTY start), so BBC's θ counts ALL insertions incl. the first job's load — same convention as compute_ktns (verified LP==compute_ktns 60/60, `plans-genai/_verification/verify_bbc2.py`). RESOLVED by reading all models: cell 6b applies NO adjustment and needs none (BBC/LSS/SSPMF/precompute all empty-start, mutually consistent — see "Objective conventions" section above). Remaining: convert ratios before comparing to plans-genai theory; verify published-paper conventions before quoting external tables.
 4. **Triplet lower bounds**: `w_ijk = max(0, |T_i ∪ T_j ∪ T_k| − c)` constraints on consecutive triplets — stronger root bound, larger MP.

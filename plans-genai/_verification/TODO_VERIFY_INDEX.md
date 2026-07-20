@@ -50,11 +50,11 @@ plans-genai/07_collapse_variants.tex:429: TODO-VERIFY(Claude-Fable 2026-06-10): 
 plans-genai/07_collapse_variants.tex:493: TODO-VERIFY(Claude-Fable 2026-06-10): argument corrected. Under the per-job
 plans-genai/07_collapse_variants.tex:508: TODO-VERIFY(Claude-Fable 2026-06-10): caveat added --- this witness is DEGENERATE:
 plans-genai/07_collapse_variants.tex:543: TODO-VERIFY(Claude-Fable 2026-06-10): strictness corrected (was "iff rho >
-plans-genai/08_branch_and_benders.tex:94: TODO-VERIFY(Claude-Fable 2026-06-10): scope corrected. The earlier draft described
-plans-genai/08_branch_and_benders.tex:199: TODO-VERIFY(Claude-Fable 2026-06-10): this section was rewritten. The earlier draft
-plans-genai/08_branch_and_benders.tex:364: TODO-VERIFY(Claude-Fable 2026-06-10): rewritten. The earlier text claimed the
-plans-genai/08_branch_and_benders.tex:402: TODO-VERIFY(Claude-Fable 2026-06-10): the earlier claim "the dummy depot gives the
-plans-genai/08_branch_and_benders.tex:417: TODO-VERIFY(Claude-Fable 2026-06-10, second audit): the action item below is now
+plans-genai/14_branch_and_benders.tex:94: TODO-VERIFY(Claude-Fable 2026-06-10): scope corrected. The earlier draft described
+plans-genai/14_branch_and_benders.tex:199: TODO-VERIFY(Claude-Fable 2026-06-10): this section was rewritten. The earlier draft
+plans-genai/14_branch_and_benders.tex:364: TODO-VERIFY(Claude-Fable 2026-06-10): rewritten. The earlier text claimed the
+plans-genai/14_branch_and_benders.tex:402: TODO-VERIFY(Claude-Fable 2026-06-10): the earlier claim "the dummy depot gives the
+plans-genai/14_branch_and_benders.tex:417: TODO-VERIFY(Claude-Fable 2026-06-10, second audit): the action item below is now
 plans-genai/09_open_problems.tex:43: TODO-VERIFY(Claude-Fable 2026-06-10): statuses updated after the verification
 plans-genai/09_open_problems.tex:62: TODO-VERIFY(Claude-Fable 2026-06-10): new conditional route added (Part V).
 plans-genai/09_open_problems.tex:74: TODO-VERIFY(Claude-Fable 2026-06-10): status upgraded with the new Part V

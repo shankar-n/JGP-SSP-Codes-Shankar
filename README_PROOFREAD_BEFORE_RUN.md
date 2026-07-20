@@ -1,8 +1,8 @@
 # Proofreading order — BBC & BNP campaigns (before launch)
 
-> For Shankar's own line-by-line verification, independent of any AI checks.
+> For Shankar's own line-by-line verification, independent of any automated checks.
 > Read in this order: each step's correctness is assumed by the next.
-> Written 2026-07-02. Companion docs: `src/BBC/docs-for-claude-code/README.md`,
+> Written 2026-07-02. Companion docs: `src/BBC/docs-internal/README.md`,
 > `src/BNP/README_RESUME.md`, `skills/ssp-bbc-expert/SKILL.md`.
 
 ## 0. Conventions to hold in your head while reading

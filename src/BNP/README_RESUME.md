@@ -3,7 +3,7 @@
 > Companion to `plans-genai/10b_position_branch_and_price.tex` (Part X cont.).
 > **Common SSP code is reused from `src/SSP/` as-is** (no duplication); B&P-specific
 > code lives here in `src/BNP/` (parallel to `src/BBC/`).
-> AI-assisted scaffold — verify before trusting.
+> Working scaffold — verify before trusting.
 
 ---
 

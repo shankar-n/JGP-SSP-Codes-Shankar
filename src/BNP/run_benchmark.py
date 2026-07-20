@@ -8,7 +8,7 @@ KTNS, and brute-searches for GAP instances (Z* > |U|-b) where PTF's stronger
 bound pays off in node count. See P4_benchmark_results.md for the writeup.
 
 Scope: SCIP only. CPLEX BBC/SSPMF baselines + the Tabela1C campaign run on the
-cluster (CLAUDE.md / SLURM); they are intentionally NOT invoked here.
+cluster (see src/BBC/cluster/SLURM_RUNBOOK.md); they are intentionally NOT invoked here.
 Run:  python3 run_benchmark.py     Requires: pyscipopt.
 """
 import os

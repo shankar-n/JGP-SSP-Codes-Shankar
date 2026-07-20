@@ -1,7 +1,7 @@
 # P4 — PCF′ vs PTF branch-and-price: benchmark & findings (2026-06-22)
 
 > SCIP/PySCIPOpt only. **Scope:** the CPLEX BBC/SSPMF baselines and the full Tabela1C
-> campaign need CPLEX + the cluster (per `CLAUDE.md` SLURM setup) and are **not** run here.
+> campaign need CPLEX + the cluster (per `src/BBC/cluster/SLURM_RUNBOOK.md`) and are **not** run here.
 > This session compares the two new exact B&P codes (`pcf_prime_bp.py`, `ptf_bp.py`) against
 > each other and against brute-force KTNS on small instances — establishing the harness and
 > cross-validating both solvers. Brute KTNS is the ground truth where computed; otherwise the

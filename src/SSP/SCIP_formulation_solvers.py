@@ -65,7 +65,7 @@ def solve_jgp_arf(n_jobs, n_tools, cap, tool_req):
             return None, []
 
         # ── Extract batches ──────────────────────────────────────────────
-        # AUDIT(Claude-Fable 2026-06-10): resolved the stale comment/TODO that
+        # AUDIT(2026-06-10): resolved the stale comment/TODO that
         # stood here.  range(h, n_jobs) is CORRECT and required: in the ARF
         # formulation v[i, h] exists only for h <= i (a batch is represented
         # by its lowest-index job), so iterating i < h would KeyError.  The

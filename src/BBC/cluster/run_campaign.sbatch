@@ -65,6 +65,6 @@ python3 benchmark_runner.py \
     --sets "$SETS" \
     --configs "$CFG" \
     --output "results/raw_${CFG}_${SETS}.csv" \
-    --max-consecutive-timeouts 8
+    --max-consecutive-timeouts "${MCT:-8}"
 
 echo "[$(date '+%F %T')] DONE config=$CFG"

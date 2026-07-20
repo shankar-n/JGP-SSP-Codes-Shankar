@@ -161,7 +161,7 @@ def _(T_j, b, mo, num_jobs, num_tools):
     LSS  : Laporte, Salazar-González & Semet (2004), IIE Transactions 36(1)
     SSPMF: da Silva, Chaves & Yanasse (2024), multicommodity flow
 
-    Objective convention (audit note, Claude-Fable 2026-06-10)
+    Objective convention (audit note, 2026-06-10)
     ----------------------------------------------------------
     All three solvers here use the EMPTY-START convention (objective counts
     every insertion, including the first job's load) -- mutually consistent,

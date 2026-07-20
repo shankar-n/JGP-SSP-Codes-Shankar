@@ -234,7 +234,7 @@ class BBCSolverMixin:
 
         duals = {}
         for (i,j,t), v in lam.items(): duals['lambda', i, j, t] = v.X
-        # AUDIT-FIX(Claude-Fable 2026-06-10): depot-arc duals must be extracted —
+        # AUDIT-FIX(2026-06-10): depot-arc duals must be extracted —
         # the Benders cut is invalid without them (see branch_and_benders_cut_cplex).
         for (j,t), v in lam_d.items(): duals['lambda_d', j, t]  = v.X
         for j, v in mu.items():        duals['mu', j]           = v.X
@@ -313,7 +313,7 @@ class BBCSolverMixin:
 
         duals = {}
         for (i,j,t), v in lam.items(): duals['lambda', i, j, t] = sol.get_value(v)
-        # AUDIT-FIX(Claude-Fable 2026-06-10): depot-arc duals must be extracted —
+        # AUDIT-FIX(2026-06-10): depot-arc duals must be extracted —
         # the Benders cut is invalid without them (see branch_and_benders_cut_cplex).
         for (j,t), v in lam_d.items(): duals['lambda_d', j, t]  = sol.get_value(v)
         for j, v in mu.items():        duals['mu', j]           = sol.get_value(v)

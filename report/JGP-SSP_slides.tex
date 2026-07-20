@@ -1,0 +1,422 @@
+% Advisor presentation (Beamer) — compile: pdflatex (x2).
+% Speaker notes: \note{} blocks; to view them compile with
+%   \setbeameroption{show notes on second screen=right}
+\documentclass[10pt]{beamer}
+\usetheme{Madrid}
+\usefonttheme{professionalfonts}
+\setbeamertemplate{navigation symbols}{}
+\definecolor{navy}{RGB}{30,39,97}
+\definecolor{acc}{RGB}{153,0,17}
+\usecolortheme[named=navy]{structure}
+\setbeamerfont{frametitle}{series=\bfseries}
+\usepackage{amsmath,amssymb,booktabs,tikz}
+\newcommand{\U}{U}\newcommand{\Kst}{K^{\ast}}\newcommand{\Zst}{Z^{\ast}}
+\title[Sequencing and Tool Switching]{Exact and Structural Methods for the\\ Job Sequencing and Tool Switching Problem}
+\subtitle{State of the work}
+\author[S.~Narayanan]{Shankar Narayanan\\[2mm]{\small Advisors: Dr.\ R.~Colares, Prof.\ A.~Wagler \quad Supervisor: Dr.\ R.~Chicoisne}}
+\institute[UCA -- ISIMA -- LIMOS]{Universit\'e Clermont Auvergne \;$\cdot$\; INP ISIMA \;$\cdot$\; LIMOS\\[1mm]
+{\scriptsize\url{https://github.com/shankar-n/JGP-SSP-Codes-Shankar}}}
+\date{July 2026}
+\newcommand{\coverlogo}[2]{\IfFileExists{cover/#1.png}{\includegraphics[height=#2]{cover/#1.png}}{}}
+\titlegraphic{\coverlogo{uca}{9mm}\qquad\coverlogo{inp_isima}{8mm}\qquad\coverlogo{limos}{6.5mm}}
+\AtBeginSection[]{\begin{frame}{Outline}\tableofcontents[currentsection]\end{frame}}
+\begin{document}
+
+\begin{frame}\titlepage
+\note{One machine, capacity-b tool magazine; reordering jobs changes how many tool
+swaps we pay. Practice groups jobs first, then sequences. We built the first
+worst-case theory of that heuristic and benchmarked all exact methods. Three
+headlines: a quantitative worst-case theory whose walk-model certificate and
+KTNS separation reopen the natural conjecture; 4/3 proved for K*<=3; and one number, |U|-b, governing heuristic and
+exact methods alike.}
+\end{frame}
+
+\begin{frame}{Outline}\tableofcontents\end{frame}
+
+\section{The problem and the two questions}
+\begin{frame}{Why this problem}
+\textbf{Flexible manufacturing.} A CNC machine serves many part types from a
+tool magazine of capacity $b$; every tool switch halts production while the
+magazine is reconfigured --- switches are \emph{the} controllable cost
+{\footnotesize[Crama et al.\ 1994]}.\\[2mm]
+\textbf{Beyond machining.} The same structure --- a capacitated store serving
+set-valued, reorderable requests --- appears in PCB assembly, warehouse
+picking, and colour printing (ink cartridges as tools)
+{\footnotesize[Burger et al.\ 2015]}.\\[2mm]
+\textbf{Two live gaps in the literature.} The heuristic everyone uses has no
+worst-case theory; the exact state of the art solves nothing at $n\ge30$.
+This project attacks both --- and they meet at one number, $|\U|-b$.
+\note{Open with the machine: magazine, switches, minutes lost per switch.
+Generalise to the store-serving-requests pattern. Then name the two gaps ---
+no guarantee for standard practice, no solver past n=30 --- and promise the
+punchline: one quantity governs both.}
+\end{frame}
+
+\begin{frame}{The problem}
+\textbf{Data.} Jobs $J$, tools $T$, magazine capacity $b$; job $j$ requires
+$T_j\subseteq T$, $|T_j|\le b$. \\[1mm]
+\textbf{Decision.} An order of the jobs and a loading policy; each tool
+insertion costs $1$.\\[3mm]
+\begin{itemize}
+  \item Fixed order $\Rightarrow$ loading solved exactly by KTNS
+        (keep tool needed soonest) in $O(n|T|)$ \hfill {\footnotesize [Tang--Denardo 1988]}
+  \item Joint problem NP-hard \hfill {\footnotesize [Crama et al.\ 1994]}
+\end{itemize}
+\vspace{2mm}
+\textbf{Practice: group, then sequence.} Partition jobs into fewest
+magazine-fitting groups (JGP), order the groups (small TSP), run KTNS.
+Applied verbatim in industry; assessed only \emph{empirically} until now
+{\footnotesize [Burger et al.\ 2015]}.
+\note{Define every object once, slowly. KTNS = optimal cache eviction: evict the
+tool needed furthest in the future. JGP = job grouping problem = pack jobs into
+fewest groups whose union fits the magazine. The literature measured the
+decomposition's quality on instances, never its worst case. That gap in the
+literature is our opening.}
+\end{frame}
+
+\begin{frame}{Two questions, one quantity}
+\begin{block}{Q1 (heuristic)}
+How far can group-then-sequence be from optimal? When is it exact?
+\end{block}
+\begin{block}{Q2 (exact methods)}
+Can the SSP be solved through tool \emph{configurations} (column generation,
+Benders), as the JGP so successfully is?
+\end{block}
+\vspace{2mm}
+\begin{alertblock}{The organising quantity: the coverage bound $|\U|-b$}
+Every used tool beyond the initial load must be inserted once, so
+$\Zst\ge|\U|-b$. It is the LP value of every natural configuration relaxation
+(proved) --- and on part of the instance space it \emph{is} the optimum.
+\end{alertblock}
+\note{Say explicitly: the same number answers both questions. Where |U|-b is
+tight, the heuristic tends to be exact and exact methods finish at the root;
+where it is loose, both must work. The benchmark later quantifies the split:
+about half and half on the standard suites.}
+\end{frame}
+
+\begin{frame}{The smallest counterexample: the $6$-ring}
+\begin{columns}
+\column{0.42\textwidth}
+\centering
+\begin{tikzpicture}[scale=1.15]
+  \foreach \i in {1,...,6}{\node[draw,circle,fill=navy,text=white,inner sep=1.5pt]
+    (j\i) at ({90-(\i-1)*60}:1.25) {$j_\i$};}
+  \foreach \a/\b/\t in {1/2/2,2/3/3,3/4/4,4/5/5,5/6/6,6/1/1}{
+    \draw (j\a)--(j\b) node[midway,fill=white,inner sep=1pt] {\scriptsize $t_\t$};}
+\end{tikzpicture}
+
+{\footnotesize $T_j=\{j,\,j{+}1 \bmod 6\}$, $b=3$}
+\column{0.58\textwidth}
+\begin{itemize}
+  \item optimum: $\Zst=3$ --- a \emph{four}-group walk, one tool per transition
+  \item heuristic ($\Kst=3$ groups, best order): $H=4$
+\end{itemize}
+\begin{alertblock}{gap $=1$, \quad ratio $=4/3$}
+The grouping phase is to blame: minimal cardinality hides the cheaper
+grouping. $g$ disjoint copies $\Rightarrow$ gap $=g$: \textbf{unbounded}.
+\end{alertblock}
+\end{columns}
+\note{Costs free-initial (first magazine load not charged). Walk through: the
+optimum keeps tool 1 resident; the heuristic must evict and reload it. This
+instance recurs in every later result -- it is the fruit fly of the project.}
+\end{frame}
+
+\section{A worst-case theory of the heuristic}
+\begin{frame}{The gap identified exactly}
+\begin{theorem}[Grouping exactness]
+$\displaystyle \Zst=\min_{\mathcal P}\gamma(\mathcal P)$ over \emph{all}
+feasible groupings. Hence
+$\;\mathrm{gap}=H-\Zst=$ the price of restricting to minimum cardinality.
+\end{theorem}
+\vspace{1mm}
+Proved zero-gap classes (every $b$): \quad
+$\Kst\le2$, \quad $|\U|\le b+1$, \quad $\Zst\le2$.
+\end{frame}
+
+\begin{frame}{The setup-cost spectrum: SSP $\longleftrightarrow$ JGP}
+In practice a changeover costs a fixed setup $\rho$ beyond the per-tool swaps.
+\begin{theorem}[Both ends explicit]
+$\rho<\tfrac{1}{n-1}$ $\Rightarrow$ the augmented problem \emph{is} the SSP.\\
+$\rho>H-\Zst$ $\Rightarrow$ every optimum uses minimum-cardinality grouping:
+the heuristic is \emph{exactly optimal}.
+\end{theorem}
+\pause
+\begin{itemize}
+  \item the transition lives on $[\,1/(n-1),\ H-\Zst\,]$: it is governed by
+        the \emph{gap itself};
+  \item real tooling reports $\rho\approx3$--$60$ $\Rightarrow$ production
+        sits far on the collapsed (JGP) side --- a rigorous licence for
+        standard practice.
+\end{itemize}
+\note{Two messages. First, grouping is not an approximation device but an exact
+lens; only the cardinality restriction costs. Second, the spectrum: both
+thresholds explicit, transition governed by the gap itself; with realistic setup
+costs the heuristic is provably optimal, answering the "real life" question of
+how the SSP degenerates into the JGP.}
+\end{frame}
+
+\begin{frame}{The worst case, quantitatively}
+For $\Kst=3$ (configurations $\subseteq\U$, $q=|\U|-b$, $R=\Zst-q$):
+\[
+  H_{\mathrm{walk}} \;=\; q+\min\ \min\bigl(x_{ab},x_{bc},x_{ca}\bigr),
+  \qquad x_{uv}=\bigl|(C_u\cap C_v)\setminus C_w\bigr|
+\]
+\[
+  \mathrm{gap}\;\le\;\max\Bigl(0,\ \min\bigl(q,\ \bigl\lfloor\tfrac{2b-q}{3}\bigr\rfloor\bigr)-R\Bigr)
+  \qquad\text{(walk value; tight at every known walk extremum)}
+\]
+\end{frame}
+
+\begin{frame}{Bounds for every $\Kst$}
+\[
+  \frac{H}{\Zst}\;\le\;\min(b,\ \Kst-1,\ q)
+\]
+\pause
+\[
+  \mathrm{gap}\;\le\;\Bigl\lfloor\frac{q\,(b(\Kst-1)-q)}{b+q}\Bigr\rfloor - R
+  \qquad\text{(random ordering of the groups + Jensen)}
+\]
+\pause
+Zero-gap classes, every $b$: \quad $\Kst\le2$, \quad $|\U|\le b+1$,
+\quad $\Zst\le2$; \qquad and $\Zst\le3\Rightarrow\mathrm{gap}\le1$.
+\note{The exact walk-cost formula: choose the middle configuration to shield
+the overlap of the outer two -- padding arguments eliminate configurations
+entirely. The counting bound comes from double counting tool degrees over
+three configurations; the general-K* bound from a random ordering of the
+groups plus Jensen. Tightness statements are for the walk value; see the next
+frame for the walk-vs-KTNS separation.}
+\end{frame}
+
+\begin{frame}{Determining the worst case: a certificate, and a separation}
+Natural candidate (all data $b\le4$): $\ \mathrm{gap}\le\Kst-2$. Two readings
+of the heuristic: hold each group's configuration (\emph{walk} value
+$H_{\mathrm{walk}}$), or re-evaluate the flattened order with KTNS
+($H\le H_{\mathrm{walk}}$, the method as defined).
+\pause
+\begin{alertblock}{Certificate ($b=5$, $\Kst=3$, $|\U|=9$)}
+$T=(\{0,1,2,4,7\},\{0,4,5\},\{1,5\},\{2,6,8\},\{3,4,5,8\})$:\quad
+$\Zst=4,\ H_{\mathrm{walk}}=6$ --- the candidate \textbf{fails for the walk
+model}, exactly on the boundary of the proved regimes, attaining our bound
+with equality.
+\end{alertblock}
+\pause
+\textbf{The separation:} on this very witness KTNS beats the walk: $H=5$,
+true gap $=1$ --- and every known walk-extremal instance collapses the same
+way. The candidate is \emph{reopened} for the heuristic itself; new:
+$\Zst\le3\Rightarrow\mathrm{gap}\le1$ (every $b$, every $\Kst$).
+\note{The honest arc: the regime theorems said where the candidate could
+fail; the walk certificate was found exactly there; then the frame audit
+showed the KTNS step beats the walk on precisely those instances. Upper
+bounds all transfer (H <= H_walk). The open question is now the worst case of
+the heuristic as actually run --- the walk theory is the proved scaffold.}
+\end{frame}
+
+\begin{frame}{The $4/3$ ratio, and what remains}
+\begin{theorem}[$b=3$]
+Every instance with $\Kst\le3$ satisfies $H/\Zst\le 4/3$.
+\end{theorem}
+\begin{itemize}
+  \item ingredients: gap $\le1$ at $\Kst=3,b=3$ (counting law) and
+        positive gap $\Rightarrow \Zst\ge3$ (small-optimum lemma);
+  \item the case $\Kst\ge4$ is the \emph{one} surviving conjecture ---
+        populated (witnesses with ratio $5/4$ exist), no violation known;
+  \item the edge-family pattern ``positive gap $\Rightarrow\Kst=3$'' does
+        \emph{not} extend --- found and corrected this month.
+\end{itemize}
+\note{Honest status: 4/3 is now a theorem on most of its range and exactly one
+regime remains conjectural. Mention the corrected assumption openly -- an
+earlier draft leaned on the edge-family pattern; mixed-size instances broke it;
+the proof route was repaired to not need it.}
+\end{frame}
+
+\section{Which structure decides the gap?}
+\begin{frame}{Which structure decides these questions?}
+\textbf{Negative (gap side).} Two instances with the \emph{same} circuit
+clutter, same $\Kst$, same $\Zst$ have different gaps ($0$ vs $1$)
+$\Rightarrow$ no job-compatibility invariant can decide exactness;
+tool-level overlaps are essential.
+\vspace{2mm}
+\begin{theorem}[Covering side: odd rings, via blocking duality]
+Clusters over maximal groups; blocker $=$ minimal covers ($\Kst=$ its min
+size). On the $k$-ring, $b=3$: fractional cover $=k/2$, $\Kst=\lceil
+k/2\rceil$ --- \textbf{tight iff $k$ even}.
+\end{theorem}
+Odd circular structure: first provable obstruction for the set-covering
+relaxation behind JGP branch-and-price --- the parallel of odd holes.
+\note{For the polyhedral session: blocker = the dual clutter; the pair here is clusters
+versus covers; Lehman transfers idealness between them. The hand computation:
+weight one-half per adjacent pair. Question for the session: is odd-ring-like
+structure the ONLY obstruction (an idealness characterisation)?}
+\end{frame}
+
+\section{Two exact solvers}
+\begin{frame}{Solver 1: branch-and-Benders-cut}
+\textbf{Why Benders fits.} Fixed order $\Rightarrow$ loading is polynomial
+(KTNS). Put the \emph{order} in an integer master, settle the \emph{loading}
+exactly in a subproblem:
+\[
+  \min\ \theta \quad\text{s.t.}\quad \text{Ham.\ path via depot},\quad
+  \theta\ge\textstyle\sum_{ij} w_{ij}x_{ij},\quad \theta\ge|\U|,\quad
+  \text{cuts}
+\]
+\begin{itemize}
+  \item loading subproblem = totally unimodular LP $=$ KTNS $\Rightarrow$
+        \emph{exact} Benders optimality cuts from its dual;
+  \item plus combinatorial cuts and triplet bounds; subtours separated
+        exactly at integer candidates; $2^3$ cut configurations ablated;
+  \item the coverage row $\theta\ge|\U|$ is our theory's one-line fix ---
+        the re-run measures exactly its effect.
+\end{itemize}
+\note{The textbook precondition: hard ordering wrapped around an easy inner
+problem. Master = TSP skeleton with a cost variable theta; every candidate
+order is priced exactly by the KTNS LP dual, so cuts are never heuristic.
+Walk through one cut generation if asked: order fixed, dual solved,
+coefficients are linear in the assignment variables.}
+\end{frame}
+
+\begin{frame}{Solver 2: position formulations and branch-and-price}
+\textbf{The obstacle.} The natural configuration model needs exponentially
+many subtour constraints; MTZ repairs are exact only with one potential per
+configuration --- exponential again (proved).\\[1mm]
+\textbf{The route: fix a polynomial row set, $O(n|T|)$, generate columns.}
+\begin{itemize}
+  \item \textbf{PCF$'$}: column $=$ configuration at a position; rows: one
+        configuration per position, cover every job, count insertions.
+        LP value $=|\U|-b$ (proved) --- the diagnostic instrument;
+  \item \textbf{PTF}: column $=$ \emph{transition} $(C\to C')$ per step, with
+        tool-by-tool flow consistency; LP $\ge|\U|-b$ and \emph{strictly
+        above} on witnesses --- first in the family to beat the bound;
+  \item MILP pricers; robust branching on aggregated $a_{t,p}$ keeps the
+        pricing problem structurally intact.
+\end{itemize}
+\note{PCF-prime inherits the coverage ceiling -- that is a theorem, so its
+role is measurement. PTF pays a heavier pricer for a strictly stronger bound:
+71 of its 72 solves close in a single node. If Ryan--Foster comes up: RF
+exists for masters where variable branching destroys the pricer; here the
+aggregate a_{t,p} branches robustly, so RF solves a problem we do not have.}
+\end{frame}
+
+\section{The computational study}
+\begin{frame}{The computational instrument}
+\textbf{Why run it.} The theorems single out $|\U|-b$; the benchmark measures
+it across the standard suites. And a prior question: the SSP's polynomial
+loading subproblem is the textbook precondition for Benders --- untested until
+now.
+\vspace{1mm}
+\begin{itemize}
+  \item methods: 8 Benders configs (ours), LSS '04, Catanzaro-F4 '15,
+        SSPMF '24, our branch-and-price (PCF$'$, PTF)
+  \item 1{,}421 standard instances ($n\le40$, $|T|\le60$); 3600\,s / 600\,s;
+        pinned threads; early stop after 8 straight failures
+  \item one canonical metric: every returned sequence re-scored by KTNS
+  \item integrity: $806$ instances solved by someone --- \textbf{zero}
+        cross-method disagreements
+  \item code, baselines, and per-instance results:
+        {\scriptsize\url{https://github.com/shankar-n/JGP-SSP-Codes-Shankar}}
+\end{itemize}
+\note{Stress the protocol choices: re-running baselines ourselves on one
+machine/solver generation (cross-paper wall-clocks are meaningless); one
+KTNS-based metric so objective conventions cannot distort; early-stop so weak
+configurations do not burn weeks.}
+\end{frame}
+
+\begin{frame}{Experimental design}
+\textbf{Environment.} LIMOS SLURM cluster, homogeneous AMD EPYC 7452 nodes;
+CPLEX 22.1.1, 4 dedicated threads per run (B\&P single-threaded, PySCIPOpt);
+16\,GB/run; time limits 3600\,s (primary) / 600\,s (secondary); all other
+solver parameters at defaults.\\[2mm]
+\textbf{Protocol.} Instances ordered easiest-first by $(n,m,b,\text{density})$,
+identically for every method; a configuration is retired after 8 consecutive
+non-optimal runs. Attempted counts are therefore \emph{outcomes}; results are
+reported over uniform suite denominators.\\[2mm]
+\textbf{Validation.} All exact solvers pre-checked against brute force on
+small instances; every returned sequence re-scored with KTNS in a single cost
+convention; 806 instances solved by $\ge$1 method, \textbf{zero}
+cross-method disagreements.
+\note{One minute here buys credibility for everything after: same machine
+pool, same solver generation, same metric, same ordering. Early stop saves
+budget on failing arms; the uniform denominators in the next slide count
+unattempted as unsolved, so nobody is flattered.}
+\end{frame}
+
+\begin{frame}{Results}
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+solved (uniform denominators) & primary, of 411 & secondary, of 1{,}010\\
+\midrule
+SSPMF (2024)                     & \textbf{138} & (not run, by design)\\
+LSS (2004, modern CPLEX)         & 91           & \textbf{667}\\
+Catanzaro F4 (2015)              & 91           & 455\\
+Benders, corrected master (ours) & 43           & 244 \ (best arm 274)\\
+PCF$'$ B\&P (ours)$^{\dagger}$  & 1            & 93\\
+PTF B\&P (ours)$^{\dagger}$     & 1            & 71\\
+\bottomrule
+\end{tabular}
+
+{\scriptsize Unattempted counts as unsolved --- every method over the same
+denominator. $^{\dagger}$prototype scope $n\le25$. Per-family solved/attempted
+detail: report, Table 2.}
+\end{center}
+\vspace{1mm}
+\pause
+\begin{itemize}
+  \item SSPMF strongest on primary --- the published SOTA claim \emph{replicates}
+  \item 2004 formulation $+$ modern solver $\approx$ 2015 formulation, and
+        dominates secondary: solver generation outweighs formulation vintage
+  \item corrected Benders, where it solves: geomean $1.0$\,s on the 4-method
+        common set vs $333$/$616$\,s for the '04/'15 compact models
+  \item everyone's wall: $n=15$ (at $|T|\approx20$); nobody solves $n\ge30$
+\end{itemize}
+\note{Solved/attempted under early-stop; unattempted instances are at least as
+hard as the last failures. The LSS observation is a benchmarking-hygiene point
+for the community: comparisons against old formulations must state the solver
+generation.}
+\end{frame}
+
+\begin{frame}{The diagnosis: bound-limited, mechanically}
+Pre-fix: optimum found in seconds, \emph{proof} bound frozen for the full hour
+($\sim$250k nodes, $\sim$75k cuts); fractional cuts \textbf{structurally
+inactive}. \textbf{With the coverage row} $\theta\ge|\U|$: $1/9\to43/73$
+(primary), $26/48\to244/318$ (secondary); 122/287 solves at the root node,
+median $0.05$\,s; the ablation flattens; \emph{all} 104 remaining timeouts
+still hold the known optimum --- nothing outside the bound-tight class is
+solved.
+\vspace{2mm}
+\begin{block}{The measured split}
+Among the $806$ solved instances: $\ 48.0\%$ have $\Zst=|\U|-b$ exactly
+(upper-biased estimate). The suites split in half between the regime where
+heuristic and exact methods win at the root, and the regime where new
+mathematics is required.
+\end{block}
+PCF$'$/PTF confirm the same law from the branch-and-price side
+($15\%$ of PCF$'$ optima at the root; PTF's stronger bound is the one lever
+that exceeds $|\U|-b$).
+\note{The frozen-bound mechanism: the master carries only pairwise information,
+which vanishes at loose capacities -- our coverage row was the one-line fix,
+and the completed re-run confirms it: the tight half is recovered entirely,
+the loose half untouched -- the bound, not the search, is the frontier. The 48/52 split is
+the report's thesis made empirical.}
+\end{frame}
+
+\section{Remaining work}
+\begin{frame}{Programme}
+\begin{enumerate}
+  \item \textbf{Implemented, cluster re-run queued:} the Benders master with
+        the coverage row $\theta\ge|\U|$ --- verified; on bound-tight
+        instances the proof now closes \emph{at the root, with zero cuts}
+        (the $6$-ring: $0$ cuts vs.\ $443$ before).
+  \item \textbf{Theory (open):} the exact worst case of the KTNS-evaluated heuristic
+        (is the counting bound the truth?); the $4/3$ case $\Kst\ge4$.
+  \item \textbf{With Prof.\ Wagler:} PTF polytope facets on the known
+        witnesses (PORTA); the odd-ring idealness question for JGP.
+\end{enumerate}
+\vspace{2mm}
+\emph{Questions for today:} which side of the blocking pair (clusters/covers
+vs.\ circuits/groups) to pursue first; priority between the Benders re-run and
+the polytope study; and whether the remaining theory items match your
+expectations for the closing period.
+\note{Close with ownership and three concrete questions. The coverage-row result is the freshest item: our own Proposition lb2, added as one master row, does what 443 Benders cuts could not on the ring -- say this plainly, it shows theory feeding back into the solver. Remaining risk is theory time only; nothing in the report depends on the open conjecture.}
+\end{frame}
+
+\end{document}

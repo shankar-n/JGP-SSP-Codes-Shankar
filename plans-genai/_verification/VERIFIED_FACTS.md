@@ -324,3 +324,84 @@ verify_smallz_and_b3census.py, verify_gapK_refutation.py. All claims below machi
   bound-loose (A0-0, opt=|U|+1) => root lifted to |U|, search remains (5.7k cuts in a
   30s CE run). Aggregate effect = the queued cluster re-run (arrays 0-7, delete
   raw_BBC-*.csv first).
+
+## 2026-07-17 — campaign statistics recomputed from merged CSVs (script: /tmp analysis, rerun-able from raw_results.csv + bnp_results.csv)
+- 806 instances solved by ≥1 method; split 387 bound-tight (48.0%) + 419 bound-loose
+  (= exactly gap_testbed.csv). Supersedes the earlier 386/47.9% (one instance was
+  unbucketed in the old tally; 387+419=806 is now exact).
+- LSS secondary corrected: 667/677 (old table said 668/678). LSS errors = 2
+  (Catanzaro B4-7, B3-7; OOM→retry→timeout), both primary → P 91/98 unchanged.
+- Times (shifted geomean, +10s): primary common-91: SSPMF 2.3s, LSS 121.7s,
+  CATZ-F4 128.0s. Secondary common-454: LSS 13.2s, CATZ-F4 25.8s.
+- B&P at J≤25: PCFp 94/319, PTF 72/291; J>25 extension: 0/96 each.
+  PCFp: root bound == optimum on 93/94 solves; single-node solves 15/94 (16%);
+  median 89 nodes. PTF: 71/72 single-node. ("15% at root" in older text = the
+  single-node share, NOT root-bound tightness.)
+- Two-regime split of PCFp failures with known optima: 225 total = 73 bound-tight
+  (implementation-limited) + 152 bound-loose (bound-limited). PTF: 82 tight failures.
+- BBC-LP: 30/30 time-limited runs held incumbent == known optimum (pure proof failure).
+- Wall corrected: largest solved n = 15 (SSPMF only, Cat-B 21/36, T=18–20 there;
+  NOT "m≥30" as earlier text said); nothing solved at n≥30 by any method.
+- Environment (report §5.1): LIMOS SLURM, homogeneous EPYC 7452 pool
+  (node35/38/39 per sacct 14616/14624), CPLEX 22.1.1, 4 threads BBC/compact,
+  BNP single-threaded (--cpus-per-task=1), 16GB (32GB LSS retry), TL 3600/600s.
+- Report §5 rewritten to these numbers; per-family tab:solves; F4-why + SEC-policy
+  + validation + protocol + scope paragraphs added. Draft switch (comment pkg)
+  added: full 29pp / circulation-without-§3 20pp, both compile 0 errors.
+
+## 2026-07-17 (evening) — CRITICAL FRAME AUDIT: walk-H vs KTNS-H  [scripts: /tmp k4b.py, wit.py — recommit as verify_frame_audit.py]
+**Two heuristic values exist and were conflated.** H_walk = min over min-card
+groupings P of γ(P) (configuration-walk cost). H_true = min over min-card
+partitions, group orders, and within-group orders of KTNS(flattened order) —
+this is the heuristic as DEFINED (report ssec:jgp step 3). H_true ≤ H_walk.
+- **REFUTATION INVALID under H_true**: witnesses W1 (n=5) and W2 (n=6), b=5,
+  K*=3: KTNS brute-force gives H_true = 10 = Z*+1 → TRUE gap = 1, not 2.
+  The gap-2 certificates were γ-frame. gap ≤ K*−2 is REOPENED for H_true.
+- **All UPPER-bound theorems transfer** (gap_true ≤ gap_walk ≤ proved bounds):
+  thm:uncond, prop:k3, prop:genk, cor:zerogap, 43route remain VALID for H_true.
+  Attainment/witness/hunt claims do NOT transfer (all were γ-frame): the five
+  attainment points, the (5,3,0)/(6,3,0) corner readings — all to be redone.
+- **New TRUE-frame data (n=6, b=3, 900 samples)**: K*=4 map max gap = 1 in
+  every populated (q,R) cell (γ-frame had spurious 2s); no 4/3 violations
+  (an earlier "violation" printout was my own empty-vs-free convention bug —
+  caught by re-derivation); **Z*_free ≤ 3 ⇒ gap = 0 on all 98 samples**
+  (candidate theorem; (3,0) branch provable via walk lemma + p=K* merge;
+  q ≤ 2 branch open). Unbounded-gap construction (disjoint rings) believed
+  frame-safe (tool-disjointness ⇒ walk = KTNS per copy) — re-verify when
+  recommitting scripts.
+- **TSP(w) hybrid bound (419-instance loose testbed, exact Held–Karp path)**:
+  validity Z*_free ≥ TSP_path(w) (consecutive pairs each cost ≥ w_ij).
+  Beats coverage q on 103/419 (24.6%), mean lift 4.87, max 12 — but closes to
+  Z* on only 3/419 (0.7%): pairwise structure is essentially EXHAUSTED on the
+  loose half; higher-order windows/polyhedra are necessary, now quantified.
+  Master row candidate (n≤15): θ ≥ b + max(q, TSP_path(w)) — implement as an
+  OFF-by-default flag; do NOT touch the in-flight re-run.
+- 2026-07-17 (final): report §3 restated in TWO-FRAME form (H_walk vs H; prop:refute
+  now walk-frame + KTNS separation; NEW cor:z3: Z*≤3 ⇒ gap ≤ 1, proof from
+  zerogap + walk lemma + k3 machinery — VERIFY the (2,1) case reads prop:k3's
+  bound correctly). Abstract/contributions/§3-opener/conclusions/remaining-work
+  aligned. Deck frame-corrected (walk certificate + separation; numbers
+  94/319, 72/291, 0/96, 667/677, 48.0%, wall n=15@T≈20). Builds: circulation
+  20pp / full 30pp / deck 27pp — all 0 errors. Remaining research (post-send):
+  KTNS-frame hunts (task 15), BBC row refresh + deck §5 numbers when re-run
+  merges, window cuts (15_research_options R2).
+- 2026-07-18 — CORRECTED-MASTER RE-RUN MERGED (raw_results.csv 4716 rows, 0
+  cross-method disagreements). BBC-LP: P 1/9→43/73 (Cat-A 24/45, L7 19/28),
+  S 26/48→244/318 (L3); LP+T deepest: 274/374; K family 43/73 & 239/318 —
+  ablation flattens (dual-cut advantage was a bound artifact). 122/287 BBC-LP
+  solves at root node, median 0.045s. 104/104 remaining timeouts hold known
+  optimum; ZERO solves outside the bound-tight class; 806/387/419 unchanged.
+  Report tab:solves + Benders paragraph + §5 opener + remaining-work updated;
+  deck results/diagnosis frames updated. Builds: circ 20pp / full 30pp /
+  deck 27pp, 0 errors.
+- 2026-07-18 (close): BBC time analysis added to report/deck — 4-method common
+  primary (43): BBC-LP 1.0s vs SSPMF 0.1s vs LSS 333s vs CATZ 616s (geomean10);
+  secondary common (244): 12.9 vs LSS 10.7 vs CATZ 28.6; BBC-LP median 0.045s,
+  p90 197s. KTNS-frame hunt COMPLETE within reach: 42 (b,K*,q,R) cells,
+  b∈{4,5} random + 520 perturbations around W1/W2 (+ earlier b=3 K*=4 map):
+  TRUE gap ≤ 1 everywhere; gap ≤ K*−2 holds in every sampled cell (reopened
+  conjecture: consistent, unrefuted). §3 hunt sentence + Benders timing +
+  deck timing bullet in. Final builds: circ 21pp / full 30pp / deck 27pp, 0e.
+  PROJECT WRAPPED — open items are research directions documented in
+  15_research_options.md (window cuts R2) and sec:planned; nothing pending in
+  the deliverables.

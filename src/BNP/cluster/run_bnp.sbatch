@@ -39,5 +39,6 @@ python bnp_benchmark_runner.py \
     --sets all \
     ${MAXJ:+--max-jobs "$MAXJ" --max-nv 1e18} \
     ${MINJ:+--min-jobs "$MINJ"} \
+    ${MCT:+--max-consecutive-timeouts "$MCT"} \
     --task-id "${SLURM_ARRAY_TASK_ID}" --num-tasks "${NUM_TASKS}" \
     --output "cluster/results/bnp_task${SLURM_ARRAY_TASK_ID}${SUFFIX}.csv"
