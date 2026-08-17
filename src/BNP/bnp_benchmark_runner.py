@@ -67,6 +67,8 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue):
         return None
 
     try:
+        from bnp_benchmark_config import accel_of
+        accel = accel_of(config)                              # pricing-acceleration flags (empty for baselines)
         if config["solver"] == "PCFp":
             from pcf_prime_bp import branch_and_price
         elif config["solver"] == "PTF":
@@ -74,7 +76,7 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue):
         else:
             result_queue.put({**base, "status": "error", "notes": f"unknown solver {config['solver']}"})
             return
-        status, obj, nodes, ncols, seq, rlp = branch_and_price(J, T, C, Tj, timelimit=time_limit)
+        status, obj, nodes, ncols, seq, rlp = branch_and_price(J, T, C, Tj, timelimit=time_limit, accel=accel)
         status = str(status)
         if "time" in status.lower():
             status = "time_limit"          # normalize SCIP's 'timelimit' vs guard's 'time_limit'

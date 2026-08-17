@@ -1,3 +1,17 @@
+"""
+utils.py -- the shared base of the whole project.  If you read one file first,
+read this one; almost everything imports from here.
+
+It does three plain things:
+  * load_ssp_instance(path)  -- read an instance file and return the number of
+    jobs, the number of tools, the magazine capacity b, the tool-need matrix,
+    and T_j (the set of tools each job needs).
+  * compute_ktns(sequence, tool_req, b)  -- given a FIXED job order, the KTNS
+    ("keep tool needed soonest") rule works out the cheapest way to load tools
+    and returns the number of tool switches.  This is the exact loading oracle
+    the whole project is built on: sequencing is the hard part, loading is this.
+  * compute_switch_cost / compute_ssp_cost and small validation helpers.
+"""
 import itertools
 
 import numpy as np

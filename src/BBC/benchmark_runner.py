@@ -142,7 +142,19 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue, verb
                 use_pareto_cuts        = config.get("pareto_cuts", False),
             )
             solver.build_master_problem(verbose=verbose)
+            # Save CPLEX's default per-instance log next to the CSV, so any single
+            # instance can be opened and debugged after the run:  logs/<config>/<inst>.log
+            import os as _os
+            _ldir = _os.path.join("logs", config["label"])
+            _os.makedirs(_ldir, exist_ok=True)
+            _lf = open(_os.path.join(_ldir, Path(instance_path).stem + ".log"), "w")
+            for _stream in ("set_results_stream", "set_log_stream", "set_warning_stream"):
+                try:
+                    getattr(solver.cpx, _stream)(_lf)
+                except Exception:
+                    pass
             status, obj_val, seq = solver.solve(time_limit=time_limit, verbose=verbose)
+            _lf.close()
             st = solver.solve_stats
             result_queue.put({**base,
                 "status":   str(status),
@@ -273,12 +285,12 @@ def _difficulty_key(path):
 # Main runner
 # ─────────────────────────────────────────────────────────────────────────────
 
-def build_work_queue(sets, config_filter=None, only_sets=None):
+def build_work_queue(sets, config_filter=None, only_sets=None, shard=None):
     """
     Return a list of (benchmark_set, instance_path, config_dict, time_limit) tuples,
-    ordered EASIEST-FIRST by instance difficulty so early-stop triggers only in the
-    hard region.  Instance-major, config-minor: all configs of an easy instance are
-    queued before any config of a harder instance.
+    ordered EASIEST-FIRST by instance difficulty.  Instance-major, config-minor.
+    `shard=(i, n)` keeps only every n-th instance (offset i), so one config's
+    instances can be split across n parallel cluster jobs; balanced by difficulty.
     """
     insts = []
     for bset, ipath, tl in get_instances(sets):
@@ -286,6 +298,9 @@ def build_work_queue(sets, config_filter=None, only_sets=None):
             continue
         insts.append((bset, ipath, tl))
     insts.sort(key=lambda r: _difficulty_key(r[1]))      # easiest first
+    if shard is not None:
+        _i, _n = shard
+        insts = insts[_i::_n]                            # this job's slice of instances
     work = []
     for bset, ipath, tl in insts:
         configs = get_configs_for_set(bset)
@@ -298,7 +313,7 @@ def build_work_queue(sets, config_filter=None, only_sets=None):
 
 def run_benchmark(sets=None, config_filter=None, only_sets=None,
                   output_csv=None, dry_run=False, verbose=False, limit=None,
-                  max_consecutive_timeouts=None):
+                  max_consecutive_timeouts=None, shard=None):
     """
     Main entry point.  Runs pending (instance, config) pairs EASIEST-FIRST, each in
     an isolated subprocess with a hard timeout.  Resumable: CSV-completed pairs are
@@ -315,7 +330,7 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None,
     if max_consecutive_timeouts is None:
         max_consecutive_timeouts = MAX_CONSECUTIVE_TIMEOUTS
 
-    work = build_work_queue(sets, config_filter, only_sets)   # easiest-first
+    work = build_work_queue(sets, config_filter, only_sets, shard=shard)   # easiest-first
     completed_status = _load_completed_status(csv_path)
 
     if limit is not None:
@@ -461,7 +476,14 @@ def main():
     parser.add_argument("--max-consecutive-timeouts", type=int, default=None,
         help="Early-stop a config after N consecutive non-optimal results on harder "
              "instances (default: benchmark_config.MAX_CONSECUTIVE_TIMEOUTS; 0 disables)")
+    parser.add_argument("--shard", default=None, metavar="I/N",
+        help="Run only this job's slice of instances: shard I of N (0-indexed). "
+             "Splits one config across N parallel cluster jobs.")
     args = parser.parse_args()
+    _shard = None
+    if args.shard:
+        _si, _sn = args.shard.split("/")
+        _shard = (int(_si), int(_sn))
 
     if args.sets == "primary":
         sets = PRIMARY_SETS
@@ -479,6 +501,7 @@ def main():
         verbose=args.verbose,
         limit=args.limit,
         max_consecutive_timeouts=args.max_consecutive_timeouts,
+        shard=_shard,
     )
 
 

@@ -1,75 +1,62 @@
-# Exact and Structural Methods for the Job Sequencing and Tool Switching Problem
+# Job Sequencing & Tool Switching (SSP) — project map
 
-Code and computational campaign for a research project on the **Job Sequencing
-and Tool Switching Problem (SSP)** and the **Job Grouping Problem (JGP)**,
-carried out at LIMOS, Université Clermont Auvergne / ISIMA.
+**The problem in one line.** One machine with a tool magazine that holds `b` tools;
+`n` jobs, each needing a set of tools. Reordering the jobs changes how many tool
+swaps you pay. Minimising the swaps is the SSP.
 
-Author: Shankar Narayanan.
-Advisors: Dr. Rafael Colares, Prof. Annegret Wagler. Supervisor: Dr. Renaud Chicoisne.
+**What this project does.** Two things: (1) a **theory** of how far the standard
+"group the jobs, then sequence the groups" heuristic can be from optimal; and
+(2) **exact solvers** — a branch-and-Benders-cut solver (BBC) and a branch-and-price
+solver (BNP) — plus a benchmark comparing them to the known formulations.
 
-## The problem
+---
 
-A single flexible machine holds at most `b` tools in its magazine; job `j`
-requires the tool set `T_j`. Processing the jobs in a different order changes
-the number of tool switches, and for a *fixed* order the optimal loading is the
-classical Keep-Tool-Needed-Soonest (KTNS) rule of Tang & Denardo (1988). The
-joint problem — order the jobs and load the magazine to minimise switches — is
-NP-hard. The project studies (i) worst-case guarantees for the standard
-group-then-sequence heuristic and (ii) exact methods built on the
-configuration view of the problem.
+## The four things you probably want
 
-## Repository layout
-
-| Path | Contents |
+| You want… | Open this |
 |---|---|
-| `src/SSP/` | Instance I/O, KTNS, switch-cost conventions, JGP via the asymmetric-representatives MILP (PySCIPOpt), constructive heuristics, instance generators, solution validators |
-| `src/BBC/` | Branch-and-Benders-cut solver (CPLEX generic callback); faithful reimplementations of three literature baselines — Laporte et al. (2004), Catanzaro et al. (2015, F4), da Silva et al. (2024, multicommodity flow); campaign configuration and resumable runner; SLURM scripts; per-instance results (`raw_results.csv`, `results/`) |
-| `src/BNP/` | Position-indexed branch-and-price prototypes (PCF′ and PTF, PySCIPOpt), instance loaders for all benchmark families, campaign runner and results (`bnp_results.csv`) |
-| `data/` | Standard SSP benchmark families (Catanzaro, Crama, Laporte, Otiai) |
+| The report | `report/JGP-SSP_report.pdf`  (source `report/JGP-SSP_report.tex`) |
+| The presentation | `report/JGP-SSP_campaigns_slides.pdf` (and `report/JGP-SSP_slides.pdf`) |
+| The code | `src/` — see the map below |
+| What's planned next | `RESEARCH_PLAN.md` (root) |
 
-## The campaign
-
-1,421 standard benchmark instances; eight Benders configurations (cut families
-switched on/off in every combination) against the three compact baselines and
-the two branch-and-price prototypes. Every solver's returned sequence is
-re-evaluated with the same KTNS routine in a single cost convention, so all
-methods are scored on one canonical metric; 806 instances are solved by at
-least one method with zero cross-method disagreements. Environment: CPLEX
-22.1.1 (4 dedicated threads per run), PySCIPOpt (single-threaded), SLURM
-cluster, 3600 s / 600 s time limits.
-
-## Requirements
-
-- Python ≥ 3.10, `numpy`
-- IBM CPLEX 22.1.x with its Python API (install `cplex` from a local CPLEX
-  Studio; the CLI alone does not provide the API)
-- `pyscipopt` (JGP MILP and branch-and-price)
-- Optional: `docplex`, `gurobipy` (subproblem fallbacks), Concorde (TSP oracle)
-
-## Quick start
-
-```bash
-# cross-solver correctness check (all exact solvers vs brute force, small instances)
-python src/BBC/test_solver.py
-
-# benchmark campaign (resumable; grid defined in src/BBC/benchmark_config.py)
-python src/BBC/benchmark_runner.py
-
-# on a SLURM cluster
-sbatch src/BBC/cluster/run_campaign.sbatch            # primary sets
-SETS=secondary sbatch --array=0-9 src/BBC/cluster/run_campaign.sbatch
-```
-
-## Instance format
+## Check it yourself — don't trust the code or me
 
 ```
-J  T  C
-<T × J binary matrix>    # A[t,j] = 1  iff  job j requires tool t
+python verification/verify_everything.py
 ```
 
-Loaders: `src/SSP/utils.py` (`load_ssp_instance`) and
-`src/BNP/instance_loader.py` (token-based, all families).
+This re-derives results from scratch (brute force on small instances) and
+recomputes every headline number in the report **straight from the raw result
+files**, printing PASS / FAIL for each. Parts A and C run anywhere; Part B (the
+solver-correctness check) needs CPLEX, so run it on the cluster.
 
-## License
+## Folder / file map
 
-MIT — see `LICENSE`.
+| Where | What it is, and why |
+|---|---|
+| `report/` | the report, the slide decks, `cover/` logos, and `references.bib` (the bibliography). The deliverables. |
+| `src/SSP/` | shared core used by everything: instance loading, the KTNS tool-loading rule, the heuristics, the compact formulations. `utils.py` is the base. |
+| `src/BBC/` | the branch-and-Benders-cut solver + the benchmark campaign (`benchmark_runner.py`, `benchmark_config.py`, `cluster/`). New this summer: `conflict_cuts.py`, `hgs_heuristic.py`, `test_new_features.py`. |
+| `src/BNP/` | the branch-and-price solver (position formulations PCF′ / PTF). Start at `src/BNP/README_RESUME.md`. |
+| `data/` | the benchmark instances (Catanzaro, Crama, Laporte, …). |
+| `references/` | the papers, as PDFs. |
+| `verification/` | `verify_everything.py` (run this to check the project) and `VERIFIED_FACTS.md` (a dated log of what was checked when). |
+| `skills/` | distilled reference notes on the literature and the BBC solver. |
+| `tools/` | PORTA / LRS polytope tools (Windows). |
+| `RESEARCH_PLAN.md` | what's done and what's next, through the Sept-2 presentation. |
+| `report_s3_review.md` | drafted (not-yet-applied) improvements to the report's §3. |
+| `_archive/` | old exploratory drafts and build files, moved out of the way. Git-ignored, still on disk if ever needed. |
+
+## Build / run
+
+- **Report:** `cd report && pdflatex JGP-SSP_report && bibtex JGP-SSP_report && pdflatex JGP-SSP_report` (run pdflatex twice at the end). The §3 theory is toggled at the top of the `.tex` (`\includecomment{gaptheory}` = in).
+- **Cluster campaign:** see `src/BBC/cluster/SLURM_RUNBOOK.md`, then `sbatch cluster/run_campaign.sbatch` from `src/BBC/`.
+
+## Note on the cleanup (2026-08)
+
+Years of exploratory drafts, superseded plans, per-proof check scripts, and LaTeX
+build files were moved to `_archive/` — recoverable, just not in your way. The old
+`plans-genai/` folder is gone; its one load-bearing file (`references.bib`) now lives
+in `report/`. **Nothing the report or code needs was lost:** the report compiles and
+`verify_everything.py` passes.

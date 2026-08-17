@@ -2,11 +2,22 @@
 BBC Benchmark Configuration
 ============================
 
-Single source of truth for instance set paths, BBC hyperparameter grid,
-time limits, CSV column schema, and output paths.
+Single source of truth for the instance families, the solver grid, the time
+limit, the CSV schema, and output paths.  Every benchmark script imports from
+here; change something once and it propagates.
 
-All other benchmark scripts (benchmark_runner, precompute_jgp_gsp, analysis/*)
-import from here.  Change something once; it propagates everywhere.
+Methodology (2026-08 -- cleaned up to a standard protocol)
+---------------------------------------------------------
+  * Run EVERY instance in EVERY family to a single, uniform time limit.  No
+    early-stop, no instance skipping.  The denominator in the results is then
+    the real number of instances -- not an outcome of a heuristic ordering.
+  * Instances are still processed easiest-first, but ONLY so that results stream
+    in from easy to hard while you watch the run; since nothing is skipped, the
+    order has no effect on which instances get solved.
+  * All solver configs run on all families (no SSPMF exclusion; if it is too
+    slow to build on a large instance it simply times out, which is honest data).
+  * Report per FAMILY plus a cactus plot / performance profile -- the way the
+    SSP literature (Catanzaro 2015, da Silva 2024, Mecler 2021) presents it.
 """
 
 from pathlib import Path
@@ -17,63 +28,55 @@ _HERE         = Path(__file__).resolve().parent          # .../src/BBC/
 _PROJECT_ROOT = _HERE.parent.parent                      # project root
 _DATA         = _PROJECT_ROOT / "data" / "From_Felipe" / "data"
 
-# ── Instance sets ─────────────────────────────────────────────────────────────
-# Each entry:  (label, glob_pattern, time_limit_seconds)
-#
-# PRIMARY  (3 600 s TL, all 11 solver configs):
-#   Catanzaro Tabela1C  — 171 instances, J=8-40,  T=5-60,  c=3-30
-#   Crama     Tabela1-4 — 160 instances, J=10-40, T=10-60, c=4-30
-#   Laporte   Tabela7   —  80 instances, J=10-15, T=10-20, c=4-12
-#   (ranges measured from the files 2026-07-02 — both sets INCLUDE the large
-#    30x40 / 40x60 series; earlier comments understated this)
-#
-# SECONDARY (600 s TL, 10 configs = all except SSPMF, which is too slow at J=15;
-#            8 BBC + LSS + CATZ-F4 — see SECONDARY_CONFIGS below):
-#   Laporte   Tabela3-5 — 1010 instances, J=8/9/15 (per Tabela), T=15-25, c=5-20
+# ── One uniform time limit for every instance (seconds) ───────────────────────
+# 3600 s = 1 hour: the standard time limit in the SSP / exact-MILP literature.
+# WALL-TIME NOTE: with only one job per config (15 jobs), running all ~1400
+# instances at 1 h each takes the slowest config ~6 WEEKS (timeouts dominate).
+# The campaign is therefore SHARDED across instances (run_campaign.sbatch splits
+# each config into NSHARDS parallel jobs), which brings it back to ~a week.
+TIME_LIMIT = 3600
 
-PRIMARY_SETS = [
-    ("Catanzaro", str(_DATA / "Catanzaro" / "Tabela1C" / "*.txt"), 3600),
-    ("Crama",     str(_DATA / "Crama"     / "**"       / "*.txt"), 3600),
-    ("Laporte7",  str(_DATA / "Laporte"   / "Tabela7"  / "*.txt"), 3600),
+# ── Instance families ─────────────────────────────────────────────────────────
+# (label, glob_pattern, time_limit).  All families, one time limit, run in full.
+FAMILIES = [
+    ("Catanzaro", str(_DATA / "Catanzaro" / "Tabela1C" / "*.txt"), TIME_LIMIT),
+    ("Crama",     str(_DATA / "Crama"     / "**"       / "*.txt"), TIME_LIMIT),
+    ("Laporte7",  str(_DATA / "Laporte"   / "Tabela7"  / "*.txt"), TIME_LIMIT),
+    ("Laporte3",  str(_DATA / "Laporte"   / "Tabela3"  / "*.txt"), TIME_LIMIT),
+    ("Laporte4",  str(_DATA / "Laporte"   / "Tabela4"  / "*.txt"), TIME_LIMIT),
+    ("Laporte5",  str(_DATA / "Laporte"   / "Tabela5"  / "*.txt"), TIME_LIMIT),
 ]
 
-SECONDARY_SETS = [
-    ("Laporte3",  str(_DATA / "Laporte" / "Tabela3" / "*.txt"), 600),
-    ("Laporte4",  str(_DATA / "Laporte" / "Tabela4" / "*.txt"), 600),
-    ("Laporte5",  str(_DATA / "Laporte" / "Tabela5" / "*.txt"), 600),
-    # Uncomment when primary runs are complete (BBC only, optional):
-    # ("Laporte6",  str(_DATA / "Laporte" / "Tabela6" / "*.txt"), 600),
-]
+# Names still imported by the runner.  There is no longer a primary/secondary
+# split in the methodology -- everything is one set.  Kept as aliases so the
+# existing --sets flag keeps working (primary == all == the whole thing).
+ALL_SETS       = FAMILIES
+PRIMARY_SETS   = FAMILIES
+SECONDARY_SETS = []          # unused; retained only for import compatibility
 
-ALL_SETS = PRIMARY_SETS + SECONDARY_SETS
-
-# ── BBC hyperparameter grid (2³ = 8 configs) ─────────────────────────────────
-# Design:
-#   comb_cuts      — use KTNS combinatorial cuts (vs. LP Benders at integer nodes)
-#   frac_cuts      — add Benders user cuts at LP relaxation nodes (novel contribution)
-#   triplet_bounds — add O(n³) triplet lower bound constraints to master problem root
-#   lp_reuse       — FIXED to True throughout (verified to give identical optima to
-#                    fresh-model; held constant as a confound control, NOT ablated)
-#
-# The full-factorial 2³ design lets us isolate marginal value of each flag
-# and report clean ablation results.
-
+# ── Solver grid ───────────────────────────────────────────────────────────────
+# 8 BBC ablation configs + 4 acceleration configs (2026-07) + 3 prior baselines.
 BBC_CONFIGS = [
-    # LP Benders family
-    {"label": "BBC-LP",    "solver": "BBC", "comb_cuts": False, "frac_cuts": False, "triplet_bounds": False, "lp_reuse": True},
-    {"label": "BBC-LP+F",  "solver": "BBC", "comb_cuts": False, "frac_cuts": True,  "triplet_bounds": False, "lp_reuse": True},
-    {"label": "BBC-LP+T",  "solver": "BBC", "comb_cuts": False, "frac_cuts": False, "triplet_bounds": True,  "lp_reuse": True},
-    {"label": "BBC-LP+FT", "solver": "BBC", "comb_cuts": False, "frac_cuts": True,  "triplet_bounds": True,  "lp_reuse": True},
-    # KTNS-Benders family (novel contribution)
-    {"label": "BBC-K",     "solver": "BBC", "comb_cuts": True,  "frac_cuts": False, "triplet_bounds": False, "lp_reuse": True},
-    {"label": "BBC-K+F",   "solver": "BBC", "comb_cuts": True,  "frac_cuts": True,  "triplet_bounds": False, "lp_reuse": True},
-    {"label": "BBC-K+T",   "solver": "BBC", "comb_cuts": True,  "frac_cuts": False, "triplet_bounds": True,  "lp_reuse": True},
-    {"label": "BBC-K+FT",  "solver": "BBC", "comb_cuts": True,  "frac_cuts": True,  "triplet_bounds": True,  "lp_reuse": True},
-    # ── Acceleration features (2026-07), layered on the corrected fractional-cut base.
-    #    conflict_cuts    — conflict-graph constant root bound (helps grouping-dominated)
-    #    primal_heuristic — HGS -> CPLEX MIP start + seeded Benders cut at the root
-    #    pareto_cuts      — Papadakos core-point lifting of the fractional Benders cuts
-    #    Each is independently on/off; +ACC turns all three on.
+    # Ablation over BOTH cut strategies (LP-dual vs combinatorial) x fractional cuts.
+    # We keep all four comb x frac combinations: the LAST campaign could NOT judge the
+    # fractional ones (the fractional-cut bug meant they never fired), so they must be
+    # re-tested now that the fix is in.
+    {"label": "BBC-LP",    "solver": "BBC", "comb_cuts": False, "frac_cuts": False, "triplet_bounds": False, "lp_reuse": True},  # base (LP Benders)
+    {"label": "BBC-LP+F",  "solver": "BBC", "comb_cuts": False, "frac_cuts": True,  "triplet_bounds": False, "lp_reuse": True},  # LP + fractional (the fix)
+    {"label": "BBC-K",     "solver": "BBC", "comb_cuts": True,  "frac_cuts": False, "triplet_bounds": False, "lp_reuse": True},  # combinatorial
+    {"label": "BBC-K+F",   "solver": "BBC", "comb_cuts": True,  "frac_cuts": True,  "triplet_bounds": False, "lp_reuse": True},  # combinatorial + fractional (RE-TEST; frac was buggy)
+    {"label": "BBC-LP+T",  "solver": "BBC", "comb_cuts": False, "frac_cuts": False, "triplet_bounds": True,  "lp_reuse": True},  # one triplet config, to confirm neutrality empirically
+    # ── PRUNED: only the triplet-ADDED crosses.  Triplet bounds are dominated by the
+    #    coverage row (w_ijk <= |U|-b < |U|) -- a PROOF, independent of any run -- so
+    #    adding triplets to a kept config cannot change it.  (NOT pruned via the buggy
+    #    last run.)  Uncomment for the full 2^3 grid.
+    # {"label": "BBC-LP+FT", "solver": "BBC", "comb_cuts": False, "frac_cuts": True,  "triplet_bounds": True,  "lp_reuse": True},  # = BBC-LP+F + triplet
+    # {"label": "BBC-K+T",   "solver": "BBC", "comb_cuts": True,  "frac_cuts": False, "triplet_bounds": True,  "lp_reuse": True},  # = BBC-K + triplet
+    # {"label": "BBC-K+FT",  "solver": "BBC", "comb_cuts": True,  "frac_cuts": True,  "triplet_bounds": True,  "lp_reuse": True},  # = BBC-K+F + triplet
+    # Acceleration features (2026-07), layered on the corrected fractional-cut base.
+    #   conflict_cuts    — conflict-graph constant root bound
+    #   primal_heuristic — HGS -> CPLEX MIP start + seeded Benders cut at the root
+    #   pareto_cuts      — Papadakos core-point lifting of the fractional Benders cuts
     {"label": "BBC-LP+F+C",  "solver": "BBC", "comb_cuts": False, "frac_cuts": True, "triplet_bounds": False, "lp_reuse": True, "conflict_cuts": True},
     {"label": "BBC-LP+F+H",  "solver": "BBC", "comb_cuts": False, "frac_cuts": True, "triplet_bounds": False, "lp_reuse": True, "primal_heuristic": True},
     {"label": "BBC-LP+F+P",  "solver": "BBC", "comb_cuts": False, "frac_cuts": True, "triplet_bounds": False, "lp_reuse": True, "pareto_cuts": True},
@@ -81,24 +84,13 @@ BBC_CONFIGS = [
     # Prior-work baselines
     {"label": "LSS",       "solver": "LSS"},
     {"label": "SSPMF",     "solver": "SSPMF"},
-    {"label": "CATZ-F4",   "solver": "CATZ"},    # Catanzaro et al. 2015, Formulation 4 (verified vs brute)
+    {"label": "CATZ-F4",   "solver": "CATZ"},    # Catanzaro et al. 2015, Formulation 4
 ]
 
-# On secondary sets, skip SSPMF (prohibitively slow for J=15)
-SECONDARY_CONFIGS = [c for c in BBC_CONFIGS if c["label"] != "SSPMF"]
-
-# ── Difficulty ordering + early-stop ─────────────────────────────────────────
-# The runner processes instances EASIEST-FIRST (sort key: J asc, T asc, density
-# asc, then loosest capacity), so we solve as many as possible before reaching
-# the hard region.  For each solver config INDEPENDENTLY, after this many
-# consecutive non-optimal results (time_limit / error / no incumbent) on
-# increasingly hard instances, the remaining (harder) instances are skipped for
-# THAT config — we don't waste cluster time on instances it clearly can't solve.
-# Set to 0 to disable early-stop (run everything).  Trade-off: worst-case wasted
-# time before a config bails is ~ N x time_limit, so on the cluster a larger N is
-# cheap (array tasks run in parallel) and safer against difficulty-ordering noise.
-# Override per-run with --max-consecutive-timeouts.
-MAX_CONSECUTIVE_TIMEOUTS = 8
+# ── Early-stop: DISABLED (run everything) ─────────────────────────────────────
+# 0 = disabled.  We run every instance to the time limit; nothing is skipped.
+# (The knob is kept only so a quick exploratory run can re-enable it by hand.)
+MAX_CONSECUTIVE_TIMEOUTS = 0
 
 # ── Output paths ──────────────────────────────────────────────────────────────
 OUTPUT_DIR   = _HERE
@@ -114,11 +106,11 @@ COLUMNS = [
     "solver", "config", "comb_cuts", "frac_cuts", "triplet_bounds",
     # Results
     "status",    # 'optimal' | 'time_limit' | 'error' | 'load_error'
-    "obj",       # solver's NATIVE objective (empty-start for BBC/LSS/Catanzaro; free-initial Z_M for SSPMF)
-    "obj_ktns",  # CANONICAL empty-start switches of the returned sequence (compute_ktns); compare solvers on THIS
+    "obj",       # solver's NATIVE objective
+    "obj_ktns",  # CANONICAL empty-start switches of the returned sequence; compare solvers on THIS
     "time_s",    # wall-clock solve time
-    "gap_pct",   # MIP gap at termination (0 if optimal; None for LSS/SSPMF)
-    # B&B diagnostics (BBC only; None for LSS/SSPMF)
+    "gap_pct",   # MIP gap at termination (0 if optimal)
+    # B&B diagnostics (BBC only)
     "nodes", "lp_iters", "cb_invocations",
     "cuts_sec", "cuts_benders", "cuts_comb", "cuts_frac",
     "root_lp_bound", "dual_bound",
@@ -135,30 +127,17 @@ BBC_DIAG_COLS = [
 
 
 def get_instances(sets=None):
-    """
-    Expand glob patterns and return a flat list of
-    (benchmark_set_label, instance_path_str, time_limit_s) tuples.
-
-    Parameters
-    ----------
-    sets : list of (label, pattern, tl) tuples, or None to use ALL_SETS
-    """
+    """Expand glob patterns and return a flat list of
+    (benchmark_set_label, instance_path_str, time_limit_s) tuples."""
     if sets is None:
         sets = ALL_SETS
     result = []
     for label, pattern, tl in sets:
-        files = sorted(_glob.glob(pattern, recursive=True))
-        for f in files:
+        for f in sorted(_glob.glob(pattern, recursive=True)):
             result.append((label, f, tl))
     return result
 
 
 def get_configs_for_set(benchmark_set_label):
-    """
-    Return the appropriate config list for a given benchmark set.
-    Secondary sets (Laporte3-5) use SECONDARY_CONFIGS (no SSPMF).
-    """
-    secondary_labels = {s[0] for s in SECONDARY_SETS}
-    if benchmark_set_label in secondary_labels:
-        return SECONDARY_CONFIGS
+    """Every family runs every solver config (no exclusions any more)."""
     return BBC_CONFIGS

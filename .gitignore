@@ -89,3 +89,12 @@ src/BNP/README_RESUME.md
 src/BNP/P4_benchmark_results.md
 src/BBC/cluster/SLURM_RUNBOOK.md
 src/BNP/cluster/README_BNP_CLUSTER.md
+
+# Archived scratch (on disk, untracked from here on) — added 2026-08
+_archive/
+_trash_2026-07/
+__pycache__/
+*.aux
+*.bbl
+*.blg
+*.synctex.gz

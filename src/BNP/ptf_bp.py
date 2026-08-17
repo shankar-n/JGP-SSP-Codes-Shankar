@@ -222,8 +222,10 @@ class PTFPricer(Pricer):
         self._price(self.model.getDualfarkasLinear); return {'result': SCIP_RESULT.SUCCESS}
 
 
-def branch_and_price(J, T, b, Tj, timelimit=120, force_milp=False):
-    """Exact PTF B&P. Polynomial master (bottom arcs priced). Returns (status, IP, nodes, n_real_arcs)."""
+def branch_and_price(J, T, b, Tj, timelimit=120, force_milp=False, accel=None):
+    """Exact PTF B&P. Polynomial master (bottom arcs priced). Returns (status, IP, nodes, n_real_arcs).
+    `accel` is accepted for a uniform runner interface; PTF-specific pricing accelerations
+    (a coupled-pair greedy + stabilisation) are follow-up work, so it is currently ignored."""
     n = J; U = sorted({t for s in Tj for t in s})
     use_milp = force_milp or math.comb(T, b) > ENUM_MAX
     reals = None if use_milp else [frozenset(c) for c in combinations(range(T), b)]

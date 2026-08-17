@@ -32,12 +32,30 @@ SECONDARY_SETS = [
 ALL_SETS = PRIMARY_SETS + SECONDARY_SETS
 
 # ── Solver grid ───────────────────────────────────────────────────────────────
-# The two position formulations. Each runs PCF'/PTF branch-and-price from src/BNP/
-# (enumerate-or-MILP pricer by size, set automatically inside branch_and_price).
+# The two position formulations plus the PCF' pricing-acceleration ablation. Each
+# runs PCF'/PTF branch-and-price from src/BNP/ (enumerate-or-MILP pricer by size).
+# The acceleration flags (heuristic_pricing, multiple_pricing, warm_start, stabilize)
+# are passed straight to pcf_prime_bp.branch_and_price(accel=...); EACH PRESERVES
+# EXACTNESS (verified IP == Z* on rings + randoms, 2026-08). They are laid out as a
+# one-at-a-time ablation plus a combined +ACC, mirroring the BBC accelerator study,
+# so the campaign measures each lever's separate and joint effect on the solve rate.
+ACCEL_KEYS = ("heuristic_pricing", "multiple_pricing", "warm_start", "stabilize",
+              "kcols", "stab_alpha")
 CONFIGS = [
-    {"label": "PCFp", "solver": "PCFp"},
-    {"label": "PTF",  "solver": "PTF"},
+    {"label": "PCFp",      "solver": "PCFp"},                                          # baseline
+    {"label": "PCFp+HP",   "solver": "PCFp", "heuristic_pricing": True},               # greedy-then-exact pricing
+    {"label": "PCFp+MC",   "solver": "PCFp", "multiple_pricing": True, "kcols": 5},    # multiple columns/round
+    {"label": "PCFp+WS",   "solver": "PCFp", "warm_start": True},                      # warm-start column pool
+    {"label": "PCFp+STAB", "solver": "PCFp", "stabilize": True, "stab_alpha": 0.5},    # Wentges smoothing
+    {"label": "PCFp+ACC",  "solver": "PCFp", "heuristic_pricing": True,
+     "multiple_pricing": True, "warm_start": True, "stabilize": True, "kcols": 5, "stab_alpha": 0.5},
+    {"label": "PTF",       "solver": "PTF"},                                           # transition formulation
 ]
+
+
+def accel_of(config):
+    """Extract the acceleration kwargs from a config dict (empty for baselines)."""
+    return {k: config[k] for k in ACCEL_KEYS if k in config}
 
 # ── Size cap + early-stop ─────────────────────────────────────────────────────
 # The prototype exact B&P (a_{t,p} integer branching + MILP pricing) does not
