@@ -137,6 +137,9 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue, verb
                 use_combinatorial_cuts = config["comb_cuts"],
                 use_triplet_bounds     = config["triplet_bounds"],
                 parallel               = False,
+                use_conflict_cuts      = config.get("conflict_cuts", False),
+                use_primal_heuristic   = config.get("primal_heuristic", False),
+                use_pareto_cuts        = config.get("pareto_cuts", False),
             )
             solver.build_master_problem(verbose=verbose)
             status, obj_val, seq = solver.solve(time_limit=time_limit, verbose=verbose)

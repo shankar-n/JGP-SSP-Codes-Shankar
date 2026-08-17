@@ -63,6 +63,7 @@ def _():
         plot_jgp_ssp_comparison,
         plot_ktns_timeline,
         plot_zero_blocks,
+        plt,
         read_porta_output,
         run_ssp_porta,
         solve_hamiltonian_path,
@@ -905,6 +906,198 @@ def _(generate_group):
 
 @app.cell
 def _():
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    # ── Appendix: BBC campaign analysis (`../BBC/raw_results.csv`) ──
+
+    Diagnostics to understand *where the exact solver's frontier is* and how to
+    push it. Every instance is classified **bound-tight** (optimum $=|U|$, the
+    empty-start coverage bound) vs **bound-loose** (optimum $>|U|$), because that
+    single property — not size, not cut configuration — is what decides whether
+    BBC can prove optimality. Reading order: solve counts → cut-config ablation →
+    the tightness diagnostic → reachability → frozen-bound → timing.
+    """)
+    return
+
+
+@app.cell
+def _(np, pd):
+    """Appendix loader: enrich raw_results.csv with suite, |U|, per-instance optimum,
+    bound-tightness, and the dual gap. Exports `bbc_df`."""
+    import glob as _glob, os as _os
+
+    _csv = next((c for c in ["../BBC/raw_results.csv", "BBC/raw_results.csv",
+                             "src/BBC/raw_results.csv"] if _os.path.exists(c)), None)
+    _datadir = next((d for d in ["../../data/From_Felipe/data", "data/From_Felipe/data",
+                                "../data/From_Felipe/data"] if _os.path.isdir(d)), None)
+
+    bbc_df = pd.read_csv(_csv).dropna(subset=["J", "T", "C"]).copy()
+    for _c in ["J", "T", "C"]:
+        bbc_df[_c] = bbc_df[_c].astype(int)
+    _SEC = {"Laporte3", "Laporte4", "Laporte5"}
+    bbc_df["suite"] = np.where(bbc_df["benchmark_set"].isin(_SEC), "secondary", "primary")
+    bbc_df["is_opt"] = bbc_df["status"].eq("MIP_optimal")
+
+    # |U| = number of tools actually used, read from each instance file (guarded).
+    _idx = {}
+    if _datadir:
+        for _p in _glob.glob(_datadir + "/**/*.txt", recursive=True):
+            try:
+                _tk = open(_p).read().split()
+                _J, _T, _C = int(_tk[0]), int(_tk[1]), int(_tk[2])
+                _A = np.array(list(map(int, _tk[3:3 + _T * _J]))).reshape(_T, _J)
+                _idx.setdefault((_os.path.basename(_p)[:-4], _J, _T, _C),
+                                int((_A.sum(1) > 0).sum()))
+            except Exception:
+                pass
+    bbc_df["U"] = [_idx.get((i, j, t, c), np.nan)
+                   for i, j, t, c in zip(bbc_df["instance"], bbc_df["J"], bbc_df["T"], bbc_df["C"])]
+
+    _opt = (bbc_df[bbc_df.is_opt]
+            .groupby(["instance", "J", "T", "C"])["obj_ktns"].min()
+            .rename("opt").reset_index())
+    bbc_df = bbc_df.merge(_opt, on=["instance", "J", "T", "C"], how="left")
+    bbc_df["tight"] = np.where(bbc_df["opt"].notna() & bbc_df["U"].notna(),
+                               (bbc_df["opt"] == bbc_df["U"]), np.nan)
+    bbc_df["dual_gap"] = bbc_df["obj"].astype(float) - bbc_df["dual_bound"].astype(float)
+    return (bbc_df,)
+
+
+@app.cell
+def _(bbc_df):
+    """Solve counts per solver x suite (each row of the CSV = one instance run)."""
+    _t = (bbc_df.groupby(["solver", "suite"])
+          .agg(solved=("is_opt", "sum"), attempted=("is_opt", "size")))
+    _t["pct"] = (100 * _t["solved"] / _t["attempted"]).round(1)
+    _t
+    return
+
+
+@app.cell
+def _(bbc_df):
+    """BBC cut-configuration ablation. The eight configs land in a narrow band once
+    the coverage row is in the master; BBC-LP+T reaches deepest on secondary."""
+    _b = bbc_df[bbc_df.solver == "BBC"]
+    _t = (_b.groupby(["config", "suite"])
+          .agg(solved=("is_opt", "sum"), attempted=("is_opt", "size"))
+          .unstack("suite"))
+    _t
+    return
+
+
+@app.cell
+def _(bbc_df, plt):
+    """KEY DIAGNOSTIC: bound-tightness predicts solvability almost perfectly.
+    Every bound-tight instance BBC reaches is solved; loose ones mostly are not
+    (and the miss rate worsens with size => the primary suite)."""
+    _sub = bbc_df[(bbc_df.solver == "BBC") & (bbc_df.config == "BBC-LP")].dropna(subset=["tight"])
+    _r = _sub.groupby(["suite", "tight"]).agg(sol=("is_opt", "sum"), n=("is_opt", "size"))
+    _r["rate"] = 100 * _r["sol"] / _r["n"]
+    _fig, _ax = plt.subplots(figsize=(6, 3.4))
+    _lab = [f"{s}\n{'tight' if t else 'loose'}" for s, t in _r.index]
+    _bars = _ax.bar(_lab, _r["rate"], color=["#1f7740" if t else "#990011" for _, t in _r.index])
+    for _bar, (_, _row) in zip(_bars, _r.iterrows()):
+        _ax.text(_bar.get_x() + _bar.get_width() / 2, _row.rate + 2,
+                 f"{int(_row['sol'])}/{int(_row['n'])}", ha="center", fontsize=8)
+    _ax.set_ylabel("% solved to optimality"); _ax.set_ylim(0, 110)
+    _ax.set_title("BBC-LP: bound-tightness predicts solvability")
+    _fig.tight_layout()
+    _fig
+    return
+
+
+@app.cell
+def _(bbc_df, plt):
+    """Cut-config ablation on the secondary suite (post-correction: nearly flat)."""
+    _g = (bbc_df[bbc_df.solver == "BBC"]
+          .groupby("config").apply(lambda s: int(s[s.suite == "secondary"].is_opt.sum()))
+          .sort_values())
+    _fig, _ax = plt.subplots(figsize=(6.5, 3.2))
+    _ax.barh(_g.index.tolist(), _g.values, color="#1f2761")
+    for _i, _v in enumerate(_g.values):
+        _ax.text(_v + 2, _i, str(_v), va="center", fontsize=8)
+    _ax.set_xlabel("instances solved (secondary)")
+    _ax.set_title("BBC solved per cut configuration")
+    _fig.tight_layout()
+    _fig
+    return
+
+
+@app.cell
+def _(bbc_df, plt):
+    """Reachability under easiest-first early-stop: BBC is retired before reaching
+    n>=15 on primary, so its low primary count is partly a protocol artifact."""
+    _fig, _ax = plt.subplots(figsize=(6, 3.4))
+    for _solv, _col in [("SSPMF", "#333333"), ("LSS", "#0a7a3a"),
+                        ("CATZ", "#0077aa"), ("BBC", "#990011")]:
+        _s = bbc_df[(bbc_df.solver == _solv) & (bbc_df.suite == "primary")]
+        if _s.empty:
+            continue
+        _gr = _s.groupby("J").is_opt.mean() * 100
+        _ax.plot(_gr.index, _gr.values, "o-", label=_solv, color=_col)
+    _ax.set_xlabel("jobs  n"); _ax.set_ylabel("% solved (primary)")
+    _ax.set_title("Reachability vs instance size (primary)")
+    _ax.legend(fontsize=8)
+    _fig.tight_layout()
+    _fig
+    return
+
+
+@app.cell
+def _(bbc_df, plt):
+    """Frozen-bound signature: on every BBC-LP timeout the incumbent is already the
+    optimum, but the dual bound sits 1-6 switches below it and never closes -> a
+    pure PROOF failure driven by the loose-half bound, not a search failure."""
+    _tt = bbc_df[(bbc_df.solver == "BBC") & (bbc_df.config == "BBC-LP") & (~bbc_df.is_opt)]["dual_gap"].dropna()
+    _fig, _ax = plt.subplots(figsize=(6, 3.2))
+    _ax.hist(_tt, bins=range(0, int(_tt.max()) + 2), align="left", rwidth=0.8, color="#990011")
+    _ax.set_xlabel("obj − dual bound at timeout (unproved switches)")
+    _ax.set_ylabel("count")
+    _ax.set_title(f"BBC-LP timeouts: bound frozen below optimum (n={len(_tt)})")
+    _fig.tight_layout()
+    _fig
+    return
+
+
+@app.cell
+def _(bbc_df, np, plt):
+    """Solve-time distribution per method (log scale, solved instances only).
+    Where BBC closes, it closes at the root — orders of magnitude below the
+    compact branch-and-bound models."""
+    _order = ["SSPMF", "BBC", "LSS", "CATZ"]
+    _sv = bbc_df[bbc_df.is_opt].copy()
+    _sv["lt"] = np.log10(_sv["time_s"].astype(float).clip(lower=1e-3))
+    _data = [_sv[_sv.solver == s]["lt"].dropna().values for s in _order]
+    _fig, _ax = plt.subplots(figsize=(6, 3.2))
+    _ax.boxplot(_data, tick_labels=_order, vert=True)
+    _ax.set_ylabel("log10 solve time (s)")
+    _ax.set_title("Solve-time distribution, solved instances")
+    _fig.tight_layout()
+    _fig
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    ### What this says about improving the algorithm
+
+    - **Tight instances are already free** — BBC proves every bound-tight instance
+      it reaches, most at the root. No engineering effort is warranted there.
+    - **The entire frontier is the loose half.** Timeouts are proof failures: the
+      incumbent equals the optimum but the dual bound is frozen at $|U|$. Progress
+      requires *raising the bound* on loose instances (PTF, window inequalities),
+      not faster search or more cuts.
+    - **Fix the early-stop bias for BBC.** Its difficulty axis is bound-tightness,
+      not size, so easiest-first-by-size retires it before it reaches larger
+      bound-tight instances it would close instantly (see the reachability plot).
+      Re-running BBC ordered by a tightness proxy would recover solves the current
+      table counts as failures.
+    """)
     return
 
 

@@ -16,7 +16,7 @@
 # =============================================================================
 
 #SBATCH --job-name=bbc-ssp
-#SBATCH --array=0-10                # 11 configs (primary). Secondary: use 0-9 (drop SSPMF, the last index)
+#SBATCH --array=0-14                # 15 configs (primary). Secondary: use 0-13 (drop SSPMF, the last index)
 #SBATCH --partition=normal          # 7-day limit; switch to 'long' for unattended runs
 #SBATCH --time=7-00:00:00           # wall-clock cap; killed tasks resume on resubmit
 #SBATCH --ntasks=1
@@ -45,7 +45,11 @@ export CPLEX_THREADS="$SLURM_CPUS_PER_TASK"          # all 4 solvers honor this 
 # ----------------------------------------------------------------------------
 # Map array index -> config label (order matches benchmark_config.BBC_CONFIGS)
 # ----------------------------------------------------------------------------
-CONFIGS=(BBC-LP BBC-LP+F BBC-LP+T BBC-LP+FT BBC-K BBC-K+F BBC-K+T BBC-K+FT LSS CATZ-F4 SSPMF)
+# Order: 8 original BBC (0-7), 4 acceleration configs (8-11), LSS/CATZ (12-13),
+# SSPMF last (14) so secondary drops it with a contiguous --array=0-13.
+CONFIGS=(BBC-LP BBC-LP+F BBC-LP+T BBC-LP+FT BBC-K BBC-K+F BBC-K+T BBC-K+FT \
+         BBC-LP+F+C BBC-LP+F+H BBC-LP+F+P BBC-LP+ACC \
+         LSS CATZ-F4 SSPMF)
 CFG="${CONFIGS[$SLURM_ARRAY_TASK_ID]}"
 
 echo "[$(date '+%F %T')] host=$(hostname) array_task=$SLURM_ARRAY_TASK_ID config=$CFG"
@@ -55,8 +59,8 @@ python3 -c "import cplex, numpy; print('cplex', cplex.__version__, '| numpy', nu
 # Run: this config, easiest-first, early-stop after 8 consecutive non-optimal
 # results.  Its own output CSV.  Set selection: SETS env var, default primary.
 #   primary   : sbatch cluster/run_campaign.sbatch
-#   secondary : SETS=secondary sbatch --array=0-9 cluster/run_campaign.sbatch
-#               (0-9 drops SSPMF, the last index; too slow at J=15)
+#   secondary : SETS=secondary sbatch --array=0-13 cluster/run_campaign.sbatch
+#               (0-13 drops SSPMF, the last index; too slow at J=15)
 # Same per-config CSV for both -- the runner resumes/skips by (instance,config).
 # ----------------------------------------------------------------------------
 SETS="${SETS:-primary}"

@@ -100,6 +100,17 @@ except ImportError:
 from utils import load_ssp_instance
 from bbc_common import BBCSolverMixin
 
+# New acceleration modules (2026-07): conflict-graph cuts + HGS primal heuristic.
+# Imported defensively so the solver still loads if they are absent.
+try:
+    import conflict_cuts as _cc
+except Exception:
+    _cc = None
+try:
+    import hgs_heuristic as _hgs
+except Exception:
+    _hgs = None
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Modern generic callback (admipex8 / bendersatsp2 style)
@@ -147,6 +158,16 @@ class BendersCutCallback:
         self.frac_cuts_added     = 0   # fractional LP user cuts
         # total for backward compat
         self.cuts_added          = 0
+
+        # ── DEBUG: fractional-cut diagnostics (2026-07; remove when resolved) ──
+        self.dbg_relax_calls = 0   # times _handle_relaxation entered
+        self.dbg_xbar_empty  = 0   # skipped: no fractional arc in x_bar
+        self.dbg_dsp_none    = 0   # DSP returned None (non-optimal / failed)
+        self.dbg_dsp_ok      = 0   # DSP returned a finite value
+        self.dbg_violated    = 0   # dsp_obj > theta_val + 1e-6  (cut IS violated)
+        self.dbg_add_failed  = 0   # add_user_cut raised (violated but not added)
+        self.dbg_max_excess  = float('-inf')  # max(dsp_obj - theta_val) seen
+        self.dbg_add_err     = None  # first add_user_cut failure repr (if any)
 
         # ── Convergence log: list of (elapsed_s, theta, best_primal) ─────
         self.convergence_log: list = []
@@ -408,6 +429,8 @@ class BendersCutCallback:
         n      = solver.n_jobs
         n_vars = solver.n_vars
 
+        self.dbg_relax_calls += 1  # DEBUG
+
         # Extract relaxation values
         try:
             all_vals = context.get_relaxation_point(list(range(n_vars)))
@@ -423,28 +446,79 @@ class BendersCutCallback:
                 x_bar[i, j] = v
 
         if not x_bar:
+            self.dbg_xbar_empty += 1  # DEBUG
             return
 
         # Solve DSP with fractional x̄
         dsp_obj, duals = solver._solve_dsp_with_xbar(x_bar, tid=tid)
         if dsp_obj is None:
+            self.dbg_dsp_none += 1  # DEBUG: DSP failed silently at this fractional node
             return
+        self.dbg_dsp_ok += 1  # DEBUG
+        self.dbg_max_excess = max(self.dbg_max_excess, dsp_obj - theta_val)  # DEBUG
 
         # Add user cut if violated
         if dsp_obj > theta_val + 1e-6:
+            self.dbg_violated += 1  # DEBUG: a fractional cut IS violated here
             cut_sp, cut_rhs = solver._build_benders_cut_sparsepair(duals)
             try:
+                # FIX(2026-07): the previous call passed `purgeable=True`, which is
+                # NOT a valid add_user_cut keyword, so every call raised TypeError
+                # and was silently caught -> cuts_frac stayed 0 across the whole
+                # campaign (falsely reported as "structurally inactive").  The
+                # correct generic-callback signature — cf. the bundled CPLEX
+                # examples bendersatsp2.py and admipex8.py — is:
+                #   add_user_cut(cut=<SparsePair>, sense, rhs, cutmanagement, local)
+                _cutmgmt = cplex.callbacks.UserCutCallback.use_cut.purge
                 context.add_user_cut(
-                    cut_sp,
+                    cut=cut_sp,
                     sense='G',
                     rhs=cut_rhs,
+                    cutmanagement=_cutmgmt,
                     local=False,
-                    purgeable=True
                 )
                 self.frac_cuts_added += 1
                 self.cuts_added      += 1
-            except Exception:
-                pass  # Not all LP nodes support user cuts
+            except Exception as _e:
+                self.dbg_add_failed += 1  # DEBUG: violated but add failed (masked)
+                if not getattr(self, 'dbg_add_err', None):
+                    self.dbg_add_err = repr(_e)  # DEBUG: first add-failure reason
+
+            # Papadakos core-point Pareto cut, added ALONGSIDE the normal cut.
+            if solver.use_pareto_cuts and solver._core_point is not None:
+                self._add_pareto_cut(context)
+
+
+    def _add_pareto_cut(self, context):
+        """Papadakos Pareto cut-lifting: generate the Benders cut at the
+        maintained core point and add it ALONGSIDE the normal fractional cut
+        (never instead of it), then move the core point toward the current
+        relaxation point.  Validity is inherited from the same
+        _build_benders_cut_sparsepair used by every other Benders cut, so this
+        can only strengthen the relaxation, never remove a feasible point."""
+        solver = self.solver
+        x0 = solver._core_point
+        if x0 is None:
+            return
+        try:
+            dsp0, duals0 = solver._solve_dsp_with_xbar(x0)
+            if dsp0 is not None:
+                cut_sp, cut_rhs = solver._build_benders_cut_sparsepair(duals0)
+                _cm = cplex.callbacks.UserCutCallback.use_cut.purge
+                context.add_user_cut(cut=cut_sp, sense='G', rhs=cut_rhs,
+                                     cutmanagement=_cm, local=False)
+                solver.n_pareto_cuts += 1
+                self.cuts_added += 1
+        except Exception:
+            pass
+        # Papadakos update: core <- 1/2 (core + current relaxation point)
+        try:
+            vals = context.get_relaxation_point(list(range(solver.n_vars)))
+            for (i, j) in solver.x_pairs:
+                a = (i, j)
+                x0[a] = 0.5 * (x0.get(a, 0.0) + vals[solver.x_idx_map[i, j]])
+        except Exception:
+            pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -487,7 +561,9 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
     def __init__(self, n_jobs, n_tools, capacity, tool_req,
                  worker_lp_reuse=False, use_fractional_cuts=False,
                  use_combinatorial_cuts=False, use_triplet_bounds=False,
-                 parallel=False):
+                 parallel=False,
+                 use_conflict_cuts=False, use_primal_heuristic=False,
+                 use_pareto_cuts=False, heuristic_time=2.0):
         self.n_jobs                 = n_jobs
         self.n_tools                = n_tools
         self.capacity               = capacity
@@ -497,6 +573,17 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         self.use_combinatorial_cuts = use_combinatorial_cuts
         self.use_triplet_bounds     = use_triplet_bounds
         self.parallel               = parallel
+
+        # ── New acceleration flags (2026-07); all default off, independent ──
+        self.use_conflict_cuts      = use_conflict_cuts     # conflict-graph root bound
+        self.use_primal_heuristic   = use_primal_heuristic  # HGS -> MIP start + seed cut
+        self.use_pareto_cuts        = use_pareto_cuts       # Papadakos cut lifting
+        self.heuristic_time         = heuristic_time
+        self._core_point            = None   # Papadakos core point: arc -> value
+        self.n_conflict_cuts        = 0
+        self.n_seed_cuts            = 0
+        self.n_pareto_cuts          = 0
+        self.heuristic_cost         = None
 
         self._compute_pairwise_bounds()
         # Precompute triplet bounds if needed (done once at init)
@@ -1165,6 +1252,104 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         return SparsePair(indices, coeffs), cut_rhs
 
     # ─────────────────────────────────────────────────────────────────────────
+    # Root accelerators (2026-07): conflict cuts / HGS primal / Pareto init
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def _apply_root_accelerators(self, verbose=False):
+        """Optional root-node accelerations, each behind its own flag and all
+        validity-preserving.  Called once in solve() after the master is built.
+
+        (1) use_conflict_cuts   : add the conflict-graph constant lower bound
+                                  theta >= max(coverage, grouping) when the
+                                  grouping term strictly beats coverage
+                                  (validated in test_new_features.py).
+        (2) use_primal_heuristic: run HGS -> push a CPLEX MIP start (warm
+                                  incumbent) AND seed a Benders optimality cut
+                                  from the heuristic sequence at the root.
+        (3) use_pareto_cuts     : initialise the Papadakos core point used by
+                                  the callback to lift fractional Benders cuts.
+        """
+        n = self.n_jobs
+
+        # (1) Conflict-graph root bound ------------------------------------------------
+        if self.use_conflict_cuts and _cc is not None:
+            try:
+                cut = _cc.root_bound_cut(self.tool_req, n, self.capacity)
+                if cut is not None and cut["rhs"] > 0:
+                    self.cpx.linear_constraints.add(
+                        lin_expr=[SparsePair([self.theta_idx], [1.0])],
+                        senses=['G'], rhs=[float(cut["rhs"])],
+                        names=['conflict_root'])
+                    self.n_conflict_cuts += 1
+                    if verbose:
+                        print(f"[conflict] theta >= {cut['rhs']}  {cut['detail']}")
+            except Exception as e:
+                if verbose:
+                    print(f"[conflict] skipped: {e}")
+
+        # (2) HGS primal heuristic -> MIP start + seeded Benders cut -------------------
+        heur_seq = None
+        if self.use_primal_heuristic and _hgs is not None:
+            try:
+                from utils import compute_ktns
+                heur_seq, hc = _hgs.hgs(
+                    self.tool_req, n, self.capacity,
+                    cost_fn=lambda s: compute_ktns(s, self.tool_req, self.capacity)[0],
+                    time_limit=self.heuristic_time)
+                self.heuristic_cost = hc
+            except Exception as e:
+                heur_seq = None
+                if verbose:
+                    print(f"[heur] HGS failed: {e}")
+            if heur_seq is not None:
+                d = self.depot
+                arcs = ([(d, heur_seq[0])]
+                        + [(heur_seq[k], heur_seq[k + 1]) for k in range(n - 1)]
+                        + [(heur_seq[-1], d)])
+                aset = set(arcs)
+                # (a) MIP start (warm incumbent) — cannot affect correctness.
+                try:
+                    ind = [self.theta_idx] + [self.x_idx_map[i, j] for i, j in self.x_pairs]
+                    val = [float(self.heuristic_cost)] + [
+                        1.0 if (i, j) in aset else 0.0 for i, j in self.x_pairs]
+                    self.cpx.MIP_starts.add(
+                        SparsePair(ind, val),
+                        self.cpx.MIP_starts.effort_level.solve_fixed)
+                except Exception as e:
+                    if verbose:
+                        print(f"[heur] MIP start skipped: {e}")
+                # (b) seed a Benders optimality cut for the heuristic sequence.
+                try:
+                    x_bar = {a: 1.0 for a in arcs}
+                    dsp_obj, duals = self._solve_dsp_with_xbar(x_bar)
+                    if dsp_obj is not None:
+                        cut_sp, cut_rhs = self._build_benders_cut_sparsepair(duals)
+                        self.cpx.linear_constraints.add(
+                            lin_expr=[cut_sp], senses=['G'], rhs=[cut_rhs],
+                            names=['heur_seed'])
+                        self.n_seed_cuts += 1
+                except Exception as e:
+                    if verbose:
+                        print(f"[heur] seed cut skipped: {e}")
+                if verbose:
+                    print(f"[heur] HGS incumbent = {self.heuristic_cost}")
+
+        # (3) Papadakos core point ----------------------------------------------------
+        if self.use_pareto_cuts:
+            base = 1.0 / max(1, n)
+            core = {(i, j): base for (i, j) in self.x_pairs}
+            if heur_seq is not None:
+                d = self.depot
+                for k in range(n - 1):
+                    a = (heur_seq[k], heur_seq[k + 1])
+                    if a in core:
+                        core[a] = 0.5 * (core[a] + 1.0)
+                a0 = (d, heur_seq[0])
+                if a0 in core:
+                    core[a0] = 0.5 * (core[a0] + 1.0)
+            self._core_point = core
+
+    # ─────────────────────────────────────────────────────────────────────────
     # Solve
     # ─────────────────────────────────────────────────────────────────────────
 
@@ -1185,6 +1370,9 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
             self.build_master_problem(verbose=verbose)
 
         self.cpx.parameters.timelimit.set(float(time_limit))
+
+        # Root accelerators (conflict bound / HGS primal / Pareto init) — flags.
+        self._apply_root_accelerators(verbose=verbose)
 
         if self.use_fractional_cuts:
             # User cuts added at relaxation nodes must remain valid for the
@@ -1241,6 +1429,18 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
         self.convergence_log    = cb.convergence_log
         self.root_lp_bound      = cb.root_lp_bound
 
+        # ── DEBUG: surface fractional-cut diagnostics for the driver script ──
+        self.dbg_frac = {
+            "relax_calls": cb.dbg_relax_calls,
+            "xbar_empty":  cb.dbg_xbar_empty,
+            "dsp_none":    cb.dbg_dsp_none,
+            "dsp_ok":      cb.dbg_dsp_ok,
+            "violated":    cb.dbg_violated,
+            "add_failed":  cb.dbg_add_failed,
+            "max_excess":  cb.dbg_max_excess,
+            "add_err":     cb.dbg_add_err,
+        }
+
         if cb.best_objective < self.best_objective:
             self.best_objective = cb.best_objective
             self.best_solution  = cb.best_solution
@@ -1291,6 +1491,14 @@ class BranchAndBendersCutSSP_CPLEX(BBCSolverMixin):
             "use_triplet_bounds":     self.use_triplet_bounds,
             "use_fractional_cuts":    self.use_fractional_cuts,
             "worker_lp_reuse":        self.worker_lp_reuse,
+            # New acceleration features (2026-07)
+            "use_conflict_cuts":      self.use_conflict_cuts,
+            "use_primal_heuristic":   self.use_primal_heuristic,
+            "use_pareto_cuts":        self.use_pareto_cuts,
+            "n_conflict_cuts":        self.n_conflict_cuts,
+            "n_seed_cuts":            self.n_seed_cuts,
+            "n_pareto_cuts":          self.n_pareto_cuts,
+            "heuristic_cost":         self.heuristic_cost,
         }
 
         if verbose:

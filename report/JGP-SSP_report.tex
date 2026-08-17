@@ -31,8 +31,8 @@
 %   CIRCULATION version  \excludecomment{gaptheory}  \includecomment{gapstub}
 % (swap the two lines below; nothing else changes)
 
-\includecomment{gapstub}
-\excludecomment{gaptheory}
+\excludecomment{gapstub}
+\includecomment{gaptheory}
 
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}
@@ -1631,11 +1631,11 @@ $w_{ij}$ vanishes) carries no information. The ablation is one-sided: the
 dual-cut family is the only active axis (the configurations using LP-based dual
 cuts---BBC-LP in Table~\ref{tab:solves}---solve $26$ of $48$ attempted secondary
 instances, the combinatorial-cut family none);
-triplet bounds are neutral; and fractional Benders cuts are
-\emph{structurally inactive}---zero violated cuts across the campaign,
-confirmed in controlled runs with presolve disabled, consistent with the
-loading subproblem's value collapsing to the pairwise bound at fractional
-orderings. The method is bound-limited exactly in the sense of
+triplet bounds are neutral; and the fractional Benders cuts recorded no
+additions across the campaign---which a post-campaign audit traced not to the
+cuts' strength but to a defect in the user-cut injection call (now corrected),
+so their effect on the dual bound is being re-measured on the corrected solver
+(Section~\ref{sec:planned}). The method is bound-limited exactly in the sense of
 Section~\ref{ssec:assess}---and the correction that diagnosis dictates, the
 coverage row $\theta\ge\lvert\U\rvert$ in the master, was implemented and
 re-run in full. The effect is decisive: on the primary suite the solve count
@@ -1777,12 +1777,23 @@ Remark~\ref{rem:belady} suggests an online SSP, in which jobs arrive over time,
 analysed competitively against paging machinery---with the offline loading oracle as
 a natural baseline.
 
-\paragraph{Learning-augmented column generation.}
-Machine-learning acceleration of pricing and branching
-\citep{Bengio2021,Gasse2019,Morabit2021} is an active but crowded field. It is worth
-pursuing here only if the benchmark data expose a concrete learning signal---such as
-the pronounced imbalance between zero-gap and positive-gap instances that the
-structural results predict---rather than as an end in itself.
+\paragraph{Learning-augmented column generation and cut selection.}
+Machine learning for the exact side---cut selection, ordering and removal
+\citep{DezaKhalil2023}, and column and branching selection
+\citep{Bengio2021,Gasse2019,Morabit2021}---is active but crowded, and its
+established role is to \emph{choose} among cuts or columns one already knows how to
+generate rather than to strengthen them; the lifting itself stays combinatorial.
+Two observations bound its usefulness here. First, the frontier of
+Section~\ref{ssec:assess} is a \emph{bound} gap, and cut selection cannot
+manufacture bound strength where no strong cut exists, so any learning signal
+would have to come from the structural imbalance between zero-gap and positive-gap
+instances rather than from search statistics. Second, the tooling for learned
+mixed-integer heuristics is built on the column-generation solver rather than the
+Benders master, which makes learned column selection for the position-indexed
+pricers \citep{Morabit2021}---whose coupled-pair pricing is the measured
+bottleneck---the natural target, with cut selection for the Benders solver
+secondary. Either is a follow-up to a settled deterministic baseline, not a
+substitute for one.
 
 %==============================================================================
 \section{Remaining work}\label{sec:planned}

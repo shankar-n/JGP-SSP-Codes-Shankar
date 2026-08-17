@@ -69,6 +69,15 @@ BBC_CONFIGS = [
     {"label": "BBC-K+F",   "solver": "BBC", "comb_cuts": True,  "frac_cuts": True,  "triplet_bounds": False, "lp_reuse": True},
     {"label": "BBC-K+T",   "solver": "BBC", "comb_cuts": True,  "frac_cuts": False, "triplet_bounds": True,  "lp_reuse": True},
     {"label": "BBC-K+FT",  "solver": "BBC", "comb_cuts": True,  "frac_cuts": True,  "triplet_bounds": True,  "lp_reuse": True},
+    # ── Acceleration features (2026-07), layered on the corrected fractional-cut base.
+    #    conflict_cuts    — conflict-graph constant root bound (helps grouping-dominated)
+    #    primal_heuristic — HGS -> CPLEX MIP start + seeded Benders cut at the root
+    #    pareto_cuts      — Papadakos core-point lifting of the fractional Benders cuts
+    #    Each is independently on/off; +ACC turns all three on.
+    {"label": "BBC-LP+F+C",  "solver": "BBC", "comb_cuts": False, "frac_cuts": True, "triplet_bounds": False, "lp_reuse": True, "conflict_cuts": True},
+    {"label": "BBC-LP+F+H",  "solver": "BBC", "comb_cuts": False, "frac_cuts": True, "triplet_bounds": False, "lp_reuse": True, "primal_heuristic": True},
+    {"label": "BBC-LP+F+P",  "solver": "BBC", "comb_cuts": False, "frac_cuts": True, "triplet_bounds": False, "lp_reuse": True, "pareto_cuts": True},
+    {"label": "BBC-LP+ACC",  "solver": "BBC", "comb_cuts": False, "frac_cuts": True, "triplet_bounds": False, "lp_reuse": True, "conflict_cuts": True, "primal_heuristic": True, "pareto_cuts": True},
     # Prior-work baselines
     {"label": "LSS",       "solver": "LSS"},
     {"label": "SSPMF",     "solver": "SSPMF"},
