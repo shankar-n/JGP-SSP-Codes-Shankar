@@ -95,29 +95,25 @@ Syst\`emes (LIMOS)}\par
 \end{titlepage}
 
 \begin{abstract}
-The Job Sequencing and Tool Switching Problem (SSP) seeks an ordering of jobs on a
-single flexible machine, together with a tool-loading policy for a capacitated
-magazine, that minimises the number of tool switches. For a fixed order the loading is
-solved exactly by a classical greedy rule, so the difficulty lies in the ordering, and
-the problem is NP-hard. In practice the SSP is solved by a two-phase
+The Job Sequencing and Tool Switching Problem (SSP) asks for an order in which to run a
+set of jobs on one machine, and which tools to keep in the machine's limited magazine, so
+as to make as few tool changes as possible. For a fixed order, the tool loading is solved
+exactly by a simple greedy rule, so the difficulty is in the ordering, which is NP-hard. In practice the SSP is solved by a two-phase
 decomposition: group the jobs into as few magazine-fitting batches as possible,
 then sequence the batches. This report asks two questions about that standard
 method.
 \begin{gaptheory}
-It answers most of both. \emph{How wrong can the decomposition be?} We
-prove that its error---the gap---is exactly the price of insisting on the fewest
-batches; that the gap vanishes in several broad classes yet can grow without
-bound; and we determine its worst-case behaviour quantitatively: an exact cost
-formula when the batch number is three, bounds that are tight at every known
-extremal instance, and a sharp separation between the heuristic's configuration-walk
-model---for which the natural candidate condition $\mathrm{gap}\le\Kst-2$
-fails by an explicit certificate---and the heuristic as actually run, whose
-KTNS loading step beats the walk on the extremal instances and for which the
-condition is reopened. We also prove that any instance with optimum at most
-three has gap at most one. At $b=3$ we prove the ratio bound $H/\Zst\le
-4/3$ whenever $\Kst\le3$. A setup-cost analysis then shows the SSP collapses
-onto the grouping problem exactly when changeovers cost more than the gap---and
-real tooling data says they do.
+It answers most of both. \emph{How wrong can the decomposition be?} We show that its
+error---the gap---is exactly the price of using the fewest batches. For several large
+families of instances the gap is zero, but on others it grows without bound. We also
+bound it: an exact formula for the cost when there are three batches; bounds that are
+tight on every hard instance we found; and a comparison between a simplified ``walk''
+version of the heuristic---which can lose by more than the natural guess
+$\mathrm{gap}\le\Kst-2$---and the heuristic as actually run, whose extra loading step
+does better. We prove that any instance whose optimum is at most three has gap at most
+one, and that the ratio $H/\Zst$ stays below $4/3$ when $b=3$ and $\Kst\le3$. Finally,
+charging a fixed cost for each batch change turns the SSP into the grouping problem once
+that cost passes the gap---and real tooling data put it well past.
 \end{gaptheory}
 \begin{gapstub}
 \emph{How wrong can the decomposition be?} A structural theory answering this
@@ -130,10 +126,9 @@ exactly?} Here the obstacle is one number, the coverage bound
 $\lvert\U\rvert-b$: we prove that every natural configuration relaxation is
 stuck at it, and a first benchmark of five exact methods on $1{,}421$
 standard instances---preliminary, with the definitive campaign still
-running---already indicates the suites split roughly in half between instances
-where this bound equals the optimum (easy for every method) and instances
-where no current method has traction. The numbers below are therefore reported as
-provisional evidence for that dichotomy rather than as final measurements.
+running---suggests the instances split into two halves: those where this bound equals
+the optimum, which every method solves easily, and those where no method makes progress.
+The numbers below are therefore given as early evidence, not as final measurements.
 \begin{gaptheory}
 Every proved statement appears as a
 theorem in the text; exactly one conjecture remains, and it is labelled as
@@ -148,26 +143,23 @@ such.
 \section{Introduction}\label{sec:intro}
 %==============================================================================
 \paragraph{Motivation.}
-A flexible manufacturing cell built around a single computer-numerically-controlled
-machine can produce a wide variety of parts because it draws on a large library of
-cutting tools. The machine, however, holds only a limited number of tools at once,
-in a magazine of capacity~$b$; producing the full part mix therefore requires tools
-to be exchanged between jobs. Each exchange interrupts production while the magazine
-is reconfigured, so tool switches are the dominant controllable cost in such cells
-\citep{Crama1994}. When the set of tools needed by each job is fixed, two decisions
-remain: in what \emph{order} to process the jobs, and which tools to \emph{keep or
-evict} at each step. The Job Sequencing and Tool Switching Problem (SSP) is the
-joint optimisation of these two decisions so as to minimise the total number of
-switches. The same abstract structure---a capacity-limited store that serves set-valued
-requests which may be reordered---recurs well beyond machining, and the methods
-developed here travel with it. In printed-circuit-board assembly the ``tools'' are
-component feeders on a placement machine and the ``jobs'' are the boards; in
-high-volume colour printing they are ink cartridges on a press---the setting in which
-the SSP appears verbatim and is solved industrially by the very group-then-sequence
-decomposition this report analyses \citep{Burger2015}; in warehouse order picking they
-are the items a picker can carry at once. In each case the scarce, reconfigurable
-resource and the freedom to reorder the demands are the whole of the problem, so
-nothing below is specific to cutting tools.
+A flexible manufacturing cell built around a single computer-controlled (CNC) machine
+can make many different parts because it can call on a large set of cutting tools. The
+machine, though, holds only a few tools at a time, in a magazine of capacity~$b$, so
+making the full range of parts means changing tools between jobs. Each change stops
+production while the magazine is reset, so tool changes are the main cost that can be
+controlled here \citep{Crama1994}. Once the tools each job needs are fixed, two decisions
+remain: in what \emph{order} to run the jobs, and which tools to \emph{keep or remove} at
+each step. The Job Sequencing and Tool Switching Problem (SSP) makes both decisions
+together, so as to minimise the total number of changes. The same structure---a small
+store that serves groups of items, in an order we can choose---appears well beyond
+machining, and the methods here carry over. In circuit-board assembly the ``tools'' are
+component feeders and the ``jobs'' are the boards; in colour printing they are ink
+cartridges on a press, where the SSP appears exactly and is solved in industry by the same
+group-then-sequence method this report studies \citep{Burger2015}; in warehouse picking
+they are the items a picker can carry at once. In each case the limited, reusable resource
+and the freedom to reorder the demands are the whole problem, so nothing below is specific
+to cutting tools.
 
 \begin{figure}[ht]\centering
 \begin{tikzpicture}[font=\small,>=Stealth,
@@ -262,7 +254,7 @@ lands close to the optimum \citep{Burger2015,Mecler2021}. Yet nobody has shown h
 far from optimal it can be, or characterised the instances on which it is exact:
 the survey literature records the heuristic's empirical success and its missing
 guarantee side by side \citep{Calmels2018}. The exact side has the same gap in reverse:
-the strongest compact relaxations of the SSP all reduce to a single elementary
+the best compact relaxations of the SSP all reduce to a single simple
 quantity---the number of tools used beyond what the magazine can hold---so a solver
 relying on them cannot prove optimality on the hard instances. This report addresses
 both gaps, and the same quantity, introduced
@@ -275,11 +267,11 @@ the optimal loading policy is known in closed form---the Keep Tool Needed Soones
 (KTNS) rule of \citet{Tang1988}, computable in $O(n\lvert T\rvert)$ time---so the
 loading subproblem is easy. The difficulty lies entirely in the ordering: a good
 order places jobs with similar tool requirements next to one another so that few
-tools change hands, but ``similarity'' here is a set-overlap relation with no
-underlying metric, and the capacity constraint couples positions that are far apart
-in the sequence. The joint problem is NP-hard \citep{Crama1994,Laporte2004}, and
-even the strongest compact integer formulations \citep{Catanzaro2015,Laporte2004,%
-daSilva2024} become difficult beyond moderate sizes. This structure---an easy inner
+tools change hands, but ``similarity'' here just means overlapping tool sets, with no
+natural distance to measure it, and the magazine limit links jobs that sit far apart
+in the order. The joint problem is NP-hard \citep{Crama1994,Laporte2004}, and
+even the best compact integer formulations \citep{Catanzaro2015,Laporte2004,%
+daSilva2024} become hard beyond moderate sizes. This structure---an easy inner
 problem nested inside a hard ordering problem---is what decomposition methods are
 designed to exploit, and both lines of this work, the structural analysis and the
 exact methods, rest on it.
@@ -412,15 +404,13 @@ assessment; Section~\ref{sec:concl} concludes; and Section~\ref{sec:planned} set
 out the work remaining in the project. Longer proofs are deferred to
 Appendix~\ref{app:proofs}.
 \begin{gaptheory}
-A reader pressed for time can follow the spine of the
-report through the heuristic's definition (Section~\ref{ssec:jgp}), the exactness
-theorem and the extremal case analysis (statements in Sections~\ref{ssec:exact}
-and~\ref{ssec:law}), and the results table of Section~\ref{ssec:results}.
+The essential parts are the heuristic's definition (Section~\ref{ssec:jgp}), the
+exactness theorem and the $\Kst=3$ analysis (Sections~\ref{ssec:exact}
+and~\ref{ssec:law}), and the results table (Section~\ref{ssec:results}).
 \end{gaptheory}
 \begin{gapstub}
-A reader pressed for time can follow the spine of the report through the
-heuristic's definition (Section~\ref{ssec:jgp}) and the results table of
-Section~\ref{ssec:results}.
+The essential parts are the heuristic's definition (Section~\ref{ssec:jgp}) and the
+results table (Section~\ref{ssec:results}).
 \end{gapstub}
 
 %==============================================================================
@@ -929,8 +919,8 @@ Year & Work & Approach & Key advance \\
 2024 & \citet{daSilva2024}   & multicommodity flow          & LP $=\lvert\U\rvert-b$; $+17\%$ solved \\
 2024 & \citet{Akhundov2024}  & symmetry; arc-flow           & symmetry-broken position/flow models \\
 2025 & \citet{Legrand2025}   & dynamic programming, $A^{*}$ & combinatorial bounds tighter than any LP \\
-\addlinespace
---   & this work             & Benders; position B\&P       & past the $\lvert\U\rvert-b$ ceiling by decomposition \\
+% (the present report's own methods, and where they sit, are given in Table~\ref{tab:methods};
+%  they are deliberately not placed in this historical timeline of published work)
 \bottomrule
 \end{tabular}
 \caption{The exact-method lineage for the SSP. Two decades of compact formulations
@@ -953,8 +943,8 @@ through lazy-constraint callbacks, attack the dual-subproblem bottleneck with fo
 algorithms replacing a general solver inside the Benders loop, and further strengthen the
 method with a heuristic that pre-injects optimality cuts and a reformulated master---and
 they report that even so the decomposition does not systematically beat the
-non-decomposed formulation. That honest negative is precisely what recommends the approach
-\emph{here}, for the SSP occupies the regime their assembly-line problem lacked: its dual
+non-decomposed formulation. That negative result is what motivates the approach
+\emph{here}. The SSP occupies the regime their assembly-line problem lacked, because its dual
 subproblem is not a general program needing tailored algorithms but the \emph{polynomially}
 solvable KTNS oracle, so the loading cut is exact and essentially free at every callback.
 The present solver adopts the same architecture---lazy-callback branch-and-Benders-cut, a
@@ -1293,12 +1283,12 @@ $b\ge5$---and Proposition~\ref{prop:refute} shows that there it does fail.
 The configurations of any feasible $3$-grouping (one exists) cover $\U$, so
 Proposition~\ref{prop:hk3} with Lemma~\ref{lem:overlap} gives
 $H\le q+\lfloor(2b-q)/3\rfloor$, while Lemma~\ref{lem:transcap} gives
-$H\le2\min(b,q)\le q+q$; subtracting $\Zst=q+R_{\mathrm{opt}}$ yields the display.
+$H\le2\min(b,q)\le q+q$; subtracting $\Zst=q+R_{\mathrm{opt}}$ yields the bound stated in the proposition.
 For (i) at $b=3$: $\lfloor(6-q)/3\rfloor\le1$ for all $q\ge1$. At $b=4$: the
-display is $\le1$ for $q\ge3$; for $q=2$, either $R_{\mathrm{opt}}\ge1$ (display
+stated bound is $\le1$ for $q\ge3$; for $q=2$, either $R_{\mathrm{opt}}\ge1$ (bound
 $\le1$) or $\Zst=q\le2$, in which case the gap vanishes (Appendix~\ref{app:proofs});
 $q\le1$ is Corollary~\ref{cor:zerogap}(ii). Parts (ii) and (iii) read off the
-display; part (iv) is proved in Appendix~\ref{app:proofs}.
+stated bound; part (iv) is proved in Appendix~\ref{app:proofs}.
 \end{proof}
 
 \begin{proposition}[A quantitative bound for every $\Kst$]\label{prop:genk}
@@ -1972,8 +1962,8 @@ and, by the grouping bound, $\Zst\ge\omega(G)-1$; more generally $\Kst\ge\chi(G)
 and where $G$ is non-bipartite---an odd hole---one has $\chi(G)\ge3$ even when
 $\omega(G)=2$. We add the resulting constant row
 $\theta\ge(\chi_{\mathrm{lb}}-1)+\min(b,\lvert\U\rvert)$ to the master whenever it
-strictly exceeds the coverage bound. This is the elementary end of the
-conflict-graph machinery of \citet{Atamturk2000}, and it is honest to note its
+strictly exceeds the coverage bound. This is the simplest end of the
+conflict-graph machinery of \citet{Atamturk2000}, and its
 reach is narrow: on most instances the coverage bound already dominates it, and it
 bites only where the grouping structure, not the tool count, is what forces
 switches. It is kept because it is exactly the lever the structural analysis of
@@ -2278,7 +2268,7 @@ candidate Benders and combinatorial cuts inside the solver's callback, so that c
 prototype over to the SSP is a matter of feeding it the same features on real cuts.
 
 \paragraph{Why it is reported, but gated.}
-The honest limit is the one drawn in Section~\ref{ssec:assess}. The frontier that defeats
+The limit is the one identified in Section~\ref{ssec:assess}. What defeats
 the exact solver is a \emph{bound} gap: on the hard instances the incumbent already equals
 the optimum and only the dual bound lags, so where no strong cut exists a learned selector
 has nothing to select that would close the instance. Cut selection can reorder and hasten
@@ -2348,9 +2338,9 @@ shifted-geometric-mean solve times on the instances a set of methods commonly
 solves, following standard practice for exact-method comparisons.
 
 \paragraph{Status: what these numbers are, and are not.}
-Candour is owed about the provenance of the figures in this section, because two
-things have changed since they were produced, and both are corrected in the campaign
-now running. First, they predate the correction of the fractional-cut injection
+Two facts about how the numbers in this section were produced need to be stated
+plainly, because both have changed since the numbers were generated, and both are
+corrected in the campaign now running. First, they predate the correction of the fractional-cut injection
 defect described in Section~\ref{ssec:accel}: in the run reported here the
 fractional-cut configurations never actually added a cut, so their columns measure the
 base Benders solver rather than fractional Benders cuts, and \emph{no} conclusion about
