@@ -8,7 +8,7 @@
 % Authoring/expansion notes are kept OUT of this file (see AI_EXPANSION_GUIDE.md)
 % so that the document itself is standalone.
 %==============================================================================
-\documentclass[11pt,a4paper]{article}
+\documentclass[12pt,a4paper]{article}
 
 \usepackage{lmodern}
 \usepackage[T1]{fontenc}
@@ -18,11 +18,23 @@
 \usepackage{booktabs}
 \usepackage{enumitem}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc,decorations.pathreplacing}
+% ---- figure colour palette (used across all TikZ figures) --------------------
+% Conventional monochrome: everything is dark ink; grayscale fills only.
+\definecolor{cBlue}{HTML}{111111}
+\definecolor{cOrange}{HTML}{111111}
+\definecolor{cGreen}{HTML}{111111}
+\definecolor{cRed}{HTML}{111111}
+\definecolor{cPurple}{HTML}{111111}
+\definecolor{cTeal}{HTML}{111111}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage[hidelinks]{hyperref}
 \usepackage{graphicx}
 \usepackage{comment}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{microtype}
+\setlength{\emergencystretch}{3em}
 \hypersetup{pdftitle={Structural Analysis and Exact solving for the Job Sequencing and Tool Switching Problem},pdfauthor={Shankar Narayanan}}
 
 % ---- DRAFT SWITCH ------------------------------------------------------------
@@ -116,10 +128,12 @@ proofs; it will be restored in the next revision.
 \emph{Can the same grouping view solve the SSP
 exactly?} Here the obstacle is one number, the coverage bound
 $\lvert\U\rvert-b$: we prove that every natural configuration relaxation is
-stuck at it, and a complete benchmark of five exact methods on $1{,}421$
-standard instances shows the suites split roughly in half between instances
-where this bound equals the optimum---easy for every method---and instances
-where no current method has traction.
+stuck at it, and a first benchmark of five exact methods on $1{,}421$
+standard instances---preliminary, with the definitive campaign still
+running---already indicates the suites split roughly in half between instances
+where this bound equals the optimum (easy for every method) and instances
+where no current method has traction. The numbers below are therefore reported as
+provisional evidence for that dichotomy rather than as final measurements.
 \begin{gaptheory}
 Every proved statement appears as a
 theorem in the text; exactly one conjecture remains, and it is labelled as
@@ -128,6 +142,7 @@ such.
 \end{abstract}
 
 \tableofcontents
+\clearpage
 
 %==============================================================================
 \section{Introduction}\label{sec:intro}
@@ -154,22 +169,72 @@ are the items a picker can carry at once. In each case the scarce, reconfigurabl
 resource and the freedom to reorder the demands are the whole of the problem, so
 nothing below is specific to cutting tools.
 
-\begin{figure}[t]
+\begin{figure}[ht]\centering
+\begin{tikzpicture}[font=\small,>=Stealth,
+   box/.style={draw=black!60,semithick,rounded corners},
+   tool/.style={circle,draw=black!60,fill=black!10,minimum size=7mm,inner sep=0pt,font=\footnotesize},
+   job/.style={draw=black!60,semithick,rounded corners,minimum width=1.4cm,minimum height=0.62cm,font=\footnotesize}]
+  % LEFT: the job list, waiting to be ordered
+  \node[font=\bfseries] at (0,2.4) {Jobs};
+  \node[job] (j1) at (0,1.55) {job 1};
+  \node[job] (j2) at (0,0.80) {job 2};
+  \node[job] (j3) at (0,0.05) {job 3};
+  \draw[->,semithick,black!65] (0.9,0.80) -- (2.15,0.80);
+  \node[font=\scriptsize,align=center,text=black!60] at (1.5,1.25) {in some\\[-2pt] order};
+  % CENTRE: the machine's tool magazine (limited capacity)
+  \node[font=\bfseries] at (3.9,2.4) {Tool magazine};
+  \node[font=\scriptsize,text=black!55] at (3.9,2.0) {(holds $b=3$ tools)};
+  \node[box,minimum width=3.2cm,minimum height=1.15cm] (mag) at (3.9,0.80) {};
+  \node[tool] at (3.05,0.80) {1};
+  \node[tool] at (3.90,0.80) {2};
+  \node[tool] at (4.75,0.80) {5};
+  % RIGHT: the full tool store
+  \node[font=\bfseries] at (8.2,2.4) {Tool store};
+  \node[font=\scriptsize,text=black!55] at (8.2,2.0) {(all tools)};
+  \node[box,minimum width=1.9cm,minimum height=1.95cm] (crib) at (8.2,0.55) {};
+  \node[tool] at (7.78,1.15) {3};
+  \node[tool] at (8.62,1.15) {4};
+  \node[tool] at (7.78,0.30) {6};
+  \node[tool] at (8.62,0.30) {7};
+  % the tool switch happens between store and magazine
+  \draw[<->,semithick,black!65] (5.6,0.80) -- (7.15,0.80);
+  \node[font=\scriptsize,align=center,text=black!60] at (6.37,1.30) {tool\\[-2pt] switch};
+\end{tikzpicture}
+\caption{The physical setting. A computer-controlled machine draws tools from a magazine
+that holds only $b$ at a time; the jobs are run in some order, and whenever a job needs a
+tool not currently loaded, a \emph{tool switch} brings it from the store and evicts
+another---halting the spindle. Minimising the number of such switches over all job orders
+is the problem this report studies; Figure~\ref{fig:setup} strips it to its essentials.}
+\label{fig:machine}
+\end{figure}
+
+\begin{figure}[ht]
 \centering
 \begin{tikzpicture}[
-   font=\footnotesize,
-   job/.style={draw, rounded corners, minimum width=2.1cm, minimum height=0.75cm},
-   mag/.style={draw, fill=black!5, minimum width=2.1cm, minimum height=0.75cm},
-   >=Stealth]
-  \node[job] (j1) at (0,1.5)   {job 1: needs $a,b$};
-  \node[job] (j2) at (4.7,1.5) {job 2: needs $b,c$};
-  \node[job] (j3) at (9.4,1.5) {job 3: needs $c,d$};
-  \node[mag] (m1) at (0,0)   {$[\;a\quad b\;]$};
-  \node[mag] (m2) at (4.7,0) {$[\;b\quad c\;]$};
-  \node[mag] (m3) at (9.4,0) {$[\;c\quad d\;]$};
-  \draw[->] (j1) -- (m1);  \draw[->] (j2) -- (m2);  \draw[->] (j3) -- (m3);
-  \draw[->, thick] (m1) -- (m2) node[midway, above, font=\scriptsize] {swap: $+c,\,-a$};
-  \draw[->, thick] (m2) -- (m3) node[midway, above, font=\scriptsize] {swap: $+d,\,-b$};
+   font=\small, >=Stealth,
+   job/.style={draw=cBlue!70, fill=white, rounded corners, semithick,
+               minimum width=2.7cm, minimum height=1.0cm, align=center},
+   chip/.style={draw=black!25, rounded corners=1pt, minimum size=0.72cm,
+                inner sep=0pt, font=\bfseries, text=white},
+   swaparr/.style={->, line width=1.1pt, cRed}]
+  \node[job] (j1) at (0,2)   {\textbf{job 1} needs\\ {\color{cRed}$a$}, {\color{cBlue}$b$}};
+  \node[job] (j2) at (5,2)   {\textbf{job 2} needs\\ {\color{cBlue}$b$}, {\color{cGreen}$c$}};
+  \node[job] (j3) at (10,2)  {\textbf{job 3} needs\\ {\color{cGreen}$c$}, {\color{cOrange}$d$}};
+  \node[chip,fill=cRed]    (m1a) at (-0.42,0) {$a$};
+  \node[chip,fill=cBlue]   (m1b) at ( 0.42,0) {$b$};
+  \node[chip,fill=cBlue]   (m2a) at ( 4.58,0) {$b$};
+  \node[chip,fill=cGreen]  (m2b) at ( 5.42,0) {$c$};
+  \node[chip,fill=cGreen]  (m3a) at ( 9.58,0) {$c$};
+  \node[chip,fill=cOrange] (m3b) at (10.42,0) {$d$};
+  \node[draw=black!45, rounded corners, fit=(m1a)(m1b), inner sep=2.5pt] (m1) {};
+  \node[draw=black!45, rounded corners, fit=(m2a)(m2b), inner sep=2.5pt] (m2) {};
+  \node[draw=black!45, rounded corners, fit=(m3a)(m3b), inner sep=2.5pt] (m3) {};
+  \draw[->,black!45] (j1) -- (m1);  \draw[->,black!45] (j2) -- (m2);  \draw[->,black!45] (j3) -- (m3);
+  \draw[swaparr] (m1) -- (m2)
+     node[midway,above,font=\scriptsize,align=center]{swap\\ $-${\color{cRed}$a$}, $+${\color{cGreen}$c$}};
+  \draw[swaparr] (m2) -- (m3)
+     node[midway,above,font=\scriptsize,align=center]{swap\\ $-${\color{cBlue}$b$}, $+${\color{cOrange}$d$}};
+  \node[font=\scriptsize,text=black!55] at (5,-1.05) {the magazine (grey box) holds only $b=2$ tools at a time};
 \end{tikzpicture}
 \caption{The problem in miniature. Three jobs run left to right on a machine whose
 magazine holds only $b=2$ tools at once; a job can run only when all of its tools
@@ -190,18 +255,17 @@ can lose hours of capacity to switches that a better order would have avoided.
 Saving switches is saving machine time, and machine time is money. The second
 reason is less obvious, and is what makes the problem live \emph{research} rather
 than engineering. The way the SSP is solved in practice rests on a piece of
-folklore that has never been checked. Practitioners---and, tellingly, the strongest
-published algorithms---almost always \emph{group} the jobs first and \emph{order}
+folklore that has never been checked. Practitioners, and the strongest published
+algorithms too, almost always \emph{group} the jobs first and \emph{order}
 the groups afterwards; this is fast, and on the instances people have tried it
 lands close to the optimum \citep{Burger2015,Mecler2021}. Yet nobody has shown how
 far from optimal it can be, or characterised the instances on which it is exact:
 the survey literature records the heuristic's empirical success and its missing
-guarantee side by side \citep{Calmels2018}. The exact side has a mirror-image gap.
-The strongest compact relaxations of the SSP all sag onto a single elementary
-quantity---roughly, the number of tools in use beyond what the magazine can
-hold---so a solver leaning on them cannot, on the hard instances, \emph{prove} its
-answer optimal. This report aims squarely at those two gaps, and its organising
-finding is that they are one gap seen from two sides: a single quantity, introduced
+guarantee side by side \citep{Calmels2018}. The exact side has the same gap in reverse:
+the strongest compact relaxations of the SSP all reduce to a single elementary
+quantity---the number of tools used beyond what the magazine can hold---so a solver
+relying on them cannot prove optimality on the hard instances. This report addresses
+both gaps, and the same quantity, introduced
 in Section~\ref{ssec:lb}, governs both when the heuristic is exact and when the
 exact methods close.
 
@@ -250,6 +314,37 @@ heuristic's gap can open and the same methods branch heavily. That coincidence,
 developed in Sections~\ref{sec:gap} and~\ref{sec:comp}, is the connecting thread of
 this report, and the configuration view that produces it is established once, in
 Section~\ref{sec:prelim}.
+
+\begin{figure}[ht]\centering
+\begin{tikzpicture}[font=\small,>=Stealth,
+   nb/.style={draw,semithick,rounded corners,align=center,minimum height=1.15cm,text width=3.4cm,font=\footnotesize},
+   ar/.style={-{Stealth[length=2.5mm]},line width=1pt}]
+  \node[draw=black!65,fill=black!8,semithick,rounded corners,align=center,
+        minimum width=3.1cm,minimum height=1.3cm] (cov) at (0,0)
+     {\textbf{coverage bound}\\[1pt] $\lvert\U\rvert-b$};
+  \node[nb,draw=cPurple!70,fill=white] (theory) at (-5.5,0)
+     {\textbf{Structural theory} (\S\ref{sec:gap})\\ how far can the heuristic fall short?};
+  \node[nb,draw=cBlue!70,fill=white] (bbc) at (5.5,1.4)
+     {\textbf{Branch-and-Benders-cut} (\S\ref{ssec:bbc})\\ exact KTNS subproblem \emph{sidesteps} it};
+  \node[nb,draw=cGreen!70,fill=white] (bp) at (5.5,-1.4)
+     {\textbf{Position branch-and-price} (\S\ref{ssec:pos})\\ PTF relaxation \emph{exceeds} it};
+  \node[nb,draw=cOrange!70,fill=white] (comp) at (0,-2.55)
+     {\textbf{Computational study} (\S\ref{sec:comp})\\ measures the split};
+  \draw[ar,cPurple!60!black] (theory) -- (cov)
+     node[midway,above,font=\scriptsize,text=cPurple!55!black]{$=\Zst$ where tight};
+  \draw[ar,cBlue!60!black] (bbc) -- (cov);
+  \draw[ar,cGreen!60!black] (bp) -- (cov);
+  \draw[ar,cOrange!60!black] (cov) -- (comp);
+\end{tikzpicture}
+\caption{The shape of the argument. One quantity, the coverage bound $\lvert\U\rvert-b$,
+is the hinge of the whole report: the structural theory shows it equals the optimum
+wherever it is tight (\S\ref{sec:gap}); the two exact methods are chosen precisely to
+get \emph{past} it where it is loose---branch-and-Benders-cut by sidestepping the linear
+relaxation, position branch-and-price by strengthening it (\S\ref{sec:exact}); and the
+computational study measures how the instances split between the two regimes
+(\S\ref{sec:comp}).}
+\label{fig:map}
+\end{figure}
 
 \paragraph{Contributions.}
 The principal results are the following.
@@ -430,14 +525,14 @@ delegating the loading to this exact oracle.
 \end{remark}
 
 \paragraph{KTNS in motion.}
-It is worth watching the rule work once, since every algorithm in this report calls
+The rule is easiest to follow on one example, since every algorithm in this report calls
 it as a black box. Return to the $6$-ring processed in the order $1,2,3,4,5,6$
 (Figure~\ref{fig:ktns}). The magazine starts empty and holds $b=3$ tools. Jobs~$1$
 and~$2$ need $\{1,2\}$ and $\{2,3\}$, so the first magazine is filled with
 $\{1,2,3\}$: this serves both jobs at once and spends the third slot now, on tool~$3$,
 to save a switch later. At position~$3$ job~$3$ needs $\{3,4\}$; tool~$3$ is already
 loaded, so only tool~$4$ is inserted---and one resident must leave. Here the rule
-earns its name. Of the residents $\{1,2,3\}$, tool~$2$ is never needed again, whereas
+does its work. Of the residents $\{1,2,3\}$, tool~$2$ is never needed again, whereas
 tool~$1$ will be needed by job~$6$ at the very end; so tool~$2$ is evicted and tool~$1$
 is kept, sitting idle across four positions. Positions~$4$ and~$5$ repeat the
 pattern---insert the single new tool, evict the one whose next use is furthest
@@ -455,9 +550,9 @@ position~$3$ would have to reload it at position~$6$ and pay more.
     \node[font=\scriptsize,text=black!55] at (\p,6.7) {$\{\req\}$};}
   \foreach \t/\y in {1/5,2/4,3/3,4/2,5/1,6/0}{\node[anchor=east,font=\footnotesize] at (0.4,\y) {$t_{\t}$};}
   \foreach \p/\y in {2/5,3/5,4/5,5/5,6/5, 2/4, 2/3,3/3, 4/2, 5/1,6/1, 6/0}{
-     \fill[black!10] (\p-0.5,\y-0.5) rectangle (\p+0.5,\y+0.5);}
+     \fill[cBlue!20] (\p-0.5,\y-0.5) rectangle (\p+0.5,\y+0.5);}
   \foreach \p/\y in {1/5,1/4,1/3, 3/2, 4/1, 5/0}{
-     \fill[black!60] (\p-0.5,\y-0.5) rectangle (\p+0.5,\y+0.5);
+     \fill[cOrange!90] (\p-0.5,\y-0.5) rectangle (\p+0.5,\y+0.5);
      \draw[white,line width=0.9pt] (\p-0.17,\y)--(\p+0.17,\y);
      \draw[white,line width=0.9pt] (\p,\y-0.17)--(\p,\y+0.17);}
   \draw[black!35,step=1] (0.5,-0.5) grid (6.5,5.5);
@@ -520,7 +615,7 @@ configuration as a city and finds the cheapest tour through them, the ``distance
 between two configurations being the number of tools that differ; the third glues the
 groups back into a single job order and reads off its true cost with KTNS. The
 division of labour is deliberate---a hard packing question and a hard ordering
-question are each handed to a mature, well-understood solver---but it is also the
+question are each handed to a mature, well-understood solver, but it is also the
 origin of the gap studied in Section~\ref{sec:gap}: the first phase freezes the
 grouping before the second phase can discover that a slightly larger grouping would
 have toured more cheaply.
@@ -529,13 +624,13 @@ have toured more cheaply.
 \begin{tikzpicture}[font=\footnotesize,>=Stealth,
    box/.style={draw,rounded corners,align=center,minimum height=1.9cm,text width=3.05cm},
    node distance=7mm]
-  \node[box] (g) {\textbf{1. Group}\\[2pt] fewest magazines\\ covering all jobs\\[3pt]
+  \node[box,semithick,draw=cBlue!70,fill=white] (g) {\textbf{1. Group}\\[2pt] fewest magazines\\ covering all jobs\\[3pt]
      $\{1,2\}\ \{3,4\}\ \{5,6\}$\\ $\Kst=3$};
-  \node[box,right=of g] (s) {\textbf{2. Sequence}\\[2pt] order them like\\ cities (TSP);\\ cost $=$ tools changed\\[3pt]
+  \node[box,right=of g,semithick,draw=cOrange!85,fill=white] (s) {\textbf{2. Sequence}\\[2pt] order them like\\ cities (TSP);\\ cost $=$ tools changed\\[3pt]
      best tour: $4$};
-  \node[box,right=of s] (e) {\textbf{3. Evaluate}\\[2pt] concatenate and\\ run KTNS on the\\ full job order\\[3pt]
+  \node[box,right=of s,semithick,draw=cGreen!70,fill=white] (e) {\textbf{3. Evaluate}\\[2pt] concatenate and\\ run KTNS on the\\ full job order\\[3pt]
      $H=4$ (free-initial)};
-  \draw[->] (g)--(s);  \draw[->] (s)--(e);
+  \draw[-{Stealth[length=3mm]},line width=1pt,black!55] (g)--(s);  \draw[-{Stealth[length=3mm]},line width=1pt,black!55] (s)--(e);
 \end{tikzpicture}
 \caption{The two-phase heuristic as a pipeline, on the $6$-ring. Phase~1 commits to
 the \emph{fewest} magazines; phase~2 orders them like cities in a travelling-salesman
@@ -581,15 +676,15 @@ Benders master as a travelling-salesman skeleton (Section~\ref{ssec:bbc}).
 
 \begin{figure}[t]\centering
 \begin{tikzpicture}[font=\footnotesize,>=Stealth,
-   cfg/.style={draw,rounded corners,minimum width=1.55cm,minimum height=0.8cm},
+   cfg/.style={draw=cPurple!70,semithick,fill=white,rounded corners,minimum width=1.6cm,minimum height=0.85cm},
    node distance=1.15cm]
   \node[cfg] (c1) {$\{1,2,3\}$};
   \node[cfg,right=of c1] (c2) {$\{1,3,4\}$};
   \node[cfg,right=of c2] (c3) {$\{1,4,5\}$};
   \node[cfg,right=of c3] (c4) {$\{1,5,6\}$};
-  \draw[->] (c1)--(c2) node[midway,above,font=\scriptsize]{$+4$};
-  \draw[->] (c2)--(c3) node[midway,above,font=\scriptsize]{$+5$};
-  \draw[->] (c3)--(c4) node[midway,above,font=\scriptsize]{$+6$};
+  \draw[->,semithick,cGreen!55!black] (c1)--(c2) node[midway,above,font=\scriptsize,text=cGreen!45!black]{$+4$};
+  \draw[->,semithick,cGreen!55!black] (c2)--(c3) node[midway,above,font=\scriptsize,text=cGreen!45!black]{$+5$};
+  \draw[->,semithick,cGreen!55!black] (c3)--(c4) node[midway,above,font=\scriptsize,text=cGreen!45!black]{$+6$};
   \node[below=0.5mm of c1,font=\scriptsize,text=black!60] {serves $1,2$};
   \node[below=0.5mm of c2,font=\scriptsize,text=black!60] {serves $3$};
   \node[below=0.5mm of c3,font=\scriptsize,text=black!60] {serves $4$};
@@ -685,43 +780,96 @@ formulations are compared, they are first reduced to the empty-start convention 
 Proposition~\ref{prop:conv}.
 
 \subsection{Related work}\label{ssec:related}
-\paragraph{Exact formulations.}
-\citet{Catanzaro2015} give a family of compact integer formulations with a
-computational comparison, their strongest models adding overlap and
-linear-ordering inequalities. \citet{Laporte2004} propose an integer program with a
-branch-and-cut. \citet{daSilva2024} give a multicommodity-flow formulation whose
-linear relaxation equals the coverage bound of Proposition~\ref{prop:lb2}. The
-configuration/GTSP formulation underlying our position-indexed models is developed
-by \citet{Colares2026Exact,Colares2026Tool}.
+\paragraph{Origins: the loading rule, and the hardness of ordering.}
+The problem was posed by \citet{Tang1988}, who isolated its two-level structure and
+settled the inner level once and for all: for a fixed job order the optimal loading is
+the Keep-Tool-Needed-Soonest rule, proved optimal in $O(n\lvert T\rvert)$ time. Their
+paper is also the source of two facts this report leans on---the pairwise bound
+$\max(0,\lvert T_i\cup T_j\rvert-b)$ on the switches forced between two adjacent jobs,
+which seeds our Benders master, and the observation that their own integer formulation
+has a linear relaxation \emph{identically zero}, so that ordering, not loading, carries
+all the difficulty and resists the linear-programming machinery from the very start.
+That difficulty was made precise by \citet{Crama1994}, who proved the SSP
+$\mathcal{NP}$-hard for every fixed capacity $b\ge2$ by a reduction to a
+Hamiltonian-path problem on an auxiliary edge graph, fixed the seven modelling
+assumptions now standard in the field, and gave an interval-matrix proof of KTNS's
+optimality that extends to arbitrary per-tool switching costs. A later study
+\citep{Crama2007} draws the boundary of tractability sharply: once tools occupy several
+magazine slots the loading problem itself becomes strongly $\mathcal{NP}$-hard (by a
+$3$-partition reduction), yet for a fixed capacity it stays polynomial through a
+shortest-path model---so the uniform SSP, whose loading is the paging problem of
+Remark~\ref{rem:belady} \citep{Belady1966}, sits at the tractable edge of a family that
+turns intractable the instant the tools stop being uniform.
 
-\paragraph{Grouping and column generation.}
-\citet{Crama1994Column} introduce a set-covering formulation of the JGP solved by
-column generation with a strong relaxation; \citet{Jans2013} give the
-asymmetric-representatives formulation. The pricing subproblem of the set-covering
-model is a Set-Union Knapsack Problem \citep{Goldschmidt1994}, NP-hard even under
-restrictive conditions. For branch-and-price we follow
-\citet{Barnhart1998,Lubbecke2005,Vanderbeck2010} and branch by the
-\citet{Ryan1981} same/different rule; subtour elimination uses the constraints of
-\citet{Miller1960} with the lifting of \citet{DesrochersLaporte1991}, or lazily
-separated generalised cuts.
+\paragraph{The exact-formulation lineage, and where it plateaus.}
+The exact side of the field is a two-decade effort to give the ordering problem a linear
+relaxation strong enough to drive branch-and-bound, and its trajectory is the single
+most important piece of context for this report: every rung of the ladder ends at the
+same quantity the structural theory singles out. \citet{Laporte2004} replaced the
+Tang--Denardo model---whose relaxation is useless---with a tool-state formulation on a
+travelling-salesman skeleton (a start/end depot, arc variables, magazine-state and
+switch variables), strengthened it with three families of valid inequalities, and solved
+it two ways: a linear-programming branch-and-cut seeded by the GENIUS heuristic
+\citep{Hertz1998}, and a branch-and-\emph{bound} carrying no linear
+relaxation at all but two combinatorial bounds on partial sequences, in the enumerative
+spirit later formalised by \citet{Yanasse2009}. The branch-and-bound reaches $25$-job
+instances while the branch-and-cut stalls near eight---an early, concrete warning that on
+this problem the relaxation, not the search, is the weak link. \citet{Ghiani2010} recast
+the SSP as a least-cost Hamiltonian cycle with a nonlinear arc cost, exploited the
+symmetry that a sequence and its reversal cost the same to halve the search, and
+separated comb inequalities with dynamically updated KTNS bounds, again pushing the
+reachable size upward. \citet{Catanzaro2015} then produced the tightest \emph{compact}
+models to date---arc-based formulations whose relaxation provably dominates Laporte's,
+a total-unimodularity argument recovering KTNS-optimality from linear-programming
+duality, and a reading of an optimal sequence as one minimising the ``zero-blocks'' of
+the tool-incidence matrix---and, in the same paper, the asymmetric-representatives MILP
+for the Job Grouping Problem that this codebase uses. Most recently \citet{daSilva2024}
+gave a multicommodity-flow model that needs no lazy constraints and solves some $17\%$
+more of the standard instances than any predecessor, and whose relaxation they prove
+equals exactly $\lvert\U\rvert-b$. That last fact is the ceiling. The strongest compact
+relaxation produced in twenty years coincides with the elementary coverage bound of
+Proposition~\ref{prop:lb2}---the very quantity Section~\ref{sec:gap} shows to be the
+optimum on a large part of the instance space and a strict underestimate on the rest.
+The compact literature has, in effect, climbed to the coverage bound and stopped; the
+two methods of Section~\ref{sec:exact} are chosen precisely to get past it.
 
-\paragraph{Adjacent exact studies.}
-Two recent theses are close in method. \citet{Otiai2026} develops an exact
-branch-and-price for the Job Grouping Problem with Ryan--Foster branching and finds
-the set-covering relaxation strong enough to solve benchmark instances in seconds
-where the compact asymmetric-representatives model times out. \citet{Moreira2026}
-studies the SSP through a magazine-configuration formulation in the sense of
-\citet{Colares2026Exact} together with a configuration-generation heuristic, and
-measures the strength of that formulation's linear relaxation against the compact
-models; we revisit those measurements in Section~\ref{ssec:assess}.
+\paragraph{The configuration view: grouping, GTSP and column generation.}
+A parallel line abandons job positions for tool \emph{configurations}.
+\citet{Crama1994Column} formulate the Job Grouping Problem as a set-covering model solved
+by column generation, whose relaxation is strong and whose pricing subproblem is a
+Set-Union Knapsack Problem \citep{Goldschmidt1994}---$\mathcal{NP}$-hard even under
+restrictive conditions, a difficulty that returns as the bottleneck of the
+position-formulation pricers of Section~\ref{ssec:pos}; \citet{Jans2013} give the
+compact asymmetric-representatives alternative. The configuration view that unifies
+grouping and sequencing is developed by \citet{Colares2026Exact,Colares2026Tool}, who
+cast the SSP as a generalised travelling-salesman problem whose clusters---the
+configurations able to serve each job---\emph{overlap}, solved by a non-compact integer
+program with exponentially many transition variables and, in progress, by column
+generation. The overlap is exactly what separates it from the textbook GTSP with
+disjoint clusters surveyed by \citet{Pop2024}, whose Noon--Bean reductions and
+branch-and-cut do not transfer directly; and where such pricing spawns constraints that
+depend on the generated columns, the simultaneous column-and-row framework of
+\citet{Muter2013} is the relevant machinery. Two recent theses sit closest to this work:
+\citet{Otiai2026} builds an exact branch-and-price for the Job Grouping Problem with
+Ryan--Foster branching and finds its set-covering relaxation strong enough to close in
+seconds instances the compact model cannot, while \citet{Moreira2026} studies the SSP
+through the magazine-configuration formulation and measures its relaxation against the
+compact models---measurements we revisit in Section~\ref{ssec:assess}. Our
+branch-and-price follows the standard column-generation apparatus
+\citep{Barnhart1998,Lubbecke2005,Vanderbeck2010}, branching by the same/different rule of
+\citet{Ryan1981} and eliminating subtours with the constraints of \citet{Miller1960}
+lifted as in \citet{DesrochersLaporte1991}.
 
 \paragraph{Heuristics and metaheuristics.}
 Because the exact methods scale poorly, most of the SSP literature is heuristic, and
 its trajectory is itself evidence for the thesis of this report. Early work pairs a
-constructive rule with local search over the job order \citep{Crama1994};
-\citet{Ghiani2010} add bounding arguments and a branch-and-bound. The current state of
+constructive, travelling-salesman-style rule with local search over the job order
+\citep{Crama1994}; the GENI and GENIUS heuristics of \citet{Hertz1998} sharpen those
+constructions and, as a byproduct, furnish the upper bound inside Laporte's
+branch-and-cut, while enumerative schemes with dominance pruning \citep{Yanasse2009} and
+the bounding arguments of \citet{Ghiani2010} complete the pre-metaheuristic era. The current state of
 the art is the hybrid genetic search of \citet{Mecler2021}, which couples an
-order-based genetic algorithm with local search and---tellingly---seeds its population
+order-based genetic algorithm with local search and seeds its population
 from Job Grouping solutions, so that the grouping view is built into even the best
 heuristic. The recurring empirical finding across two decades of this work is that
 grouping-based starting points are hard to beat; that is precisely the phenomenon
@@ -743,6 +891,75 @@ gap or ratio, extremal instances, or conditions for exactness. To our knowledge 
 worst-case guarantee has been published for \emph{any} SSP heuristic; the
 decomposition in particular had only ever been assessed empirically.
 Section~\ref{sec:gap} supplies that analysis.
+
+\paragraph{Recent exact developments.}
+The exact frontier has moved again in the last two years, by routes that reinforce rather
+than contradict the reading above. \citet{Akhundov2024} exploit the reversal symmetry of
+\citet{Ghiani2010} systematically, deriving symmetry-broken position-based and arc-flow
+formulations from a job-group representation and solving larger instances than the earlier
+compact models. \citet{Legrand2025}---with Catanzaro among the authors---abandon integer
+programming altogether for a dynamic-programming and $A^{*}$ search equipped with a new
+family of lower bounds \emph{provably tighter} than any in the prior literature, reporting
+the strongest exact results to date and outperforming both branch-and-bound and the ILP
+formulations. Their bounds are combinatorial, computed inside the search rather than as a
+linear relaxation, and that is exactly the moral: the way past the coverage ceiling has
+been to leave the compact-LP paradigm---whether for a search with sharper combinatorial
+bounds (Legrand et al.), for a decomposition whose subproblem is solved exactly (the
+Benders route of Section~\ref{ssec:bbc}), or for a configuration relaxation engineered to
+exceed $\lvert\U\rvert-b$ (the position--transition route of Section~\ref{ssec:pos}). The
+position formulations here are, to our knowledge, the first \emph{linear relaxation over
+configurations} to break the bound; they are complementary to, not in competition with,
+the search bounds of \citet{Legrand2025}, and a head-to-head comparison of the two on
+shared instances is a natural next step. Activity has also broadened to sequence-dependent
+and non-identical parallel-machine variants with new mixed-integer models, but the
+single-machine switch-minimisation core studied here remains the object of the sharpest
+exact competition.
+
+\begin{table}[t]\centering
+\footnotesize
+\begin{tabular}{@{}lll p{5.4cm}@{}}
+\toprule
+Year & Work & Approach & Key advance \\
+\midrule
+1988 & \citet{Tang1988}      & ILP; KTNS rule               & KTNS optimal for a fixed order; LP relaxation $=0$ \\
+1994 & \citet{Crama1994}     & complexity; heuristics       & SSP $\mathcal{NP}$-hard; standard model fixed \\
+2004 & \citet{Laporte2004}   & LSS ILP; B\&C and B\&B       & exact to $25$ jobs (B\&B beats B\&C) \\
+2010 & \citet{Ghiani2010}    & Hamiltonian cycle            & reversal symmetry halves the search \\
+2015 & \citet{Catanzaro2015} & tighter compact F3/F4        & LP relaxation dominates LSS \\
+2024 & \citet{daSilva2024}   & multicommodity flow          & LP $=\lvert\U\rvert-b$; $+17\%$ solved \\
+2024 & \citet{Akhundov2024}  & symmetry; arc-flow           & symmetry-broken position/flow models \\
+2025 & \citet{Legrand2025}   & dynamic programming, $A^{*}$ & combinatorial bounds tighter than any LP \\
+\addlinespace
+--   & this work             & Benders; position B\&P       & past the $\lvert\U\rvert-b$ ceiling by decomposition \\
+\bottomrule
+\end{tabular}
+\caption{The exact-method lineage for the SSP. Two decades of compact formulations
+tightened the linear relaxation only up to the coverage bound $\lvert\U\rvert-b$
+\citep{daSilva2024}; moving past it has required leaving the compact-LP paradigm---by
+search with combinatorial bounds \citep{Legrand2025}, or by the decomposition and
+configuration-relaxation routes of this report.}
+\label{tab:lineage}
+\end{table}
+
+\paragraph{Benders decomposition and its branch-and-cut integration.}
+The solver of Section~\ref{ssec:bbc} inherits a well-developed methodology.
+\citet{Rahmaniani2017} survey the acceleration of Benders decomposition; the particular
+setting in which the subproblem is settled not by linear-programming duality but by a
+combinatorial oracle is the logic-based Benders of \citet{Hooker2003} and the
+combinatorial Benders cuts of \citet{Codato2006}. The immediate template, however, is the
+recent study of \citet{Kashou2025}, who apply branch-and-Benders-cut to a robust
+production-line balancing problem: they integrate Benders into the branch-and-bound tree
+through lazy-constraint callbacks, attack the dual-subproblem bottleneck with four tailored
+algorithms replacing a general solver inside the Benders loop, and further strengthen the
+method with a heuristic that pre-injects optimality cuts and a reformulated master---and
+they report that even so the decomposition does not systematically beat the
+non-decomposed formulation. That honest negative is precisely what recommends the approach
+\emph{here}, for the SSP occupies the regime their assembly-line problem lacked: its dual
+subproblem is not a general program needing tailored algorithms but the \emph{polynomially}
+solvable KTNS oracle, so the loading cut is exact and essentially free at every callback.
+The present solver adopts the same architecture---lazy-callback branch-and-Benders-cut, a
+heuristic warm start with seeded cuts, and a strengthened master---in the one setting where
+a Benders decomposition is structurally expected to pay off rather than merely break even.
 
 \paragraph{What remains open, and the route taken here.}
 Three observations from the preceding paragraphs set the agenda. First, the
@@ -804,12 +1021,12 @@ walk.
 
 \begin{figure}[t]\centering
 \begin{tikzpicture}[font=\footnotesize,>=Stealth,
-   cfg/.style={draw,rounded corners,minimum width=1.7cm,minimum height=0.8cm}]
+   cfg/.style={draw=cRed!70,semithick,fill=white,rounded corners,minimum width=1.75cm,minimum height=0.85cm}]
   \node[cfg] (a) at (0,0) {$\{1,2,3\}$};
   \node[cfg] (b) at (3.6,0) {$\{3,4,5\}$};
   \node[cfg] (c) at (1.8,-1.9) {$\{5,6,1\}$};
-  \draw[->] (a)--(b) node[midway,above,font=\scriptsize]{$2$ tools};
-  \draw[->] (b)--(c) node[midway,right,font=\scriptsize,xshift=1pt]{$2$ tools};
+  \draw[->,semithick,cRed!70] (a)--(b) node[midway,above,font=\scriptsize,text=cRed!70!black]{$2$ tools};
+  \draw[->,semithick,cRed!70] (b)--(c) node[midway,right,font=\scriptsize,xshift=1pt,text=cRed!70!black]{$2$ tools};
   \node[text=black!60,font=\scriptsize] at (0,0.6){jobs $1,2$};
   \node[text=black!60,font=\scriptsize] at (3.6,0.6){jobs $3,4$};
   \node[text=black!60,font=\scriptsize] at (1.8,-2.45){jobs $5,6$};
@@ -1260,15 +1477,33 @@ compatible yet jointly overflow---so the true obstruction is the hypergraph of \
 minimal clashes, not merely the two-job ones the conflict graph sees
 (Figure~\ref{fig:hypergraph}).
 
-\begin{figure}[t]\centering
-\begin{tikzpicture}[font=\footnotesize,
-   jb/.style={draw,fill=white,circle,minimum size=1.3cm,inner sep=0pt,align=center}]
-  \fill[black!9] (0,0) circle (2.05);
-  \node[jb] (a) at (90:1.35)  {$j_1$\\[-2pt]{\scriptsize$\{0,1\}$}};
-  \node[jb] (b) at (210:1.35) {$j_2$\\[-2pt]{\scriptsize$\{0,2\}$}};
-  \node[jb] (c) at (330:1.35) {$j_3$\\[-2pt]{\scriptsize$\{0,3\}$}};
-  \node[align=center,text=black!70] at (0,-2.7)
-     {\scriptsize circuit $\{j_1,j_2,j_3\}$: tools $\{0,1,2,3\}$, size $4>b=3$};
+\begin{figure}[ht]\centering
+\begin{tikzpicture}[font=\small,>=Stealth,
+   jb/.style={draw=cPurple!75,fill=white,circle,semithick,minimum size=1.25cm,
+              inner sep=0pt,align=center,font=\scriptsize\bfseries}]
+  % ===== LEFT: conflict graph (pairwise) =====
+  \node[font=\bfseries,text=cGreen!40!black] at (1.4,2.55) {Conflict graph (pairwise)};
+  \node[jb] (a1) at (1.4,1.4)  {$j_1$\\[-1.5pt]{\tiny$\{0,1\}$}};
+  \node[jb] (b1) at (0.4,-0.4) {$j_2$\\[-1.5pt]{\tiny$\{0,2\}$}};
+  \node[jb] (c1) at (2.4,-0.4) {$j_3$\\[-1.5pt]{\tiny$\{0,3\}$}};
+  \node[align=center,font=\scriptsize,text=black!65] at (1.4,-1.85)
+     {every pair shares tool $0$, so any two\\ need $3\le b$ tools:
+      \textbf{\color{cGreen!45!black}no edge at all}};
+  % ===== middle =====
+  \node[font=\Large\bfseries,text=black!45] at (4.6,0.35) {vs.};
+  % ===== RIGHT: circuit hypergraph =====
+  \node[font=\bfseries,text=cOrange!55!black] at (7.8,2.55) {Circuit hypergraph};
+  \begin{scope}[on background layer]
+    \fill[cOrange!16] (7.8,0.2) circle (1.55);
+    \draw[cOrange!85,semithick,dashed] (7.8,0.2) circle (1.55);
+  \end{scope}
+  \node[jb] (a2) at (7.8,1.15)  {$j_1$};
+  \node[jb] (b2) at (6.9,-0.45) {$j_2$};
+  \node[jb] (c2) at (8.7,-0.45) {$j_3$};
+  \node[cOrange!60!black,font=\scriptsize\itshape] at (9.55,1.5) {one circuit};
+  \node[align=center,font=\scriptsize,text=black!65] at (7.8,-1.85)
+     {all three \emph{together} need\\ $\{0,1,2,3\}=4>b$:
+      \textbf{\color{cOrange!60!black}one hyperedge}, $\Kst=2$};
 \end{tikzpicture}
 \caption{The circuit hypergraph, on the star instance $T_1=\{0,1\}$, $T_2=\{0,2\}$,
 $T_3=\{0,3\}$ with $b=3$. No two jobs conflict---each pair needs only three tools,
@@ -1453,6 +1688,51 @@ constraints, and making it tractable is the obstacle that the position-indexed
 formulations of Section~\ref{ssec:pos} resolve. We first record the compact formulations
 that serve as baselines.
 
+\paragraph{Why these two methods.}
+The choice of methods is dictated by where the difficulty sits. A compact integer
+formulation is the natural first recourse---and three from the literature serve here as
+baselines---but their linear relaxations all collapse to the coverage bound
+$\lvert\U\rvert-b$ (Proposition~\ref{prop:sspmf-lp}), so a branch-and-cut on any of them
+inherits precisely the weakness the structural theory predicts: fast where that bound is
+tight, adrift where it is loose. Escaping it requires a method that does not rest on a
+compact relaxation, and two classical routes qualify, for opposite reasons. Benders
+decomposition is the textbook fit when the subproblem is \emph{polynomially} solvable
+\citep{Rahmaniani2017}: KTNS settles the loading exactly, so it becomes an oracle
+returning exact optimality cuts, and the master's bound is assembled from true
+subproblem values rather than from a weak relaxation---the algorithm \emph{sidesteps}
+the coverage bound rather than trying to strengthen it. This places the solver in the
+lineage of logic-based \citep{Hooker2003} and combinatorial \citep{Codato2006} Benders
+decomposition, whose defining trait is exactly a subproblem settled by a combinatorial
+oracle rather than by linear-programming duality; the combinatorial KTNS cuts of
+Section~\ref{ssec:bbc} are of that family, and the LP-dual cuts are the classical Benders
+form used alongside them. Branch-and-price attacks the same weakness from the other
+side: by reformulating over configurations, its position--transition variant carries a
+relaxation that provably \emph{exceeds} $\lvert\U\rvert-b$ (Proposition~\ref{prop:ptf}),
+the one construction in this report that does. The two are therefore complementary
+probes of a single question---whether any exact method can reach past the coverage
+bound---one by never forming the weak relaxation, the other by improving on it.
+
+\begin{table}[t]\centering
+\footnotesize
+\begin{tabular}{@{}llll@{}}
+\toprule
+Method & Source & Formulation & Linear relaxation \\
+\midrule
+F4          & \citet{Catanzaro2015} & compact, arc-based            & below $\lvert\U\rvert-b$ \\
+LSS         & \citet{Laporte2004}   & compact, tool-state          & below $\lvert\U\rvert-b$ \\
+SSPMF       & \citet{daSilva2024}   & multicommodity flow          & $=\lvert\U\rvert-b$ \\
+BBC         & this work             & branch-and-Benders-cut       & none (KTNS-cut bound) \\
+PCF, PCF$'$ & this work             & position--configuration B\&P & $=\lvert\U\rvert-b$ \\
+PTF         & this work             & position--transition B\&P    & $\ge\lvert\U\rvert-b$, can exceed \\
+\bottomrule
+\end{tabular}
+\caption{The three compact baselines and the exact methods of this report, ordered by
+the strength of their linear relaxation relative to the coverage bound
+$\lvert\U\rvert-b$. Every method is exact; they differ in whether, and by what means,
+they get past that bound---the organising question of this section.}
+\label{tab:methods}
+\end{table}
+
 \paragraph{The optimization toolkit, in brief.}
 The methods in this section draw on a small, standard vocabulary, gathered here so that
 nothing that follows is left undefined; a reader fluent in integer programming may skip
@@ -1521,7 +1801,7 @@ loading subproblem. In contrast to column generation, whose pricing subproblem f
 this problem is NP-hard (Section~\ref{ssec:related}), the Benders subproblem here is
 polynomial, so every cut is exact.
 
-\paragraph{What a Benders decomposition buys, in plain terms.}
+\paragraph{What Benders decomposition does.}
 The manoeuvre is worth stating without notation, because it recurs throughout this
 section. Suppose a problem splits into a hard part and, once the hard part is fixed,
 an easy part---here, choose the order (hard), then load the tools (easy). Benders
@@ -1540,12 +1820,12 @@ generation, whose analogous subproblem for the SSP is itself NP-hard.
 
 \begin{figure}[t]\centering
 \begin{tikzpicture}[font=\footnotesize,>=Stealth,
-   blk/.style={draw,rounded corners,align=center,minimum height=1.5cm,text width=3.7cm}]
-  \node[blk] (m) {\textbf{Master} (hard)\\[2pt] choose the job order\\ minimising the stand-in $\theta$};
-  \node[blk,right=3.4cm of m] (s) {\textbf{Subproblem} (easy)\\[2pt] KTNS loads the tools\\ for that order---\emph{exactly}};
-  \draw[->] (m.north east) to[bend left=20] node[above,font=\scriptsize]{an order} (s.north west);
-  \draw[->] (s.south west) to[bend left=20]
-      node[below,align=center,font=\scriptsize]{Benders cut:\\ $\theta\ge$ true cost} (m.south east);
+   blk/.style={draw,semithick,rounded corners,align=center,minimum height=1.6cm,text width=3.7cm}]
+  \node[blk,draw=cBlue!70,fill=white] (m) {\textbf{Master} (hard)\\[2pt] choose the job order\\ minimising the stand-in $\theta$};
+  \node[blk,right=3.4cm of m,draw=cGreen!70,fill=white] (s) {\textbf{Subproblem} (easy)\\[2pt] KTNS loads the tools\\ for that order---\emph{exactly}};
+  \draw[-{Stealth[length=3mm]},semithick,cBlue!60!black] (m.north east) to[bend left=20] node[above,font=\scriptsize,text=cBlue!55!black]{an order} (s.north west);
+  \draw[-{Stealth[length=3mm]},semithick,cRed!75] (s.south west) to[bend left=20]
+      node[below,align=center,font=\scriptsize,text=cRed!70!black]{Benders cut:\\ $\theta\ge$ true cost} (m.south east);
   \node[below=6mm of $(m)!0.5!(s)$,text width=8.2cm,align=center,font=\scriptsize,text=black!60]
      {repeat until $\theta$ equals the loading cost---the order is then a \emph{certified} optimum};
 \end{tikzpicture}
@@ -1863,7 +2143,7 @@ does not strengthen the bound.
 \noindent The proof is in Appendix~\ref{app:proofs}. The separation of concerns is
 deliberate: PCF$'$ attacks symmetry, and only PTF attacks the bound.
 
-\paragraph{What column generation does, in plain terms.}
+\paragraph{What column generation does.}
 The position-indexed models carry one variable for each (configuration, position)
 pair, and there are astronomically many configurations, so the models cannot be
 written out in full. Column generation is the standard escape. It keeps only a handful
@@ -1949,6 +2229,64 @@ these formulations produce. None of the four alters the relaxation value or the
 optimum---they are speed, not strength---so, exactly as for the Benders accelerations,
 the campaign switches each on independently and reads off its separate and combined
 contribution to the solve rate.
+
+\subsection{Learning to select cuts: a reinforcement-learning prototype}\label{ssec:rl}
+The branch-and-Benders-cut solver of Section~\ref{ssec:bbc} produces, at a given node,
+\emph{several} admissible cuts: a combinatorial KTNS cut for each candidate order it
+evaluates, the coverage inequality, and---once fractional separation is enabled---one cut
+per violated fractional point. Which of these to add, and in what order, is a decision the
+solver now makes by a fixed rule, and it is the natural place to ask whether a
+\emph{learned} policy would do better. This subsection records a prototype in that
+direction, built alongside the deterministic solver and following the cut-selection
+framework of \citet{Tang2020}; its evaluation on the SSP awaits the campaign, for the
+reason given at the end.
+
+\paragraph{The cut-selection Markov decision process.}
+Following \citet{Tang2020}, cut selection is cast as a Markov decision process. At
+separation round $t$ the state $s_t$ is the current relaxation solution together with a
+pool of candidate cuts, each summarised by a feature vector $\phi$ that collects the cut's
+\emph{violation} at the current point, its \emph{support size} (density), its right-hand
+side and its mean coefficient magnitude. An action $a_t$ selects one candidate to add; the
+reward $r_t$ is the resulting increase in the dual bound---how much that cut tightened the
+relaxation. The policy is a softmax over the candidates, linear in the features,
+\[
+  \pi_\theta(a\mid s)=\frac{\exp\!\bigl(\theta^{\top}\phi_a\bigr)}
+                          {\sum_{a'}\exp\!\bigl(\theta^{\top}\phi_{a'}\bigr)},
+\]
+and its parameters $\theta$ are trained by the REINFORCE policy-gradient rule with a
+return baseline,
+\[
+  \theta\ \leftarrow\ \theta+\alpha\sum_{t}\nabla_\theta\log\pi_\theta(a_t\mid s_t)\,
+  \bigl(G_t-\bar G\bigr),\qquad
+  G_t=\sum_{k\ge t}\gamma^{\,k-t}r_k,
+\]
+so that a cut whose selection is followed by a large bound improvement is made more
+likely. A softmax-linear policy keeps the learned rule interpretable---the sign and size
+of each component of $\theta$ report how much each feature matters---while remaining
+expressive enough to separate useful cuts from useless ones.
+
+\paragraph{What was built and verified.}
+Because the branch-and-Benders-cut solver runs on a commercial mixed-integer solver
+unavailable in the development environment, the learning machinery was implemented and
+validated on an exactly-valid, self-contained cut family---knapsack cover cuts---whose
+separation and bound effect can be computed directly. On held-out instances the trained
+policy raises the linear-relaxation bound about $60\%$ more per episode than uniform-random
+cut selection, and it does so by discovering, unaided, that a cut's \emph{violation} is
+the dominant feature---exactly the quantity a hand-written rule would privilege. The
+learned policy and its feature map are exposed through a scoring function that ranks
+candidate Benders and combinatorial cuts inside the solver's callback, so that carrying the
+prototype over to the SSP is a matter of feeding it the same features on real cuts.
+
+\paragraph{Why it is reported, but gated.}
+The honest limit is the one drawn in Section~\ref{ssec:assess}. The frontier that defeats
+the exact solver is a \emph{bound} gap: on the hard instances the incumbent already equals
+the optimum and only the dual bound lags, so where no strong cut exists a learned selector
+has nothing to select that would close the instance. Cut selection can reorder and hasten
+the cuts that \emph{do} exist---worth having---but it cannot manufacture bound strength.
+The prototype is therefore presented as a capability with a verified learning core and a
+ready integration path, to be evaluated on the SSP only once the campaign identifies the
+bound-loose instances on which it could plausibly help; it is not offered as a substitute
+for the deterministic baseline this report measures.
 
 %==============================================================================
 \section{Computational study}\label{sec:comp}
@@ -2063,7 +2401,7 @@ protocol retired the configuration before it reached that family; and the
 counts are mutually consistent in the sense of the validation paragraph above.
 
 \begin{table}[h]\centering
-\small
+\footnotesize
 \begin{tabular}{llcccccc}
 \toprule
 Suite & Family ($n$; $m$) & LSS & CATZ-F4 & SSPMF & BBC-LP & PCF$'$ & PTF\\
@@ -2252,8 +2590,10 @@ On the algorithmic
 side we gave a branch-and-Benders-cut solver whose subproblem is exact and
 polynomial, and position-indexed formulations with a fixed row set, among which the
 position--transition model is the first configuration relaxation to improve on the
-coverage bound. The methods are implemented, and their large-scale comparison is
-complete (Section~\ref{ssec:results}).
+coverage bound. The methods are implemented; a first large-scale comparison is reported
+here, and the definitive campaign under the corrected protocol is running at the time of
+writing (Section~\ref{ssec:results}), so the empirical claims of this report are stated
+as provisional.
 
 \subsection{Beyond the project horizon}
 The remaining work is set out in Section~\ref{sec:planned}; three further
@@ -2278,22 +2618,32 @@ analysed competitively against paging machinery---with the offline loading oracl
 a natural baseline.
 
 \paragraph{Learning-augmented column generation and cut selection.}
-Machine learning for the exact side---cut selection, ordering and removal
-\citep{DezaKhalil2023}, and column and branching selection
-\citep{Bengio2021,Gasse2019,Morabit2021}---is active but crowded, and its
-established role is to \emph{choose} among cuts or columns one already knows how to
-generate rather than to strengthen them; the lifting itself stays combinatorial.
-Two observations bound its usefulness here. First, the frontier of
-Section~\ref{ssec:assess} is a \emph{bound} gap, and cut selection cannot
-manufacture bound strength where no strong cut exists, so any learning signal
-would have to come from the structural imbalance between zero-gap and positive-gap
-instances rather than from search statistics. Second, the tooling for learned
-mixed-integer heuristics is built on the column-generation solver rather than the
-Benders master, which makes learned column selection for the position-indexed
-pricers \citep{Morabit2021}---whose coupled-pair pricing is the measured
-bottleneck---the natural target, with cut selection for the Benders solver
-secondary. Either is a follow-up to a settled deterministic baseline, not a
-substitute for one.
+Machine learning for the exact side is an active but crowded frontier---cut selection,
+ordering and removal \citep{DezaKhalil2023}, and column and branching selection
+\citep{Bengio2021,Gasse2019,Morabit2021}---whose established role is to \emph{choose}
+among cuts or columns one already knows how to generate rather than to strengthen them;
+the lifting itself stays combinatorial. The state of the art has moved from the
+policy-gradient cut selection of \citet{Tang2020} to graph-neural-network state encoders
+trained by proximal policy optimisation and to hierarchical selection agents. A first
+prototype in this direction was built alongside this report---a policy-gradient agent
+that learns, from cut features, which cut most tightens the relaxation, validated to
+recover a sensible selection rule on a controlled cut family---with a graph-network
+encoder trained on the campaign's own cut traces as its state-of-the-art successor. On
+the pricing side the counterpart upgrade is not learning but the automatic dual
+stabilisation of \citet{Pessoa2018}, which would replace the static smoothing used here
+with an adaptive, self-combining scheme. Two observations, however, bound how much any
+of this can help the SSP in particular. First, the frontier of Section~\ref{ssec:assess}
+is a \emph{bound} gap, and cut selection cannot manufacture bound strength where no
+strong cut exists: on the instances that defeat the solver the incumbent already equals
+the optimum and only the dual bound lags, so a learned selector has nothing to select
+that would close them, and any useful signal must come from the structural imbalance
+between zero-gap and positive-gap instances rather than from search statistics. Second,
+the mature tooling for learned mixed-integer heuristics is built on the
+column-generation solver rather than the Benders master, which makes learned column
+selection for the position-indexed pricers \citep{Morabit2021}---whose coupled-pair
+pricing is the measured bottleneck---the more promising target, with cut selection for
+the Benders solver secondary. Each is a follow-up to a settled deterministic baseline,
+not a substitute for one.
 
 %==============================================================================
 \section{Remaining work}\label{sec:planned}
@@ -2393,6 +2743,16 @@ root bound on instances whose grouping structure dominates the coverage bound.
 Fourth, Papadakos-style Pareto-optimal lifting deepens the fractional cuts. Each is
 an independent option in the campaign harness, so the re-run measures the separate
 and combined effect of all four, together with the window inequalities above.
+
+On the branch-and-price side, the four pricing accelerations of
+Section~\ref{ssec:pos}---heuristic pricing, multiple pricing, warm-start columns, and
+dual stabilisation---are likewise implemented as independent switches and verified to
+preserve exactness ($\mathrm{IP}=\Zst$ against brute force on the ring and small random
+instances); their scale evaluation is part of the same pending campaign. A first
+learning-augmented cut-selection prototype (Section~\ref{sec:concl}) is also in place
+but is deliberately gated on that campaign, since, for the reasons given there, it can
+help only if the run exposes bound-loose instances on which a learned selector would
+have something to act.
 
 %==============================================================================
 \appendix
