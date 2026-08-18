@@ -79,6 +79,8 @@ _trash_2026-07/
 CLAUDE.md
 README_PROOFREAD_BEFORE_RUN.md
 RUNBOOK_NEXT.md
+report_s3_review.md
+RESEARCH_PLAN.md
 CLEANUP_PLAN.md
 plans-genai/
 skills/
@@ -98,3 +100,5 @@ __pycache__/
 *.bbl
 *.blg
 *.synctex.gz
+
+
