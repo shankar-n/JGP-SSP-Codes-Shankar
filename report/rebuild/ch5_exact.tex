@@ -1,0 +1,493 @@
+%==============================================================================
+\section{Exact methods}\label{sec:exact}
+%==============================================================================
+
+Section~\ref{sec:gap} showed that the coverage bound $q=\lvert\U\rvert-b$ equals the
+optimum on a large part of the instance space. Section~\ref{sec:sota} showed that the
+strongest compact formulation in the literature has a linear relaxation equal to that
+same quantity. This section asks whether an exact method can do better, and builds
+two that are designed to.
+
+\paragraph{Why these two methods.}
+A compact integer formulation is the natural first recourse, and three from the
+literature serve here as baselines. Their relaxations do not exceed the coverage
+bound, so a branch-and-cut built on any of them is fast where that bound is tight and
+adrift where it is not. Escaping this requires a method that does not rest on a
+compact relaxation, and two classical routes qualify, for opposite reasons.
+
+Benders decomposition is the textbook fit when the subproblem is polynomially
+solvable \citep{Rahmaniani2017}. The loading problem is such a subproblem, so it
+becomes an oracle returning exact cuts, and the master's bound is assembled from true
+subproblem values rather than from a weak relaxation. The algorithm never forms the
+weak relaxation at all. This places the solver in the lineage of logic-based
+\citep{Hooker2003} and combinatorial \citep{Codato2006} Benders decomposition.
+
+Branch-and-price attacks the same weakness from the other side. Reformulating over
+configurations, its position--transition variant carries a relaxation that provably
+exceeds the coverage bound (Proposition~\ref{prop:ptf}), which is the one construction
+in this report that does.
+
+\begin{table}[t]\centering
+\footnotesize
+\begin{tabular}{@{}llll@{}}
+\toprule
+Method & Source & Formulation & Linear relaxation \\
+\midrule
+F4          & \citet{Catanzaro2015} & compact, arc-based            & in general below $q$ \\
+LSS         & \citet{Laporte2004}   & compact, tool-state           & in general below $q$ \\
+SSPMF       & \citet{daSilva2024}   & multicommodity flow           & $=q$ when every tool is used \\
+BBC         & this work             & branch-and-Benders-cut        & no relaxation of the loading \\
+PCF, PCF$'$ & this work             & position--configuration B\&P  & $=q$ with the counting rows \\
+PTF         & this work             & position--transition B\&P     & $\ge q$, and can exceed it \\
+\bottomrule
+\end{tabular}
+\caption{The three compact baselines and the methods of this report, ordered by the
+strength of their linear relaxation relative to the coverage bound $q$. Every method
+is exact; they differ in whether, and by what means, they get past that bound. The
+entries for F4 and LSS are hedged because the source states only that earlier models
+fall below $q$ in the great majority of cases \citep{daSilva2024}, not in all.}
+\label{tab:methods}
+\end{table}
+
+\subsection{Compact formulations and the limit they reach}\label{ssec:compact}
+
+Three compact formulations from the literature serve as baselines. All three were
+reimplemented for this study, and Section~\ref{ssec:validation} describes how they
+were checked.
+
+\citet{Catanzaro2015} give a family of five formulations in job-position and ordering
+variables. Formulation~4 is used here. Formulations~3 and~4 have the same linear
+relaxation and Formulation~4 is the smaller, which is the authors' own reason for
+excluding Formulation~3 from their experiments. Formulation~5 is stronger still, and
+the authors recommend it as the best of the family; it was not implemented in this
+study, and Section~\ref{ssec:limits} records that as a limitation.
+
+\citet{Laporte2004} formulate the problem with tool-state variables on a
+travelling-salesman skeleton, with subtour elimination separated lazily and three
+families of valid inequalities. \citet{daSilva2024} give a multicommodity-flow model
+in which each tool routes one unit of flow through the position network. The last is
+singled out by its relaxation.
+
+\begin{proposition}[\citealp{daSilva2024}]\label{prop:sspmf-lp}
+The linear relaxation of the multicommodity-flow formulation equals
+$\lvert T\rvert-b$, the number of tools minus the magazine capacity. Under the
+standing assumption that every tool is required by some job, so that $\U=T$, this is
+the coverage bound $q$ of Proposition~\ref{prop:lb2}.
+\end{proposition}
+
+The hypothesis matters and is stated explicitly by the authors. On an instance with
+unused tools the two quantities differ, and it is $q$, not $\lvert T\rvert-b$, that
+bounds the optimum. The instances of the computational study all satisfy the
+hypothesis.
+
+This result matters twice. It says that the strongest compact relaxation available is
+no stronger than an elementary counting bound. And since $q$ equals $\Zst$ on a large
+part of the instance space (Section~\ref{sec:gap}), it predicts that such a model will
+be fast exactly where the bound is tight and weak where it is not.
+Section~\ref{ssec:results-tight} tests that prediction directly.
+
+\subsection{A branch-and-Benders-cut algorithm}\label{ssec:bbc}
+
+\paragraph{The idea.}
+A schedule is an order together with a loading. Once the order is fixed the minimum
+loading cost is computed exactly and in polynomial time. The order therefore goes into
+an integer master problem, and the loading cost is represented by a single continuous
+variable $\theta$, refined by cuts generated from the exactly solved loading
+subproblem. In contrast to column generation, whose pricing subproblem for this
+problem is NP-hard (Section~\ref{ssec:pos}), the Benders subproblem here is
+polynomial, so every cut is exact.
+
+Figure~\ref{fig:benders} shows the loop.
+
+\begin{figure}[t]\centering
+\begin{tikzpicture}[font=\footnotesize,>=Stealth,
+   blk/.style={draw,semithick,rounded corners,align=center,minimum height=1.6cm,text width=3.7cm}]
+  \node[blk,draw=cBlue!70,fill=white] (m) {\textbf{Master} (hard)\\[2pt] choose the job order,\\ minimising the stand-in $\theta$};
+  \node[blk,right=3.4cm of m,draw=cGreen!70,fill=white] (s) {\textbf{Subproblem} (easy)\\[2pt] load the tools for that\\ order, \emph{exactly}};
+  \draw[-{Stealth[length=3mm]},semithick,black!60] (m.north east) to[bend left=20] node[above,font=\scriptsize]{an order} (s.north west);
+  \draw[-{Stealth[length=3mm]},semithick,black!60] (s.south west) to[bend left=20]
+      node[below,align=center,font=\scriptsize]{Benders cut:\\ $\theta\ge$ true cost} (m.south east);
+  \node[below=6mm of $(m)!0.5!(s)$,text width=8.6cm,align=center,font=\scriptsize,text=black!60]
+     {repeat until $\theta$ equals the loading cost; the order is then a certified optimum};
+\end{tikzpicture}
+\caption{The branch-and-Benders-cut loop. The master picks an order using an
+optimistic stand-in $\theta$ for the loading cost. The subproblem returns the exact
+loading cost of that order. If $\theta$ undershot, one cut lifts it, and that cut is
+valid for every order, not only the current one. Because the subproblem is polynomial
+every cut is exact, so the loop halts at a proven optimum. The cuts are separated
+inside a branch-and-bound tree over the order variables, which is what makes the
+method a \emph{branch}-and-Benders-cut.}
+\label{fig:benders}
+\end{figure}
+
+\paragraph{The master problem.}
+Introduce a depot node $d$ with an empty tool requirement, and arc variables
+$x_{ij}\in\rset{0,1}$ for $i,j\in J\cup\rset{d}$ with $i\ne j$, where $x_{ij}=1$ means
+job $j$ runs immediately after $i$. The depot marks the start and the end, so the
+$x$ variables describe a Hamiltonian path through the jobs. The assignment
+constraints
+\[
+  \sum_{i\ne j}x_{ij}=1\ \ (\forall j),\qquad \sum_{j\ne i}x_{ij}=1\ \ (\forall i),
+\]
+together with subtour-elimination constraints
+$\sum_{i,j\in S}x_{ij}\le\lvert S\rvert-1$ for $S\subseteq J$, enforce that. The
+master problem is then
+\[
+  \min\ \theta
+\]
+subject to the assignment constraints, the subtour constraints, the bound rows
+described next, and the Benders cuts generated during the search.
+
+Three families of rows bound $\theta$ from below before any cut is generated.
+
+\emph{The pairwise bound.} At the boundary between consecutive jobs $i$ and $j$ at
+least $w_{ij}:=\max(0,\lvert T_i\cup T_j\rvert-b)$ tools are switched, since the
+magazine holds $b$ tools but must serve $T_i$ and then $T_j$. This is the bound of
+\citet{Tang1988}. Because the subproblem charges insertions from an empty magazine,
+the first job also costs at least $\lvert T_{j}\rvert$ insertions, and that term is
+carried on the depot arcs. Summing gives the valid inequality
+\[
+  \theta\ \ge\ \sum_{i,j\in J} w_{ij}\,x_{ij}\;+\;\sum_{j\in J}\lvert T_j\rvert\,x_{d,j},
+\]
+in which the two contributions are disjoint by position and so may be added.
+
+\emph{The coverage row.} Every tool of $\U$ must be loaded at least once. In the
+empty-start cost this gives $\theta\ge\lvert\U\rvert$ directly. This row was absent
+from the first implementation, and its absence was the reason the solver performed
+poorly in the first campaign; Section~\ref{ssec:validation} records the correction.
+
+\emph{Triplet bounds.} The pairwise argument generalises to ordered triples of jobs,
+giving $O(n^{3})$ valid inequalities of the form
+$\theta\ge w_{ijk}(x_{ij}+x_{jk}-1)$ with
+$w_{ijk}=\max(0,\lvert T_i\cup T_j\cup T_k\rvert-b)$. These are optional and their
+effect is measured in Section~\ref{ssec:results-bbc}.
+
+Subtour separation is exact by construction: violated constraints are detected at
+integer candidate solutions by a connected-component search, so no optimal solution is
+ever removed. Separating them at fractional points would be an acceleration, not a
+correctness requirement, and is deliberately absent from the measured configuration.
+
+\paragraph{The subproblem.}
+Fix the order and relabel the jobs $1,\dots,n$ along it. With $g_{t,i}\in[0,1]$
+indicating that tool $t$ occupies the magazine at position $i$, and $s_{t,i}\ge0$
+counting an insertion there, the loading cost is the optimal value of the linear
+program written in Section~\ref{ssec:toolkit}. Its constraint matrix has the
+consecutive-ones property and is therefore totally unimodular, so the relaxation is
+integral and, by Proposition~\ref{prop:ktns}, its optimum equals $\KTNS$ of the order.
+
+Writing $R_i$ for the tool set of the job at position $i$, an optimal dual solution
+prices each requirement ``tool $t$ present at position $i$'' by a multiplier
+$\bar\alpha_{t,i}$ and each capacity row by $\bar\beta_i\ge0$. Linear-programming
+duality then gives the Benders optimality cut
+\[
+  \theta\ \ge\ \sum_i\sum_{t\in R_i}\bar\alpha_{t,i}\ -\ b\sum_i\bar\beta_i,
+\]
+where the multipliers of the unit upper bounds on the $g_{t,i}$ contribute a further
+term, suppressed here. The requirement multipliers carry the dependence on the order,
+through which job occupies each position, so the right-hand side is linear in the
+master's variables. Because the dual feasible region does not depend on the order, the
+cut is valid for every order, which is the defining property of a Benders cut.
+
+One consequence of using the linear program rather than the KTNS rule is worth
+recording. \citet{Crama1994} show that KTNS is invalid when tools have different setup
+times, while the same linear program remains exact because its matrix remains an
+interval matrix. The subproblem used here is that linear program. The solver therefore
+extends unchanged to non-uniform per-tool switching costs, a regime in which the
+KTNS-based framing of the problem does not apply. This was not tested experimentally
+and is stated as a property of the construction.
+
+\paragraph{Cut families.}
+Two kinds of cut are separated, and the computational study switches each on and off
+independently.
+
+\emph{Benders optimality cuts} are the dual cuts above, separated at integer master
+solutions and, optionally, at fractional ones. The latter are called
+\emph{fractional cuts} and are added as user cuts.
+
+\emph{Combinatorial cuts} use only the oracle value. At an integer order
+$\bar\sigma$ with $\KTNS(\bar\sigma)=\bar z$, the inequality
+\[
+  \theta\ \ge\ \bar z\Bigl(1-\!\!\sum_{(i,j)\in A(\bar\sigma)}(1-x_{ij})\Bigr)
+\]
+is valid: it forces $\theta\ge\bar z$ when the order is exactly $\bar\sigma$, and is
+vacuous otherwise. It needs no dual computation, and it is a combinatorial Benders cut
+in the sense of \citet{Codato2006}.
+
+\subsection{Strengthening the Benders solver}\label{ssec:accel}
+
+Four strengthenings were implemented, each as an independent switch, and each checked
+against brute force on small instances before any campaign run so that a strengthening
+can never silently return a wrong optimum. All four are classical elements of the
+toolbox surveyed by \citet{Rahmaniani2017}.
+
+\paragraph{Fractional Benders cuts.}
+The optimality cut is derived at an integer order, but nothing prevents separating the
+same cut at the fractional solutions produced at a node before branching. The
+intention is to attack tailing-off: an integer-only scheme learns about the loading
+cost only once an order is fully committed, whereas a fractional cut extracts the same
+dual information from a partial order and removes it from the relaxation at once.
+
+In the first campaign this option was inert. Every cut it constructed was discarded by
+an incorrect solver call, so no fractional cuts were recorded, and the campaign could
+not test the idea. The defect was corrected, and Section~\ref{ssec:results-bbc}
+reports what the corrected version does.
+
+\paragraph{A strong incumbent at the root.}
+A branch-and-bound search prunes in proportion to the quality of its incumbent. A
+compact form of the hybrid genetic search of \citet{Mecler2021} is run once, at the
+root: a population of constructive seeds, being nearest-neighbour orders on the
+pairwise weights $w_{ij}$ and a largest-tool-first order, each improved by a
+variable-neighbourhood local search using adjacent swaps and short segment
+relocations, with every candidate scored by the exact loading oracle, evolved under
+order crossover with a diversity guard.
+
+The resulting order is used twice. As a warm start it gives the solver an incumbent
+from node zero. And it seeds a Benders cut: the loading dual is solved once for the
+heuristic order and its cut added before the first relaxation, which is the
+initial-cut-pool acceleration of \citet{Rahmaniani2017}.
+
+\paragraph{A conflict-graph bound.}
+The master's root bound is pairwise plus coverage, and both are visible to the linear
+relaxation. The combinatorial structure they miss lives in the conflict graph $G$ of
+Section~\ref{ssec:clutter}, whose vertices are the jobs and whose edges join pairs
+that cannot share a configuration. A clique of $G$ is a set of pairwise incompatible
+jobs, which must occupy that many distinct configurations, so $\Kst\ge\omega(G)$; more
+generally $\Kst\ge\chi(G)$, and where $G$ is non-bipartite one has $\chi(G)\ge3$ even
+when $\omega(G)=2$. The resulting constant row
+$\theta\ge(\chi_{\mathrm{lb}}-1)+\min(b,\lvert\U\rvert)$ is added whenever it strictly
+exceeds the coverage row. This is the simplest of the conflict-graph inequalities studied by
+\citet{Atamturk2000}. Its reach is narrow by construction: on most instances the
+coverage row already dominates it, and it can bite only where the grouping structure,
+rather than the tool count, is what forces switches.
+
+\paragraph{Pareto-optimal cut lifting.}
+When the loading dual has several optimal solutions, which a degenerate
+transportation-type problem routinely does, the cuts they yield are not equally
+strong. Choosing the deepest is the Pareto-optimal cut of \citet{MagnantiWong1981}:
+among the alternative dual optima, select the one maximising the cut's value at a fixed
+interior core point of the master. \citet{Papadakos2008} makes this practical by
+observing that the core point need not be tied to the current relaxation and may simply
+be updated as a convex combination of the points visited. That form is used here. A
+core point is kept in the relative interior of the master polytope, initialised from
+the heuristic order blended with the barycentre; at each fractional separation the
+loading dual is solved a second time at the core point and its cut added alongside the
+ordinary one, after which the core point is drawn halfway towards the current
+relaxation point. Adding the core-point cut in addition to, never instead of, the
+ordinary cut keeps the scheme valid by construction.
+
+\subsection{Position-indexed formulations}\label{ssec:pos}
+
+The configuration walk of Section~\ref{ssec:gtsp} is the most faithful exact picture
+of the SSP, but as a model it has two flaws. There are far too many configurations to
+enumerate, and forbidding the subtours that a valid walk must avoid takes exponentially
+many constraints.
+
+The position-indexed formulations, proposed by Prof.~Colares, remove both flaws by
+fixing the schedule's length in advance. In place of an open-ended walk they lay out a
+fixed row of \emph{positions} into which configurations are placed, and ask of each
+position which configuration sits there and what it costs to change from the previous
+one. Numbering the positions does two useful things at once. It makes the transition
+cost a purely local quantity between adjacent slots, so the global subtour constraints
+disappear, and it caps the model at a number of rows polynomial in $n$ and
+$\lvert T\rvert$. That last property is the point of the construction: the row set is
+fixed in advance, so column generation only ever adds columns to rows that already
+exist.
+
+\paragraph{Why not Miller--Tucker--Zemlin.}
+The obvious alternative is to keep the configuration formulation and replace its
+subtour constraints by Miller--Tucker--Zemlin potentials
+\citep{Miller1960,DesrochersLaporte1991}. That trades one obstacle for another.
+
+\begin{proposition}\label{prop:mtz}
+A potential per configuration is exact but leaves one potential for each of
+exponentially many configurations. Aggregating the potentials to one per job is
+polynomial but no longer exact: it can exclude the optimum.
+\end{proposition}
+
+\begin{proof}
+The aggregated form fails under job domination. If $T_i\subseteq T_j$ then every
+configuration serving $j$ also serves $i$, so a transition between two such
+configurations places both $i$ and $j$ at each of its ends, and the aggregated
+potentials of $i$ and $j$ are forced into a two-cycle that no ordering satisfies. A
+concrete instance is $b=3$ with $T=(\rset{1,4},\rset{1,3,4},\rset{1},\rset{1,2,4})$,
+for which the optimum is $1$ while the aggregated model values it at $2$. This was
+verified by exhaustive enumeration over covering paths.
+\end{proof}
+
+Neither variant therefore yields a tractable exact model, which is what motivates
+fixing the positions instead.
+
+\paragraph{The position--configuration formulation.}
+Let $y_C^{k}\in\rset{0,1}$ indicate that configuration $C$ occupies position $k$, for
+$k=1,\dots,n$, and let $w_t^{k}\ge0$ count the insertion of tool $t$ at position $k$:
+\[
+\begin{aligned}
+  \min\ & \sum_{t,k} w_t^{k}\\
+  \text{(P)}\quad & \sum_{C} y_C^{k}=1, & k&=1,\dots,n;\\
+  \text{(Cov)}\quad & \sum_{k}\sum_{C\supseteq T_j} y_C^{k}\ge1, & j&\in J;\\
+  \text{(W)}\quad & w_t^{k}\ge\sum_{C\ni t}\bigl(y_C^{k}-y_C^{k-1}\bigr), & t&\in T,\ k\ge2;\\
+  \text{(T)}\quad & \sum_{k\ge2} w_t^{k}+\sum_{C\ni t} y_C^{1}\ge1, & t&\in\U.
+\end{aligned}
+\]
+Constraint (P) places one configuration per position, (Cov) serves every job, (W)
+charges an insertion whenever a tool enters the magazine, and (T) records that every
+used tool is either present at the first position or inserted later. The
+configuration variables are generated as columns; the rows number
+$O(n\lvert T\rvert)$ and never change. Call this formulation PCF.
+
+\begin{proposition}\label{prop:pcf}
+PCF is exact: its integer feasible points are exactly the SSP schedules, with equal
+cost. Its linear relaxation \emph{without} the counting rows (T) equals $0$. With
+them it equals $q$.
+\end{proposition}
+
+The vanishing of the plain relaxation is the fractional pathology of
+\citet{Tang1988} again: a single convex blend of configurations, repeated at every
+position, satisfies (P), (Cov) and (W) at zero cost. The counting rows restore the
+coverage bound, matching the multicommodity model of
+Proposition~\ref{prop:sspmf-lp} with one extra family of rows.
+
+\paragraph{Symmetry reduction.}
+PCF carries a large padding symmetry. A schedule using $m<n$ distinct configurations
+is encoded by repeating configurations to fill all $n$ positions, and the repeats may
+sit anywhere, so one schedule has many equal-cost encodings and therefore many
+distinct nodes in a search tree. Removing this freedom means relaxing (P) to an
+inequality and forcing the empty positions to a suffix:
+\[
+  \text{(P$'$)}\quad \sum_{C} y_C^{k}\le1\ \ (\forall k);
+  \qquad
+  \text{(G)}\quad \sum_{C} y_C^{k+1}\le\sum_{C} y_C^{k}\ \ (k=1,\dots,n-1),
+\]
+with (Cov), (W) and (T) unchanged. Call this PCF$'$. At an integer point the counts
+are non-increasing in $k$, so the used positions form a prefix and the empty ones a
+suffix, with the cost-free first configuration at position one. The contiguity rows
+(G) are not decorative: without them an interior empty position would make (W) read
+the re-entry as a full reload and (T) misattribute the free load.
+
+\begin{proposition}\label{prop:pcfprime}
+PCF$'$ is exact, and its linear relaxation equals that of PCF: $q$ with the counting
+rows, and $0$ without. It removes symmetric integer encodings but does not strengthen
+the bound.
+\end{proposition}
+
+The proof is in Appendix~\ref{app:proofs}. The separation of concerns is deliberate:
+PCF$'$ attacks symmetry, and only the next formulation attacks the bound.
+
+\paragraph{The position--transition formulation.}
+To exceed the coverage bound the formulation indexes \emph{transitions} rather than
+positions. Augment the configurations with an absorbing tool-less node, used to pad
+schedules that change configuration fewer than $n-1$ times, and let
+$z_{C,C'}^{k}\ge0$ be a column for the step from position $k$ to position $k+1$ that
+leaves $C$ and enters $C'$. The formulation is
+\[
+\begin{aligned}
+  \min\ & \sum_{k=1}^{n-1}\sum_{(C,C')} d(C,C')\,z_{C,C'}^{k}\\
+  \text{(S)}\quad & \sum_{(C,C')} z_{C,C'}^{k}=1, & k&=1,\dots,n-1;\\
+  \text{(F)}\quad & \sum_{(C,C'):\,t\in C'} z_{C,C'}^{k}
+                    =\sum_{(D,D'):\,t\in D} z_{D,D'}^{k+1}, & t&\in T,\ k=1,\dots,n-2;\\
+  \text{(Cov)}\quad & \sum_{k=1}^{n-1}\,\sum_{(C,C'):\,T_j\subseteq C} z_{C,C'}^{k}
+                    +\!\!\sum_{(C,C'):\,T_j\subseteq C'} z_{C,C'}^{\,n-1}\ \ge\ 1,
+                    & j&\in J.
+\end{aligned}
+\]
+Constraint (S) selects one transition per step. The flow-consistency rows (F) require,
+tool by tool, that what enters position $k+1$ at the end of step $k$ is what leaves it
+at the start of step $k+1$, so the selected columns describe a single coherent walk.
+Constraint (Cov) serves every job at the configuration of some position, either the
+tail of a step or the head of the last one. As in PCF the rows number
+$O(n\lvert T\rvert)$ and are fixed, while the transition columns are generated. Call
+this PTF.
+
+\begin{proposition}\label{prop:ptf}
+PTF is exact, and its linear relaxation is at least $q$ and can be strictly greater.
+\end{proposition}
+
+On an instance whose optimum exceeds both bounds of Corollary~\ref{cor:lb}, the PTF
+relaxation returns $2.10$ against a coverage bound of $2$; on the $6$-ring it is tight
+at $\Zst=3$. PTF is therefore the first relaxation in this family to improve on the
+elementary bound, and it does so with a fixed, polynomial row set.
+
+\paragraph{Column generation and robust branching.}
+Both PCF$'$ and PTF have $O(n\lvert T\rvert)$ rows but exponentially many columns, so
+their relaxations are solved by column generation. Branching on a single column
+$y_C^{k}$ is ineffective under the position symmetry and forces the pricing problem to
+carry a growing list of forbidden columns. The branching used here is instead on the
+\emph{presence} variables $a_t^{k}=\sum_{C\ni t}y_C^{k}\in\rset{0,1}$, which already
+appear in (W). Fixing $a_t^{k}$ to $0$ or $1$ forbids or forces tool $t$ at position
+$k$, which in the pricing problem merely shifts one dual weight and leaves the
+oracle's form unchanged. This is a robust branching rule, and it is why the
+Ryan--Foster rule of \citet{Ryan1981} is not needed here: that rule exists for
+set-partitioning masters whose pricing problems variable branching would destroy, and
+this master is not of that kind.
+
+\paragraph{Pricing PCF$'$.}
+Let $\alpha_k,\gamma_k\le0$ and $\pi_j,\mu_{t,k},\lambda_t\ge0$ be the duals of
+(P$'$), (G), (Cov), (W) and (T). Collecting the coefficient of $y_C^{k}$, which enters
+(W) and (T) through $a_t^{k}$, gives the reduced cost
+\[
+  \bar c(C,k)=\beta_k-\sum_{t\in C}\rho_t^{\,k}-\!\!\sum_{j:\,T_j\subseteq C}\!\!\pi_j,
+\]
+with
+\[
+  \rho_t^{\,k}=-\mu_{t,k}\,[k\ge2]\;+\;\mu_{t,k+1}\,[k\le n-1]\;+\;\lambda_t\,[k=1,\ t\in\U],
+\]
+with $\beta_k$ depending only on the position. For each $k$ the most negative reduced
+cost is obtained by maximising the configuration-dependent part,
+\[
+  \max_{\lvert C\rvert=b}\ \sum_{t\in C}\rho_t^{\,k}
+  +\!\!\sum_{j:\,T_j\subseteq C}\!\!\pi_j ,
+\]
+which is to say: choose $b$ tools so as to collect per-tool rewards plus a bonus for
+each job whose \emph{entire} requirement lands inside the chosen set. This is a
+Set-Union Knapsack Problem \citep{Goldschmidt1994}, the same class as the
+grouping-pricing problem of \citet{Crama1994Column}. The branching dual enters
+additively in $\rho_t^{\,k}$, so branching does not change the oracle.
+
+\paragraph{Pricing PTF.}
+For PTF a column is an ordered pair $(C,C')$, and its reduced cost contains the
+bilinear term $\sum_t[t\in C'\setminus C](1-\lambda_t)$ together with chaining terms on
+the tools of $C$ and $C'$. The pricing problem cannot therefore separate into a single
+set: it must choose two $b$-subsets at once, with $C\ne C'$. The products
+$x'_t(1-x_t)$ are linearised by the McCormick inequalities and the problem is solved as
+a mixed-integer program with $2\lvert T\rvert$ binary variables. This heavier pricing
+is the algorithmic price of PTF's stronger bound, and the contrast between the two
+formulations --- PCF$'$ pairing a weak bound with a cheap single-set oracle, PTF a
+stronger bound with a costly coupled-pair oracle --- is the central trade-off of this
+section.
+
+\paragraph{Accelerations.}
+Four accelerations were implemented as independent switches, mirroring those of
+Section~\ref{ssec:accel}. \emph{Heuristic pricing} answers the pricing question first
+with a fast greedy subset and calls the exact oracle only to certify that no improving
+column remains, so exactness is untouched while the costly oracle is skipped on all but
+the final round. \emph{Multiple pricing} returns several negative-reduced-cost columns
+per round instead of one. \emph{Warm starting} seeds the initial column pool from a
+greedy schedule rather than the trivial one-configuration-per-job pool. \emph{Dual
+stabilisation} \citep{Lubbecke2005} smooths successive dual vectors to damp the
+oscillation that slows column generation on degenerate masters. None of the four
+alters the relaxation value or the optimum.
+
+\subsection{A learned cut-selection prototype}\label{ssec:rl}
+
+At a given node the Benders solver has several admissible cuts available: a
+combinatorial cut for each candidate order it evaluates, the coverage row, and, with
+fractional separation enabled, one cut per violated fractional point. Which to add is
+currently decided by a fixed rule, and whether a learned policy would do better is a
+natural question. Prof.~Colares raised it during the internship.
+
+A prototype was built, following the cut-selection framework of \citet{Tang2020}. Cut
+selection is cast as a Markov decision process in which the state is the current
+relaxation solution together with a pool of candidate cuts, each summarised by its
+violation, support size, right-hand side and mean coefficient magnitude; an action
+selects one candidate; and the reward is the resulting increase in the dual bound. The
+policy is a softmax that is linear in those features and is trained by the REINFORCE
+policy-gradient rule with a return baseline.
+
+Because the Benders solver requires a commercial solver that was unavailable in the
+development environment, the learning components were implemented and validated on a
+self-contained cut family, knapsack cover cuts, rather than on SSP instances. It has
+not been evaluated on the SSP, and no claim is made about its effect on this problem.
+It is reported here as work carried out during the internship, not as a result.
+
+Section~\ref{ssec:further} explains why evaluating it is unlikely to be worthwhile
+until the bound question of Section~\ref{sec:disc} is resolved.

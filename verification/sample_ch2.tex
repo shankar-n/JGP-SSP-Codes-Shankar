@@ -1,0 +1,240 @@
+%==============================================================================
+% SAMPLE — Chapter 2, Sections 2.3 and 2.4, for the rebuilt report.
+% Drop-in: uses the existing preamble macros (\Kst, \Zst, \U, \rset, \confs)
+% and the existing theorem environments.
+%==============================================================================
+
+\subsection{Grouping the jobs}\label{ssec:jgp}
+
+Section~\ref{ssec:ktns} settled the loading problem. What remains is the order.
+Solving for the order directly is hard, so practice does something indirect. It
+first asks a simpler question: which jobs could share a magazine?
+
+\begin{definition}[Feasible group]\label{def:group}
+A set of jobs $G \subseteq J$ is a \emph{feasible group} if the tools its jobs
+need, taken together, fit in the magazine:
+\[
+  \Bigl\lvert \bigcup_{j \in G} T_j \Bigr\rvert \;\le\; b .
+\]
+\end{definition}
+
+A feasible group can be run start to finish without a single tool change. Load
+the tools its jobs need, run them in any order, and only then change anything.
+This makes the following question natural.
+
+\begin{definition}[Job Grouping Problem]\label{def:jgp}
+The \emph{Job Grouping Problem} (JGP) is the problem of partitioning $J$ into as
+few feasible groups as possible. The smallest possible number of groups is
+written $\Kst$.
+\end{definition}
+
+The JGP ignores order completely. It asks only how the jobs may be divided. It is
+itself NP-hard, but it is much easier in practice than the SSP, and it can be
+solved exactly on the instance sizes considered here.
+
+Two problems now sit next to each other. The JGP says which jobs may share a
+magazine. The SSP asks for an order. The standard heuristic joins them, in three
+steps.
+
+\begin{enumerate}[topsep=4pt,itemsep=2pt]
+  \item \textbf{Group.} Solve the JGP. This returns $\Kst$ feasible groups
+  $G_1,\dots,G_{\Kst}$, and for each group a magazine \emph{configuration}
+  $C_l$ of size $b$ containing everything the group needs.
+  \item \textbf{Sequence.} Decide the order of the groups. The cost of moving
+  from configuration $C$ to configuration $C'$ is the number of tools that must
+  be inserted, $d(C,C') = \lvert C' \setminus C \rvert$. Finding the cheapest
+  order of the $\Kst$ configurations is a travelling-salesman problem on $\Kst$
+  points, which is small enough to solve exactly.
+  \item \textbf{Evaluate.} Write out the jobs group by group, in the order chosen
+  in step~2, to obtain a single job order. Apply KTNS to that order and report
+  its cost.
+\end{enumerate}
+
+This is the method studied throughout this report. It is fast, it is what
+practitioners use, and its output is always a valid schedule, so its cost is
+never below the optimum $\Zst$.
+
+\begin{example}[The heuristic on the $6$-ring]\label{ex:jgp-ring}
+Take the $6$-ring of Example~\ref{ex:ring}: six jobs, six tools, $b=3$, and
+$T_j = \rset{j, j+1}$ with indices modulo~$6$.
+
+Step~1 returns $\Kst = 3$. One optimal grouping is
+\[
+  G_1 = \rset{1,2}, \qquad G_2 = \rset{3,4}, \qquad G_3 = \rset{5,6},
+\]
+whose tool requirements are $\rset{1,2,3}$, $\rset{3,4,5}$ and $\rset{5,6,1}$.
+Each has exactly three tools, so each group fixes its configuration with no
+freedom left: $C_1 = \rset{1,2,3}$, $C_2 = \rset{3,4,5}$, $C_3 = \rset{5,6,1}$.
+
+Step~2 compares the three configurations. Any two of them share exactly one
+tool, so moving between any two costs two insertions. Every order of the three
+groups therefore costs the same, and step~2 may return any of them. Take
+$G_1, G_2, G_3$.
+
+Step~3 writes out the jobs group by group, giving the order $1,2,3,4,5,6$, and
+applies KTNS to it. That is the order already traced in Example~\ref{ex:ring},
+and its cost is $6$ insertions, or $3$ once the first fill is not charged.
+\end{example}
+
+Two things in this example are worth pausing on, because both matter later.
+
+First, the method does not fully determine its own answer. Step~1 may return
+several optimal groupings; step~2 may face ties, as it does here; and the order
+of the jobs \emph{inside} a group is left open by all three steps. Different
+choices can give different costs. Throughout this report the heuristic is read
+in its most favourable form: its cost is the best value reachable over all these
+choices. This is the reading that makes the comparison with $\Zst$ meaningful,
+because any weaker reading would measure the tie-breaking rule rather than the
+method.
+
+Second, and less obviously, step~3 does something that step~2 did not
+anticipate. This is the subject of the next section.
+
+\subsection{Two ways to measure the heuristic}\label{ssec:frames}
+
+Steps~1 and~2 reason entirely in terms of configurations. A group is assigned one
+magazine, and that magazine is imagined to stay loaded while the whole group
+runs. Under that picture the schedule is a walk through $\Kst$ configurations,
+and its cost is the sum of the transition costs $d(C,C')$ along the walk.
+
+Step~3 does not do this. It discards the configurations, keeps only the job
+order they produced, and hands that order to KTNS. KTNS is free to change the
+magazine between any two consecutive jobs, including two jobs of the same group.
+The group structure survives only as an ordering of the jobs. It does not
+constrain the magazine.
+
+The two readings give different numbers, and both appear in the literature
+without being distinguished. This report separates them.
+
+\begin{definition}[The walk value and the heuristic value]\label{def:frames}
+Let $\mathcal{P}$ range over the partitions of $J$ into $\Kst$ feasible groups,
+and for each such partition let the configurations be chosen and ordered as
+cheaply as possible. Write
+\[
+  H_{\mathrm{walk}}
+  \;=\;\min_{\mathcal{P}}\;\min_{\sigma}\;
+        \sum_{l=1}^{\Kst - 1} d\bigl(C_{\sigma(l)}, C_{\sigma(l+1)}\bigr)
+\]
+for the cheapest such walk. Write $H$ for the cost of the two-phase heuristic as
+defined in Section~\ref{ssec:jgp}: the minimum, over the same partitions, over
+all orders of the groups and all orders of the jobs within each group, of the
+KTNS cost of the resulting job order.
+\end{definition}
+
+\begin{proposition}\label{prop:frames}
+For every instance, $H \le H_{\mathrm{walk}}$.
+\end{proposition}
+
+\begin{proof}
+Fix a partition and an order of its groups attaining $H_{\mathrm{walk}}$. Writing
+the jobs out group by group in that order gives a job order. Holding each
+group's configuration fixed while its jobs run is one admissible loading for
+that order, and its cost is exactly the walk cost. By
+Proposition~\ref{prop:ktns}, KTNS returns the cheapest loading for that order,
+so its cost is at most the walk cost. Since $H$ minimises over at least this
+one job order, $H \le H_{\mathrm{walk}}$.
+\end{proof}
+
+The inequality can be strict, and it is strict on the running example.
+
+\begin{example}[The two values differ on the $6$-ring]\label{ex:frames-ring}
+Continue Example~\ref{ex:jgp-ring}. The walk pays three insertions to build
+$C_1 = \rset{1,2,3}$, then two to reach $C_2 = \rset{3,4,5}$, then two to reach
+$C_3 = \rset{5,6,1}$. That is $H_{\mathrm{walk}} = 7$, or $4$ free-initial.
+
+KTNS on the same job order costs $6$, or $3$ free-initial
+(Example~\ref{ex:ring}). Since $\Zst = 3$, the heuristic is \emph{optimal} on the
+$6$-ring, while the walk value is one above the optimum.
+
+Figure~\ref{fig:frames} shows where the two part company. The walk insists that
+the middle group runs under $C_2 = \rset{3,4,5}$ and nothing else. Tool~1 is not
+in $C_2$, so it is evicted at position~3 and must be reloaded at position~5 for
+job~6. KTNS is not bound to $C_2$. It holds $\rset{1,3,4}$ at position~3 and
+$\rset{1,4,5}$ at position~4 --- two different magazines inside one group, each
+serving its own job --- and so keeps tool~1 resident throughout. The one
+re-insertion is avoided, and the schedule is optimal.
+\end{example}
+
+\begin{figure}[t]\centering
+\begin{tikzpicture}[x=0.8cm,y=0.8cm,font=\footnotesize]
+ % ---------------- (a) the configuration walk ----------------
+ \begin{scope}
+  \node[font=\footnotesize\bfseries,anchor=west] at (0.15,7.6)
+     {(a) the walk: one magazine per group};
+  \foreach \p/\req in {1/{1{,}2},2/{2{,}3},3/{3{,}4},4/{4{,}5},5/{5{,}6},6/{6{,}1}}{
+    \node[font=\footnotesize] at (\p,6.05) {\p};
+    \node[font=\scriptsize,text=black!55] at (\p,6.7) {$\{\req\}$};}
+  \foreach \t/\y in {1/5,2/4,3/3,4/2,5/1,6/0}{
+    \node[anchor=east,font=\footnotesize] at (0.4,\y) {$t_{\t}$};}
+  \foreach \p/\y in {1/5,2/5,5/5,6/5, 1/4,2/4, 1/3,2/3,3/3,4/3,
+                     3/2,4/2, 3/1,4/1,5/1,6/1, 5/0,6/0}{
+     \fill[cBlue!20] (\p-0.5,\y-0.5) rectangle (\p+0.5,\y+0.5);}
+  \foreach \p/\y in {1/5,1/4,1/3, 3/2,3/1, 5/5,5/0}{
+     \fill[cOrange!90] (\p-0.5,\y-0.5) rectangle (\p+0.5,\y+0.5);
+     \draw[white,line width=0.9pt] (\p-0.17,\y)--(\p+0.17,\y);
+     \draw[white,line width=0.9pt] (\p,\y-0.17)--(\p,\y+0.17);}
+  \draw[black!35,step=1] (0.5,-0.5) grid (6.5,5.5);
+  \draw[black!55,semithick,dashed] (2.5,-0.5) -- (2.5,5.5);
+  \draw[black!55,semithick,dashed] (4.5,-0.5) -- (4.5,5.5);
+  \foreach \x/\g in {1.5/1,3.5/2,5.5/3}{
+    \node[font=\scriptsize,text=black!55] at (\x,-1.05) {$G_{\g}$};}
+  \node[font=\scriptsize,text=black!70,anchor=west] at (0.5,-1.8)
+     {seven insertions};
+ \end{scope}
+ % ---------------- (b) KTNS on the same job order ----------------
+ \begin{scope}[xshift=7.7cm]
+  \node[font=\footnotesize\bfseries,anchor=west] at (0.15,7.6)
+     {(b) KTNS on the same job order};
+  \foreach \p/\req in {1/{1{,}2},2/{2{,}3},3/{3{,}4},4/{4{,}5},5/{5{,}6},6/{6{,}1}}{
+    \node[font=\footnotesize] at (\p,6.05) {\p};
+    \node[font=\scriptsize,text=black!55] at (\p,6.7) {$\{\req\}$};}
+  \foreach \t/\y in {1/5,2/4,3/3,4/2,5/1,6/0}{
+    \node[anchor=east,font=\footnotesize] at (0.4,\y) {$t_{\t}$};}
+  \foreach \p/\y in {1/5,2/5,3/5,4/5,5/5,6/5, 1/4,2/4, 1/3,2/3,3/3,
+                     3/2,4/2, 4/1,5/1,6/1, 5/0,6/0}{
+     \fill[cBlue!20] (\p-0.5,\y-0.5) rectangle (\p+0.5,\y+0.5);}
+  \foreach \p/\y in {1/5,1/4,1/3, 3/2, 4/1, 5/0}{
+     \fill[cOrange!90] (\p-0.5,\y-0.5) rectangle (\p+0.5,\y+0.5);
+     \draw[white,line width=0.9pt] (\p-0.17,\y)--(\p+0.17,\y);
+     \draw[white,line width=0.9pt] (\p,\y-0.17)--(\p,\y+0.17);}
+  \draw[black!35,step=1] (0.5,-0.5) grid (6.5,5.5);
+  \draw[black!55,semithick,dashed] (2.5,-0.5) -- (2.5,5.5);
+  \draw[black!55,semithick,dashed] (4.5,-0.5) -- (4.5,5.5);
+  \foreach \x/\g in {1.5/1,3.5/2,5.5/3}{
+    \node[font=\scriptsize,text=black!55] at (\x,-1.05) {$G_{\g}$};}
+  \node[font=\scriptsize,text=black!70,anchor=west] at (0.5,-1.8)
+     {six insertions};
+ \end{scope}
+\end{tikzpicture}
+\caption{The same grouping of the $6$-ring, measured two ways. Columns are the
+six processing positions, with the tools each job needs above them; rows are the
+six tools. A shaded cell means the tool sits in the magazine at that position;
+a ``$+$'' marks an \emph{insertion}. The dashed lines separate the three groups.
+In (a) each group runs under one fixed magazine, so tool~$1$ (top row) is evicted
+at position~$3$ and reloaded at position~$5$ for job~$6$: seven insertions. In
+(b) KTNS may change the magazine inside a group, so tool~$1$ is loaded once and
+kept across all six positions, and the count is six. That single re-insertion is
+the whole difference between $H_{\mathrm{walk}}$ and $H$.}
+\label{fig:frames}
+\end{figure}
+
+\begin{remark}[Why the distinction is kept throughout]\label{rem:frames}
+It would be simpler to work with $H_{\mathrm{walk}}$ alone. It has a clean
+description --- a shortest walk through $\Kst$ configurations --- and the
+structural results of Chapter~\ref{sec:gap} are naturally proved about it.
+
+That simplification is not available, for two reasons. The first is that
+$H_{\mathrm{walk}}$ is not what the method returns. A practitioner running the
+three steps of Section~\ref{ssec:jgp} obtains $H$, and any statement about how
+far the method can be from optimal must be a statement about $H$. The second is
+that the two can differ on exactly the instances that matter: on the $6$-ring,
+the family this report returns to most often, $H_{\mathrm{walk}}$ exceeds the
+optimum while $H$ attains it.
+
+Every result in Chapter~\ref{sec:gap} is therefore stated with its value named.
+Proposition~\ref{prop:frames} carries upper bounds from one to the other:
+anything proved to bound $H_{\mathrm{walk}}$ from above also bounds $H$. Nothing
+transfers in the other direction, and in particular an instance on which
+$H_{\mathrm{walk}}$ exceeds $\Zst$ is not, by itself, an instance on which the
+heuristic is suboptimal.
+\end{remark}

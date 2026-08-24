@@ -1,0 +1,72 @@
+\section*{Notation and conventions}
+\addcontentsline{toc}{section}{Notation and conventions}
+\label{sec:notation}
+
+Every symbol used in this report is listed here. Each is defined once, in the
+section given in the last column, and is used with that meaning everywhere else.
+
+\medskip
+\noindent\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{8.9cm}l@{}}
+\toprule
+Symbol & Meaning & Defined in \\
+\midrule
+$n$              & number of jobs                                              & \S\ref{ssec:ssp} \\
+$J$              & the set of jobs, $J=\rset{1,\dots,n}$                        & \S\ref{ssec:ssp} \\
+$T$              & the set of tools                                            & \S\ref{ssec:ssp} \\
+$\lvert T\rvert$ & number of tools                                             & \S\ref{ssec:ssp} \\
+$T_j$            & the tools job $j$ requires                                   & \S\ref{ssec:ssp} \\
+$b$              & magazine capacity, in tool slots                            & \S\ref{ssec:ssp} \\
+$\U$             & the tools required by at least one job, $\U=\bigcup_j T_j$   & \S\ref{ssec:ssp} \\
+$q$              & the tool excess, $q=\lvert\U\rvert-b$                        & \S\ref{ssec:lb} \\
+$\pi$            & a job order (a permutation of $J$)                           & \S\ref{ssec:ssp} \\
+$M_i$            & the magazine contents at position $i$                        & \S\ref{ssec:ssp} \\
+$\Zst$           & the optimal switch cost of the instance                      & \S\ref{ssec:ssp} \\
+$\KTNS(\pi)$     & the cheapest loading cost for the fixed order $\pi$          & \S\ref{ssec:ktns} \\
+$G$              & a group of jobs                                             & \S\ref{ssec:jgp} \\
+$\Kst$           & the fewest feasible groups covering all jobs                 & \S\ref{ssec:jgp} \\
+$C$              & a configuration: a set of exactly $b$ tools                  & \S\ref{ssec:gtsp} \\
+$\confs$         & the set of all configurations                                & \S\ref{ssec:gtsp} \\
+$H_j$            & the cluster of configurations able to serve job $j$          & \S\ref{ssec:gtsp} \\
+$d(C,C')$        & transition cost, $d(C,C')=\lvert C'\setminus C\rvert$        & \S\ref{ssec:gtsp} \\
+$\mathcal{P}$    & a grouping: a partition of $J$ into feasible groups          & \S\ref{ssec:frames} \\
+$\gamma(\mathcal{P})$ & the cheapest walk through the configurations of $\mathcal{P}$ & \S\ref{ssec:exact} \\
+$\Hwalk$         & the walk value of the two-phase heuristic                    & \S\ref{ssec:frames} \\
+$H$              & the value the two-phase heuristic returns                    & \S\ref{ssec:frames} \\
+$R$              & re-insertions: insertions of tools evicted earlier           & \S\ref{ssec:ratio} \\
+$R_{\mathrm{opt}}$ & re-insertions made by an optimal schedule                  & \S\ref{ssec:ratio} \\
+$w_{ij}$         & pairwise bound, $w_{ij}=\max(0,\lvert T_i\cup T_j\rvert-b)$  & \S\ref{ssec:bbc} \\
+$\rho$           & setup cost charged per configuration change                  & \S\ref{ssec:collapse} \\
+$\theta$         & the Benders stand-in for the loading cost                    & \S\ref{ssec:bbc} \\
+\bottomrule
+\end{tabular}
+
+\subsection*{Two conventions that are fixed once and never varied}
+
+\paragraph{Cost.}
+Formulations in the literature charge the first magazine fill differently, and
+comparing their objective values without adjusting for this produces differences
+that are not real. Two costs are used here and are always named.
+The \emph{empty-start} cost counts every insertion, beginning from an empty
+magazine. The \emph{free-initial} cost does not charge the first fill.
+Proposition~\ref{prop:conv} shows the two differ by a constant that depends only on
+the instance. Section~\ref{ssec:conv} gives the details. Theory is stated in the
+free-initial cost; the computational study reports the empty-start cost, because
+that is what the solvers return.
+
+\paragraph{Status of results.}
+Every statement carries a label saying what kind of statement it is.
+
+\begin{itemize}[topsep=3pt,itemsep=1pt]
+  \item \textbf{Theorem}, \textbf{Proposition}, \textbf{Lemma}, \textbf{Corollary}
+  --- proved, with the proof given here or in Appendix~\ref{app:proofs}.
+  \item \textbf{Observation} --- established by computation, not by proof. The
+  computation is named, and Appendix~\ref{app:verify} says how to repeat it.
+  \item \textbf{Conjecture} --- supported by computation but not proved. Where a
+  partial argument exists it is given under the heading \emph{Supporting
+  argument}, which is deliberately not the word \emph{Proof}.
+\end{itemize}
+
+\noindent
+Numbers taken from the literature name the paper and the table or section they
+come from. Numbers computed for this report name the instance family, its
+parameter range, and the script that produced them.

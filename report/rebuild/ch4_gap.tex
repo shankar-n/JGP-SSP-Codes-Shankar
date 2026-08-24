@@ -1,0 +1,761 @@
+%==============================================================================
+\section{How far can the two-phase heuristic be from optimal?}\label{sec:gap}
+%==============================================================================
+
+The two-phase heuristic of Section~\ref{ssec:jgp} is the standard practical method
+for the SSP. Where it has been measured against exact optima its suboptimality is
+small \citep{Burger2015}. No worst-case analysis of it has been published. This
+section gives one.
+
+The source of any gap is easy to state. The heuristic commits to a grouping with the
+\emph{fewest} groups before it sequences anything, whereas the optimal schedule may
+be served by a larger grouping with cheaper transitions. Everything below makes that
+statement precise, bounds the resulting loss, and identifies when it is zero.
+
+\paragraph{Which value is being bounded.}
+Section~\ref{ssec:frames} distinguished two values: the walk value $\Hwalk$, and the
+value $H$ that the method returns. Every result below names the one it is about. The
+distinction is not a technicality. Section~\ref{ssec:ktnsgap} shows that the
+canonical example family of this problem has a positive walk gap and a zero
+heuristic gap, so a result proved about $\Hwalk$ and reported as a result about the
+heuristic would be false.
+
+\paragraph{How the results were checked.}
+Every statement in this section was verified computationally by a program written
+independently of the solvers used elsewhere in this report, described in
+Appendix~\ref{app:verify}. Statements labelled Theorem, Proposition, Lemma or
+Corollary also have proofs, given here or in Appendix~\ref{app:proofs}. Statements
+labelled Observation were established by computation only. Statements labelled
+Conjecture have neither a proof nor a claim to one.
+
+\subsection{The gap is the price of using the fewest groups}\label{ssec:exact}
+
+A grouping is given a cost by ordering its configurations as cheaply as possible.
+
+\begin{definition}[Feasible grouping and its cost]\label{def:grouping}
+A \emph{feasible grouping} is a partition $\mathcal{P}=\rset{G_1,\dots,G_p}$ of $J$
+into feasible groups, together with a configuration $C_l\supseteq\bigcup_{j\in G_l}T_j$
+for each group. Its cost is the cheapest free-initial walk through its
+configurations,
+\[
+  \gamma(\mathcal{P})\;=\;\min_{\sigma\in S_p}\ \sum_{l=1}^{p-1}
+  d\bigl(C_{\sigma(l)},C_{\sigma(l+1)}\bigr).
+\]
+\end{definition}
+
+The Job Grouping Problem seeks a feasible grouping of minimum cardinality $\Kst$,
+and $\Hwalk$ is $\gamma$ minimised over those. Removing the cardinality restriction
+makes the framework exact.
+
+\begin{theorem}[Grouping exactness]\label{thm:grouping}
+$\displaystyle \Zst=\min_{\mathcal{P}}\gamma(\mathcal{P})$, where the minimum runs
+over \emph{all} feasible groupings, of every cardinality.
+\end{theorem}
+
+The proof is in Appendix~\ref{app:proofs}. It is a pair of constructions. Any
+feasible grouping, processed group by group, is a schedule of cost
+$\gamma(\mathcal{P})$, which gives one inequality. Any optimal schedule, with its
+jobs grouped by the magazine under which they run, is a feasible grouping of no
+greater cost, which gives the other.
+
+\begin{corollary}[The walk gap]\label{cor:gap}
+\[
+  \Hwalk-\Zst \;=\; \min_{\lvert\mathcal{P}\rvert=\Kst}\gamma(\mathcal{P})
+  \;-\;\min_{\mathcal{P}}\gamma(\mathcal{P})\;\ge\;0,
+\]
+and it is strictly positive exactly when no minimum-cardinality grouping attains the
+overall minimum of $\gamma$.
+\end{corollary}
+
+This locates the loss exactly. It is not a failure of the sequencing phase, which
+orders whatever it is given optimally. It is the price of the cardinality
+restriction imposed by the grouping phase.
+
+\begin{example}[Where the ring loses, in the walk model]\label{ex:ring-why}
+The optimum of the $6$-ring is realised by a \emph{four}-configuration grouping,
+\[
+  \rset{1,2,3}\ \to\ \rset{1,3,4}\ \to\ \rset{1,4,5}\ \to\ \rset{1,5,6},
+\]
+in which consecutive configurations differ in a single tool, for $\gamma=3$. Every
+minimum-cardinality grouping uses three configurations and costs $4$
+(Example~\ref{ex:frames-ring}). The walk gap of one is exactly the difference in
+Corollary~\ref{cor:gap}: the cheaper grouping is not of minimum cardinality, so the
+grouping phase never offers it to the sequencer.
+\end{example}
+
+\begin{figure}[t]\centering
+\begin{tikzpicture}[font=\footnotesize,>=Stealth,
+   cfg/.style={draw=cPurple!70,semithick,fill=white,rounded corners,minimum width=1.6cm,minimum height=0.85cm},
+   bad/.style={draw=cRed!70,semithick,fill=white,rounded corners,minimum width=1.75cm,minimum height=0.85cm},
+   node distance=1.15cm]
+ \begin{scope}
+  \node[font=\footnotesize\bfseries,anchor=west] at (-0.9,1.15)
+     {four configurations: cost $3$};
+  \node[cfg] (c1) {$\{1,2,3\}$};
+  \node[cfg,right=of c1] (c2) {$\{1,3,4\}$};
+  \node[cfg,right=of c2] (c3) {$\{1,4,5\}$};
+  \node[cfg,right=of c3] (c4) {$\{1,5,6\}$};
+  \draw[->,semithick,black!60] (c1)--(c2) node[midway,above,font=\scriptsize]{$+4$};
+  \draw[->,semithick,black!60] (c2)--(c3) node[midway,above,font=\scriptsize]{$+5$};
+  \draw[->,semithick,black!60] (c3)--(c4) node[midway,above,font=\scriptsize]{$+6$};
+  \node[below=0.5mm of c1,font=\scriptsize,text=black!60] {serves $1,2$};
+  \node[below=0.5mm of c2,font=\scriptsize,text=black!60] {serves $3$};
+  \node[below=0.5mm of c3,font=\scriptsize,text=black!60] {serves $4$};
+  \node[below=0.5mm of c4,font=\scriptsize,text=black!60] {serves $5,6$};
+ \end{scope}
+ \begin{scope}[yshift=-3.2cm]
+  \node[font=\footnotesize\bfseries,anchor=west] at (-0.9,1.15)
+     {three configurations: cost $4$};
+  \node[bad] (a) at (0.6,0) {$\{1,2,3\}$};
+  \node[bad] (b) at (3.9,0) {$\{3,4,5\}$};
+  \node[bad] (c) at (7.2,0) {$\{5,6,1\}$};
+  \draw[->,semithick,black!60] (a)--(b) node[midway,above,font=\scriptsize]{$+4,+5$};
+  \draw[->,semithick,black!60] (b)--(c) node[midway,above,font=\scriptsize]{$+6,+1$};
+  \node[below=0.5mm of a,font=\scriptsize,text=black!60] {serves $1,2$};
+  \node[below=0.5mm of b,font=\scriptsize,text=black!60] {serves $3,4$};
+  \node[below=0.5mm of c,font=\scriptsize,text=black!60] {serves $5,6$};
+ \end{scope}
+\end{tikzpicture}
+\caption{The $6$-ring in configuration space, in the walk model. Above: the optimal
+schedule visits four configurations, each one tool from the next, for a cost of
+three. Below: the heuristic may use only the $\Kst=3$ minimum-cardinality groups, and
+every pair of the resulting configurations differs in two tools, so the best it can
+do in this model is four. The extra unit is one re-insertion of tool~1, which the
+middle configuration cannot hold. Figure~\ref{fig:frames} shows what happens when
+the KTNS step is applied instead.}
+\label{fig:gtsp}
+\end{figure}
+
+\subsection{Zero-gap classes and worst-case guarantees}\label{ssec:ratio}
+
+This subsection proves bounds that hold for \emph{every} instance and every capacity.
+Two quantities recur. The first is the tool excess $q=\lvert\U\rvert-b$ of
+Section~\ref{ssec:lb}. The second is the number of \emph{re-insertions} a schedule
+makes: insertions of tools that were in the magazine earlier and were removed. Write
+$R_{\mathrm{opt}}$ for the re-insertions made by an optimal schedule. Throughout,
+$\Kst\ge2$, since at $\Kst=1$ the heuristic is trivially exact, and all costs are
+free-initial.
+
+\begin{lemma}[Cost identity]\label{lem:costid}
+Restrict every magazine state to a subset of $\U$, which is possible whenever
+$\Kst\ge2$ and never increases cost. The free-initial cost of any full-magazine
+schedule then equals $q+R$, where $R\ge0$ counts re-insertions.
+\end{lemma}
+
+\begin{proof}
+Each of the $q$ tools of $\U$ outside the first fill is required by some job, so it
+is inserted at least once. Split all insertions into first-time insertions, of which
+there are exactly $q$, and the rest, which are by definition the $R$ re-insertions.
+\end{proof}
+
+Hence $\Zst=q+R_{\mathrm{opt}}$, and writing $R_{\mathrm{walk}}$ for the walk model's
+re-insertions, $\Hwalk-\Zst=R_{\mathrm{walk}}-R_{\mathrm{opt}}$. The walk gap is
+exactly the excess re-insertions forced by the cardinality restriction. On the
+$6$-ring the single extra insertion is one such re-insertion: tool~1, needed by the
+first and last groups but not the middle one, is removed at a group boundary and
+reloaded (Figure~\ref{fig:frames}).
+
+\begin{lemma}[Transition cap]\label{lem:transcap}
+In any ordering of configurations contained in $\U$, every transition inserts at most
+$\min(b,q)$ tools. Hence $\Hwalk\le(\Kst-1)\min(b,q)$.
+\end{lemma}
+
+\begin{proof}
+A transition into $C_{k+1}$ inserts $\lvert C_{k+1}\setminus C_k\rvert$ tools. This
+is at most $\lvert C_{k+1}\rvert=b$, and also at most
+$\lvert\U\setminus C_k\rvert=q$, since $C_{k+1}\subseteq\U$ and
+$\lvert C_k\rvert=b$. A covering configuration inside $\U$ exists for every group, so
+some minimum-cardinality grouping uses only such configurations, and $\Hwalk$ is at
+most its cost.
+\end{proof}
+
+These two lemmas give the section's central guarantee. Lemma~\ref{lem:transcap} caps
+the heuristic's absolute cost, Corollary~\ref{cor:lb} floors the optimum, and
+dividing one by the other bounds how far from optimal the method can stray.
+
+\begin{theorem}[Worst-case guarantee]\label{thm:uncond}
+For every instance with $\Kst\ge2$,
+\[
+  \frac{H}{\Zst}\ \le\ \frac{\Hwalk}{\Zst}
+  \ \le\ \frac{(\Kst-1)\min(b,q)}{\max(\Kst-1,\ q)}
+  \ \le\ \min\bigl(b,\ \Kst-1,\ q\bigr).
+\]
+\end{theorem}
+
+\begin{proof}
+The first inequality is Proposition~\ref{prop:frames}. For the second, divide
+Lemma~\ref{lem:transcap} by $\Zst\ge\max(\Kst-1,q)\ge1$ (Corollary~\ref{cor:lb}). For
+the third, $(\Kst-1)q/\max(\Kst-1,q)=\min(\Kst-1,q)$ together with $\min(b,q)\le q$
+gives the $\min(\Kst-1,q)$ term, while $(\Kst-1)/\max(\Kst-1,q)\le1$ together with
+$\min(b,q)\le b$ gives the $b$ term.
+\end{proof}
+
+This subsumes the trivial $b$-approximation that follows from
+$\Hwalk\le b(\Kst-1)$ and $\Zst\ge\Kst-1$, which was the bound the internship began
+with. It tightens automatically on instances with few groups, with a small tool
+excess, or with a small magazine.
+
+\begin{corollary}[Zero-gap classes, every $b$]\label{cor:zerogap}
+\emph{(i)} If $\Kst=2$ the gap is zero, and indeed $H=\Hwalk=\Zst=q$.
+\emph{(ii)} If $\lvert\U\rvert\le b+1$ the gap is zero.
+\emph{(iii)} If $\Kst=3$ then $H/\Zst\le2$.
+\end{corollary}
+
+\begin{proof}
+All three are instances of Theorem~\ref{thm:uncond}, whose ratio bound is
+$\Kst-1=1$, $q\le1$ and $\Kst-1=2$ respectively. For the equality in (i), pad the
+first group's configuration to size $b$ using tools from the second group's
+requirement, and pad the second from the first. The single transition then inserts
+exactly the $q$ tools of $\U$ missing from the first configuration, so
+$\Hwalk\le q\le\Zst\le H\le\Hwalk$ by the coverage bound.
+\end{proof}
+
+A positive gap therefore requires $\Kst\ge3$.
+
+\begin{corollary}[Small optima are gap-free]\label{cor:smallZ}
+If $\Zst\le2$ then the gap is zero, for every $b$ and every $\Kst$.
+\end{corollary}
+
+\begin{proof}
+$\Zst\ge q$, so $q\le2$. If $q\le1$ the gap vanishes by
+Corollary~\ref{cor:zerogap}(ii). If $q=2$ then $\Zst=q$, and the walk argument of
+Appendix~\ref{app:proofs} yields a walk of at most $q+1=3$ configurations, each
+serving a job, exhibiting a feasible grouping of that cardinality; for $\Kst\le2$ the
+gap vanishes by Corollary~\ref{cor:zerogap}(i), and for $\Kst=3$ the walk grouping is
+itself of minimum cardinality and has cost $\Zst$, forcing $\Hwalk=\Zst$.
+\end{proof}
+
+\begin{corollary}[$\Zst\le3$ forces a walk gap of at most one]\label{cor:z3}
+If $\Zst\le3$ then $\Hwalk-\Zst\le1$, for every $b$ and every $\Kst$.
+\end{corollary}
+
+\begin{proof}
+Write $\Zst=q+R_{\mathrm{opt}}$, so $q\le3$. If $q\le1$ or $\Kst\le2$ the gap is zero
+by Corollary~\ref{cor:zerogap}. Assume $q\in\rset{2,3}$ and $\Kst\ge3$. The excised
+optimal walk has $p\le\Zst+1\le4$ configurations, each serving a job, and exhibits a
+feasible $p$-grouping, so $\Kst\le p\le4$. If $\Kst=4$ then $p=\Kst$, the walk's
+grouping is of minimum cardinality and has cost $\Zst$, forcing $\Hwalk=\Zst$. There
+remains $\Kst=3$. For $(q,R_{\mathrm{opt}})=(3,0)$ the merge argument in
+Appendix~\ref{app:proofs} gives a gap of at most one. For
+$(q,R_{\mathrm{opt}})=(2,1)$ the bound of Proposition~\ref{prop:k3} reads
+$\max\bigl(0,\min(2,\lfloor(2b-2)/3\rfloor)-1\bigr)\le1$.
+\end{proof}
+
+\subsection{The extremal behaviour at three groups}\label{ssec:law}
+
+Corollary~\ref{cor:zerogap} places every positive-gap instance at $\Kst\ge3$. This
+subsection works out the case $\Kst=3$, which is where the extremes occur. All
+results here are about the walk value; Section~\ref{ssec:ktnsgap} then asks what the
+KTNS step does to them.
+
+\begin{proposition}[Exact walk cost at $\Kst=3$]\label{prop:hk3}
+If $\Kst=3$ then, with configurations restricted to subsets of $\U$,
+\[
+  \Hwalk\;=\;q\;+\;\min\ \min\bigl(x_{ab},\,x_{bc},\,x_{ca}\bigr),
+  \qquad x_{uv}=\bigl\lvert(C_u\cap C_v)\setminus C_w\bigr\rvert,
+\]
+where the outer minimum runs over feasible $3$-groupings and choices of their
+configurations, and $w$ denotes the third index in each case.
+\end{proposition}
+
+\begin{proof}
+The three configurations of a feasible $3$-grouping are distinct, since two equal
+ones would merge their groups and contradict $\Kst=3$, and together they cover $\U$.
+For a path $(C_a,C_b,C_c)$, splitting the cost into first-time insertions and
+re-insertions (Lemma~\ref{lem:costid}) gives cost
+$q+\lvert(C_a\cap C_c)\setminus C_b\rvert$: the re-inserted tools are exactly those
+of $C_c$ present in $C_a$ but absent from $C_b$. Minimising over the three possible
+middle configurations selects the smallest of the three overlap terms, and $\Hwalk$
+then minimises over groupings and configuration choices.
+\end{proof}
+
+This turns grouping selection at $\Kst=3$ into an explicit criterion: choose the
+grouping whose configurations have the smallest pairwise overlap outside the third.
+Section~\ref{ssec:grouping-sel} returns to it.
+
+\begin{lemma}[Overlap counting]\label{lem:overlap}
+Any three configurations $C_a,C_b,C_c\subseteq\U$ of size $b$ with
+$C_a\cup C_b\cup C_c=\U$ satisfy
+$\min(x_{ab},x_{bc},x_{ca})\le\lfloor(2b-q)/3\rfloor$.
+\end{lemma}
+
+\begin{proof}
+Count tools by how many of the three configurations contain them. Let $a$ be the
+number in exactly one, $\sum x:=x_{ab}+x_{bc}+x_{ca}$ the number in exactly two, and
+$c_3$ the number in all three. Counting tools gives $a+\sum x+c_3=b+q$, and counting
+memberships gives $a+2\sum x+3c_3=3b$. Subtracting, $\sum x=2b-q-2c_3\le2b-q$. The
+minimum of three numbers is at most their mean, and it is an integer.
+\end{proof}
+
+\begin{proposition}[The walk gap at $\Kst=3$]\label{prop:k3}
+Let $\Kst=3$ and $R_{\mathrm{opt}}=\Zst-q$. Then
+\[
+  \Hwalk-\Zst\ \le\ \max\Bigl(0,\ \min\bigl(q,\ \lfloor(2b-q)/3\rfloor\bigr)
+  -R_{\mathrm{opt}}\Bigr).
+\]
+Consequently $\Hwalk-\Zst\le1$ holds
+\emph{(i)} for every instance with $b\le4$;
+\emph{(ii)} whenever $2b\le q+3R_{\mathrm{opt}}+5$;
+\emph{(iii)} whenever $R_{\mathrm{opt}}\ge q-1$; and
+\emph{(iv)} at $\Zst=q=3$ when two of the four walk groups have combined requirement
+fitting one magazine.
+The bound can therefore fail only in the corner
+$2b\ge q+3R_{\mathrm{opt}}+6$ with $R_{\mathrm{opt}}\le q-2$, which forces $b\ge5$.
+\end{proposition}
+
+\begin{proof}
+The configurations of any feasible $3$-grouping cover $\U$, so
+Proposition~\ref{prop:hk3} with Lemma~\ref{lem:overlap} gives
+$\Hwalk\le q+\lfloor(2b-q)/3\rfloor$, while Lemma~\ref{lem:transcap} gives
+$\Hwalk\le2\min(b,q)\le 2q$. Subtracting $\Zst=q+R_{\mathrm{opt}}$ yields the bound.
+For (i) at $b=3$, $\lfloor(6-q)/3\rfloor\le1$ for every $q\ge1$. At $b=4$ the bound
+is at most $1$ for $q\ge3$; for $q=2$, either $R_{\mathrm{opt}}\ge1$ and the bound is
+at most $1$, or $\Zst=q\le2$ and the gap vanishes by Corollary~\ref{cor:smallZ}; and
+$q\le1$ is Corollary~\ref{cor:zerogap}(ii). Parts (ii) and (iii) are read off the
+bound, and part (iv) is proved in Appendix~\ref{app:proofs}.
+\end{proof}
+
+\begin{proposition}[A bound for every $\Kst$]\label{prop:genk}
+For every instance with $\Kst\ge2$,
+\[
+  \Hwalk-\Zst\ \le\ \max\Bigl(0,\
+  \Bigl\lfloor\frac{q\bigl(b(\Kst-1)-q\bigr)}{b+q}\Bigr\rfloor-R_{\mathrm{opt}}\Bigr).
+\]
+\end{proposition}
+
+\begin{proof}
+Fix a minimum-cardinality grouping. Its configurations $C_1,\dots,C_{\Kst}\subseteq\U$
+are pairwise distinct and cover $\U$. In an ordering $\sigma$ the path cost is
+$q+\sum_t(\mathrm{runs}_\sigma(t)-1)$, where $\mathrm{runs}_\sigma(t)$ counts the
+maximal blocks of consecutive configurations containing $t$, since every block after
+the first begins with a re-insertion (Lemma~\ref{lem:costid}). Let $d_t$ be the number
+of configurations containing $t$, so that $\sum_t d_t=\Kst b$ over $b+q$ tools. Under
+a uniformly random ordering,
+$\mathbb{E}[\mathrm{runs}(t)-1]=(d_t-1)(\Kst-d_t)/\Kst$, which is concave in $d_t$, so
+by Jensen's inequality the expected total excess is at most
+$q\bigl(b(\Kst-1)-q\bigr)/(b+q)$. Some ordering achieves at most the mean, the total is
+an integer, and subtracting $\Zst=q+R_{\mathrm{opt}}$ gives the claim.
+\end{proof}
+
+At $\Kst=3$ this and Proposition~\ref{prop:k3} are incomparable and both are attained
+at the $6$-ring. Proposition~\ref{prop:genk} grows linearly in $\Kst$ and is
+unconditional.
+
+The next result shows that the natural guess $\mathrm{gap}\le\Kst-2$, which held on
+all the evidence collected before this internship, is false for the walk value. All
+the earlier evidence lay at $b\le4$, which is exactly the region
+Proposition~\ref{prop:k3} proves.
+
+\begin{proposition}[The $\Kst-2$ bound fails for the walk value]\label{prop:refute}
+There are instances with $\Kst=3$ and $\Hwalk-\Zst=2$. One, with $b=5$ and
+$\U=\rset{1,\dots,9}$, is
+\[
+  W:\quad T=\bigl(\rset{1,2,3,5,8},\ \rset{1,5,6},\ \rset{2,6},\ \rset{3,7,9},\
+  \rset{4,5,6,9}\bigr),
+\]
+with $q=4$, $\Zst=4$ and $\Hwalk=6$, both values obtained by exhaustive computation.
+The instance lies exactly on the boundary of the regimes of
+Proposition~\ref{prop:k3}, at $2b=q+3R_{\mathrm{opt}}+6$, and attains that
+proposition's bound with equality.
+\end{proposition}
+
+\begin{observation}\label{obs:refute-ktns}
+On the same instance $W$, the KTNS step gives $H=5$, so the heuristic gap is one and
+the guess $\mathrm{gap}\le\Kst-2$ is not contradicted by it.
+\end{observation}
+
+\begin{conjecture}[The $4/3$ ratio at $b=3$]\label{conj:43}
+For every instance with $b=3$, $H/\Zst\le4/3$.
+\end{conjecture}
+
+The evidence is a complete enumeration of two families. The first is every instance
+in which each job requires exactly two tools, with $b=3$, at most six tools and at
+most six jobs: $10{,}691$ instances, of which the maximum ratio is exactly $4/3$,
+attained at the $6$-ring in the walk model. The second is every instance with $b=3$
+whose jobs require two or three tools, with at most five tools and at most five jobs:
+a further $6{,}065$ instances, none exceeding $4/3$.
+
+\begin{proposition}[The $4/3$ bound holds whenever $\Kst\le3$]\label{prop:43route}
+Every instance with $b=3$ and $\Kst\le3$ satisfies $\Hwalk/\Zst\le4/3$, and hence
+$H/\Zst\le4/3$. Conjecture~\ref{conj:43} is therefore open only for $\Kst\ge4$.
+\end{proposition}
+
+\begin{proof}
+For $\Kst\le2$ the gap is zero (Corollary~\ref{cor:zerogap}). For $\Kst=3$,
+Proposition~\ref{prop:k3}(i) gives a walk gap of at most one, and a positive gap
+forces $\Zst\ge3$ (Corollary~\ref{cor:smallZ}), so
+$\Hwalk/\Zst=1+(\Hwalk-\Zst)/\Zst\le1+1/3$. Proposition~\ref{prop:frames} carries the
+bound to $H$.
+\end{proof}
+
+The reduction to $\Kst\ge4$ is not vacuous. Positive-walk-gap instances with $b=3$
+and $\Kst=4$ exist; one is
+$T=(\rset{1,3,6},\rset{1,4,7},\rset{2,3},\rset{2,5},\rset{2,7})$, with $\Zst=4$ and
+$\Hwalk=5$. No ratio above $4/3$ has been found in that regime.
+
+\subsection{What the KTNS step does to the walk gap}\label{ssec:ktnsgap}
+
+Everything in Section~\ref{ssec:law} bounds $\Hwalk$. By
+Proposition~\ref{prop:frames} those bounds also hold for $H$. The question this
+subsection asks is how much slack that inequality hides. The answer is: a great deal,
+and on exactly the instances the literature uses as examples.
+
+\begin{observation}[The ring family has no heuristic gap]\label{obs:rings}
+For the $k$-ring at $b=3$ with $k=3,\dots,9$, the heuristic is optimal:
+$H=\Zst$ in every case. The walk value is one above the optimum for
+$k=6,\dots,9$. Table~\ref{tab:rings} gives the values.
+\end{observation}
+
+\begin{table}[h]\centering
+\begin{tabular}{ccccccc}
+\toprule
+$k$ & $\Kst$ & $\Zst$ & $\Hwalk$ & walk gap & $H$ & heuristic gap\\
+\midrule
+3 & 1 & 0 & 0 & 0 & 0 & 0\\
+4 & 2 & 1 & 1 & 0 & 1 & 0\\
+5 & 3 & 2 & 2 & 0 & 2 & 0\\
+6 & 3 & 3 & 4 & 1 & 3 & 0\\
+7 & 4 & 4 & 5 & 1 & 4 & 0\\
+8 & 4 & 5 & 6 & 1 & 5 & 0\\
+9 & 5 & 6 & 7 & 1 & 6 & 0\\
+\bottomrule
+\end{tabular}
+\caption{The $k$-ring at $b=3$, free-initial costs, computed exhaustively. The walk
+value separates from the optimum at $k=6$ and stays one above it. The value the
+heuristic actually returns equals the optimum for every $k$ tested. The mechanism is
+the one drawn in Figure~\ref{fig:frames}.}\label{tab:rings}
+\end{table}
+
+This is why the distinction of Section~\ref{ssec:frames} cannot be dropped. The
+$6$-ring is the standard example of a positive gap for this heuristic, and for the
+heuristic as defined it has no gap at all. The same holds for the $\Kst=4$ instance
+at the end of Section~\ref{ssec:law}, whose walk gap is one and whose heuristic gap
+is zero, and for the witness $W$ of Proposition~\ref{prop:refute}, whose walk gap is
+two and whose heuristic gap is one.
+
+Positive heuristic gaps do exist. They are simply rarer and smaller than the walk
+model suggests.
+
+\begin{observation}[The smallest sub-optimal instance]\label{obs:smallest}
+The instance with $b=4$, four jobs and $\U=\rset{1,\dots,7}$ given by
+\[
+  T=\bigl(\rset{1,2},\ \rset{3,4},\ \rset{1,3,5,6},\ \rset{2,5,6,7}\bigr)
+\]
+has $\Kst=3$, $\Zst=3$ and $H=4$, so the heuristic is suboptimal on it. An exhaustive
+search over all instances with at most four jobs finds no smaller one.
+\end{observation}
+
+\begin{observation}[Positive heuristic gaps are rare and small]\label{obs:census}
+In a random sample of $420$ instances, drawn with three to five jobs, four to eight
+tools, capacity between two and five, and each job's requirement a uniformly random
+subset of admissible size, exactly one has $H>\Zst$. Every positive heuristic gap
+found anywhere in this study equals one, and every instance carrying one has
+$b\ge4$.
+\end{observation}
+
+The last part of that observation is worth pausing on. A positive heuristic gap
+requires the magazine to be large relative to the jobs. That is precisely the regime
+in which \citet{Burger2015} report the decomposition degrading: as the difference
+between the magazine size and the largest job size grows, the quality of the
+heuristic's solutions decreases. Their finding is empirical and industrial, this one
+is combinatorial and exhaustive, and they agree.
+
+Unboundedness survives, but not with the family the walk model suggests.
+
+\begin{proposition}[Unbounded walk gap]\label{prop:unbounded}
+Let $R_g$ consist of $g$ tool-disjoint copies of the $6$-ring, so that $b=3$ and
+$\lvert\U\rvert=6g$. Then $\Zst=6g-3$ and $\Hwalk=7g-3$, so the walk gap $g$ grows
+without bound, while the walk ratio $(7g-3)/(6g-3)$ decreases from $4/3$ towards
+$7/6$.
+\end{proposition}
+
+The proof is in Appendix~\ref{app:proofs}. It pairs the coverage bound with an
+explicit schedule attaining it, and counts the heuristic's cost as $g$ within-copy
+contributions of four and $g-1$ inter-copy transitions of three.
+
+By Observation~\ref{obs:rings} this construction says nothing about $H$: the ring has
+no heuristic gap, so copies of it have none either. Replacing the seed repairs the
+construction.
+
+\begin{observation}[Unbounded heuristic gap, with a different seed]\label{obs:unbounded-true}
+Let $S$ be the four-job instance of Observation~\ref{obs:smallest}, which has $b=4$,
+$\lvert\U\rvert=7$ and heuristic gap one, and let $S_g$ consist of $g$ tool-disjoint
+copies of it. Exhaustive computation gives
+\[
+  \begin{array}{c|ccccc}
+   g & \lvert\U\rvert & \Kst & \Zst & H & H-\Zst\\\hline
+   1 & 7  & 3 & 3  & 4  & 1\\
+   2 & 14 & 6 & 10 & 12 & 2
+  \end{array}
+\]
+so $\Zst=7g-4=\lvert\U\rvert-b$ and the heuristic gap equals $g$ on both.
+\end{observation}
+
+\begin{conjecture}\label{conj:unbounded}
+For every $g\ge1$ the instance $S_g$ of Observation~\ref{obs:unbounded-true} has
+$\Zst=7g-4$ and $H-\Zst=g$. In particular the heuristic gap is unbounded.
+\end{conjecture}
+
+\begin{support}
+The optimum is immediate: the coverage bound gives $\Zst\ge7g-4$, and processing the
+copies one after another, each by its own optimal schedule, attains it, because
+consecutive copies are tool-disjoint and so the magazine must be rebuilt in full
+between them. For $H$ the difficulty is that a group may in principle contain jobs
+from two different copies, since two jobs requiring two tools each can together
+require exactly $b=4$. Verifying that no such grouping helps is what the computation
+above does, and what a proof would have to establish in general.
+\end{support}
+
+Finally, the phenomenon behind all of this deserves to be stated as a question, since
+it is the natural one to ask next and it has no answer here.
+
+\begin{problem}\label{prob:ktns-closes}
+Characterise the instances on which the KTNS step closes the walk gap, that is, on
+which $H<\Hwalk$. Equivalently: when does re-optimising the loading over the whole
+flattened order recover an optimum that no single magazine per group can reach?
+\end{problem}
+
+The evidence assembled here is that this happens very often, and that the walk model
+therefore substantially overstates the weakness of the standard method.
+
+\subsection{What the gap does not depend on}\label{ssec:clutter}
+
+The results above are quantitative. This subsection asks from which combinatorial
+structure of an instance the gap could, even in principle, be read. The natural
+object is the family of feasible groups.
+
+\begin{definition}[Group complex and circuit clutter]\label{def:complex}
+Let $\mathcal{F}=\rset{S\subseteq J:\lvert\bigcup_{j\in S}T_j\rvert\le b}$. Since
+$\lvert T_j\rvert\le b$ and membership is preserved under taking subsets,
+$\mathcal{F}$ is an independence system on $J$. Its inclusion-minimal non-members,
+the \emph{circuits}, form a clutter $\mathcal{C}$.
+\end{definition}
+
+Three plain ideas sit in that definition. That $\mathcal{F}$ is an independence system
+means only that feasibility is preserved downwards: remove a job from a group that
+fits, and it still fits. The circuits are the minimal ways to fail: a set of jobs
+whose tools overflow the magazine although every proper subset fits. A clutter is a
+family no member of which contains another, which the circuits form automatically.
+
+\begin{proposition}[$\Kst$ is a hypergraph chromatic number]\label{prop:chromK}
+A set of jobs is a feasible group if and only if it contains no circuit. Hence $\Kst$
+is the chromatic number of the hypergraph $(J,\mathcal{C})$. The \emph{conflict
+graph}, whose edges join pairs of jobs that cannot share a configuration, consists
+exactly of the two-element circuits, so its chromatic number is at most $\Kst$ and
+may be strictly smaller. For $T_1=\rset{1,2}$, $T_2=\rset{1,3}$, $T_3=\rset{1,4}$
+with $b=3$ there is no conflicting pair at all, yet the three jobs together require
+four tools, so they form a circuit and $\Kst=2$.
+\end{proposition}
+
+\begin{proof}
+An infeasible set contains a minimal infeasible subset and feasibility is preserved
+downwards, which gives the first claim. Colour classes of a proper colouring of
+$(J,\mathcal{C})$ are then exactly feasible groups. Two-element circuits are precisely
+the conflicting pairs, and every proper colouring of the hypergraph properly colours
+the graph. The stated instance computes as claimed.
+\end{proof}
+
+Figure~\ref{fig:hypergraph} draws the example. The point it makes is that pairwise
+conflicts undercount: three jobs can be pairwise compatible and jointly infeasible,
+so the true obstruction is the hypergraph of all minimal clashes.
+
+\begin{figure}[ht]\centering
+\begin{tikzpicture}[font=\small,>=Stealth,
+   jb/.style={draw=cPurple!75,fill=white,circle,semithick,minimum size=1.25cm,
+              inner sep=0pt,align=center,font=\scriptsize\bfseries}]
+  \node[font=\bfseries] at (1.4,2.55) {Conflict graph (pairs only)};
+  \node[jb] (a1) at (1.4,1.4)  {$j_1$\\[-1.5pt]{\tiny$\{1,2\}$}};
+  \node[jb] (b1) at (0.4,-0.4) {$j_2$\\[-1.5pt]{\tiny$\{1,3\}$}};
+  \node[jb] (c1) at (2.4,-0.4) {$j_3$\\[-1.5pt]{\tiny$\{1,4\}$}};
+  \node[align=center,font=\scriptsize,text=black!65] at (1.4,-1.85)
+     {every pair shares tool $1$, so any two\\ need $3\le b$ tools: \textbf{no edge}};
+  \node[font=\Large\bfseries,text=black!45] at (4.6,0.35) {vs.};
+  \node[font=\bfseries] at (7.8,2.55) {Circuit hypergraph};
+  \begin{scope}[on background layer]
+    \fill[cOrange!16] (7.8,0.2) circle (1.55);
+    \draw[cOrange!85,semithick,dashed] (7.8,0.2) circle (1.55);
+  \end{scope}
+  \node[jb] (a2) at (7.8,1.15)  {$j_1$};
+  \node[jb] (b2) at (6.9,-0.45) {$j_2$};
+  \node[jb] (c2) at (8.7,-0.45) {$j_3$};
+  \node[text=black!60,font=\scriptsize\itshape] at (9.55,1.5) {one circuit};
+  \node[align=center,font=\scriptsize,text=black!65] at (7.8,-1.85)
+     {all three \emph{together} need\\ $\{1,2,3,4\}=4>b$: \textbf{one hyperedge}, $\Kst=2$};
+\end{tikzpicture}
+\caption{Why $\Kst$ is read off the hypergraph of all minimal clashes and never off
+the graph of pairwise ones. On this instance no two jobs conflict, because any two of
+them need only three tools, which fit. All three together need four and overflow the
+magazine, so they form a circuit, and that single circuit already forces two groups.}
+\label{fig:hypergraph}
+\end{figure}
+
+\begin{proposition}[No matroid structure]\label{prop:nonmatroid}
+$\mathcal{F}$ is not a matroid in general. For $T_1=\rset{1}$, $T_2=\rset{2}$,
+$T_3=\rset{3,4}$ with $b=2$, both $\rset{3}$ and $\rset{1,2}$ are independent, but
+neither $\rset{1,3}$ nor $\rset{2,3}$ is, so the exchange axiom fails. Greedy and
+matroid-union arguments are therefore unavailable without further hypotheses.
+\end{proposition}
+
+\begin{proof}
+The relevant unions have sizes $2$, $2$, $3$ and $3$.
+\end{proof}
+
+\begin{proposition}[The circuit clutter does not determine the gap]\label{prop:noclutter}
+Two instances with $b=4$, $\lvert\U\rvert=7$, four jobs, isomorphic circuit clutters
+and equal $\Kst=3$ and $\Zst=3$ can have different gaps:
+\[
+\begin{aligned}
+  I_0:\ &T=\bigl(\rset{1,3,7},\ \rset{2,3,4},\ \rset{3,4,5,6},\ \rset{4,5,6}\bigr),\\
+  I_1:\ &T=\bigl(\rset{1,2,4,7},\ \rset{2,5,6,7},\ \rset{3,5},\ \rset{4,6}\bigr).
+\end{aligned}
+\]
+In both, every pair of jobs conflicts except the last two, and no larger set is a
+minimal clash. Yet $I_0$ has gap zero and $I_1$ has gap one, in both the walk value
+and the heuristic value.
+\end{proposition}
+
+\begin{proof}
+The pairwise union sizes are checked directly. Exhaustive enumeration over sequences
+and over minimum-cardinality groupings gives $\Zst=3$ and $H=\Hwalk=3$ for $I_0$, and
+$\Zst=3$ and $H=\Hwalk=4$ for $I_1$.
+\end{proof}
+
+No criterion that reads only the circuit clutter, and a fortiori none that reads only
+the conflict graph, can therefore decide when the gap vanishes. Tool-level structure
+is essential, and that is exactly the level at which Proposition~\ref{prop:hk3}
+operates: its overlap sizes $x_{uv}$ are precisely the data the clutter forgets.
+
+On the covering side, however, the clutter is the right object, and blocking duality
+makes this precise.
+
+\begin{proposition}[Circuit--group blocking identity]\label{prop:circblocker}
+On ground set $J$, the blocker of the circuit clutter, meaning the clutter of its
+minimal transversals, is the family of minimal complements of maximal feasible
+groups.
+\end{proposition}
+
+\begin{proof}
+A set meets every circuit if and only if its complement contains no circuit, if and
+only if its complement is a feasible group. Minimal transversals therefore correspond
+to maximal feasible complements.
+\end{proof}
+
+This has a concrete consequence for the next section. Grouping branch-and-price rests
+on a set-covering relaxation, and it is fast only when that relaxation is
+\emph{ideal}, meaning its fractional optimum is already integral. The next result
+exhibits the smallest family where it is not.
+
+\begin{proposition}[Odd rings are not ideal]\label{prop:oddring}
+Consider the clutter of job clusters over the maximal feasible groups; its blocker is
+the clutter of minimal group-covers, so $\Kst$ is the blocker's minimum size. On the
+$k$-ring with $b=3$ and $k\ge4$, the fractional cover equals $k/2$ while
+$\Kst=\lceil k/2\rceil$. The covering relaxation is therefore tight for every even
+$k$ and has integrality gap $\tfrac12$ for every odd $k$.
+\end{proposition}
+
+\begin{proof}
+For $k\ge4$ the maximal feasible groups are exactly the pairs of adjacent jobs.
+Weight $\tfrac12$ on each covers every job exactly once, so the fractional cover is at
+most $k/2$. The dual packing $y_j=\tfrac12$ is feasible, since no group holds more than
+two jobs, so by linear-programming duality the fractional cover equals $k/2$. The
+integer optimum is $\lceil k/2\rceil$.
+\end{proof}
+
+The hypothesis $k\ge4$ is needed: at $k=3$ all three jobs require only the three tools
+$\rset{1,2,3}$, so the whole job set is one feasible group and $\Kst=1$.
+
+This locates a first provable obstruction for the set-covering relaxation behind
+grouping branch-and-price \citep{Crama1994Column,Otiai2024}: odd circular structure,
+in exact parallel to odd holes in perfect-graph theory \citep{Chudnovsky2006}. Whether
+odd-ring-like structure is the only obstruction is open, and
+Section~\ref{ssec:further} records what is known about it.
+
+\subsection{The setup-cost spectrum}\label{ssec:collapse}
+
+In practice a machine stop costs time beyond the individual tool exchanges. This
+subsection shows that the SSP and the JGP are the two ends of a single parameterised
+problem, with the transition governed by the gap itself. \citet{Burger2015} pose
+exactly this question at the end of their paper.
+
+Charge, in addition to the tool switches, a cost $\rho\ge0$ for every
+\emph{configuration change}. The objective becomes
+\[
+  \text{switches}\;+\;\rho\cdot(\text{number of configuration changes}),
+\]
+where $\rho$ is the ratio of the fixed stop time to the time of one tool exchange. A
+grouping into $p$ configurations makes $p-1$ changes, so the setup term alone is
+minimised by the Job Grouping Problem. As $\rho$ grows it dominates and pulls the
+optimum onto minimum-cardinality groupings.
+
+\begin{theorem}[Setup-cost collapse]\label{thm:collapse}
+If $\rho>\Hwalk-\Zst$, then every optimal solution of the setup-augmented objective
+uses a minimum-cardinality grouping, and the two-phase heuristic is exact for that
+objective. The collapse threshold therefore satisfies $\rho_c\le\Hwalk-\Zst$, and for
+the ring family $\rho_c=1$.
+\end{theorem}
+
+\begin{proof}
+Every feasible grouping $\mathcal{P}$ has $\lvert\mathcal{P}\rvert\ge\Kst$ and, by
+Theorem~\ref{thm:grouping}, $\gamma(\mathcal{P})\ge\Zst$, so its augmented cost is at
+least $\rho(\lvert\mathcal{P}\rvert-1)+\Zst$. The best minimum-cardinality grouping
+has augmented cost $\rho(\Kst-1)+\Hwalk$. If $\lvert\mathcal{P}\rvert>\Kst$, the
+former exceeds the latter whenever
+$\rho(\lvert\mathcal{P}\rvert-\Kst)>\Hwalk-\Zst$, which holds for every such
+$\mathcal{P}$ as soon as $\rho>\Hwalk-\Zst$. No grouping of larger cardinality is
+therefore optimal, and the heuristic, which selects the cheapest ordering of a
+minimum-cardinality grouping, attains the optimum.
+\end{proof}
+
+The threshold must be read in the walk value. Using the heuristic value instead makes
+the statement false, because on the $6$-ring $H-\Zst=0$ while a four-configuration
+grouping still wins for small positive $\rho$.
+
+\begin{lemma}[The other end of the spectrum]\label{lem:lowrho}
+If $\rho<1/(n-1)$, every optimum of the setup-augmented objective is a
+switch-optimal SSP schedule.
+\end{lemma}
+
+\begin{proof}
+A schedule makes at most $n-1$ configuration changes. Let $S^{*}$ be switch-optimal.
+Any schedule with at least $\Zst+1$ switches has augmented cost at least
+$\Zst+1>\Zst+\rho(n-1)$, which is at least the augmented cost of $S^{*}$. No such
+schedule is therefore optimal.
+\end{proof}
+
+Together these pin both ends. For $\rho<1/(n-1)$ the augmented problem is the SSP.
+For $\rho>\Hwalk-\Zst$ its optima use minimum-cardinality groupings and the two-phase
+heuristic is exact, so the problem has collapsed onto the JGP. The transition is
+confined to the interval $[\,1/(n-1),\ \Hwalk-\Zst\,]$, which is to say it is governed
+by the gap itself.
+
+\begin{remark}[On practical values of $\rho$]\label{rem:rho}
+It is natural to ask where real manufacturing sits on this spectrum. Answering that
+requires measured values of the stop time and the per-tool exchange time in a
+comparable setting, and no source giving both could be found during this internship.
+The spectrum result is therefore stated as it is proved, as a statement about the
+parameter $\rho$, and no claim is made about where practice falls on it. Obtaining
+such measurements would settle a question that Theorem~\ref{thm:collapse} otherwise
+leaves open.
+\end{remark}
+
+\subsection{Which grouping to choose}\label{ssec:grouping-sel}
+
+Theorem~\ref{thm:grouping} turns the heuristic's weakness into a concrete algorithmic
+question. The optimum is attained by \emph{some} feasible grouping, and
+minimum-cardinality ones may miss it (Example~\ref{ex:ring-why}). On which grouping,
+then, should the sequencing phase be run?
+
+Admitting a single extra group already recovers the ring optimum in the walk model. In
+general the trade-off is between more configuration changes and cheaper individual
+transitions. At $\Kst=3$, Proposition~\ref{prop:hk3} makes the criterion explicit:
+choose the grouping whose configurations have the smallest pairwise overlap outside
+the third. For general $\Kst$, characterising the groupings that attain
+$\min_{\mathcal{P}}\gamma(\mathcal{P})$, or giving an efficient rule that improves on
+the minimum-cardinality choice, is open.
+
+Two things follow from Section~\ref{ssec:ktnsgap} and are worth noting here. The
+first is that the practical value of such a rule is smaller than the walk model
+suggests, since the KTNS step already recovers the optimum on most instances where
+the walk model loses it. The second is that the instances where a rule would help are
+identifiable in advance by the same criterion that identifies positive gaps: a
+magazine large relative to the jobs.

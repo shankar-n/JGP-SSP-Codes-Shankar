@@ -1,0 +1,53 @@
+\begin{abstract}
+\noindent
+A machine that makes many different parts needs many different tools, but it can
+hold only a few of them at a time. Running a set of jobs therefore means stopping
+to change tools, and each stop costs production time. The Job Sequencing and Tool
+Switching Problem (SSP) asks for the order of jobs, and the tool loading at each
+step, that makes the total number of tool changes as small as possible. Choosing
+the loading for a fixed order is easy. Choosing the order is NP-hard, and it is
+where all of the difficulty sits.
+
+In practice the SSP is not attacked directly. Jobs are first grouped into as few
+magazine-fitting batches as possible, and the batches are then sequenced. This
+two-phase method is fast and is what industry uses, but no worst-case analysis of
+it has been published. This report gives one. It first shows that the method
+admits two different readings, which the literature has not separated: the cost of
+a walk through one fixed magazine per group, and the cost the method actually
+returns once its final step re-optimises the loading. The two differ, and they
+differ on the instances most often used as examples. Separating them is what makes
+the rest of the analysis correct. Within that setting, the optimum is shown to
+equal the cheapest walk over \emph{all} groupings, so the two-phase gap is exactly
+the price of insisting on the fewest groups; classes of instances with zero gap are
+identified for every capacity; upper bounds on the gap are proved for every
+instance; and the extremal behaviour is worked out at three groups. Positive gaps
+turn out to be rare, small, and confined to instances whose magazine is large
+relative to the jobs, which agrees with what the one published industrial study
+reports. A parameterised cost model shows the SSP and the grouping problem to be
+the two ends of a single spectrum, with the transition governed by the gap itself.
+
+On the exact side the obstacle is a single quantity. The strongest compact
+formulation in the literature has a linear relaxation equal to the number of tools
+minus the magazine capacity, which is an elementary counting bound. Two methods are
+built to get past it. A branch-and-Benders-cut algorithm places the ordering in a
+master problem and settles the loading exactly with a polynomial oracle, so it never
+forms a weak relaxation. Position-indexed formulations replace the configuration
+walk by a fixed row set of polynomial size, and one of them, the
+position--transition formulation, has a linear relaxation that provably exceeds the
+counting bound.
+
+Both were implemented and benchmarked against three reimplemented compact models on
+$1{,}301$ standard instances under a single one-hour limit. The campaign is still
+running; what follows is the snapshot available at the time of writing, and every
+comparison is made on instances that the configurations being compared both attempted.
+The results are consistent, and negative in an informative way. The branch-and-Benders-cut solver
+closes $94\%$ of the instances on which the counting bound is tight and $49\%$ of
+those on which it is not. Where it fails, the incumbent is usually already optimal
+and only the proof is missing. Fractional Benders cuts, which the earlier campaign
+could not test because of an implementation defect, were generated in very large
+numbers once the defect was corrected; they raised the dual bound on three
+instances out of $1{,}238$ and cost sixty-nine solved instances. Of four
+strengthenings, only the one that improves the incumbent helps. The evidence is
+that a configuration-based exact method for the SSP is limited by the strength of
+its bound and not by its implementation.
+\end{abstract}

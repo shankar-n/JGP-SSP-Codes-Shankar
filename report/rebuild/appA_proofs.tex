@@ -1,0 +1,124 @@
+%==============================================================================
+\section{Proofs}\label{app:proofs}
+%==============================================================================
+
+\begin{proof}[Proof of Theorem~\ref{thm:grouping}]
+Both inequalities are explicit constructions. By Proposition~\ref{prop:ktns} an
+optimal schedule may be assumed to load by KTNS, so every magazine is full and
+$\lvert M_i\rvert=b$.
+
+\emph{The inequality $\Zst\le\min_{\mathcal{P}}\gamma(\mathcal{P})$.}
+Let $\mathcal{P}=\rset{G_1,\dots,G_p}$ be a feasible grouping with configurations
+$C_1,\dots,C_p$, and let $\sigma$ attain the minimum in
+Definition~\ref{def:grouping}. Process the groups in the order
+$G_{\sigma(1)},\dots,G_{\sigma(p)}$, and within each group its jobs in any order,
+holding the magazine at $C_{\sigma(l)}$ throughout group $G_{\sigma(l)}$. This is
+feasible: each $j\in G_{\sigma(l)}$ satisfies
+$T_j\subseteq\bigcup_{i\in G_{\sigma(l)}}T_i\subseteq C_{\sigma(l)}$, and
+$\lvert C_{\sigma(l)}\rvert=b$. The magazine is constant within a group and changes
+only at the $p-1$ group boundaries, so the free-initial switch cost is
+$\sum_{l=1}^{p-1}d(C_{\sigma(l)},C_{\sigma(l+1)})=\gamma(\mathcal{P})$. Hence
+$\Zst\le\gamma(\mathcal{P})$, and minimising over $\mathcal{P}$ gives the claim.
+
+\emph{The inequality $\min_{\mathcal{P}}\gamma(\mathcal{P})\le\Zst$.}
+Let $(\pi,\mathbf{M})$ be an optimal schedule with full magazines. Partition the
+positions into maximal blocks of consecutive positions sharing one magazine. Let these
+be $B_1,\dots,B_r$ in order, with magazines $D_1,\dots,D_r$, where $D_l\ne D_{l+1}$ by
+maximality. Each block is a set of jobs run under $D_l$, so
+$\bigcup_{j\in B_l}T_j\subseteq D_l$ with $\lvert D_l\rvert=b$; the blocks therefore
+form a feasible grouping $\mathcal{P}'$ with configurations $D_1,\dots,D_r$. The
+identity ordering of those configurations is one admissible $\sigma$, so
+$\gamma(\mathcal{P}')\le\sum_{l=1}^{r-1}d(D_l,D_{l+1})$, which is exactly the
+free-initial switch cost of $(\pi,\mathbf{M})$, namely $\Zst$. Therefore
+$\min_{\mathcal{P}}\gamma(\mathcal{P})\le\gamma(\mathcal{P}')\le\Zst$.
+
+Combining the two gives equality.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:unbounded}]
+The copies use pairwise disjoint tool sets, so $\lvert\U\rvert=6g$ and
+Proposition~\ref{prop:lb2} gives $\Zst\ge6g-3$.
+
+For a schedule attaining this, process the copies one after another, each in the
+cyclic order of Example~\ref{ex:ktns}. Within a copy that loading makes three
+insertions to build the first magazine and three more across the copy. Since
+consecutive copies are tool-disjoint, entering a new copy rebuilds its first magazine
+from scratch, at a cost of three. The total is six insertions for the first copy and
+six for each of the others, that is $6g$ in the empty-start count and $6g-3$
+free-initial. Hence $\Zst=6g-3$.
+
+For the walk value, a minimum-cardinality grouping of $R_g$ uses $\Kst=3g$
+configurations, three per copy. Within a copy those three configurations are pairwise
+at distance two, so any ordering of one copy's three contributes $2+2=4$. Any
+transition between configurations of different copies costs three, the copies being
+tool-disjoint. Connecting $g$ copies requires at least $g-1$ inter-copy transitions, so
+every ordering costs at least $4g+3(g-1)=7g-3$, and that value is attained by keeping
+each copy's configurations consecutive. Thus $\Hwalk=7g-3$ and $\Hwalk-\Zst=g$.
+\end{proof}
+
+\begin{proof}[Proof of the walk lemma used in Corollaries~\ref{cor:smallZ} and
+\ref{cor:z3}, and of Proposition~\ref{prop:k3}(iv)]
+Suppose $\Zst=q$ and take an optimal schedule. Its walk of distinct configurations
+$D_1,\dots,D_p$ may be assumed, after excising configurations that serve no job, to
+have every configuration serve a job: the transition cost obeys the triangle
+inequality $d(A,C)\le d(A,B)+d(B,C)$, and no covering walk costs less than $q$. With
+zero re-insertions every insertion is a first-time insertion, so the $p-1$ transitions
+insert $q$ tools in total and $p\le q+1$. Assigning each job to a configuration
+serving it exhibits a feasible $p$-grouping, so $p\ge\Kst$. If $p=\Kst$ that grouping
+is of minimum cardinality and has cost $\Zst$, forcing $\Hwalk=\Zst$. In particular
+$\Zst=q\le2$ gives $p\le q+1\le3=\Kst$ and the gap vanishes, which is the claim used
+in Proposition~\ref{prop:k3}(i).
+
+For part (iv), let $q=3$. If $p=3$ the gap vanishes as above, so let $p=4$. Each
+transition then inserts exactly one fresh tool, say $D_{l+1}\setminus D_l=\rset{x_{l+1}}$
+and $D_l\setminus D_{l+1}=\rset{e_{l+1}}$, and zero re-insertion forces
+\emph{persistence}: a tool lying in $D_i\cap D_j$ with $i<j$ belongs to every
+intermediate $D_l$. Write $U_l$ for the requirement of group $G_l$ and suppose
+$\lvert U_i\cup U_j\rvert\le b$ for some $i<j$. Merging $G_i$ and $G_j$ and keeping the
+other two groups with their walk configurations yields a minimum-cardinality grouping.
+It remains to choose its configuration $C\supseteq U_i\cup U_j$ and an ordering whose
+wrap term $\lvert(\text{first}\cap\text{last})\setminus\text{middle}\rvert$ of
+Proposition~\ref{prop:hk3} is at most one, which gives $\Hwalk\le q+1=\Zst+1$.
+
+For the pair $(1,2)$: take $C\subseteq D_1\cup D_2$, possible since that union has size
+$b+1$, and order $(C,D_3,D_4)$. The wrap lies in
+$(D_1\cap D_4\setminus D_3)\cup(D_2\cap D_4\setminus D_3)\subseteq\varnothing\cup(D_2\setminus D_3)=\rset{e_3}$,
+using persistence. For $(3,4)$: order $(D_1,D_2,C)$ with $C\subseteq D_3\cup D_4$; the
+wrap lies in $D_1\cap(D_3\cup D_4)\setminus D_2=\varnothing$ by persistence. For
+$(1,3)$, $(2,4)$ and $(1,4)$: the orderings $(C,D_2,D_4)$, $(D_1,D_3,C)$ and
+$(C,D_2,D_3)$ bound the wrap by $\rset{x_3}$, $\rset{e_3}$ and $\rset{x_3}$
+respectively, by the same two facts. For $(2,3)$: the set
+$W=U_2\cup U_3\cup(D_1\cap D_4)$ lies in $D_2\cup\rset{x_3}$, because persistence
+places $D_1\cap D_4$ inside $D_2\cap D_3$, so $\lvert W\rvert\le b+1$ and a
+configuration $C\supseteq U_2\cup U_3$ inside $W$ omits at most one element of
+$D_1\cap D_4$; the ordering $(D_1,C,D_4)$ then has wrap
+$\lvert(D_1\cap D_4)\setminus C\rvert\le1$.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:pcfprime}]
+\emph{Exactness.} Take an optimal schedule and collapse equal consecutive magazines to
+the sequence of distinct magazines it visits, a trajectory $D_1,\dots,D_m$ with
+$m\le n$, as in the proof of Theorem~\ref{thm:grouping}. Set $y^{l}_{D_l}=1$ for
+$l=1,\dots,m$, leave positions $m+1,\dots,n$ empty, and put
+$w_t^{k}=\max(0,a_t^{k}-a_t^{k-1})$. Then (P$'$) holds, with value $1$ on the prefix
+and $0$ afterwards, and (G) holds because the prefix is contiguous, while (Cov), (W)
+and (T) hold exactly as for PCF. The step from position $m$ to position $m+1$ and all
+later steps add no cost, so the objective is
+$\sum_{l<m}d(D_l,D_{l+1})=\Zst$. Hence the optimum is at most $\Zst$.
+
+Conversely, any integer-feasible PCF$'$ point has, by (G), its used positions in a
+prefix $1,\dots,p$, each holding one configuration $D_k$. By (W) the objective is at
+least $\sum_{k=2}^{p}d(D_{k-1},D_k)$, and by (Cov) every job is served by some $D_k$,
+so assigning each job to a covering position yields a schedule of cost at most the
+objective. Hence the optimum is at least $\Zst$.
+
+\emph{Invariance of the relaxation.} Every PCF-feasible point has $\sum_C y_C^{k}=1$
+for all $k$ and therefore satisfies (P$'$) and (G). The PCF$'$ relaxation minimises
+over a superset and so is no larger than PCF's. For the reverse, sum (T) over
+$t\in\U$ and use
+$\sum_{t\in\U}a_t^{1}\le\sum_{t\in T}a_t^{1}=b\sum_C y_C^{1}\le b$, where the last
+bound now comes from (P$'$) rather than (P). This gives objective at least
+$\lvert\U\rvert-b$ at every PCF$'$ point, so the two relaxations coincide wherever
+PCF's value is $q$. Dropping (T), the plain relaxation is certified to be $0$ by the
+same blended configuration used for PCF.
+\end{proof}

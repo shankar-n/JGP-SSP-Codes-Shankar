@@ -1,0 +1,119 @@
+%==============================================================================
+% Studying structural properties and exact models for solving the
+% Job Sequencing and Tool Switching Problem
+%
+% Internship report. Rebuilt 2026-08.
+%
+% Build:  pdflatex JGP-SSP_report && bibtex JGP-SSP_report &&
+%         pdflatex JGP-SSP_report && pdflatex JGP-SSP_report
+%
+% Every quantitative claim in this document is reproduced by
+% verification/verify_report_independent.py or by the campaign analysis
+% described in Appendix B.  See that appendix before changing any number.
+%==============================================================================
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc,decorations.pathreplacing}
+% ---- figure colour palette (used across all TikZ figures) --------------------
+% Conventional monochrome: everything is dark ink; grayscale fills only.
+\definecolor{cBlue}{HTML}{111111}
+\definecolor{cOrange}{HTML}{111111}
+\definecolor{cGreen}{HTML}{111111}
+\definecolor{cRed}{HTML}{111111}
+\definecolor{cPurple}{HTML}{111111}
+\definecolor{cTeal}{HTML}{111111}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+\usepackage{comment}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{microtype}
+\setlength{\emergencystretch}{3em}
+\hypersetup{pdftitle={Studying structural properties and exact models for solving the Job Sequencing and Tool Switching Problem},pdfauthor={Shankar Narayanan}}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{observation}{Observation}
+\newtheorem{problem}{Problem}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\newtheorem{example}{Example}
+
+% "Supporting argument" replaces "Proof" for statements whose proof has not
+% been independently checked; see Section 1.4 for the convention.
+\newenvironment{support}{\begin{proof}[Supporting argument]}{\end{proof}}
+
+\DeclareMathOperator{\KTNS}{KTNS}
+\newcommand{\U}{U}
+\newcommand{\Kst}{K^{\ast}}
+\newcommand{\Zst}{Z^{\ast}}
+\newcommand{\Hwalk}{H_{\mathrm{walk}}}
+\newcommand{\confs}{\mathcal{C}}
+\newcommand{\rset}[1]{\{#1\}}
+
+\begin{document}
+
+% ---- Cover page (layout copied from the department's model cover) -----------
+\newcommand{\coverlogo}[2]{\IfFileExists{cover/#1.png}{\includegraphics[height=#2]{cover/#1.png}}{}}
+\begin{titlepage}
+\centering
+\makebox[\textwidth]{\coverlogo{uca}{22mm}\hfill\coverlogo{inp_isima}{20mm}\hfill\coverlogo{limos}{15mm}}\par
+\vspace{20mm}
+{\LARGE\bfseries Studying structural properties and exact models \\[4pt]
+	for solving the Job Sequencing and Tool Switching Problem\par}
+\vspace{16mm}
+{\large\bfseries Shankar Narayanan\par}
+\vspace{13mm}
+Internship report\par
+\vspace{16mm}
+{\bfseries Advisors:}\\[2pt]
+Prof.~Rafael Colares \quad Prof.~Annegret Wagler\\[7pt]
+{\bfseries Supervisor:}\\[2pt]
+Dr.~Renaud Chicoisne\\[7pt]
+{\itshape Laboratoire d'Informatique, de Mod\'elisation et d'Optimisation des
+Syst\`emes (LIMOS)}\par
+\vfill
+{\large\today\par}
+\end{titlepage}
+
+\input{ch0_abstract}
+\tableofcontents
+\clearpage
+\input{ch0_notation}
+\clearpage
+
+\input{ch1_introduction}
+\input{ch2_preliminaries}
+\input{ch3_state_of_the_art}
+\input{ch4_gap}
+\input{ch5_exact}
+\input{ch6_computational}
+\input{ch7_discussion}
+\input{ch8_conclusions}
+\input{ch9_declaration}
+
+\appendix
+\input{appA_proofs}
+\input{appB_verification}
+\input{appC_reproducibility}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

@@ -137,9 +137,9 @@ def run_episode(env, theta, rounds=8, greedy=False, rng=None):
     return trans, rewards, (b0 - bound if bound is not None else 0.0)
 
 
-def train(episodes=600, n=14, lr=0.2, gamma=0.95, seed_pool=40, log_every=150):
+def train(episodes=600, n=14, lr=0.2, gamma=0.95, seed_pool=40, log_every=150, seed=0):
     theta = np.zeros(FEAT_DIM)
-    rng = np.random.RandomState(0)
+    rng = np.random.RandomState(seed)
     hist = []
     for ep in range(episodes):
         env = KnapsackCutEnv(n, seed=rng.randint(seed_pool))     # train instances
@@ -201,7 +201,21 @@ def score_cut(features, theta):
     return float(np.asarray(features, float) @ np.asarray(theta, float))
 
 
-if __name__ == "__main__":
+def run_one(seed, episodes, n, lr, gamma, n_test, seed_pool=100000):
+    """Train with one seed, evaluate on the FIXED held-out set, return a result dict.
+    Each seed samples its OWN training instances from a large pool (`seed_pool`), so the
+    held-out `random_mean` is a constant reference and the spread in `learned_mean` /
+    `improvement_pct` across seeds is genuine training/sampling variance."""
+    theta = train(episodes=episodes, n=n, lr=lr, gamma=gamma, seed=seed,
+                  seed_pool=seed_pool, log_every=10**9)
+    learned, rand = evaluate(theta, n=n, n_test=n_test)
+    lift = 100 * (learned - rand) / abs(rand) if rand else float("nan")
+    return {"seed": seed, "episodes": episodes, "n": n, "lr": lr, "gamma": gamma,
+            "learned_mean": round(learned, 4), "random_mean": round(rand, 4),
+            "improvement_pct": round(lift, 2), "theta": theta.tolist()}
+
+
+def _demo():
     np.random.seed(0)
     print("RL-for-cuts (Tang et al. 2020 MDP) — knapsack cover-cut selection")
     print("training REINFORCE agent ...")
@@ -216,3 +230,74 @@ if __name__ == "__main__":
     print(f"  improvement           : {lift:+.1f}%")
     print("PASS: learned policy beats random." if learned > rand + 1e-6
           else "INCONCLUSIVE: learned did not beat random (retune lr/episodes).")
+
+
+def main():
+    """CLI for batch / SLURM use.  No args -> the single-run demo (unchanged).
+    --seed / --seeds -> reproducible multi-seed training, one CSV row per seed, so an
+    array job can report mean +/- std improvement (see cluster/run_rl.sbatch)."""
+    import argparse, csv, glob, json, os
+    ap = argparse.ArgumentParser(description="RL-for-cuts: REINFORCE cut-selection training")
+    ap.add_argument("--seed", type=int, help="single training seed (e.g. SLURM array task id)")
+    ap.add_argument("--seeds", type=str, help="inclusive range 'A-B' to run in one process")
+    ap.add_argument("--episodes", type=int, default=2000)
+    ap.add_argument("--n", type=int, default=14, help="knapsack size (instance difficulty)")
+    ap.add_argument("--lr", type=float, default=0.2)
+    ap.add_argument("--gamma", type=float, default=0.95)
+    ap.add_argument("--n-test", type=int, default=200)
+    ap.add_argument("--seed-pool", type=int, default=100000,
+                    help="size of the per-seed training-instance pool (the variance source)")
+    ap.add_argument("--out", type=str, default=None, help="CSV to append per-seed results to")
+    ap.add_argument("--summary", type=str, default=None,
+                    help="glob of shard CSVs to aggregate (mean/std across seeds), then exit")
+    args = ap.parse_args()
+
+    if args.summary:
+        rows = []
+        for f in sorted(glob.glob(args.summary)):
+            with open(f, newline="") as fh:
+                rows += list(csv.DictReader(fh))
+        if not rows:
+            print("no rows matched", args.summary); return
+        imp = np.array([float(r["improvement_pct"]) for r in rows])
+        lm = np.array([float(r["learned_mean"]) for r in rows])
+        rm = np.array([float(r["random_mean"]) for r in rows])
+        print(f"RL-for-cuts summary over {len(rows)} runs:")
+        print(f"  improvement %: mean {imp.mean():+.1f}  std {imp.std():.1f}  "
+              f"min {imp.min():+.1f}  max {imp.max():+.1f}")
+        print(f"  learned bound-drop: {lm.mean():.3f} +/- {lm.std():.3f}")
+        print(f"  random  bound-drop: {rm.mean():.3f} +/- {rm.std():.3f}")
+        print(f"  learned beat random on {int((lm > rm).sum())}/{len(rows)} seeds")
+        return
+
+    if args.seed is None and args.seeds is None:
+        _demo(); return
+
+    seeds = []
+    if args.seeds:
+        a, b = args.seeds.split("-"); seeds += list(range(int(a), int(b) + 1))
+    if args.seed is not None:
+        seeds.append(args.seed)
+
+    fields = ["seed", "episodes", "n", "lr", "gamma",
+              "learned_mean", "random_mean", "improvement_pct", "theta"]
+    fh = w = None
+    if args.out:
+        newfile = (not os.path.exists(args.out)) or os.path.getsize(args.out) == 0
+        fh = open(args.out, "a", newline="")
+        w = csv.DictWriter(fh, fieldnames=fields)
+        if newfile:
+            w.writeheader()
+    for s in seeds:
+        res = run_one(s, args.episodes, args.n, args.lr, args.gamma, args.n_test, args.seed_pool)
+        print(f"[seed {s:3d}] learned={res['learned_mean']:.3f}  random={res['random_mean']:.3f}  "
+              f"improvement={res['improvement_pct']:+.1f}%")
+        if w:
+            res["theta"] = json.dumps(res["theta"])
+            w.writerow(res); fh.flush()
+    if fh:
+        fh.close()
+
+
+if __name__ == "__main__":
+    main()

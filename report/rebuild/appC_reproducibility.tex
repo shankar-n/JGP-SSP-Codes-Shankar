@@ -1,0 +1,76 @@
+%==============================================================================
+\section{Reproducing the experiments}\label{app:repro}
+%==============================================================================
+
+The complete implementation --- the solvers, the reimplemented baselines, the campaign
+harness, the verification program, and the per-instance result files behind every
+number in Section~\ref{sec:comp} --- is available at
+\url{https://github.com/shankar-n/JGP-SSP-Codes-Shankar}.
+
+\subsection{Layout}\label{ssec:repro-layout}
+
+\noindent\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{9.4cm}@{}}
+\toprule
+Path & Contents \\
+\midrule
+\texttt{src/SSP/}     & the loading oracle, instance handling, heuristics, the grouping solver \\
+\texttt{src/BBC/}     & the branch-and-Benders-cut solver, the three reimplemented baselines, and the campaign harness \\
+\texttt{src/BNP/}     & the PCF$'$ and PTF branch-and-price prototypes and their pricers \\
+\texttt{data/}        & the instance families of Table~\ref{tab:families} \\
+\texttt{verification/}& the independent verification program of Appendix~\ref{app:verify} \\
+\texttt{report/}      & the source of this document \\
+\bottomrule
+\end{tabular}
+
+\subsection{Requirements}\label{ssec:repro-req}
+
+The exact solvers require IBM CPLEX with its Python interface; version~22.1.1 was used
+throughout. The branch-and-price prototypes require PySCIPOpt. The grouping solver
+requires PySCIPOpt. The verification program of Appendix~\ref{app:verify} requires
+only Python~3 and SciPy, and in particular needs no commercial solver, so the
+structural results of Section~\ref{sec:gap} can be checked on any machine.
+
+\subsection{Instance format}\label{ssec:repro-format}
+
+An instance file gives the number of jobs, the number of tools and the capacity on one
+line, followed by the job--tool incidence matrix with one row per tool and one column
+per job, where entry $(t,j)$ is $1$ when job $j$ requires tool $t$.
+
+\subsection{Running the campaign}\label{ssec:repro-campaign}
+
+The instance families and the solver configurations are declared in one place, in the
+campaign configuration module, which is the single source of truth for both. The runner
+is resumable: it records one row per completed run and skips runs already recorded. That
+property requires care. If the solver changes, previously recorded rows must be deleted
+before re-running, or the runner will keep the stale results. Both re-runs described in
+this report --- the one following the Benders cut correction and the one following the
+addition of the coverage row --- required exactly that.
+
+On the cluster the campaign is submitted as a SLURM job array with one task per
+configuration and instance shard. Each run is given four dedicated threads,
+$16$ gigabytes of memory and a one-hour limit.
+
+\subsection{Reproducing the numbers in Section~\ref{sec:comp}}\label{ssec:repro-numbers}
+
+Every table in Section~\ref{sec:comp} is computed from the raw per-instance result
+files by a single analysis pass, which reads the shards, keys each row by the pair
+(family, instance), and derives:
+
+\begin{itemize}[topsep=3pt,itemsep=1pt]
+  \item the solved and attempted counts of Table~\ref{tab:solves}, per family and in
+  total;
+  \item the cross-method agreement check, comparing the evaluated cost of the returned
+  sequence across every pair of methods that both solved an instance;
+  \item the shifted geometric mean times of Table~\ref{tab:times}, on the subset that
+  all compared configurations solve;
+  \item the fractional-cut comparison of Table~\ref{tab:frac} and the ablation of
+  Table~\ref{tab:ablation}, each on the instances that both compared configurations
+  attempted;
+  \item the coverage-bound split of Table~\ref{tab:tightness}, by testing whether the
+  known optimum equals the number of tools in the empty-start cost.
+\end{itemize}
+
+Because comparisons are made on common subsets rather than on absolute counts, the
+analysis is insensitive to which runs happened to complete, which is what makes the
+conclusions of Section~\ref{sec:disc} robust to the incomplete denominators noted in
+Section~\ref{ssec:results-solved}.

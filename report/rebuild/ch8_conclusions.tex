@@ -1,0 +1,127 @@
+%==============================================================================
+\section{Conclusions and further work}\label{sec:concl}
+%==============================================================================
+
+\subsection{What this report establishes}\label{ssec:concl-summary}
+
+One idea organises everything above: the equivalence between the SSP and a walk
+through magazine configurations. It gives a structural theory of the standard
+heuristic and a family of exact methods, and the same quantity turns out to govern
+both.
+
+\paragraph{On the structural side.}
+The two-phase heuristic admits two readings, and separating them is a prerequisite for
+saying anything correct about it (Section~\ref{ssec:frames}). Within that setting:
+
+\begin{itemize}[topsep=3pt,itemsep=2pt]
+  \item The optimum equals the cheapest walk over \emph{all} feasible groupings
+  (Theorem~\ref{thm:grouping}), so the heuristic's loss is exactly the price of using
+  the fewest groups (Corollary~\ref{cor:gap}).
+  \item Zero-gap classes exist for every capacity: two groups, or a tool set barely
+  exceeding the magazine, or a small optimum (Corollaries~\ref{cor:zerogap} and
+  \ref{cor:smallZ}).
+  \item The ratio is bounded for every instance by
+  $\min(b,\Kst-1,q)$ (Theorem~\ref{thm:uncond}), which tightens automatically on
+  instances with few groups or a small tool excess.
+  \item At three groups the walk cost has a closed form
+  (Proposition~\ref{prop:hk3}), and the gap obeys a counting bound
+  (Proposition~\ref{prop:k3}) that is attained by explicit witnesses. The natural
+  guess $\mathrm{gap}\le\Kst-2$ is false for the walk value
+  (Proposition~\ref{prop:refute}).
+  \item For the method as actually specified, positive gaps are rare, always equal to
+  one in everything tested, and always require $b\ge4$
+  (Observations~\ref{obs:rings}--\ref{obs:census}). Unboundedness survives, but with a
+  different witness family from the one the walk model suggests
+  (Observation~\ref{obs:unbounded-true}).
+  \item The circuit clutter of the grouping system computes $\Kst$
+  (Proposition~\ref{prop:chromK}) but does not determine the gap
+  (Proposition~\ref{prop:noclutter}), while blocking duality gives a first
+  non-integral family for the grouping relaxation
+  (Proposition~\ref{prop:oddring}).
+  \item A per-changeover setup cost interpolates between the SSP and the JGP, with the
+  transition confined to an interval whose width is the gap itself
+  (Theorem~\ref{thm:collapse} and Lemma~\ref{lem:lowrho}). This answers a question
+  posed by \citet{Burger2015}.
+\end{itemize}
+
+\paragraph{On the algorithmic side.}
+A branch-and-Benders-cut solver was built whose subproblem is exact and polynomial,
+together with position-indexed formulations carrying a fixed polynomial row set, among
+which the position--transition model is a configuration relaxation that provably
+improves on the coverage bound (Proposition~\ref{prop:ptf}).
+
+\paragraph{On the empirical side.}
+A campaign over $1{,}301$ instances and eleven configurations, under a single
+one-hour limit, establishes that the coverage bound decides the outcome: $94\%$ of
+bound-tight instances are closed against $49\%$ of bound-loose ones. Where the solver
+fails, its incumbent is already optimal $71\%$ of the time. Fractional Benders cuts,
+tested properly for the first time after a defect was corrected, are generated in
+enormous numbers and raise the bound on three instances out of $1{,}238$. Of four
+strengthenings only the one improving the incumbent helps. The multicommodity model of
+\citet{daSilva2024} is reproduced as the strongest single method.
+
+The conclusion those measurements support is that a configuration-based exact method
+for the SSP is limited by the strength of its bound and not by its implementation.
+This is a negative result about a family of methods, and it is a useful one, because it
+says where effort should not go.
+
+\subsection{Further work}\label{ssec:further}
+
+\paragraph{The exact worst case of the heuristic.}
+Section~\ref{ssec:law} settles the extremal behaviour of the walk value at three
+groups. For the value the method returns, the question is open and is now the more
+interesting one, because Section~\ref{ssec:ktnsgap} shows that the two differ
+substantially. Two concrete questions: is the heuristic gap ever larger than one on a
+connected instance, and does $\mathrm{gap}\le\Kst-2$ hold for it? Directed searches
+across $b\in\rset{3,4,5}$ found no counterexample to either.
+Problem~\ref{prob:ktns-closes} is the structural question underneath both.
+
+\paragraph{The polyhedral questions.}
+Two questions from Section~\ref{ssec:clutter} drive it: whether odd-ring-like
+structure is the only obstruction to integrality of the grouping covering relaxation,
+and which facets of the position--transition polytope explain where its bound exceeds
+$q$. A first scan of the $b=3$ family with two tools per job finds the covering
+relaxation non-integral on about a quarter of it, and non-integrality occurring away
+from rings, so the obstruction landscape is richer than the odd rings alone.
+
+\paragraph{A bound that reaches into the loose half.}
+This is the direction the campaign points to most strongly. The pairwise information of
+\citet{Tang1988} is close to exhausted: solving the pairwise bound to optimality, as a
+travelling-salesman path over the weights $w_{ij}$ --- an idea already present in their
+paper --- lifts the root value on about a quarter of the bound-loose instances but
+reaches the optimum on under one per cent of them. The natural next family is the
+higher-order form: window inequalities over sets $S$ of consecutive jobs, charging
+$\lvert\bigcup_{j\in S}T_j\rvert-b$ when the jobs of $S$ run contiguously, which
+generalises the pairwise and triplet rows in one family.
+
+\paragraph{Completing the branch-and-price measurement.}
+The runs of PCF$'$ and PTF under the uniform protocol of Section~\ref{ssec:bench} are
+in progress. They will answer directly whether PTF's stronger relaxation translates
+into solved instances or only into a better root bound.
+
+\paragraph{Non-uniform tool costs.}
+Section~\ref{ssec:bbc} notes that the Benders subproblem is the loading linear program
+rather than the KTNS rule, and that \citet{Crama1994} show the linear program remains
+exact when tools have different setup times while the rule does not. The solver
+therefore extends to that regime unchanged. Testing it there would broaden the scope of
+the method beyond the uniform problem that the whole SSP literature assumes.
+
+\paragraph{Beyond the SSP.}
+Nothing in the position--transition construction is specific to tool switching except
+the transition metric. Position-transition columns with per-element consistency rows
+apply to any generalised travelling-salesman problem with overlapping clusters
+\citep{Pop2024}. Whether the relaxation strength observed here persists in that
+generality is open.
+
+\paragraph{Learning-augmented methods.}
+Machine learning for the exact side is an active area, covering cut selection
+\citep{Tang2020,DezaKhalil2023} and column and branching selection
+\citep{Bengio2021,Gasse2019,Morabit2021}. Its established role is to \emph{choose}
+among cuts or columns one already knows how to generate, not to make them stronger.
+Section~\ref{sec:disc} bounds how much that can help here: what defeats the solver is
+a bound gap, and a selector cannot select a strong cut that does not exist. If a
+learned component is to help this problem, the more promising target is column
+selection for the position-indexed pricers \citep{Morabit2021}, whose coupled-pair
+oracle is the measured bottleneck, rather than cut selection for the Benders master.
+On the pricing side the corresponding non-learned upgrade is the automatic dual
+stabilisation of \citet{Pessoa2018}.

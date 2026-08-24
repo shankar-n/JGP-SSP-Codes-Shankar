@@ -1,0 +1,122 @@
+%==============================================================================
+\section{Discussion}\label{sec:disc}
+%==============================================================================
+
+\subsection{Bound-limited, not implementation-limited}\label{ssec:disc-bound}
+
+A method can fail to solve an instance for two reasons. It can fail to find a good
+solution, or it can find one and fail to prove that no better one exists. The
+distinction matters because the two failures call for different remedies. The first
+is answered by better search: heuristics, warm starts, branching rules. The second is
+answered only by a better bound.
+
+For the SSP the campaign answers this question unambiguously, and it answers it three
+times over.
+
+The first answer is in the direct measurement. On the runs that hit the time limit and
+whose optimum is known from elsewhere, the Benders solver's incumbent already equals
+that optimum $71\%$ of the time. It is not looking for the answer. It has the answer.
+
+The second answer is in the ablation. Four strengthenings were implemented. The one
+that improves the incumbent, a hybrid genetic search run at the root, gains
+twenty-nine instances. The three that aim at the dual bound --- fractional cuts,
+Pareto-optimal lifting, a conflict-graph row --- are neutral or harmful, and the worst
+of them costs thirty-seven. A solver whose difficulty was finding good solutions would
+not behave this way.
+
+The third answer is the split by coverage-bound tightness. The same solver closes
+$94\%$ of the instances on which the elementary bound $q$ happens to equal the
+optimum, and $49\%$ of those on which it does not. That classification is not by size
+or density. It is by a single structural property, and it is the property
+Section~\ref{sec:gap} identifies as governing the whole problem.
+
+The natural objection is that this is a statement about one implementation. It is not,
+and Proposition~\ref{prop:pcf} is why. The position--configuration relaxation, arrived
+at from a completely different direction, also equals $q$ exactly. So does the
+multicommodity relaxation of \citet{daSilva2024}, proved by its own authors. Three
+independent routes to the same value is not a coincidence of engineering; it is a
+property of the problem. A configuration-based exact method for the SSP is limited by
+the strength of its bound and not by its implementation.
+
+The fractional-cut result deserves a separate remark, because it is the strongest form
+of this conclusion available. Before the campaign, the honest position was that
+fractional Benders cuts had never been tested here, because a defect had silently
+discarded them. The temptation was to treat that as an open question with a promising
+answer. The corrected run generated sixty million cuts and moved the bound on three
+instances out of $1{,}238$. That is not an untested idea; it is a tested idea that
+does not work on this problem, and knowing which of the two one has is the difference
+between a research direction and a dead end.
+
+\subsection{Where the theory and the measurements meet}\label{ssec:disc-agree}
+
+Three agreements between Section~\ref{sec:gap} and Section~\ref{sec:comp} are worth
+drawing out, because each was arrived at independently.
+
+\paragraph{The bound governs both sides.}
+Section~\ref{sec:gap} shows that $q$ equals the optimum on a large part of the
+instance space, and that where it does the two-phase heuristic tends to be exact.
+Section~\ref{sec:comp} shows that where it does, the exact methods close at the root,
+and where it does not they branch without closing. The same quantity that makes the
+heuristic exact makes the exact methods fast. That is not obvious in advance: it says
+that the instances on which one would most want an exact method are exactly the
+instances on which the available exact methods are weakest.
+
+\paragraph{The gap opens where the magazine is large.}
+Observation~\ref{obs:census} finds that every instance with a positive heuristic gap
+has $b\ge4$, and that positive gaps are rare in a random sample. Independently,
+\citet{Burger2015} report from an industrial study that the decomposition does well
+when the largest job nearly fills the magazine, and that its solution quality
+decreases as the gap between the magazine size and the largest job size grows. One of
+these is an exhaustive combinatorial search on small instances and the other is a case
+study on a printing press. They describe the same regime.
+
+\paragraph{The walk model overstates the weakness of the standard method.}
+This is the least expected of the three. The literature's mental model of the
+two-phase heuristic is a walk through one magazine per group, and under that model the
+canonical example family has a positive gap that grows without bound. Under the method
+as it is actually specified, with its final loading step, that same family has no gap
+at all (Observation~\ref{obs:rings}). The standard method is better than the standard
+picture of it. Problem~\ref{prob:ktns-closes} asks how much better, and that question
+did not exist before the two readings were separated.
+
+\subsection{Limitations}\label{ssec:limits}
+
+Several limitations bear on how far the conclusions above can be pushed.
+
+\paragraph{The branch-and-price runs are not yet in.}
+Their campaign under the uniform protocol is still running. The structural results
+about their relaxations are unaffected, since those are proved rather than measured,
+but the claim that a configuration branch-and-price is bound-limited currently rests on
+Proposition~\ref{prop:pcf} and on the Benders measurements rather than on a direct
+measurement of the prototypes.
+
+\paragraph{Formulation 5 of \citet{Catanzaro2015} was not implemented.}
+F4 was used as the compact baseline from that family. Their own conclusions recommend
+F5 as the best of the family, and their experiments show it solving more instances
+than F4. The comparison in Section~\ref{sec:comp} is therefore against the second
+strongest member of that family, not the strongest, and the compact side of the
+comparison is correspondingly favourable to the methods of this report.
+
+\paragraph{The campaign is a snapshot.}
+It had not finished when Section~\ref{sec:comp} was prepared, so not every
+configuration has a result on every instance. Comparisons are made on common subsets
+for this reason, and absolute solved counts across columns of Table~\ref{tab:solves}
+are not comparable. The completed campaign will remove the caveat.
+
+\paragraph{The prototypes are deliberately unaccelerated.}
+The branch-and-price implementations carry no warm-started column pool, no dual
+stabilisation and no heuristic pricing in the measured configuration. This is
+intentional --- the prototype exists to measure the relaxation, and every
+acceleration would confound that measurement --- but it means their solve counts are a
+lower bound on what a tuned implementation would achieve.
+
+\paragraph{The learned cut-selection prototype is still being evaluated.}
+Section~\ref{ssec:rl} records what was built and on what it was validated. Its runs on
+SSP instances are in progress, so no claim about its effect on this problem is made
+here.
+
+\paragraph{The setup-cost spectrum is not calibrated.}
+Theorem~\ref{thm:collapse} locates the transition between the SSP and the JGP in terms
+of the parameter $\rho$, but no source giving comparable measurements of machine stop
+time and per-tool exchange time was found, so where real installations fall on that
+spectrum is not established here. Remark~\ref{rem:rho} states this.

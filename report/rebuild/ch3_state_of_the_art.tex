@@ -1,0 +1,274 @@
+%==============================================================================
+\section{State of the art}\label{sec:sota}
+%==============================================================================
+
+This section reviews the SSP literature. It is organised around one question:
+how strong a lower bound can be obtained, and by what means. That question
+organises the exact literature completely, and it also explains why the heuristic
+literature looks the way it does.
+
+\subsection{Origins: the loading rule, and the hardness of ordering}\label{ssec:sota-origins}
+
+\citet{Tang1988} posed the problem and settled its inner level. For a fixed job
+order the optimal loading is the Keep Tool Needed Soonest rule, proved optimal and
+computable in $O(n\lvert T\rvert)$ time (Proposition~\ref{prop:ktns}). Two further
+elements of that paper are used directly in this report. The first is the pairwise
+bound: if jobs $i$ and $j$ run consecutively, at least
+$\max(0,\lvert T_i\cup T_j\rvert-b)$ tools must be switched between them, because
+the magazine holds $b$ tools but must serve $T_i$ and then $T_j$. The second is
+their observation that the shortest Hamiltonian path under those pairwise weights
+is a lower bound on the optimum. Both reappear in the Benders master of
+Section~\ref{ssec:bbc}.
+
+\citet{Crama1994} made the difficulty precise. They proved the SSP NP-hard for every
+fixed capacity $b\ge2$, by showing that finding a minimum-length travelling-salesman
+path in the edge graph of an arbitrary graph can be written as an SSP instance with
+$b=2$, and then extending the construction to larger $b$ by padding the incidence
+matrix. The same paper fixes the seven modelling assumptions that have been standard
+in the field since: the magazine is always full, each tool occupies one slot, switch
+times are equal for all tools, tools are changed one at a time, tool requirements are
+fixed in advance, tools do not wear out, and the job list is known.
+
+That paper also gives a second, linear-programming proof of KTNS optimality through
+interval matrices, and its treatment of the non-uniform case is relevant to
+Section~\ref{ssec:bbc}. When tools have different setup times, the greedy argument
+breaks: \citet{Crama1994} state explicitly that in that setting the greedy algorithm
+and KTNS are \emph{no longer valid}. What survives is the linear-programming
+formulation. The matrix remains an interval matrix and therefore totally unimodular,
+so the loading problem is still solvable in polynomial time, by solving the linear
+relaxation. This distinction matters here because the Benders subproblem of
+Section~\ref{ssec:bbc} is that linear program, not the KTNS rule, and so remains
+exact in a regime where the rule does not apply.
+
+A later study \citep{Crama2007} draws the boundary of tractability sharply. Once
+tools may occupy several magazine slots, the loading problem alone becomes strongly
+NP-hard, by reduction from $3$-partition, and yet for a fixed capacity it remains
+polynomial through a shortest-path model. The uniform SSP studied here, whose loading
+problem is the paging problem of Remark~\ref{rem:belady} \citep{Belady1966}, sits at
+the tractable edge of a family that becomes intractable as soon as the tools stop
+being uniform.
+
+\subsection{The compact formulations, and where they stop}\label{ssec:sota-compact}
+
+The exact side of the field is a two-decade effort to give the ordering problem a
+linear relaxation strong enough to drive branch and bound. Its trajectory is the
+single most important piece of context for this report.
+
+\citet{Laporte2004} replaced the original Tang--Denardo model, and it is their paper
+that established why a replacement was needed: they exhibited a feasible solution of
+the Tang--Denardo linear relaxation with objective value $0$, valid on every
+instance. Their own formulation, written here as LSS, introduces a dummy job as a
+start-and-end depot and uses arc variables, magazine-state variables and switch
+variables on a travelling-salesman skeleton. They strengthen it with three families
+of valid inequalities, and report that on the Tang--Denardo example the relaxation
+rises from $0$ to $6.0$ against an integer optimum of $7.0$.
+
+They then solve the model two ways. A linear-programming branch-and-cut, seeded with
+the GENIUS heuristic of \citet{Hertz1998}, and a branch-and-bound that carries no
+linear relaxation at all but two combinatorial bounds on partial sequences, in the
+enumerative spirit later developed by \citet{Yanasse2009}. Their computational tables
+report the branch-and-cut on instances with eight jobs, and the branch-and-bound
+reaching twenty-five. That a search with no relaxation beats a search with one is the
+first concrete evidence that on this problem the bound, not the search, is the
+limiting factor.
+
+\citet{Ghiani2010} recast the SSP as a least-cost Hamiltonian cycle problem with a
+nonlinear arc cost. They establish a symmetry property: a job sequence and its
+reversal have the same total switch cost. They are careful to note that this does not
+make the problem symmetric, since individual transition costs do differ; it is the
+total that is preserved. The property halves the search space, and they combine it
+with comb inequalities and lower bounds recomputed inside the search.
+
+\citet{Catanzaro2015} produced the tightest compact models to date, a family of five
+formulations in arc-based variables. Two of their results are used here. Formulations
+3 and 4 have the same linear relaxation, and Formulation 4 is the smaller of the two;
+their computational section says so explicitly and excludes Formulation 3 on that
+ground. Formulation 5 has a relaxation at least as strong as Formulation 4, and their
+experiments confirm it is strictly stronger on most of their datasets. Their
+conclusions recommend Formulation 5 as the best integer-programming formulation for
+the SSP. The present study uses Formulation 4 as its compact baseline, because that
+is what was implemented; Formulation 5 was not implemented, and
+Section~\ref{ssec:limits} records this as a limitation rather than a preference.
+
+\citet{daSilva2024} give a multicommodity-flow model in which each tool routes one
+unit of flow through a position network. It requires no lazy constraints, so a
+standard solver can be used directly, and it includes a symmetry-breaking constraint
+that eliminates half of the symmetric solutions. Its relaxation is what makes it
+important. They prove that the linear relaxation of their model equals $M-C$ in
+their notation: the number of tools minus the magazine capacity. Their argument
+assumes, as they state, that all $M$ tools are required by some job. Under that
+assumption $M=\lvert\U\rvert$, and the bound is exactly the coverage bound $q$ of
+Proposition~\ref{prop:lb2}. They report solving $17.01\%$ more instances than the
+models of \citet{Tang1988}, \citet{Laporte2004} and \citet{Catanzaro2015}, on the
+instance sets of \citet{Yanasse2009}.
+
+That is where the compact models stop. The strongest compact relaxation produced in twenty years
+coincides with a counting argument that fits in one sentence. \citet{daSilva2024}
+also record, for the earlier models, that their relaxations fall below $M-C$ in the
+great majority of cases; this is a statement about most instances, not all, and
+Table~\ref{tab:methods} in Section~\ref{sec:exact} is hedged accordingly.
+
+\begin{table}[t]\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lll p{5.9cm}@{}}
+\toprule
+Year & Work & Approach & Contribution used here \\
+\midrule
+1988 & \citet{Tang1988}      & ILP; the KTNS rule           & KTNS optimal for a fixed order; the pairwise bound $w_{ij}$ \\
+1994 & \citet{Crama1994}     & complexity; heuristics       & NP-hard for every fixed $b\ge2$; the seven standard assumptions; KTNS invalid under non-uniform tool costs, the LP is not \\
+2004 & \citet{Laporte2004}   & the LSS model; B\&C and B\&B & the Tang--Denardo relaxation is identically $0$; B\&B to $25$ jobs beats B\&C at $8$ \\
+2010 & \citet{Ghiani2010}    & Hamiltonian cycle            & reversal symmetry preserves the total cost \\
+2015 & \citet{Catanzaro2015} & compact F1--F5               & F3 and F4 share a relaxation, F4 is smaller; F5 is strongest and is their recommendation \\
+2021 & \citet{daSilva2024}   & multicommodity flow          & relaxation $=M-C$ when every tool is used; $+17.01\%$ instances solved \\
+2024 & \citet{Akhundov2024}  & symmetry; arc flow           & symmetry-broken position and flow models \\
+2025 & \citet{Legrand2025}   & dynamic programming, $A^{*}$ & combinatorial bounds computed inside the search \\
+\bottomrule
+\end{tabular}
+\caption{The exact-method lineage for the SSP. Two decades of compact formulations
+raised the linear relaxation only as far as the coverage bound $q=\lvert\U\rvert-b$
+\citep{daSilva2024}. Moving past it has required leaving the compact
+linear-programming setting.}
+\label{tab:lineage}
+\end{table}
+
+\subsection{The configuration view}\label{ssec:sota-config}
+
+A parallel line abandons job positions for tool configurations.
+
+\citet{Crama1994Column} formulate the Job Grouping Problem as a set-covering model
+solved by column generation. Its relaxation is strong, and its pricing subproblem is
+a Set-Union Knapsack Problem \citep{Goldschmidt1994}, which is NP-hard even under
+restrictive conditions. That difficulty returns as the bottleneck of the pricing
+problems in Section~\ref{ssec:pos}. \citet{Jans2013} give a compact
+asymmetric-representatives alternative, which is what the grouping solver used in
+this work implements.
+
+The configuration view that unifies grouping and sequencing is developed by
+\citet{Colares2026Exact}, work in progress in the advisors' own group. It casts the
+SSP as a generalised travelling-salesman problem whose clusters overlap, and solves
+it by a non-compact integer program with exponentially many transition variables,
+together with generalised subtour-elimination constraints separated as lazy
+constraints. The overlap is what separates the problem from the textbook generalised
+travelling-salesman problem with disjoint clusters surveyed by \citet{Pop2024}, whose
+Noon--Bean reduction \citep{Noon1993} and branch-and-cut methods
+\citep{Fischetti1997} therefore do not transfer directly. Where a pricing problem
+generates constraints that depend on the columns already generated, the
+column-and-row framework of \citet{Muter2013} is the relevant methodology.
+
+Two recent theses sit closest to this work, and both come from the same research
+group. \citet{Otiai2024} builds an exact branch-and-price for the Job Grouping
+Problem using Ryan--Foster branching \citep{Ryan1981}. \citet{Moreira2026} studies
+the SSP through the magazine-configuration formulation and measures its relaxation
+against the compact models. His measurements are directly comparable with those of
+Section~\ref{sec:comp}, and one of them is quoted there: he reports that the trivial
+bound $M-b$ obtained by the multicommodity model was the best available bound on all
+thirty instances of three of his subgroups, while on the tighter subgroup the
+configuration model gave the best bound on four instances.
+
+\subsection{Heuristics and metaheuristics}\label{ssec:sota-heur}
+
+Because the exact methods scale poorly, most of the SSP literature is heuristic.
+Early work pairs a constructive travelling-salesman-style rule with local search over
+the job order \citep{Crama1994}. The GENI and GENIUS heuristics of \citet{Hertz1998}
+sharpen those constructions and outperform the earlier ones; GENIUS also supplies the
+upper bound inside the branch-and-cut of \citet{Laporte2004}. Enumerative schemes with
+dominance pruning \citep{Yanasse2009} and the bounding arguments of
+\citet{Ghiani2010} complete the pre-metaheuristic period.
+
+The current state of the art is the hybrid genetic search of \citet{Mecler2021},
+which couples an order-based genetic algorithm with local search and seeds its
+population from grouping solutions. The grouping view is therefore built into the
+best heuristic as well as into the exact methods.
+
+\subsection{The decomposition in industrial practice}\label{ssec:sota-practice}
+
+The group-then-sequence decomposition is not only a theoretical construct. In colour
+printing the SSP appears in exactly the form studied here, with ink cartridges as
+tools and the cartridge rack as the magazine. \citet{Burger2015} solve the industrial
+problem by this decomposition, modelling the grouping as a unicost set-covering
+problem and the sequencing as a travelling-salesman problem, and enumerating optimal
+groupings by Stirling-number arguments.
+
+Their assessment of the decomposition is the closest thing in the literature to the
+question Section~\ref{sec:gap} attacks, and it is conditional. They concur with the
+earlier finding that the decomposition does well, but qualify it: the agreement holds
+\emph{especially in cases where the largest job size is only slightly smaller than
+the magazine size}, and, as the difference between the magazine size and the largest
+job size grows, the quality of the solutions the heuristic finds decreases. That
+qualification matches the structural analysis of Section~\ref{sec:gap} closely, and
+Section~\ref{ssec:disc-agree} returns to the agreement.
+
+Their paper also poses, as an open question in its closing paragraph, the trade-off
+between minimising the number of tools changed and the number of times tools are
+changed, for varying values of the setup time incurred when the machine is stopped.
+Section~\ref{ssec:collapse} answers that question for the uniform model.
+
+What the literature does not contain is a worst-case analysis of the decomposition:
+bounds on its gap or ratio, extremal instances, or conditions for exactness. The
+survey of \citet{Calmels2018} classifies sixty-one SSP papers and identifies gaps in
+the field; among them is the observation that few authors propose decomposition
+methods for the SSP at all. No worst-case guarantee has been published for any SSP
+heuristic, as far as could be determined during this internship.
+
+\subsection{Recent exact developments}\label{ssec:sota-recent}
+
+The exact frontier has moved again recently, by routes that reinforce the reading
+above. \citet{Akhundov2024} exploit the reversal symmetry of \citet{Ghiani2010}
+systematically, deriving symmetry-broken position-based and arc-flow formulations
+from a job-group representation. \citet{Legrand2025}, with Catanzaro among the
+authors, leave integer programming altogether for a dynamic-programming and $A^{*}$
+search equipped with a new family of lower bounds, reporting the strongest exact
+results to date.
+
+Their bounds are combinatorial and are computed inside the search rather than as a
+linear relaxation. That is the pattern. Every recent advance has come from leaving
+the compact linear-programming setting, whether for a search with sharper
+combinatorial bounds, for a decomposition whose subproblem is settled exactly, or for
+a relaxation engineered to exceed the counting bound. The two methods of
+Section~\ref{sec:exact} take the second and third of those routes.
+
+\subsection{Benders decomposition}\label{ssec:sota-benders}
+
+The solver of Section~\ref{ssec:bbc} inherits a developed methodology.
+\citet{Rahmaniani2017} survey the acceleration of Benders decomposition. The
+particular setting in which the subproblem is settled by a combinatorial oracle
+rather than by linear-programming duality is the logic-based Benders of
+\citet{Hooker2003} and the combinatorial Benders cuts of \citet{Codato2006}. Two
+classical strengthenings are used later: the Pareto-optimal cut of
+\citet{MagnantiWong1981}, which selects among alternative dual optima the cut that
+cuts deepest at a fixed interior point, and the practical form of
+\citet{Papadakos2008}, which removes the extra constrained solve the original method
+required.
+
+The immediate source, however, is not a paper but an internship. \citet{Kashou2025}
+applies branch-and-Benders-cut to a robust production-line balancing problem,
+integrating Benders into the branch-and-bound tree through lazy-constraint callbacks,
+replacing a general solver in the dual subproblem with four tailored algorithms, and
+strengthening the method with a heuristic that pre-injects cuts. He reports that even
+so the decomposition does not systematically beat the non-decomposed formulation. It
+was that report which prompted Prof.~Colares to propose the same architecture for the
+SSP, on the reasoning that the SSP occupies the regime the assembly-line problem
+lacked: its subproblem is not a general program needing tailored algorithms, but a
+polynomially solvable oracle, so the cut is exact and essentially free at every
+callback.
+
+\subsection{What is open, and what this report attacks}\label{ssec:sota-open}
+
+Three observations set the agenda.
+
+First, the two-phase heuristic has a strong empirical record, one conditional
+industrial assessment \citep{Burger2015}, and no worst-case theory.
+Section~\ref{sec:gap} builds one.
+
+Second, on the exact side the strongest compact relaxation equals the coverage bound
+$q$ \citep{daSilva2024}, and the configuration relaxation does not improve on it on
+most instances \citep{Moreira2026}. Progress therefore requires either a method that
+does not rely on a linear relaxation at all, which is the Benders route of
+Section~\ref{ssec:bbc}, or a formulation whose relaxation can exceed the bound, which
+is the position--transition route of Section~\ref{ssec:pos}.
+
+Third, the configuration view that works well for the Job Grouping Problem
+\citep{Otiai2024} has no tractable exact counterpart for the SSP, because the natural
+model carries exponentially many subtour constraints. That is the opening the
+position-indexed formulations address.

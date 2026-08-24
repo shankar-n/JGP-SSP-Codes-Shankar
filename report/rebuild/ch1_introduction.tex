@@ -1,0 +1,193 @@
+%==============================================================================
+\section{Introduction}\label{sec:intro}
+%==============================================================================
+
+\subsection{The problem}\label{ssec:intro-problem}
+
+A flexible manufacturing cell is built around one computer-controlled machine. The
+machine can make many different parts, because it can call on a large set of
+cutting tools. It cannot hold them all at once. The tools sit in a magazine with a
+fixed number of slots, and only the tools in the magazine can be used.
+
+Running a set of jobs therefore means changing tools. Whenever a job needs a tool
+that is not loaded, the machine stops, the tool is fetched, and another tool is
+removed to make room. The stop is the cost. It is not a small one: a tool change
+takes seconds to minutes, the machine produces nothing while it happens, and a cell
+running thousands of parts a day repeats it constantly.
+
+Two decisions control how often this happens. The first is the order in which the
+jobs are run. The second is which tools to keep and which to remove at each step.
+The Job Sequencing and Tool Switching Problem, written SSP throughout this report,
+makes both decisions together, so as to minimise the total number of tool
+insertions. Figure~\ref{fig:setup} shows the problem at its smallest.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+   font=\small, >=Stealth,
+   job/.style={draw=cBlue!70, fill=white, rounded corners, semithick,
+               minimum width=2.7cm, minimum height=1.0cm, align=center},
+   chip/.style={draw=black!25, rounded corners=1pt, minimum size=0.72cm,
+                inner sep=0pt, font=\bfseries, text=white},
+   swaparr/.style={->, line width=1.1pt, cRed}]
+  \node[job] (j1) at (0,2)   {\textbf{job 1} needs\\ {\color{cRed}$a$}, {\color{cBlue}$b$}};
+  \node[job] (j2) at (5,2)   {\textbf{job 2} needs\\ {\color{cBlue}$b$}, {\color{cGreen}$c$}};
+  \node[job] (j3) at (10,2)  {\textbf{job 3} needs\\ {\color{cGreen}$c$}, {\color{cOrange}$d$}};
+  \node[chip,fill=cRed]    (m1a) at (-0.42,0) {$a$};
+  \node[chip,fill=cBlue]   (m1b) at ( 0.42,0) {$b$};
+  \node[chip,fill=cBlue]   (m2a) at ( 4.58,0) {$b$};
+  \node[chip,fill=cGreen]  (m2b) at ( 5.42,0) {$c$};
+  \node[chip,fill=cGreen]  (m3a) at ( 9.58,0) {$c$};
+  \node[chip,fill=cOrange] (m3b) at (10.42,0) {$d$};
+  \node[draw=black!45, rounded corners, fit=(m1a)(m1b), inner sep=2.5pt] (m1) {};
+  \node[draw=black!45, rounded corners, fit=(m2a)(m2b), inner sep=2.5pt] (m2) {};
+  \node[draw=black!45, rounded corners, fit=(m3a)(m3b), inner sep=2.5pt] (m3) {};
+  \draw[->,black!45] (j1) -- (m1);  \draw[->,black!45] (j2) -- (m2);  \draw[->,black!45] (j3) -- (m3);
+  \draw[swaparr] (m1) -- (m2)
+     node[midway,above,font=\scriptsize,align=center]{swap\\ $-a$, $+c$};
+  \draw[swaparr] (m2) -- (m3)
+     node[midway,above,font=\scriptsize,align=center]{swap\\ $-b$, $+d$};
+  \node[font=\scriptsize,text=black!55] at (5,-1.05) {the magazine (grey box) holds only $b=2$ tools at a time};
+\end{tikzpicture}
+\caption{The problem at its smallest. Three jobs run from left to right on a
+machine whose magazine holds two tools. A job can run only when both of its tools
+are loaded. Filling the magazine for job~1 costs two insertions. Each later job
+happens to share one tool with the job before it, so one tool is swapped in at each
+step: two more insertions, four in total. Changing the order of the jobs, or making
+the magazine larger, changes that count. Finding the order that minimises the total,
+over all $n!$ orders, is the SSP.}
+\label{fig:setup}
+\end{figure}
+
+The same structure appears well outside machining, and everything in this report
+carries over. In printed-circuit-board assembly the tools are component feeders and
+the jobs are the boards. In colour printing they are ink cartridges on a press, and
+the problem occurs there in exactly the form studied here
+\citep{Burger2015}. In warehouse picking they are the items a picker can carry at
+once. What matters in each case is that a limited, reusable resource serves groups
+of demands, and that the order of the demands can be chosen.
+
+\subsection{Why the problem is hard, and why it is still open}\label{ssec:intro-why}
+
+The two decisions behave very differently.
+
+Loading is easy. Once the order of the jobs is fixed, the cheapest loading policy is
+known in closed form. It is the Keep Tool Needed Soonest rule of \citet{Tang1988}:
+when a tool must be inserted into a full magazine, remove the tool whose next use
+lies furthest in the future. The rule is optimal, and it runs in
+$O(n\lvert T\rvert)$ time.
+
+Ordering is hard. \citet{Crama1994} proved the SSP NP-hard for every fixed magazine
+capacity $b\ge2$. The difficulty is that a good order places jobs with similar tool
+requirements next to one another, but ``similar'' here means nothing more than
+overlapping sets, with no natural distance to measure it, and the magazine limit
+couples jobs that are far apart in the order.
+
+That combination --- an easy inner problem inside a hard outer one --- is exactly
+what decomposition methods are built for, and it is the reason the SSP has attracted
+exact methods for four decades. Two gaps in that literature motivate this work.
+
+The first is on the practical side. Nobody solves the SSP directly. The standard
+approach groups the jobs into as few magazine-fitting batches as possible, then
+orders the batches. It is fast, it is what the strongest metaheuristics start from
+\citep{Mecler2021}, and where it has been measured against exact optima it does
+well \citep{Burger2015}. No worst-case analysis of it has been published. How far
+from optimal it can be, and on which instances it is exact, are open questions.
+
+The second is on the exact side. Every compact integer formulation of the SSP
+proposed so far has a weak linear relaxation, and the strongest of them
+\citep{daSilva2024} has a relaxation exactly equal to the number of tools minus the
+magazine capacity. That is an elementary counting bound: every tool that does not
+fit in the initial magazine must be inserted at some point. Twenty years of
+formulation work has reached a bound that can be written in one line, and a solver
+that relies on it cannot prove optimality on the instances where the bound is loose.
+
+\subsection{What was done during this internship}\label{ssec:intro-done}
+
+The internship took place at the Laboratoire d'Informatique, de Mod\'elisation et
+d'Optimisation des Syst\`emes (LIMOS), under the advisorship of Prof.~Rafael
+Colares and Prof.~Annegret Wagler, with Dr.~Renaud Chicoisne as academic
+supervisor. The research directions were set by the advisors, and this report is
+organised around them. They are recorded here explicitly, so that the origin of
+each line of work is clear.
+
+\begin{itemize}[topsep=4pt,itemsep=3pt]
+  \item \textbf{The configuration-based view of the problem} was proposed by
+  Prof.~Colares and Prof.~Wagler, and frames the whole project. A
+  \emph{configuration} is a full magazine, and a schedule is a walk through
+  configurations that serves every job. Section~\ref{ssec:gtsp} develops it.
+
+  \item \textbf{The reduction of the SSP to a generalised travelling-salesman
+  problem} was set by Prof.~Colares. It is the formal content of that view, and it
+  is what makes both exact methods below natural.
+
+  \item \textbf{The analysis of the gap between the two-phase heuristic and the
+  optimum} was set by Prof.~Wagler, together with the request to enumerate the
+  integral solutions of the grouping problem with PORTA. Her specific questions
+  were to construct worst-case examples with the number of groups fixed, to study
+  instances where the gap is attained, and to prove an upper bound tighter than the
+  trivial $b(\Kst-1)$. Section~\ref{sec:gap} answers the first two and gives
+  several answers to the third.
+
+  \item \textbf{The study of the grouping problem through clutters and blocking
+  duality} was also set by Prof.~Wagler. Section~\ref{ssec:clutter} reports it.
+
+  \item \textbf{The branch-and-Benders-cut algorithm} was proposed by
+  Prof.~Colares, following the internship report of \citet{Kashou2025}, which
+  applies the same architecture to a production-line balancing problem. The
+  suggestion was to try lazy cuts first and cuts at fractional solutions second.
+  Section~\ref{ssec:bbc} develops it and Section~\ref{ssec:results-bbc} measures it.
+
+  \item \textbf{The position-indexed formulations} were proposed by
+  Prof.~Colares, including the idea that makes them work: fixing a row set that
+  is polynomial in the instance size, so that column generation only ever adds
+  columns to rows that already exist. The purpose was to make branch-and-price over
+  configurations possible. Section~\ref{ssec:pos} develops them.
+\end{itemize}
+
+\noindent
+Work on these directions fell into three parts, and each has a section of its own
+below.
+
+The first was theoretical: the structural analysis of Section~\ref{sec:gap}. It
+answers the questions Prof.~Wagler set, and raises several that emerged from them.
+
+The second was implementation. The branch-and-Benders-cut solver, the two
+branch-and-price prototypes, three formulations from the literature reimplemented as
+baselines, a hybrid genetic heuristic, the campaign harness and the cluster pipeline
+were built and validated against brute-force optima before any of them was used to
+produce a result. Section~\ref{sec:exact} describes the methods and
+Appendix~\ref{app:repro} the code.
+
+The third was experimental: the benchmark campaign of Section~\ref{sec:comp}, run on
+the LIMOS cluster over the standard instance families under a uniform protocol,
+together with the small-scale enumeration used throughout Section~\ref{sec:gap} to
+test each statement as it was made. One correction made during the campaign is worth
+recording, because it changed the results substantially: the Benders master was found
+to be missing the tool coverage bound, and the campaign was re-run once it was added.
+
+Section~\ref{sec:ai} declares the use of AI tools during the internship and describes
+the checking that was applied. In short, every quantitative statement in this report
+is reproduced by an independent verification program, described in
+Appendix~\ref{app:verify}.
+
+\subsection{How to read this report}\label{ssec:intro-read}
+
+Section~\ref{sec:prelim} defines the problem and everything used to attack it,
+including a self-contained account of the integer-programming background in
+Section~\ref{ssec:toolkit}. A reader who already knows integer programming may skip
+that subsection. Section~\ref{sec:sota} reviews the literature.
+Section~\ref{sec:gap} is the structural analysis of the two-phase heuristic.
+Section~\ref{sec:exact} presents the exact methods and Section~\ref{sec:comp}
+measures them. Section~\ref{sec:disc} interprets the measurements,
+Section~\ref{sec:concl} concludes, and Section~\ref{sec:ai} is the declaration on
+the use of AI. Longer proofs are in Appendix~\ref{app:proofs}, the verification
+program is described in Appendix~\ref{app:verify}, and Appendix~\ref{app:repro}
+says how to reproduce every experiment.
+
+One point of reading is worth stating in advance, because it recurs. Every
+statement in this report carries a label --- Theorem, Proposition, Lemma, Corollary,
+Observation, or Conjecture --- and the labels are used strictly. A Proposition has a
+proof. An Observation was established by running a program. A Conjecture has neither,
+only evidence. The distinction is kept even where it makes the text less confident,
+because a reader who cannot tell the three apart cannot use any of them.

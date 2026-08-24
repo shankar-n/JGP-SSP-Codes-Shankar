@@ -1,0 +1,5 @@
+CPLEX Error  1217: No solution exists.
+CPLEX Error  1217: No solution exists.
+CPLEX Error  1217: No solution exists.
+CPLEX Error  1217: No solution exists.
+slurmstepd-node39: error: Detected 36 oom_kill events in StepId=20079.batch. Some of the step tasks have been OOM Killed.
