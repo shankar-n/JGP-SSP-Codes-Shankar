@@ -23,9 +23,10 @@ weak relaxation at all. This places the solver in the lineage of logic-based
 \citep{Hooker2003} and combinatorial \citep{Codato2006} Benders decomposition.
 
 Branch-and-price attacks the same weakness from the other side. Reformulating over
-configurations, its position--transition variant carries a relaxation that provably
-exceeds the coverage bound (Proposition~\ref{prop:ptf}), which is the one construction
-in this report that does.
+configurations, its position--transition variant carries a relaxation that can provably
+exceed the coverage bound (Proposition~\ref{prop:ptf}), which is the one construction in
+this report that does. How often it does so on real instances is a separate question,
+and Section~\ref{ssec:results-bnp} answers it.
 
 \begin{table}[t]\centering
 \footnotesize
@@ -407,6 +408,17 @@ relaxation returns $2.10$ against a coverage bound of $2$; on the $6$-ring it is
 at $\Zst=3$. PTF is therefore the first relaxation in this family to improve on the
 elementary bound, and it does so with a fixed, polynomial row set.
 
+The proposition says the relaxation \emph{can} exceed $q$. It says nothing about how
+often, or by how much, and Section~\ref{ssec:results-bnp} finds that on the standard
+benchmark the answer to both is: rarely, and by one unit. That leaves the question that
+decides whether the construction is worth pursuing.
+
+\begin{problem}\label{prob:ptf-gap}
+Is there a family of instances on which the PTF relaxation exceeds the coverage bound
+$q$ by an amount that grows without bound? Equivalently: is the excess of PTF over $q$
+bounded by a constant?
+\end{problem}
+
 \paragraph{Column generation and robust branching.}
 Both PCF$'$ and PTF have $O(n\lvert T\rvert)$ rows but exponentially many columns, so
 their relaxations are solved by column generation. Branching on a single column
@@ -484,10 +496,48 @@ policy is a softmax that is linear in those features and is trained by the REINF
 policy-gradient rule with a return baseline.
 
 Because the Benders solver requires a commercial solver that was unavailable in the
-development environment, the learning components were implemented and validated on a
-self-contained cut family, knapsack cover cuts, rather than on SSP instances. It has
-not been evaluated on the SSP, and no claim is made about its effect on this problem.
-It is reported here as work carried out during the internship, not as a result.
+development environment, the learning components were implemented and trained on a
+self-contained cut family rather than on SSP instances. The substitute is knapsack
+cover cuts: for a knapsack instance and a minimal cover $C$, the inequality
+$\sum_{j\in C}x_j\le\lvert C\rvert-1$ is valid, the separation is elementary, and the
+linear relaxations can be solved without a commercial solver. The state, the action,
+the reward and the policy are the same objects as in the Benders case; only the feature
+extractor and the source of the candidate cuts differ.
 
-Section~\ref{ssec:further} explains why evaluating it is unlikely to be worthwhile
-until the bound question of Section~\ref{sec:disc} is resolved.
+\paragraph{What was measured.}
+The agent was trained for $2{,}000$ episodes at each of six knapsack sizes, with
+learning rate $0.2$ and discount $0.95$, and evaluated on a held-out set of instances
+it had not seen. The quantity compared is the mean tightening of the linear bound
+achieved over a fixed number of separation rounds, under the learned policy against
+uniformly random selection from the same candidate pool. Table~\ref{tab:rl} gives the
+result.
+
+\begin{table}[h]\centering
+\footnotesize
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+knapsack size $n$ & learned policy & random selection & improvement\\
+\midrule
+$10$ & $1.3855$ & $0.8734$ & $+58.6\%$\\
+$12$ & $1.1639$ & $0.7014$ & $+65.9\%$\\
+$20$ & $0.7482$ & $0.5021$ & $+49.0\%$\\
+$22$ & $0.6692$ & $0.4568$ & $+46.5\%$\\
+$24$ & $0.6383$ & $0.3888$ & $+64.2\%$\\
+$26$ & $0.5661$ & $0.3279$ & $+72.7\%$\\
+\bottomrule
+\end{tabular}
+\caption{Mean bound tightening on held-out knapsack instances, learned cut selection
+against random cut selection. One training seed per size. The learning machinery works;
+the problem is not the SSP.}
+\label{tab:rl}
+\end{table}
+
+Two things follow, and only two. The learning machinery is correct and does learn: the
+policy beats random selection at every size tested, by between $47\%$ and $73\%$. And
+that is a statement about knapsack cover cuts, on a single training seed per size, with
+no repetition to separate the effect from training variance. It says nothing about the
+SSP. The prototype has not been evaluated on SSP instances, and no claim about its
+effect on this problem is made anywhere in this report.
+
+Section~\ref{ssec:further} explains why evaluating it on the SSP is unlikely to be
+worthwhile until the bound question of Section~\ref{sec:disc} is resolved.

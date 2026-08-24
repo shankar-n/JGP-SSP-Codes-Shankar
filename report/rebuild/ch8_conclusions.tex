@@ -47,18 +47,23 @@ saying anything correct about it (Section~\ref{ssec:frames}). Within that settin
 \paragraph{On the algorithmic side.}
 A branch-and-Benders-cut solver was built whose subproblem is exact and polynomial,
 together with position-indexed formulations carrying a fixed polynomial row set, among
-which the position--transition model is a configuration relaxation that provably
-improves on the coverage bound (Proposition~\ref{prop:ptf}).
+which the position--transition model is a configuration relaxation that can provably
+improve on the coverage bound (Proposition~\ref{prop:ptf}), although the campaign finds
+it doing so on three runs out of $233$.
 
 \paragraph{On the empirical side.}
-A campaign over $1{,}301$ instances and eleven configurations, under a single
-one-hour limit, establishes that the coverage bound decides the outcome: $94\%$ of
-bound-tight instances are closed against $49\%$ of bound-loose ones. Where the solver
-fails, its incumbent is already optimal $71\%$ of the time. Fractional Benders cuts,
-tested properly for the first time after a defect was corrected, are generated in
-enormous numbers and raise the bound on three instances out of $1{,}238$. Of four
-strengthenings only the one improving the incumbent helps. The multicommodity model of
-\citet{daSilva2024} is reproduced as the strongest single method.
+A campaign over $1{,}421$ instances and twelve configurations, under a single one-hour
+limit, establishes that the coverage bound decides the outcome: $94\%$ of bound-tight
+instances are closed against $40\%$ of bound-loose ones. Where the solver fails, its
+incumbent is already optimal $66\%$ of the time. Fractional Benders cuts, tested
+properly for the first time after a defect was corrected, are generated in enormous
+numbers and raise the bound at termination on no instance at all. Of four
+strengthenings only the one improving the incumbent helps. The branch-and-price
+prototypes measure the same bound from the other side: the position--configuration
+relaxation equals $q$ on every one of $2{,}114$ runs, and the position--transition
+relaxation exceeds it on three of $233$. The multicommodity model of
+\citet{daSilva2024} is reproduced as the strongest single method. Across $41{,}673$
+pairs of methods that both proved an optimum, none disagree.
 
 The conclusion those measurements support is that a configuration-based exact method
 for the SSP is limited by the strength of its bound and not by its implementation.
@@ -85,19 +90,29 @@ relaxation non-integral on about a quarter of it, and non-integrality occurring 
 from rings, so the obstruction landscape is richer than the odd rings alone.
 
 \paragraph{A bound that reaches into the loose half.}
-This is the direction the campaign points to most strongly. The pairwise information of
-\citet{Tang1988} is close to exhausted: solving the pairwise bound to optimality, as a
-travelling-salesman path over the weights $w_{ij}$ --- an idea already present in their
-paper --- lifts the root value on about a quarter of the bound-loose instances but
-reaches the optimum on under one per cent of them. The natural next family is the
-higher-order form: window inequalities over sets $S$ of consecutive jobs, charging
-$\lvert\bigcup_{j\in S}T_j\rvert-b$ when the jobs of $S$ run contiguously, which
-generalises the pairwise and triplet rows in one family.
+This is the direction the campaign points to most strongly, and
+Section~\ref{ssec:disc-locality} takes the first step along it. The arc-supported
+information is exhausted: on the loose instances the strongest bound any arc-indexed
+family could ever certify closes $8.9\%$ of the gap on average and nothing at all on
+three quarters of them. The window family of inequality~\eqref{eq:window} closes
+$30.9\%$, is valid, is robust in the branch-and-price sense, and is implemented in
+\texttt{src/BNP/window\_cuts.py}. What remains is to measure it inside the solver
+rather than at its ceiling, and to separate the longer windows rather than taking a
+static pool of short ones. Two further families suggest themselves from the same
+reading: chaining PTF per configuration rather than per tool, which is what confines
+its advantage to three runs in Section~\ref{ssec:results-bnp}, and disaggregating the
+Benders master's single $\theta$ into one variable per position, which is the standard
+strengthening the ablation of Section~\ref{ssec:results-bbc} never tested.
 
-\paragraph{Completing the branch-and-price measurement.}
-The runs of PCF$'$ and PTF under the uniform protocol of Section~\ref{ssec:bench} are
-in progress. They will answer directly whether PTF's stronger relaxation translates
-into solved instances or only into a better root bound.
+\paragraph{Making PTF's advantage large.}
+Section~\ref{ssec:results-bnp} finds the position--transition relaxation above the
+coverage bound on three runs of $233$, by one unit each. The construction is therefore
+sound and, as it stands, of no practical use. Problem~\ref{prob:ptf-gap} asks whether
+the excess can be made to grow; the polyhedral question underneath it is which facets
+of the position--transition polytope are responsible for the three cases where it does
+exceed $q$. Independently, the prototypes are written in Python with a Python pricer,
+and a compiled pricer would allow the formulations to be measured on instances larger
+than nine jobs, which is where they currently stop.
 
 \paragraph{Non-uniform tool costs.}
 Section~\ref{ssec:bbc} notes that the Benders subproblem is the loading linear program

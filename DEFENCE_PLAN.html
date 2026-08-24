@@ -1,0 +1,962 @@
+<title>Nine Days to the Defence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --paper:#F1F4F6;
+  --surface:#FFFFFF;
+  --surface-2:#E9EEF2;
+  --ink:#151E27;
+  --ink-soft:#5A6975;
+  --ink-faint:#8695A1;
+  --accent:#12456E;
+  --accent-wash:#E2EBF3;
+  --moss:#3C6B4B;
+  --moss-wash:#E3EDE5;
+  --brass:#8A6413;
+  --brass-wash:#F2EADA;
+  --rust:#8E3B2C;
+  --rust-wash:#F3E4E0;
+  --rule:#D6DDE3;
+  --rule-soft:#E4EAEF;
+  --shadow:0 1px 2px rgba(21,30,39,.05), 0 8px 24px -12px rgba(21,30,39,.16);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D1319;
+    --surface:#141C24;
+    --surface-2:#1B242D;
+    --ink:#E3E9EE;
+    --ink-soft:#8FA0AC;
+    --ink-faint:#6B7C89;
+    --accent:#74ACD8;
+    --accent-wash:#16283A;
+    --moss:#82B191;
+    --moss-wash:#16251C;
+    --brass:#D2A24C;
+    --brass-wash:#26200F;
+    --rust:#DA8D79;
+    --rust-wash:#291711;
+    --rule:#26313A;
+    --rule-soft:#1E272F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D1319;
+  --surface:#141C24;
+  --surface-2:#1B242D;
+  --ink:#E3E9EE;
+  --ink-soft:#8FA0AC;
+  --ink-faint:#6B7C89;
+  --accent:#74ACD8;
+  --accent-wash:#16283A;
+  --moss:#82B191;
+  --moss-wash:#16251C;
+  --brass:#D2A24C;
+  --brass-wash:#26200F;
+  --rust:#DA8D79;
+  --rust-wash:#291711;
+  --rule:#26313A;
+  --rule-soft:#1E272F;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16.5px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+.col{max-width:70ch}
+section{padding:52px 0;border-top:1px solid var(--rule-soft)}
+section:first-of-type{border-top:none}
+
+/* ---------- nav ---------- */
+.nav{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--rule);
+}
+.nav-inner{max-width:1080px;margin:0 auto;padding:9px 28px;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.nav a{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--ink-soft);text-decoration:none;
+  padding:5px 9px;border-radius:3px;white-space:nowrap;
+}
+.nav a:hover{color:var(--accent);background:var(--accent-wash)}
+.nav a:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+/* ---------- type ---------- */
+h1,h2,h3{font-family:Spectral,Georgia,serif;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.3rem,5.2vw,3.4rem);line-height:1.06;font-weight:700;letter-spacing:-.015em}
+h2{font-size:clamp(1.5rem,3vw,2rem);line-height:1.18;font-weight:600;letter-spacing:-.01em}
+h3{font-size:1.11rem;line-height:1.35;font-weight:600}
+p{margin:0}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:500;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--accent);
+}
+.lede{font-size:1.13rem;color:var(--ink-soft);line-height:1.55}
+.stack{display:flex;flex-direction:column;gap:18px}
+.stack-sm{display:flex;flex-direction:column;gap:10px}
+.stack-lg{display:flex;flex-direction:column;gap:30px}
+code,.mono{font-family:"IBM Plex Mono",monospace;font-size:.86em}
+code{background:var(--surface-2);padding:1px 5px;border-radius:3px;color:var(--ink)}
+strong{font-weight:600;color:var(--ink)}
+em.term{font-style:normal;font-weight:600;color:var(--accent)}
+a.ref{color:var(--accent);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+
+/* ---------- hero ---------- */
+.hero{padding:70px 0 46px}
+.hero .meta{
+  display:flex;gap:22px;flex-wrap:wrap;margin-top:26px;
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-faint);
+}
+.hero .meta b{color:var(--ink-soft);font-weight:500}
+
+/* ---------- verdict callout ---------- */
+.verdict{
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:26px 28px;box-shadow:var(--shadow);
+}
+.verdict-row{display:grid;grid-template-columns:auto 1fr;gap:14px 18px;align-items:baseline}
+.verdict-q{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-faint);white-space:nowrap;padding-top:3px;
+}
+.verdict-a{font-size:.98rem}
+.verdict-a b{color:var(--ink)}
+
+/* ---------- thesis panel ---------- */
+.thesis{
+  background:var(--accent-wash);border-left:3px solid var(--accent);
+  padding:24px 26px;border-radius:0 5px 5px 0;
+}
+.thesis .big{font-family:Spectral,Georgia,serif;font-size:1.35rem;line-height:1.35;font-weight:600}
+.acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:8px}
+.act{background:var(--surface);border:1px solid var(--rule);border-radius:5px;padding:18px 20px}
+.act .n{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--accent);display:block;margin-bottom:7px;
+}
+.act h3{margin-bottom:6px}
+.act p{font-size:.92rem;color:var(--ink-soft)}
+
+/* ---------- ring figure ---------- */
+figure{margin:0;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:24px;box-shadow:var(--shadow)}
+figure svg{display:block;width:100%;height:auto;max-width:620px;margin:0 auto}
+figcaption{margin-top:14px;font-size:.88rem;color:var(--ink-soft);line-height:1.5;max-width:60ch}
+
+/* ---------- scoreboard ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:6px;background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.92rem}
+thead th{
+  text-align:left;font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);
+  padding:12px 16px;border-bottom:1px solid var(--rule);background:var(--surface-2);
+}
+tbody td{padding:13px 16px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+.who{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);padding-top:16px!important;background:var(--surface-2)}
+.pill{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:3px;white-space:nowrap;
+}
+.pill-yes{background:var(--moss-wash);color:var(--moss)}
+.pill-neg{background:var(--accent-wash);color:var(--accent)}
+.pill-part{background:var(--brass-wash);color:var(--brass)}
+td .where{display:block;margin-top:4px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-faint)}
+
+/* ---------- two lists ---------- */
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:20px 22px;box-shadow:var(--shadow)}
+.panel h3{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.dot-y{background:var(--moss)}
+.dot-n{background:var(--rust)}
+.panel ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:11px}
+.panel li{font-size:.92rem;line-height:1.5;padding-left:15px;position:relative;color:var(--ink-soft)}
+.panel li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:1px;background:var(--ink-faint)}
+.panel li b{color:var(--ink)}
+
+/* ---------- day plan ---------- */
+.days{display:flex;flex-direction:column;gap:0}
+.day{display:grid;grid-template-columns:92px 1fr;gap:22px;padding:20px 0;border-top:1px solid var(--rule-soft)}
+.day:first-child{border-top:none}
+.day-when{font-family:"IBM Plex Mono",monospace;font-size:12px;line-height:1.5;padding-top:2px}
+.day-when .d{display:block;font-size:19px;font-weight:600;color:var(--accent);letter-spacing:-.01em}
+.day-when .w{display:block;color:var(--ink-faint);font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+.day-body h3{margin-bottom:8px}
+.day-body p{font-size:.93rem;color:var(--ink-soft)}
+.tasks{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.tasks li{font-size:.9rem;color:var(--ink-soft);padding-left:20px;position:relative;line-height:1.5}
+.tasks li::before{
+  content:"";position:absolute;left:0;top:.42em;width:11px;height:11px;
+  border:1px solid var(--ink-faint);border-radius:2px;
+}
+.day.pin{background:var(--brass-wash);border-radius:6px;padding:20px 18px;border-top:none;margin:6px 0}
+.day.pin .day-when .d{color:var(--brass)}
+
+/* ---------- reading ---------- */
+.tier{margin-top:6px}
+.tier-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.tier-head h3{font-family:"IBM Plex Sans",sans-serif;font-size:.95rem;font-weight:600}
+.tier-note{font-size:.86rem;color:var(--ink-faint)}
+.papers{display:flex;flex-direction:column;gap:0}
+.paper{display:grid;grid-template-columns:1fr;gap:3px;padding:13px 0;border-top:1px solid var(--rule-soft)}
+.paper:first-child{border-top:none}
+.paper .t{font-size:.95rem;font-weight:500}
+.paper .f{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--accent);word-break:break-word}
+.paper .x{font-size:.88rem;color:var(--ink-soft);line-height:1.5}
+
+/* ---------- drills ---------- */
+.drills{counter-reset:drill;display:flex;flex-direction:column;gap:14px}
+.drill{
+  display:grid;grid-template-columns:32px 1fr;gap:14px;align-items:start;
+  background:var(--surface);border:1px solid var(--rule);border-radius:5px;padding:16px 18px;
+}
+.drill::before{
+  counter-increment:drill;content:counter(drill);
+  font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--accent);
+  background:var(--accent-wash);width:26px;height:26px;border-radius:3px;
+  display:flex;align-items:center;justify-content:center;
+}
+.drill p{font-size:.93rem;line-height:1.52}
+.drill p b{color:var(--ink)}
+.drill .why{display:block;margin-top:4px;font-size:.85rem;color:var(--ink-faint)}
+
+/* ---------- Q&A ---------- */
+.qa{display:flex;flex-direction:column;gap:0}
+.qi{padding:20px 0;border-top:1px solid var(--rule-soft)}
+.qi:first-child{border-top:none}
+.qi .q{font-family:Spectral,Georgia,serif;font-size:1.08rem;font-weight:600;line-height:1.35;margin-bottom:9px}
+.qi .a{font-size:.94rem;color:var(--ink-soft);line-height:1.58}
+.qi .a b{color:var(--ink)}
+
+/* ---------- email ---------- */
+.email{
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:24px 26px;box-shadow:var(--shadow);
+}
+.email .subj{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-faint);
+  padding-bottom:12px;margin-bottom:16px;border-bottom:1px solid var(--rule-soft);
+}
+.email .subj b{color:var(--ink);font-weight:500}
+.email .body{font-size:.95rem;line-height:1.68;display:flex;flex-direction:column;gap:12px}
+
+/* ---------- footer ---------- */
+footer{padding:44px 0 64px;border-top:1px solid var(--rule);color:var(--ink-faint);font-size:.86rem}
+
+@media (max-width:640px){
+  body{font-size:16px}
+  .day{grid-template-columns:1fr;gap:8px}
+  .day-when{display:flex;gap:10px;align-items:baseline}
+  .verdict-row{grid-template-columns:1fr;gap:4px 0}
+  .verdict-q{padding-top:0}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#verdict">Verdict</a>
+    <a href="#thesis">The one thing</a>
+    <a href="#scoreboard">Their questions</a>
+    <a href="#worked">Worked / didn't</a>
+    <a href="#plan">Nine days</a>
+    <a href="#reading">Reading</a>
+    <a href="#drills">Drills</a>
+    <a href="#questions">Jury Q&amp;A</a>
+    <a href="#email">Email</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero col">
+    <p class="eyebrow">Job Sequencing and Tool Switching · LIMOS</p>
+    <h1>Nine days to the defence</h1>
+    <div class="meta">
+      <span><b>Talk</b> 25 min + 20 min questions</span>
+      <span><b>Date</b> 2 September 2026</span>
+      <span><b>Audience</b> jury</span>
+    </div>
+  </header>
+
+  <section id="verdict">
+    <div class="col stack">
+      <p class="eyebrow">First, the honest answer</p>
+      <h2>Is any of it substantial?</h2>
+      <p>You asked whether the work is correct, substantial, or even scientific. Those are three
+      different questions and they have three different answers.</p>
+    </div>
+
+    <div class="col" style="margin-top:24px">
+      <div class="verdict">
+        <div class="verdict-row">
+          <span class="verdict-q">Correct</span>
+          <p class="verdict-a"><b>Yes, and it is checkable.</b> Every quantitative claim is reproduced by a
+          program that shares no code with the solvers. Across 41,673 pairs of methods that both proved an
+          optimum on the same instance, none disagreed. The loading rule is verified against an exact
+          dynamic program on 83,670 instance-and-sequence pairs. Two errors were found this way and both
+          are fixed and documented.</p>
+
+          <span class="verdict-q">Scientific</span>
+          <p class="verdict-a"><b>Yes, more than most.</b> Every statement carries a label used strictly —
+          a Proposition has a proof, an Observation was computed, a Conjecture has neither. Negative results
+          are reported as negative rather than buried. The failed runs are counted in the tables. That
+          discipline is the thing a jury will notice first.</p>
+
+          <span class="verdict-q">Substantial</span>
+          <p class="verdict-a"><b>The theory is. The methods are not competitive, and that is the finding.</b>
+          Section 4 alone holds two theorems, twelve propositions, four corollaries, four lemmas, five
+          observations, three conjectures and one open problem. Every question your advisors set has an
+          answer. What you do <em class="term">not</em> have is a solver that beats the literature —
+          the multicommodity model closes 1,038 instances against 727 for your best Benders configuration.
+          Do not claim otherwise. The reason it loses <em class="term">is</em> the result.</p>
+
+          <span class="verdict-q">Publishable</span>
+          <p class="verdict-a"><b>One piece plausibly is</b> — the frame distinction together with the gap
+          analysis. That is Wagler's call, not yours and not mine. Bring it to her as a question, not a
+          claim.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="thesis">
+    <div class="col stack">
+      <p class="eyebrow">What the 25 minutes should be about</p>
+      <h2>One quantity runs the whole problem</h2>
+      <p>You said the presentation has to be one thing. It is this, and it holds the theory and
+      the computation together:</p>
+    </div>
+
+    <div class="col" style="margin-top:20px">
+      <div class="thesis stack-sm">
+        <p class="big">The elementary counting bound <span class="mono">q = |U| − b</span> decides both
+        how good the standard industrial heuristic is, and whether any exact method can close an instance.</p>
+        <p style="font-size:.93rem;color:var(--ink-soft)">Tools that some job needs, minus what fits in
+        the magazine. One line of arithmetic. Everything else in your internship orbits it.</p>
+      </div>
+    </div>
+
+    <div class="acts">
+      <div class="act">
+        <span class="n">Act 1 — the hook</span>
+        <h3>The textbook example is wrong</h3>
+        <p>The literature's canonical bad case for the two-phase heuristic is the ring family. Under the
+        method as actually specified, every ring from <span class="mono">k=3</span> to <span class="mono">9</span>
+        has gap <b>zero</b>. The published gaps are walk gaps — one fixed magazine per group. The method's own
+        final loading step closes them.</p>
+      </div>
+      <div class="act">
+        <span class="n">Act 2 — the theory</span>
+        <h3>The gap is a price, and you can name it</h3>
+        <p>The optimum equals the cheapest walk over <em class="term">all</em> groupings. So the two-phase
+        gap is exactly what you pay for insisting on the fewest groups — nothing else. Zero-gap classes for
+        every capacity, worst-case bounds, the extremal case at three groups.</p>
+      </div>
+      <div class="act">
+        <span class="n">Act 3 — the close</span>
+        <h3>The same number stops the exact side</h3>
+        <p>Three unrelated formulations — your Benders master, your PCF′ column generation, and the
+        literature's strongest compact model — all reach exactly <span class="mono">q</span>. Where
+        <span class="mono">q</span> is tight the solver closes 94% of instances; where it is loose, 40%.</p>
+      </div>
+    </div>
+
+    <div class="col stack" style="margin-top:34px">
+      <h3>The picture the whole talk hangs on</h3>
+      <p style="font-size:.94rem;color:var(--ink-soft)">If you can draw this at the board without notes,
+      you can defend the contribution. Six jobs in a ring, magazine holds three tools.</p>
+    </div>
+
+    <div style="margin-top:16px">
+      <figure>
+        <svg viewBox="0 0 620 250" role="img" aria-label="Two groupings of the six-ring: three groups costing four insertions, four groups costing three.">
+          <defs>
+            <style>
+              .lbl{font-family:"IBM Plex Mono",monospace;font-size:11px;fill:var(--ink-soft)}
+              .cfg{font-family:"IBM Plex Mono",monospace;font-size:12px;fill:var(--ink)}
+              .hd{font-family:"IBM Plex Sans",sans-serif;font-size:12.5px;font-weight:600;fill:var(--ink)}
+              .cost{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600}
+              .box{fill:var(--surface-2);stroke:var(--rule);stroke-width:1}
+              .arr{stroke:var(--ink-faint);stroke-width:1.2;fill:none}
+              .tick{font-family:"IBM Plex Mono",monospace;font-size:10px;fill:var(--ink-faint)}
+            </style>
+            <marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="var(--ink-faint)"/>
+            </marker>
+          </defs>
+
+          <text class="hd" x="0" y="14">Fewest groups — what the heuristic is told to do</text>
+          <text class="lbl" x="0" y="32">3 configurations</text>
+          <g>
+            <rect class="box" x="0" y="44" width="112" height="34" rx="4"/>
+            <text class="cfg" x="56" y="66" text-anchor="middle">{1, 2, 3}</text>
+            <path class="arr" d="M118,61 L166,61" marker-end="url(#ah)"/>
+            <text class="tick" x="142" y="53" text-anchor="middle">+2</text>
+            <rect class="box" x="172" y="44" width="112" height="34" rx="4"/>
+            <text class="cfg" x="228" y="66" text-anchor="middle">{4, 5, 6}</text>
+            <path class="arr" d="M290,61 L338,61" marker-end="url(#ah)"/>
+            <text class="tick" x="314" y="53" text-anchor="middle">+2</text>
+            <rect class="box" x="344" y="44" width="112" height="34" rx="4"/>
+            <text class="cfg" x="400" y="66" text-anchor="middle">{1, 4, …}</text>
+            <text class="cost" x="478" y="66" fill="var(--rust)">cost 4</text>
+          </g>
+
+          <line x1="0" y1="112" x2="620" y2="112" stroke="var(--rule)" stroke-width="1"/>
+
+          <text class="hd" x="0" y="140">Best over all groupings — what the optimum actually uses</text>
+          <text class="lbl" x="0" y="158">4 configurations, each one tool apart</text>
+          <g>
+            <rect class="box" x="0" y="170" width="130" height="34" rx="4"/>
+            <text class="cfg" x="65" y="192" text-anchor="middle">{1, 2, 3}</text>
+            <path class="arr" d="M136,187 L166,187" marker-end="url(#ah)"/>
+            <text class="tick" x="151" y="179" text-anchor="middle">+1</text>
+            <rect class="box" x="172" y="170" width="130" height="34" rx="4"/>
+            <text class="cfg" x="237" y="192" text-anchor="middle">{1, 3, 4}</text>
+            <path class="arr" d="M308,187 L338,187" marker-end="url(#ah)"/>
+            <text class="tick" x="323" y="179" text-anchor="middle">+1</text>
+            <rect class="box" x="344" y="170" width="130" height="34" rx="4"/>
+            <text class="cfg" x="409" y="192" text-anchor="middle">{1, 4, 5}</text>
+            <path class="arr" d="M480,187 L510,187" marker-end="url(#ah)"/>
+            <text class="tick" x="495" y="179" text-anchor="middle">+1</text>
+            <rect class="box" x="516" y="170" width="104" height="34" rx="4"/>
+            <text class="cfg" x="568" y="192" text-anchor="middle">{1, 5, 6}</text>
+          </g>
+          <text class="cost" x="0" y="232" fill="var(--moss)">cost 3 — and this is the optimum</text>
+        </svg>
+        <figcaption>Every minimum-cardinality grouping of the 6-ring costs 4. The optimum uses one more
+        group and costs 3. That difference is the entire two-phase gap, and it is why the gap is a price
+        rather than a failure of sequencing. The heuristic's own final loading step recovers it, which is
+        why the measured heuristic gap is zero and the published walk gap is one.</figcaption>
+      </figure>
+    </div>
+
+    <div class="col stack" style="margin-top:28px">
+      <p style="font-size:.94rem"><strong>The alternative, if the jury is more applied than theoretical:</strong>
+      make Act 3 the subject and Acts 1–2 the setup. Same thesis, more measurement. Ask your advisors
+      which room you are walking into — they know the jury and you do not.</p>
+    </div>
+  </section>
+
+  <section id="scoreboard">
+    <div class="col stack">
+      <p class="eyebrow">The thing you should walk in holding</p>
+      <h2>Every question they set, and where it stands</h2>
+      <p>You feel you have nothing to show. This is the evidence otherwise. Colares and Wagler each set
+      you specific questions; here is the state of each one. Three of the answers are negative. A negative
+      answer to a well-posed question is still an answer, and you should present it as one.</p>
+    </div>
+
+    <div class="tablewrap" style="margin-top:24px">
+      <table>
+        <thead>
+          <tr><th style="width:44%">Question</th><th style="width:16%">Status</th><th>Where it is answered</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="who" colspan="3">Prof. Wagler</td></tr>
+          <tr>
+            <td>Construct worst-case examples with the number of groups fixed</td>
+            <td><span class="pill pill-yes">Answered</span></td>
+            <td>The extremal behaviour at three groups is settled exactly<span class="where">§4.4 · prop:hk3, prop:k3, prop:genk</span></td>
+          </tr>
+          <tr>
+            <td>Study the instances on which the gap is attained</td>
+            <td><span class="pill pill-yes">Answered</span></td>
+            <td>Zero-gap classes for every capacity; the smallest sub-optimal instance identified; a 420-instance census<span class="where">§4.3, §4.5 · cor:zerogap, obs:smallest, obs:census</span></td>
+          </tr>
+          <tr>
+            <td>Prove an upper bound tighter than the trivial <span class="mono">b(K*−1)</span></td>
+            <td><span class="pill pill-yes">Answered ×5</span></td>
+            <td>An unconditional guarantee plus four conditional ones<span class="where">§4.3 · thm:uncond, cor:zerogap, cor:smallZ, cor:z3, lem:transcap</span></td>
+          </tr>
+          <tr>
+            <td>Enumerate the integral solutions of the grouping problem with PORTA</td>
+            <td><span class="pill pill-part">Partial</span></td>
+            <td>Sampled, not enumerated exhaustively. Say so plainly — it is the one loose end<span class="where">§4.7</span></td>
+          </tr>
+          <tr>
+            <td>Read the grouping problem through clutters and blocking duality</td>
+            <td><span class="pill pill-neg">Answered, negatively</span></td>
+            <td>The gap cannot be recovered from the circuit clutter. <span class="mono">K*</span> is a hypergraph chromatic number; there is no matroid structure; odd rings are not ideal<span class="where">§4.6 · prop:noclutter, prop:chromK, prop:nonmatroid, prop:oddring</span></td>
+          </tr>
+
+          <tr><td class="who" colspan="3">Prof. Colares</td></tr>
+          <tr>
+            <td>Develop the configuration-based view of the problem</td>
+            <td><span class="pill pill-yes">Done</span></td>
+            <td>A schedule is a walk through magazines; it frames the whole report<span class="where">§2.5</span></td>
+          </tr>
+          <tr>
+            <td>Reduce the SSP to a generalised travelling-salesman problem</td>
+            <td><span class="pill pill-yes">Done</span></td>
+            <td>The formal content of that view, and what makes both exact methods natural<span class="where">§2.5</span></td>
+          </tr>
+          <tr>
+            <td>Branch-and-Benders-cut: lazy cuts first, fractional cuts second</td>
+            <td><span class="pill pill-neg">Both tested</span></td>
+            <td>Lazy cuts work. Fractional cuts are a clean negative: 67.5 million of them, and the bound at termination never rises on a single instance<span class="where">§5.2, §5.3, §6.4</span></td>
+          </tr>
+          <tr>
+            <td>Position-indexed formulations on a fixed polynomial row set</td>
+            <td><span class="pill pill-neg">Both built, both measured</span></td>
+            <td>PCF′ equals <span class="mono">q</span> — proved, then confirmed on all 2,114 runs. PTF can exceed <span class="mono">q</span> — proved, and observed on 3 runs of 233<span class="where">§5.4, §6.6</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col" style="margin-top:20px">
+      <p style="font-size:.94rem;color:var(--ink-soft)">Nine questions. Eight answered, one partial. Print
+      this table and put it on the table at the advisor meeting before you say anything else.</p>
+    </div>
+  </section>
+
+  <section id="worked">
+    <div class="col stack">
+      <p class="eyebrow">Sorting the pile</p>
+      <h2>What worked, and what didn't</h2>
+      <p>The report keeps everything. The presentation keeps only the left column — and one item from
+      the right, because a measured negative is worth more than a hedge.</p>
+    </div>
+
+    <div class="split" style="margin-top:24px">
+      <div class="panel">
+        <h3><span class="dot dot-y"></span>Worked — presentable</h3>
+        <ul>
+          <li><b>The frame distinction.</b> <span class="mono">H</span> and <span class="mono">H_walk</span> are different quantities and the literature conflates them. Every ring has heuristic gap zero.</li>
+          <li><b>Grouping exactness.</b> The optimum is the cheapest walk over all groupings, so the gap is exactly the price of the fewest-groups restriction.</li>
+          <li><b>Zero-gap classes and worst-case bounds</b> for every capacity, and the exact extremal behaviour at three groups.</li>
+          <li><b>The census.</b> Positive gaps are rare, always equal to one, and always need <span class="mono">b ≥ 4</span> — which independently matches the one industrial study in the literature.</li>
+          <li><b>The setup-cost spectrum theorem.</b> The SSP and the grouping problem are two ends of one parameterised model. This answers a question Burger et al. posed and left open.</li>
+          <li><b>The clutter analysis</b> — negative, but clean and well-posed.</li>
+          <li><b>The bound-limited diagnosis</b>, established four independent ways.</li>
+          <li><b>The validation itself.</b> 41,673 cross-method comparisons with zero disagreements is unusually strong for a student project.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3><span class="dot dot-n"></span>Didn't work — report only</h3>
+        <ul>
+          <li><b>Fractional Benders cuts.</b> 67.5 million generated, node count down twentyfold, bound never improved, 67 solved instances lost. <em class="term">Keep this one</em> — it is the single most convincing slide you have for the bound-limited thesis.</li>
+          <li><b>Pareto-optimal cut lifting.</b> Costs 37 instances.</li>
+          <li><b>The conflict-graph row.</b> Neutral, as predicted.</li>
+          <li><b>The Benders solver as a competitor.</b> 727 against 1,038. It is a diagnostic instrument, not a faster solver — present it that way.</li>
+          <li><b>Branch-and-price at scale.</b> Nothing above nine jobs. That is the Python pricer, not the formulation, and you must say which.</li>
+          <li><b>PTF's advantage in practice.</b> Three runs out of 233, one unit each.</li>
+          <li><b>The learned cut-selection prototype.</b> Never run on the SSP at all — it was trained on knapsack cover cuts. Leave it out of the talk entirely, or one backup slide.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="plan">
+    <div class="col stack">
+      <p class="eyebrow">24 August → 2 September</p>
+      <h2>Nine days</h2>
+      <p>The order matters. Understand the problem before the methods, your own results before the
+      literature's, and meet the advisors before you build a single slide — their feedback should shape
+      the talk, not arrive after it.</p>
+    </div>
+
+    <div class="days" style="margin-top:24px">
+
+      <div class="day pin">
+        <div class="day-when"><span class="d">Now</span><span class="w">Today</span></div>
+        <div class="day-body">
+          <h3>Send the email</h3>
+          <p>This is the only irreversible deadline in the list. The advisor meeting has to be booked
+          before anything else can be scheduled around it, and every day you wait costs you a day of
+          their calendar. Draft is at the bottom of this page. Send it before you start reading.</p>
+        </div>
+      </div>
+
+      <div class="day">
+        <div class="day-when"><span class="d">24</span><span class="w">Mon</span></div>
+        <div class="day-body">
+          <h3>The problem itself</h3>
+          <p>No methods, no formulations. Just what the SSP is and why it is hard.</p>
+          <ul class="tasks">
+            <li>Read §1 and §2.1–2.4 of your own report, slowly. It was written for a reader who knows nothing, which is the right level for today.</li>
+            <li>Read Tang &amp; Denardo (1988) properly — it is short and it is the foundation.</li>
+            <li>Draw the three-job example from Figure 1 by hand and count the insertions yourself.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="day">
+        <div class="day-when"><span class="d">25</span><span class="w">Tue</span></div>
+        <div class="day-body">
+          <h3>KTNS, the two conventions, and <span class="mono">q</span></h3>
+          <p>These three are the vocabulary of every conversation you will have.</p>
+          <ul class="tasks">
+            <li>Understand why KTNS is optimal — the exchange argument, not just the statement.</li>
+            <li>Get the empty-start and free-initial conventions straight. They differ by the initial load, and half the apparent contradictions in this field are really this.</li>
+            <li>Derive <span class="mono">q = |U| − b</span> yourself in one line. Then explain out loud why it is the weakest possible interesting bound.</li>
+            <li>Read Crama et al. (1994) §1–2: the seven assumptions and the NP-hardness proof.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="day">
+        <div class="day-when"><span class="d">26</span><span class="w">Wed</span></div>
+        <div class="day-body">
+          <h3>Your contribution</h3>
+          <p>The whole of §4. This is the day that decides whether the presentation works.</p>
+          <ul class="tasks">
+            <li>Read §2.5 (configurations, the two frames) and then all of §4, with a pen.</li>
+            <li>Be able to state the grouping-exactness theorem and its corollary from memory.</li>
+            <li>Work Example 4.x — the 6-ring at cost 3 with four groups versus cost 4 with three — until you can draw it cold.</li>
+            <li>Read Burger et al. (the printing-press study) and find the sentence about the magazine-to-job-size gap. That is your independent corroboration.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="day">
+        <div class="day-when"><span class="d">27</span><span class="w">Thu</span></div>
+        <div class="day-body">
+          <h3>Verify it yourself</h3>
+          <p>You will stop feeling like an impostor on this day. Not because someone reassures you —
+          because you watch the machine confirm the claims one at a time, in front of you.</p>
+          <ul class="tasks">
+            <li>Run <code>verification/verify_report_independent.py</code>. Twenty-five minutes, no CPLEX needed. Read every line it prints.</li>
+            <li>Run <code>verification/analyse_campaign_results.py --check</code>. It re-derives roughly a hundred figures in §6 from the raw shards.</li>
+            <li>Read <code>compute_ktns</code> in <code>src/SSP/utils.py</code>. It is short. Trace it on your Figure 1 example by hand.</li>
+            <li>Read <code>verification/VERIFIED_FACTS.md</code> and <code>LINE_BY_LINE_FINDINGS.md</code> — the record of what was wrong and how it was caught.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="day">
+        <div class="day-when"><span class="d">28</span><span class="w">Fri</span></div>
+        <div class="day-body">
+          <h3>The compact models</h3>
+          <p>Three formulations from the literature, and the single fact that they share.</p>
+          <ul class="tasks">
+            <li>Laporte, Salazar-González &amp; Semet §2.2 — the LSS model and why Tang &amp; Denardo's own relaxation is identically zero.</li>
+            <li>Catanzaro et al. §3 — the F-family, the total-unimodularity argument, the 0-blocks reading.</li>
+            <li>da Silva et al. — the multicommodity flow model, and their proof that its relaxation equals the counting bound. This is the paper your strongest baseline reimplements.</li>
+            <li>Then say out loud: three independent formulations, one bound. That is the talk's closing line.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="day">
+        <div class="day-when"><span class="d">29</span><span class="w">Sat</span></div>
+        <div class="day-body">
+          <h3>Your own methods, in code</h3>
+          <p>You built these. Today you read them as if someone else had.</p>
+          <ul class="tasks">
+            <li>Skim the Rahmaniani et al. Benders survey — the taxonomy section only. Learn what a lazy cut, a Pareto-optimal cut and a core point are.</li>
+            <li>Open <code>src/BBC/branch_and_benders_cut_cplex.py</code>. Find the master problem. Find the coverage row <span class="mono">θ ≥ |U|</span>. Understand why its absence wrecked the first campaign.</li>
+            <li>Open <code>src/BNP/pcf_prime_bp.py</code>. Identify what a column is, what the pricing problem is, and why it is a set-union knapsack.</li>
+            <li>Read §5 of the report against the code as you go.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="day">
+        <div class="day-when"><span class="d">30</span><span class="w">Sun</span></div>
+        <div class="day-body">
+          <h3>Build the long version</h3>
+          <p>The advisor meeting is not the jury talk. It is longer, it covers everything, and its
+          job is to find out what they think matters.</p>
+          <ul class="tasks">
+            <li>Assemble the advisor deck from the report's own structure — §4, then §5, then §6.</li>
+            <li>Put the question scoreboard on slide two.</li>
+            <li>Write down every question you cannot answer. Bring the list. Asking it is not weakness; arriving without it is.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="day pin">
+        <div class="day-when"><span class="d">31</span><span class="w">Mon</span></div>
+        <div class="day-body">
+          <h3>Meet Colares, Wagler and Chicoisne</h3>
+          <p>Present everything, long form. Ask them two things directly: which single result should
+          carry the jury talk, and whether the frame distinction is worth writing up. Take notes on
+          what they push back on — that is your Q&amp;A preparation, free.</p>
+        </div>
+      </div>
+
+      <div class="day">
+        <div class="day-when"><span class="d">1</span><span class="w">Tue</span></div>
+        <div class="day-body">
+          <h3>Cut it to 25 minutes</h3>
+          <p>From roughly 40 slides to roughly 15. Build it around whatever they told you yesterday.</p>
+          <ul class="tasks">
+            <li>Rough shape: 4 min problem · 4 min the frame surprise · 7 min the gap theory · 6 min the measurement · 2 min what it means · 2 min next.</li>
+            <li>Every slide gets one sentence you say out loud. If you cannot say it, cut the slide.</li>
+            <li>Build the backup slides: the ablation table, the fractional-cut result, the failed runs, the RL prototype. Twenty minutes of questions will reach them.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="day">
+        <div class="day-when"><span class="d">2</span><span class="w">Wed</span></div>
+        <div class="day-body">
+          <h3>Rehearse, then present</h3>
+          <p>Twice out loud with a timer, standing. Then the 6-ring at the board once more, from
+          memory, because that is the one thing you may well be asked to draw.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="reading">
+    <div class="col stack">
+      <p class="eyebrow">Everything below is already on your disk</p>
+      <h2>What to read, and what to take from it</h2>
+      <p>You have far more papers than you need. These are the ones that will come up. Note that
+      <code>references/Useless/</code> is misnamed — several of the important ones are duplicated in there.</p>
+    </div>
+
+    <div class="col tier" style="margin-top:26px">
+      <div class="tier-head">
+        <h3>Read properly</h3>
+        <span class="tier-note">Five papers. A jury question will land on one of these.</span>
+      </div>
+      <div class="papers">
+        <div class="paper">
+          <span class="t">Tang &amp; Denardo (1988) — the KTNS rule</span>
+          <span class="f">references/ref- tang, denardo.pdf</span>
+          <span class="x">The optimality theorem for loading at a fixed order, and the pairwise lower bound your Benders master uses. Also the source of the fact that their own relaxation is identically zero.</span>
+        </div>
+        <div class="paper">
+          <span class="t">Crama, Kolen, Oerlemans &amp; Spieksma (1994)</span>
+          <span class="f">references/ref - Minimizing the number of tool switches on a flexible machine - Crama.pdf</span>
+          <span class="x">The seven assumptions that define the problem, and NP-hardness for every fixed capacity ≥ 2. Also: KTNS fails under non-uniform tool costs while the loading LP stays exact — which is why your Benders subproblem extends to that regime and the compact models do not.</span>
+        </div>
+        <div class="paper">
+          <span class="t">Laporte, Salazar-González &amp; Semet (2004) — LSS</span>
+          <span class="f">references/ref - laporte, salazar.pdf</span>
+          <span class="x">One of your three baselines, and the branch-and-cut it sits in. Read §2.2 for the formulation and the valid inequalities.</span>
+        </div>
+        <div class="paper">
+          <span class="t">Catanzaro, Gouveia &amp; Labbé (2015) — the F-family</span>
+          <span class="f">references/ref - catanzaro.pdf</span>
+          <span class="x">Your <span class="mono">CATZ-F4</span> baseline. Read §3 including the total-unimodularity argument. Know that they recommend F5 and you implemented F4 — the jury may ask, and §7.3 already concedes it.</span>
+        </div>
+        <div class="paper">
+          <span class="t">da Silva et al. — the multicommodity flow model</span>
+          <span class="f">references/To read/SSPMF.pdf</span>
+          <span class="x">The strongest method in your campaign, and the paper that proves its relaxation equals the counting bound. This is the single most important paper for Act 3 of your talk.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col tier" style="margin-top:34px">
+      <div class="tier-head">
+        <h3>Read the abstract and the results</h3>
+        <span class="tier-note">Skim the rest. You need to know what they say, not how they prove it.</span>
+      </div>
+      <div class="papers">
+        <div class="paper">
+          <span class="t">Burger et al. — colour printing, the industrial study</span>
+          <span class="f">references/printing2.pdf</span>
+          <span class="x">Your independent corroboration. Find where they say solution quality degrades as the magazine grows relative to the largest job — that is your census result, arrived at from a factory instead of a computer. They also pose the question your setup-cost theorem answers.</span>
+        </div>
+        <div class="paper">
+          <span class="t">Mecler et al. — hybrid genetic search</span>
+          <span class="f">references/To read/1910.10021v1.pdf</span>
+          <span class="x">The state of the art heuristic, and the source of the warm start in your <span class="mono">+H</span> configuration — the one strengthening that helped.</span>
+        </div>
+        <div class="paper">
+          <span class="t">Calmels — the SSP survey</span>
+          <span class="f">references/ref - SSP-SOTA-Survey- Calmels, Dorothea.pdf</span>
+          <span class="x">Your map of the field. Read §4's classification table. If a jury member names a paper you have never heard of, it is in here.</span>
+        </div>
+        <div class="paper">
+          <span class="t">Colares — the GTSP reduction preprint</span>
+          <span class="f">references/formal-def-ssp.pdf</span>
+          <span class="x">Your own advisor's framing of the problem, and the origin of the configuration view. Read it before you meet him.</span>
+        </div>
+        <div class="paper">
+          <span class="t">Otiai — branch-and-price for the grouping problem</span>
+          <span class="f">references/felipe-thesis.pdf</span>
+          <span class="x">The instance collection you benchmark on, and the contrast case: for the grouping problem the set-covering relaxation is strong; for the SSP it is not. Chapters 2–4.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col tier" style="margin-top:34px">
+      <div class="tier-head">
+        <h3>Only if the days allow</h3>
+        <span class="tier-note">Background. Nobody will fail you for not having read these.</span>
+      </div>
+      <div class="papers">
+        <div class="paper">
+          <span class="t">Rahmaniani et al. — the Benders survey</span>
+          <span class="x">Taxonomy section only. Lazy cuts, Pareto-optimal cuts, core points, initial cut pools — the vocabulary of your §5.3.</span>
+        </div>
+        <div class="paper">
+          <span class="t">Lübbecke &amp; Desrosiers — column generation primer</span>
+          <span class="x">If branch-and-price still feels like a black box after Saturday, read this first and then re-read your own §5.4.</span>
+        </div>
+        <div class="paper">
+          <span class="t">Wolsey — <em>Integer Programming</em></span>
+          <span class="f">references/Integer Programming __ {Wolsey, Laurence} latest.pdf</span>
+          <span class="x">Reference, not reading. Chapters on branch-and-bound, cutting planes and Lagrangian duality if any of §2.8 does not land.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="drills">
+    <div class="col stack">
+      <p class="eyebrow">With a pen, no notes, no slides</p>
+      <h2>Seven things you must be able to do at the board</h2>
+      <p>Reading alone will not remove the fear. These will. If you can do all seven cold, there is no
+      question in that room you cannot take a decent run at.</p>
+    </div>
+
+    <div class="drills col" style="margin-top:24px">
+      <div class="drill"><p><b>Run KTNS on the three-job example</b> and get four insertions.
+        <span class="why">Tests: do you actually understand the loading rule, or only its name.</span></p></div>
+      <div class="drill"><p><b>Draw the 6-ring, group it two ways, and get 4 and 3.</b>
+        <span class="why">Tests: the contribution. If you can only do one drill, do this one.</span></p></div>
+      <div class="drill"><p><b>Derive <span class="mono">q = |U| − b</span> in one line</b> and say why it is valid.
+        <span class="why">Tests: the quantity the whole talk is about.</span></p></div>
+      <div class="drill"><p><b>Sketch why KTNS is optimal</b> — the exchange argument, two sentences.
+        <span class="why">Tests: the one classical proof you will be expected to know.</span></p></div>
+      <div class="drill"><p><b>State the grouping-exactness theorem</b> and both directions of its proof idea.
+        <span class="why">Tests: your own main theorem. Not knowing it would be the worst moment of the day.</span></p></div>
+      <div class="drill"><p><b>Explain a Benders cut here in two sentences</b> — what the master decides, what the subproblem returns, why the master's bound is <span class="mono">q</span>.
+        <span class="why">Tests: whether you can defend the method you spent months building.</span></p></div>
+      <div class="drill"><p><b>Say what a column is in PCF′</b> and what the pricing problem asks for.
+        <span class="why">Tests: the branch-and-price half. Colares will ask this one.</span></p></div>
+    </div>
+  </section>
+
+  <section id="questions">
+    <div class="col stack">
+      <p class="eyebrow">Twenty minutes is a long time</p>
+      <h2>What they will ask, and what is true</h2>
+      <p>None of these answers requires you to overstate anything. Every one of them is defensible
+      from the report as it stands.</p>
+    </div>
+
+    <div class="qa col" style="margin-top:20px">
+      <div class="qi">
+        <p class="q">Your solver doesn't beat the state of the art. So what is the contribution?</p>
+        <p class="a">The contribution is the <b>reason</b> it doesn't, established four independent ways.
+        Three unrelated formulations reach exactly the same elementary bound. The search is not the
+        bottleneck — where the bound is loose, the solver already holds the optimum two-thirds of the
+        time and cannot certify it. Every strengthening aimed at the bound made things worse; only the
+        one aimed at the incumbent helped. That result rules out a family of approaches, which is worth
+        knowing before someone spends a year on it.</p>
+      </div>
+      <div class="qi">
+        <p class="q">How do you know these numbers are right?</p>
+        <p class="a">An independent verification program that shares no code with the solvers reproduces
+        every quantitative claim. Across 41,673 pairs of methods that both proved an optimum, none
+        disagreed. The loading rule is checked against an exact dynamic program on 83,670 instance-and-sequence
+        pairs. Two analysis errors were caught this way and both are documented in the report rather
+        than quietly fixed.</p>
+      </div>
+      <div class="qi">
+        <p class="q">Isn't the ring counterexample already known?</p>
+        <p class="a">The example is known; the gap reported for it is a <b>walk</b> gap. Under the
+        two-phase method as actually specified — group, sequence, then re-optimise the loading across
+        the whole flattened order — every ring from <span class="mono">k=3</span> to <span class="mono">9</span>
+        has gap zero. The standard method is better than the standard model of it. That distinction is
+        what makes the rest of the analysis correct.</p>
+      </div>
+      <div class="qi">
+        <p class="q">Why did the PORTA enumeration not finish?</p>
+        <p class="a">It was sampled rather than enumerated exhaustively. Say exactly that. It is the one
+        question your advisors set that does not have a complete answer, and pretending otherwise is far
+        more damaging than the gap itself.</p>
+      </div>
+      <div class="qi">
+        <p class="q">Why is the branch-and-price so slow?</p>
+        <p class="a">Because it is Python with a Python pricer, benchmarked against models compiled into
+        CPLEX. Its solve counts are a lower bound on what the formulations can do and the report says so.
+        The quantity it reports that is free of that problem is the root relaxation, which is why every
+        conclusion drawn from it rests on the bound and not on solve counts.</p>
+      </div>
+      <div class="qi">
+        <p class="q">What would you do next?</p>
+        <p class="a">Window inequalities — charging <span class="mono">|∪T_j| − b</span> over sets of
+        consecutive jobs, which generalises the pairwise and triplet rows in one family. That is the only
+        direction the measurements point to. And the open problem: is the excess of the PTF relaxation
+        over <span class="mono">q</span> bounded by a constant? If it is not, that construction becomes
+        worth pursuing.</p>
+      </div>
+      <div class="qi">
+        <p class="q">How much of this did you do yourself?</p>
+        <p class="a">The report already answers this in §9 and §1.3 — the research directions were set by
+        your advisors, each attributed by name, and the use of AI tools is declared. You do not need a
+        better answer than the honest one. What you need is to be able to <b>defend every claim on every
+        slide</b>, because that is what actually distinguishes understanding from transcription — and that
+        is precisely what the nine days above are for. Do the drills and this question stops being
+        frightening.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="email">
+    <div class="col stack">
+      <p class="eyebrow">Send this today, before you read anything</p>
+      <h2>The email</h2>
+      <p>Short. No long apology — a paragraph of explanation reads worse than a line. Lead with the
+      results, because that is what changes the tone of the reply.</p>
+    </div>
+
+    <div class="col" style="margin-top:22px">
+      <div class="email">
+        <p class="subj"><b>To</b> Rafael Colares, Annegret Wagler · <b>Cc</b> Renaud Chicoisne<br>
+        <b>Subject</b> SSP internship — campaigns finished, could we meet this week?</p>
+        <div class="body">
+          <p>Dear Prof. Colares, dear Prof. Wagler,</p>
+          <p>My apologies for the long silence. The cluster campaigns have now finished and I have
+          written up everything, so I would like to show you where the work stands.</p>
+          <p>Three results in short. First, the two-phase heuristic admits two different readings that the
+          literature does not separate, and under the method as actually specified the ring family has no
+          gap at all — the published gaps are walk gaps. Second, the optimum equals the cheapest walk over
+          all groupings, so the two-phase gap is exactly the price of using the fewest groups; this gives
+          zero-gap classes for every capacity and several bounds tighter than the trivial one. Third, the
+          campaign shows the coverage bound decides everything on the exact side: the Benders solver closes
+          94% of the instances where the bound is tight and 40% where it is not, and the position–configuration
+          relaxation equals that bound on every one of 2,114 runs.</p>
+          <p>The fractional Benders cuts did not work. They are generated in very large numbers and never
+          improve the bound at termination, which I think is itself worth reporting.</p>
+          <p>The report is attached. Could we meet this week, before the presentation on 2 September? I
+          would like to go through all of it with you and hear which result you think should carry the
+          jury talk. I also have a list of questions I could not answer on my own.</p>
+          <p>Best regards,<br>Shankar</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col stack" style="margin-top:24px">
+      <p style="font-size:.94rem;color:var(--ink-soft)">Two things not to do. Do not explain the vacation
+      at length — one clause if at all, and only if asked. And do not open with an apology for the work;
+      you have nine questions answered out of nine asked, and the tone of the email should match that
+      rather than contradict it.</p>
+    </div>
+  </section>
+
+  <footer class="col">
+    <p>Built from the report at <span class="mono">report/rebuild/</span>, the campaign record at
+    <span class="mono">verification/CAMPAIGN_RESULTS_2026-08-24.md</span>, and the attribution notes in
+    <span class="mono">verification/ATTRIBUTION.md</span>. Every figure quoted here is reproduced by
+    <span class="mono">verification/analyse_campaign_results.py --check</span>.</p>
+  </footer>
+
+</div>

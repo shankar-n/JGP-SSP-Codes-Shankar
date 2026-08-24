@@ -53,24 +53,34 @@ $16$ gigabytes of memory and a one-hour limit.
 \subsection{Reproducing the numbers in Section~\ref{sec:comp}}\label{ssec:repro-numbers}
 
 Every table in Section~\ref{sec:comp} is computed from the raw per-instance result
-files by a single analysis pass, which reads the shards, keys each row by the pair
-(family, instance), and derives:
+files by a single analysis pass, which reads the shards, keys each row by the
+five-part identifier (family, file name, jobs, tools, capacity), and derives:
 
 \begin{itemize}[topsep=3pt,itemsep=1pt]
-  \item the solved and attempted counts of Table~\ref{tab:solves}, per family and in
-  total;
-  \item the cross-method agreement check, comparing the evaluated cost of the returned
-  sequence across every pair of methods that both solved an instance;
+  \item the solved counts of Table~\ref{tab:solves}, per family and in total, against
+  the number of runs that returned a result;
+  \item the cross-method agreement check, comparing the empty-start cost of the
+  returned sequence across every pair of methods that both solved an instance;
   \item the shifted geometric mean times of Table~\ref{tab:times}, on the subset that
   all compared configurations solve;
   \item the fractional-cut comparison of Table~\ref{tab:frac} and the ablation of
   Table~\ref{tab:ablation}, each on the instances that both compared configurations
   attempted;
-  \item the coverage-bound split of Table~\ref{tab:tightness}, by testing whether the
-  known optimum equals the number of tools in the empty-start cost.
+  \item the coverage-bound split of Table~\ref{tab:tightness}, by reading each instance
+  file, counting the tools $\lvert\U\rvert$ that some job actually requires, and testing
+  whether the known optimum equals $\lvert\U\rvert$ in the empty-start cost;
+  \item the branch-and-price table and root-bound counts of
+  Section~\ref{ssec:results-bnp}, from the separate result files of the prototypes.
 \end{itemize}
 
-Because comparisons are made on common subsets rather than on absolute counts, the
-analysis is insensitive to which runs happened to complete, which is what makes the
-conclusions of Section~\ref{sec:disc} robust to the incomplete denominators noted in
-Section~\ref{ssec:results-solved}.
+Two points of the key deserve emphasis, because getting either wrong changes the
+conclusions. The capacity must be part of the identifier: the Crama collection reuses
+file names across four capacities, and keying on the name alone merges rows from
+different instances and manufactures cross-method disagreements that do not exist. And
+the coverage bound must be computed from $\lvert\U\rvert$ rather than from the tool
+count declared in the instance file, because ten instances of the collection declare a
+tool that no job requires.
+
+Comparisons are made on common subsets rather than on absolute counts wherever the
+denominators differ, which is what makes the conclusions of Section~\ref{sec:disc}
+insensitive to the runs lost as described in Section~\ref{ssec:validation}.

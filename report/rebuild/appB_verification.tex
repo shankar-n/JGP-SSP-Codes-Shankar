@@ -87,6 +87,18 @@ objects they were really about. That is the characteristic failure mode this app
 exists to catch, and it is the reason the verification does not assume the results it
 checks.
 
+A third finding concerns the campaign analysis rather than the structural results, and
+is recorded in Section~\ref{ssec:validation} and Appendix~\ref{app:repro}. An earlier
+version of that analysis identified an instance by its family and file name. The Crama
+collection reuses file names across four magazine capacities, so rows describing
+different instances were merged, and the merge produced apparent disagreements between
+methods. With the capacity included in the identifier the disagreements vanish: all
+$41{,}673$ pairs agree. The same version also computed the coverage bound from the tool
+count declared in the instance file, which is wrong on the ten instances that declare a
+tool no job requires. Neither error was in a solver. Both were in the code that reads
+the results, which is the part least likely to be checked and, on this evidence, the
+part most worth checking.
+
 \subsection{Running it}\label{ssec:verify-running}
 
 The program is \texttt{verification/verify\_report\_independent.py} in the repository.

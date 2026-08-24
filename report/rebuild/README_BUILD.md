@@ -81,10 +81,46 @@ Every change traces to a finding in `verification/`. The substantive ones:
 10. **Appendix B is new**: it describes the verification programme, so the AI
     declaration is checkable rather than asserted.
 
+## Revision of 2026-08-24 — the finished campaigns
+
+All three campaigns completed. Every number in §6 is now from a finished run, and every
+one of them is re-derivable by `verification/analyse_campaign_results.py --check`, which
+reads the raw shards and compares what it computes against what the report states.
+
+1. **§6 is rewritten again, from the complete BBC campaign**: 1,421 instances (Crama was
+   wrongly counted as 40 rather than 160), 12 configurations including `CATZ-F4`,
+   16,994 runs. New solve table, new times table, new fractional-cut and ablation tables.
+
+2. **Cross-method agreement is now a measured result**: 41,673 pairwise comparisons on
+   999 instances, zero disagreements. §6.2 explains what had to be right for that check
+   to mean anything — the instance key must include the capacity, because Crama reuses
+   file names across four of them.
+
+3. **§6.6 is written from scratch.** It said the branch-and-price runs were in progress.
+   They are in: 2,581 runs, and the result that matters is that the PCF′ root LP equals
+   the coverage bound on all 2,114 runs where it was recorded, while PTF exceeds it on
+   three of 233. Proposition on PCF confirmed empirically; the PTF proposition confirmed
+   and shown to be of little practical use as it stands.
+
+4. **New open problem** (§5.4): is the excess of the PTF relaxation over `q` bounded by a
+   constant? The measurement raises it and cannot answer it.
+
+5. **§5.5 gains its measurement** — the learned cut-selection agent beats random selection
+   by 46–73% on held-out knapsack instances — together with an explicit statement, kept
+   in three places, that this is knapsack cover cuts and says nothing about the SSP.
+   §7.3 previously claimed SSP runs were in progress. They never existed.
+
+6. **A tool-counting correction.** Ten instances declare a tool that no job requires, so
+   the coverage bound is `|U| − b` and not `|T| − b`. All coverage figures use `|U|`.
+
+7. **Failed runs are reported rather than hidden.** 427 of 16,994 returned nothing, 352 of
+   them LSS crashes concentrated on one family, so the LSS row is flagged as running on a
+   smaller and harder denominator than the rest.
+
 ## Still open
 
 - Page limits or a departmental template, if any.
-- Whether §5.5 (the RL prototype) should stay at its current length.
+- `Calmels2018` — the entry says 2018, but volume 57 is 2019.
 - How to cite `Colares2026Exact` — Moreira's bibliography lists it as personal
   communication, 2024.
-- Running PCF′ and PTF under the uniform protocol; §6.6 records their absence.
+- Catanzaro's F5 was never implemented; F4 is the baseline, and §7.3 records it.

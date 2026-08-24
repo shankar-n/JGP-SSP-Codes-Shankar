@@ -1,6 +1,6 @@
 # PROJECT STATE — read this first on any new session
 
-**Last updated:** 2026-08-20
+**Last updated:** 2026-08-24
 **Task:** rebuild `report/JGP-SSP_report.tex` end to end — correct, provenance-checked, in Shankar's voice.
 **Deadline context:** presentation 2 September 2026. Report submitted to the university (comprehensive; length is not a constraint). Presentation must be concise.
 
@@ -41,16 +41,38 @@ All live in `verification/` on Shankar's machine.
 
 ---
 
-## The campaign (new protocol) — landed 2026-08-20
+## The campaigns — ALL THREE FINISHED, analysed 2026-08-24
 
-`src/BBC/results/`, 110 shards, ~13,800 rows, still being written when last read. **Re-read before quoting; numbers will move.**
+Full record in `CAMPAIGN_RESULTS_2026-08-24.md`. Re-derivable at any time with
+`python3 verification/analyse_campaign_results.py --check`, which recomputes every
+figure in §6 from the raw shards and compares it against what the report says. It
+passes.
 
-- Fractional Benders cuts now fire: 61,028,468 in `BBC-LP+F`, 0 in the non-F configs.
-- They make it worse: 628 solved vs 697 for `BBC-LP` on 1,247 common instances. Dual bound strictly higher on **3 of 1,247**.
-- Ablation vs `BBC-LP+F`: `+H` (HGS warm start) **+29**; `+C` −2; `+ACC` −7; `+P` (Papadakos) **−37**.
-- Solved counts (mid-flight): SSPMF 852/901, LSS 803/1235, BBC-K 701/1301, BBC-LP+T 701/1301, BBC-LP 699/1301.
+**BBC** — 120 shards, 16,994 runs, 12 configurations, 1,421 instances.
+Cross-method agreement: 41,673 pairwise comparisons, **0 disagreements**.
+Solved: SSPMF 1038, CATZ-F4 885, LSS 844 (of only 1,069 — see below), BBC-LP+T 727,
+BBC-LP 726, BBC-K 725, then every `+F` variant below that.
+Fractional cuts: 67.5M generated, node count down 20×, dual bound at termination
+**higher on 0** instances, 67 solved instances lost.
+Ablation vs `BBC-LP+F`: `+H` +31, `+C` −2, `+ACC` −3, `+P` −37, removing `+F` **+67**.
+Coverage-bound split: BBC-LP 94% tight vs 40% loose; SSPMF 100% vs 87%.
+427 runs failed; 352 of them LSS crashes, 239 on Laporte5, so LSS's rate is on a
+biased subset and is flagged as not comparable.
 
-**Reading:** the bound-limited diagnosis is now measured, not inferred. Only primal improvements help.
+**BNP** — 32 shards, 2,581 runs, 7 configurations, 469 instances. 507 proved optima,
+**0 mismatches** against BBC. The result worth having: **PCF′ root LP = |U| − b on all
+2,114 runs**, and **PTF exceeds it on 3 of 233** (A0-0, L11-6, L11-7, by one unit).
+Nothing above 9 jobs closed — Python pricer, not the formulation.
+
+**RL** — `src/BBC/rl_results/`, 6 sizes, one seed each. This is a **knapsack cover-cut**
+study, not an SSP evaluation. Learned selection beats random by 46–73%. Reported as
+such in §5.5 with the limits stated; §7.3 no longer claims SSP runs exist.
+
+**Two analysis bugs found and fixed before anything was written down** (both in the
+reading code, not a solver): the instance key must include the capacity (Crama reuses
+file names across four capacities — keying without it manufactures disagreements), and
+the coverage bound must use |U| not |T| (10 instances declare a tool no job needs).
+Both are now documented inside the report, §6.2 / App. B / App. C.
 
 ---
 
@@ -100,10 +122,33 @@ Remark 4.2 states the spectrum in terms of the parameter instead.
 It is committed to `report/rebuild/` rather than over `report/`, so the previous
 version is untouched. Move it when ready.
 
+## Report updated with the finished campaigns — 2026-08-24
+
+Sections rewritten: abstract, §5.4, §5.5, all of §6, §7.1, §7.3, §8, Appendix B,
+Appendix C. §6.6 (branch-and-price results) written from scratch — it was a placeholder
+saying the runs were in progress. The full change list is the last table in
+`CAMPAIGN_RESULTS_2026-08-24.md`.
+
+Build: 78 pages, 0 errors, 0 overfull boxes, 0 undefined references or citations, all
+Type 1 Latin Modern fonts (`lmodern` must be installed — without it pdflatex silently
+falls back to Type 3 bitmaps and the text looks washed out on screen).
+
 ## Next action
 
-Superseded: the full report is written (see above). The original sample of §2.3–2.4 (`sample_ch2.tex`, `sample_ch2_preview.pdf`) — this is the section that fixes the frame error, and it is the template for voice, level of explanation, and figure idiom.
+The report is complete and submittable. What is left is not writing:
 
-Next: draft the rest of Chapter 2 (2.1 SSP and notation, 2.2 KTNS, 2.5 configurations and the GTSP view, 2.6 the two lower bounds, 2.7 cost conventions, 2.8 the expanded integer-programming background) plus the notation table, all in the same register and styling.
+1. **Check `Calmels2018`.** The entry says 2018; volume 57 is 2019.
+2. **Decide how to cite `Colares2026Exact`.** Moreira lists it as personal
+   communication, 2024. Ask Colares.
+3. **Read §6 once yourself before submitting** — it is the section the advisors will
+   test you on, and every number in it is now defensible: run
+   `python3 verification/analyse_campaign_results.py --check` and it re-derives all of
+   them from the shards.
+4. The presentation for 2 September still has to be built, and it is the opposite job:
+   §6.5 (the coverage-bound split) and §6.6 (PCF′ = q on 2,114 runs) are the two slides
+   that carry the whole story.
 
-To preview a fragment in this container: `/tmp/smp/prev.tex` is a harness with the report's preamble (palette included); `\input{body}` where `body.tex` is the fragment. Compile with `pdflatex -interaction=nonstopmode prev.tex` twice. Note `lmodern` is absent in the container and `microtype` needs `[protrusion=false,expansion=false]` — neither change applies to the real report, only the preview harness.
+To preview a fragment in a container: a harness with the report's preamble (palette
+included) and `\input{body}`; compile with `pdflatex -interaction=nonstopmode` twice.
+`microtype` may need `[protrusion=false,expansion=false]` in a preview harness — that
+change never applies to the real report.

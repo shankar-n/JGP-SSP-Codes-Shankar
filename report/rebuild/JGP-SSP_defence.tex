@@ -1,0 +1,549 @@
+%==============================================================================
+%  Internship defence -- 25 minutes + 20 minutes of questions
+%  Job Sequencing and Tool Switching Problem, LIMOS
+%
+%  Styling deliberately matches the report: Latin Modern, monochrome, grayscale
+%  TikZ fills, no decoration.  One accent used only for the results that are new.
+%==============================================================================
+\documentclass[11pt,aspectratio=169]{beamer}
+
+\usetheme{default}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{itemize subitem}{--}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{fit,positioning,arrows.meta}
+
+% ---- palette: the report's grayscale, with one accent for what is new ---------
+\definecolor{cInk}{HTML}{111111}
+\definecolor{cGrey}{HTML}{666666}
+\definecolor{cLight}{HTML}{DDDDDD}
+\definecolor{cAccent}{HTML}{123E63}
+\definecolor{cRule}{HTML}{BBBBBB}
+
+\setbeamercolor{structure}{fg=cInk}
+\setbeamercolor{frametitle}{fg=cInk}
+\setbeamercolor{normal text}{fg=cInk}
+\setbeamercolor{alerted text}{fg=cAccent}
+\setbeamerfont{frametitle}{series=\bfseries,size=\large}
+\setbeamerfont{framesubtitle}{size=\small,shape=\itshape}
+\setbeamercolor{framesubtitle}{fg=cGrey}
+
+\setbeamertemplate{frametitle}{%
+  \vspace{0.7em}%
+  \usebeamerfont{frametitle}\insertframetitle\par
+  {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle\par}%
+  \vspace{-0.2em}{\color{cRule}\rule{\textwidth}{0.4pt}}%
+}
+\setbeamertemplate{footline}{%
+  \hfill{\color{cGrey}\scriptsize\insertframenumber\,/\,\inserttotalframenumber}\hspace{1.2em}\vspace{0.6em}%
+}
+
+\newcommand{\Zst}{Z^{*}}
+\newcommand{\Kst}{K^{*}}
+\newcommand{\U}{\mathcal{U}}
+\newcommand{\Hwalk}{H_{\mathrm{walk}}}
+\newcommand{\new}[1]{{\color{cAccent}#1}}
+\newcommand{\keyline}[1]{\vspace{0.4em}{\color{cRule}\rule{\textwidth}{0.4pt}}\vspace{0.3em}\par#1}
+
+\title{\bfseries Job Sequencing and Tool Switching}
+\subtitle{What limits an exact method, and where the limit comes from}
+\author{Shankar}
+\institute{\small LIMOS --- Université Clermont Auvergne\\[0.3em]
+  \scriptsize Advisors: Prof.\ Rafael Colares, Prof.\ Annegret Wagler\\
+  \scriptsize Academic supervisor: Dr.\ Renaud Chicoisne}
+\date{2 September 2026}
+
+\begin{document}
+
+%------------------------------------------------------------------ title
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+%------------------------------------------------------------------ thesis
+\begin{frame}{One quantity runs the whole problem}
+\vspace{1em}
+\begin{center}
+\begin{minipage}{0.86\textwidth}
+\large
+One line of arithmetic --- the tools some job needs, minus what fits in the magazine ---
+\[
+  \new{q \;=\; |\U| - b}
+\]
+decides \emph{both} how good the standard industrial heuristic is,
+\emph{and} whether any exact method can close an instance.
+\end{minipage}
+\end{center}
+\vspace{1.2em}
+\keyline{}
+\begin{columns}[T]
+\column{0.31\textwidth}
+{\footnotesize\textbf{1. The heuristic}\\[0.3em]
+\color{cGrey} The textbook worst case is not a worst case. The gap is a price, and the
+price can be named.}
+\column{0.31\textwidth}
+{\footnotesize\textbf{2. The exact methods}\\[0.3em]
+\color{cGrey} Three unrelated formulations all stop at $q$. Measured, not conjectured.}
+\column{0.31\textwidth}
+{\footnotesize\textbf{3. What to do about it}\\[0.3em]
+\color{cGrey} Why every inequality we have is too local, and a family that is not.}
+\end{columns}
+\end{frame}
+
+%------------------------------------------------------------------ problem
+\begin{frame}{The problem}{One machine, many tools, a magazine that holds only a few}
+\vspace{0.2em}
+\centering
+\begin{tikzpicture}[
+   font=\small, >=Stealth, scale=0.92, every node/.style={transform shape},
+   job/.style={draw=cInk!70, fill=white, rounded corners, semithick,
+               minimum width=2.6cm, minimum height=0.95cm, align=center},
+   chip/.style={draw=cInk!25, rounded corners=1pt, minimum size=0.68cm,
+                inner sep=0pt, font=\bfseries\small, fill=cLight},
+   swaparr/.style={->, line width=1pt, cInk}]
+  \node[job] (j1) at (0,1.9)   {\textbf{job 1} needs\\ $a$, $b$};
+  \node[job] (j2) at (4.6,1.9) {\textbf{job 2} needs\\ $b$, $c$};
+  \node[job] (j3) at (9.2,1.9) {\textbf{job 3} needs\\ $c$, $d$};
+  \node[chip] (m1a) at (-0.40,0) {$a$};  \node[chip] (m1b) at (0.40,0) {$b$};
+  \node[chip] (m2a) at (4.20,0) {$b$};   \node[chip] (m2b) at (5.00,0) {$c$};
+  \node[chip] (m3a) at (8.80,0) {$c$};   \node[chip] (m3b) at (9.60,0) {$d$};
+  \node[draw=cInk!45, rounded corners, fit=(m1a)(m1b), inner sep=2.5pt] (m1) {};
+  \node[draw=cInk!45, rounded corners, fit=(m2a)(m2b), inner sep=2.5pt] (m2) {};
+  \node[draw=cInk!45, rounded corners, fit=(m3a)(m3b), inner sep=2.5pt] (m3) {};
+  \draw[->,cInk!45] (j1) -- (m1); \draw[->,cInk!45] (j2) -- (m2); \draw[->,cInk!45] (j3) -- (m3);
+  \draw[swaparr] (m1) -- (m2) node[midway,above,font=\scriptsize,align=center]{swap\\$-a$, $+c$};
+  \draw[swaparr] (m2) -- (m3) node[midway,above,font=\scriptsize,align=center]{swap\\$-b$, $+d$};
+  \node[font=\scriptsize,text=cGrey] at (4.6,-1.0) {the magazine holds only $b=2$ tools at a time};
+\end{tikzpicture}
+\vspace{0.4em}
+\keyline{}
+\begin{itemize}\itemsep2pt
+\small
+  \item Each stop costs production time, and a cell running thousands of parts a day
+  repeats it constantly. Same structure in circuit assembly, colour printing, picking.
+  \item \textbf{Choose the order of the jobs and the loading at each step} so that the
+  total number of tool insertions is smallest.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------ two decisions
+\begin{frame}{Two decisions that behave completely differently}
+\vspace{0.8em}
+\begin{columns}[T]
+\column{0.47\textwidth}
+\textbf{Loading is easy.}\\[0.5em]
+{\small For a \emph{fixed} order, the cheapest policy is known in closed form:
+\emph{Keep Tool Needed Soonest} (Tang \& Denardo, 1988). When a tool must go into a
+full magazine, remove the one whose next use is furthest away.\\[0.6em]
+Optimal, and $O(n|T|)$.}
+\column{0.47\textwidth}
+\textbf{Ordering is hard.}\\[0.5em]
+{\small NP-hard for every fixed capacity $b \ge 2$ (Crama et al., 1994).\\[0.6em]
+A good order puts jobs with similar requirements next to each other --- but ``similar''
+means only \emph{overlapping sets}, with no natural distance, and the magazine limit
+couples jobs that sit far apart in the order.}
+\end{columns}
+\vspace{1.2em}
+\keyline{}
+\centering
+An easy inner problem inside a hard outer one --- exactly what decomposition is built for.
+\end{frame}
+
+%------------------------------------------------------------------ two-phase
+\begin{frame}{Nobody solves it directly}{The two-phase method, and the question nobody had answered}
+\vspace{0.5em}
+\begin{enumerate}\itemsep4pt
+  \item \textbf{Group} the jobs into as few magazine-fitting batches as possible.
+  \item \textbf{Sequence} the batches.
+  \item \textbf{Re-optimise the loading} across the whole flattened order.
+\end{enumerate}
+\vspace{0.8em}
+{\small It is fast, it is what the strongest metaheuristics start from, and it is what
+industry uses.}
+\vspace{1.0em}
+\keyline{}
+\begin{center}
+\textbf{No worst-case analysis of it had been published.}\\[0.4em]
+{\small How far from optimal can it be? On which instances is it exact?}
+\end{center}
+\end{frame}
+
+%------------------------------------------------------------------ RESULT 1
+\begin{frame}{\new{Result 1.} The textbook worst case is not a worst case}
+\vspace{0.1em}
+{\small The literature's canonical bad example is the $k$-ring. Its reported gap is
+measured with \emph{one fixed magazine per group} --- step 3 of the method is left out.}
+\vspace{0.7em}
+\centering
+\begin{tabular}{@{}crrrrr@{}}
+\toprule
+$k$ & $\Kst$ & $\Zst$ & $\Hwalk$ & walk gap & \new{heuristic gap}\\
+\midrule
+$4$ & $2$ & $1$ & $1$ & $0$ & \new{$0$}\\
+$6$ & $3$ & $3$ & $4$ & $1$ & \new{$0$}\\
+$7$ & $3$ & $4$ & $5$ & $1$ & \new{$0$}\\
+$8$ & $3$ & $5$ & $6$ & $1$ & \new{$0$}\\
+$9$ & $4$ & $6$ & $7$ & $1$ & \new{$0$}\\
+\bottomrule
+\end{tabular}
+\vspace{0.5em}
+\keyline{}
+\begin{center}
+Every $k$-ring, $k=3,\dots,9$: the method as actually specified is \new{optimal}.\\[0.3em]
+{\small The published gaps are walk values. Separating the two readings is what makes
+the rest of the analysis correct.}
+\end{center}
+\end{frame}
+
+%------------------------------------------------------------------ why
+\begin{frame}{\new{Result 2.} The gap is exactly the price of using the fewest groups}
+\vspace{0.3em}
+\centering
+\begin{tikzpicture}[font=\small, >=Stealth, scale=0.95, every node/.style={transform shape},
+   cfg/.style={draw=cInk!45, fill=cLight, rounded corners=2pt, minimum height=0.72cm,
+               minimum width=1.75cm, font=\small}]
+  \node[font=\footnotesize\bfseries, anchor=west] at (-0.2,1.55) {Fewest groups --- what the heuristic is told to do};
+  \node[cfg] (a1) at (0.8,0.75) {$\{1,2,3\}$};
+  \node[cfg] (a2) at (3.6,0.75) {$\{4,5,6\}$};
+  \node[cfg] (a3) at (6.4,0.75) {$\{1,4,\dots\}$};
+  \draw[->,cInk] (a1)--(a2) node[midway,above,font=\scriptsize]{$+2$};
+  \draw[->,cInk] (a2)--(a3) node[midway,above,font=\scriptsize]{$+2$};
+  \node[font=\small\bfseries, anchor=west] at (8.0,0.75) {cost 4};
+
+  \node[font=\footnotesize\bfseries, anchor=west] at (-0.2,-0.55) {Best over \emph{all} groupings --- what the optimum uses};
+  \node[cfg] (b1) at (0.8,-1.35) {$\{1,2,3\}$};
+  \node[cfg] (b2) at (3.0,-1.35) {$\{1,3,4\}$};
+  \node[cfg] (b3) at (5.2,-1.35) {$\{1,4,5\}$};
+  \node[cfg] (b4) at (7.4,-1.35) {$\{1,5,6\}$};
+  \draw[->,cInk] (b1)--(b2) node[midway,above,font=\scriptsize]{$+1$};
+  \draw[->,cInk] (b2)--(b3) node[midway,above,font=\scriptsize]{$+1$};
+  \draw[->,cInk] (b3)--(b4) node[midway,above,font=\scriptsize]{$+1$};
+  \node[font=\small\bfseries, anchor=west, text=cAccent] at (8.7,-1.35) {cost 3};
+\end{tikzpicture}
+\vspace{0.6em}
+\keyline{}
+\begin{center}
+\textbf{Theorem.}\; $\displaystyle \Zst=\min_{\mathcal{P}}\gamma(\mathcal{P})$ over
+\emph{all} feasible groupings, of every cardinality.\\[0.5em]
+{\small So the gap is not a failure of the sequencing phase --- that orders whatever it
+is given optimally. It is the price of the cardinality restriction, and nothing else.}
+\end{center}
+\end{frame}
+
+%------------------------------------------------------------------ consequences
+\begin{frame}{What follows from it}
+\vspace{0.2em}\small
+\begin{itemize}\itemsep6pt
+  \item \textbf{Zero-gap classes for every capacity} --- families on which the two-phase
+  method is provably exact.
+  \item \textbf{Worst-case guarantees} strictly better than the trivial $b(\Kst-1)$, and
+  the extremal behaviour settled exactly at three groups.
+  \item \textbf{A census.} In $420$ random instances exactly one has a positive
+  heuristic gap. Every positive gap found anywhere in this work equals \emph{one}, and
+  every instance carrying one has $b\ge4$.
+\end{itemize}
+\vspace{0.5em}
+\keyline{}
+\begin{center}
+{\small The last point is an exhaustive combinatorial search on small instances.\\
+Burger et al.\ report from a \emph{printing press} that the decomposition degrades
+as the magazine grows relative to the largest job.\\[0.4em]
+\textbf{Two completely different methods, the same regime.}}
+\end{center}
+\end{frame}
+
+%------------------------------------------------------------------ exact side
+\begin{frame}{The exact side, and the wall it runs into}
+\vspace{0.5em}
+{\small Every compact formulation proposed in forty years has a weak linear relaxation.
+The strongest of them relaxes to}
+\[
+  \new{q \;=\; |\U| - b}
+\]
+{\small --- every tool that does not fit in the initial magazine must be inserted at
+some point. Twenty years of formulation work reaching a bound that fits on one line.}
+\vspace{0.9em}
+\keyline{}
+\textbf{Two methods built to get past it:}
+\begin{itemize}\itemsep4pt
+  \item \textbf{Branch-and-Benders-cut} --- put the ordering in a master problem and
+  settle the loading exactly with the polynomial oracle, so no weak relaxation is ever
+  formed.
+  \item \textbf{Position-indexed branch-and-price} --- PCF$'$ prices one magazine per
+  position; PTF prices \emph{pairs} of consecutive magazines, and its relaxation can
+  provably exceed $q$.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------ RESULT 3
+\begin{frame}{\new{Result 3.} The bound decides the outcome}{$1{,}421$ instances $\cdot$ 12 configurations $\cdot$ $16{,}994$ runs $\cdot$ one hour each}
+\vspace{0.6em}
+\centering
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+ & instances & Benders & strongest compact model\\
+\midrule
+coverage bound tight $(\Zst=q)$  & $523$ & \new{$94\%$} & $100\%$\\
+coverage bound loose $(\Zst>q)$  & $592$ & \new{$40\%$} & $87\%$\\
+\bottomrule
+\end{tabular}
+\vspace{1.0em}
+\keyline{}
+\begin{itemize}\itemsep3pt\small
+  \item Same solver, same hardware, same time limit. The classification is not by number
+  of jobs, tools, or density --- it is by one structural property.
+  \item Of the runs that hit the limit and whose optimum is known, \textbf{$66\%$ already
+  held that optimum} and could not certify it.
+  \item Across $41{,}673$ pairs of methods that both proved an optimum, \textbf{none
+  disagreed}.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------ RESULT 3b
+\begin{frame}{The same number, from a completely different direction}
+\vspace{0.7em}
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+PCF$'$ root relaxation equals $q$ & \new{$2{,}114$ of $2{,}114$ runs}\\
+PTF root relaxation exceeds $q$   & $3$ of $233$ runs\\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace{1.0em}
+\keyline{}
+\begin{itemize}\itemsep5pt
+  \item PCF$'$: \textbf{proved} in the report, then confirmed on every single run, across
+  six different acceleration settings. Not one exception.
+  \item PTF: the proposition is \textbf{not vacuous} --- but the advantage is one unit,
+  on three small instances, against gaps of six to eight.
+  \item Benders master, PCF$'$, and the literature's multicommodity model: three
+  unrelated routes, one number.
+\end{itemize}
+\vspace{0.5em}
+\centering\small
+This is a property of the problem, not of any one implementation.
+\end{frame}
+
+%------------------------------------------------------------------ RESULT 4 diagnosis
+\begin{frame}{\new{Result 4.} Why the bound will not move}
+\vspace{0.1em}
+Write $\beta_t$ for the number of blocks of positions in which tool $t$ sits in the magazine:
+\[
+  \Zst=\sum_{t\in\U}\beta_t,\qquad \beta_t\ge1 \;\Longrightarrow\; \Zst \ge q .
+\]
+{\small Everything above $q$ is a \textbf{re-insertion} --- a tool evicted and brought
+back. That happens because of the \emph{global interleaving} of the schedule.}
+\vspace{0.4em}
+\keyline{}
+\begin{center}
+\textbf{But every inequality either method has is \new{local}.}
+\end{center}
+\vspace{0.1em}
+\begin{itemize}\itemsep3pt\small
+  \item Benders: one aggregated row over \emph{arcs}; triplet rows that are worth zero at
+  a fractional point; and every optimality cut is arc-supported too.
+  \item PCF$'$: one configuration per \emph{position}, coupled only per tool --- so the
+  relaxation mixes fractionally and pays no transition.
+  \item \textbf{Measured:} on $87.4\%$ of Benders runs the root LP equals $|\U|$ exactly.
+  The pairwise and triplet rows contribute \emph{nothing}.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------ RESULT 5 window
+\begin{frame}{\new{Result 5.} A family that is not local, and what it is worth}
+\vspace{0.1em}
+{\small For a stretch of positions $W=[p,r]$: every tool needed inside $W$ is either
+already loaded at $p-1$, or inserted within $W$.}
+\[
+  \sum_{t}\sum_{k\in W} w_{t,k} \;\;\ge\;\;
+  \bigl|\{t \text{ present somewhere in } W\}\bigr| \;-\; \sum_{t} a_{t,p-1}
+\]
+{\small Valid --- checked at $1{,}200{,}816$ integer points, no violation. And
+\textbf{robust}: only master variables, so the pricing oracle is untouched.}
+\vspace{0.4em}
+\keyline{}
+\centering
+{\small Best bound each family could \emph{ever} certify, on the $62$ loose instances:}\\[0.5em]
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+family & mean & median & no gain on\\
+\midrule
+arc-supported --- what both solvers carry today & $8.9\%$ & $0\%$ & $46/62$\\
+\new{window} & \new{$30.9\%$} & \new{$40\%$} & $18/62$\\
+\bottomrule
+\end{tabular}
+\vspace{0.4em}
+
+{\small The arc family is \emph{exhausted}. The window family has somewhere to go.}
+\end{frame}
+
+%------------------------------------------------------------------ negatives
+\begin{frame}{What was tried and did not work --- and why}
+\vspace{0.1em}
+\begin{itemize}\itemsep4pt\small
+  \item \textbf{Fractional Benders cuts.} $67.5$ million generated; node count fell
+  twentyfold; the bound at termination rose on \emph{no} instance; $67$ solved instances
+  lost.
+  \hfill{\color{cGrey}\scriptsize They are arc-supported, so they re-derive what the integer cuts already say.}
+  \item \textbf{Pareto-optimal cut lifting.} $-37$ instances.
+  \hfill{\color{cGrey}\scriptsize Choosing a deeper cut inside the wrong family.}
+  \item \textbf{Conflict-graph row.} Neutral --- as predicted, the coverage row dominates it.
+  \item \textbf{Only the primal strengthening helped} ($+31$): a hybrid genetic warm start.
+  \hfill{\color{cGrey}\scriptsize A solver whose difficulty was finding solutions would not behave this way.}
+  \item \textbf{Learned cut selection.} Built and trained, but on knapsack cover cuts,
+  \emph{not} on the SSP. It learns --- $46$--$73\%$ over random selection --- and says
+  nothing about this problem.
+  \hfill{\color{cGrey}\scriptsize Selection cannot pick a strong cut that does not exist.}
+\end{itemize}
+\vspace{0.2em}
+\keyline{}
+\centering\small
+Each of these is a \emph{tested} idea rather than an untested one. Knowing which you have
+is the difference between a research direction and a dead end.
+\end{frame}
+
+%------------------------------------------------------------------ conclusions
+\begin{frame}{Conclusions}
+\vspace{0.1em}
+\begin{itemize}\itemsep3pt\small
+  \item The two-phase heuristic admits \textbf{two readings}, and the literature's worst
+  case belongs to the wrong one. The method is better than the model of it.
+  \item The gap is exactly the \textbf{price of using the fewest groups} --- with zero-gap
+  classes, worst-case bounds, and a census that agrees with the one industrial study.
+  \item A configuration-based exact method for the SSP is \textbf{bound-limited, not
+  implementation-limited}. Established four independent ways.
+  \item The bound will not move because every inequality we have is \textbf{local} and
+  the cost is not. \new{A non-local family exists, is valid and robust, and has roughly
+  four times the headroom.}
+\end{itemize}
+\vspace{0.4em}
+\keyline{}
+\small\textbf{Next:} measure the window family inside the solver; chain PTF per configuration
+rather than per tool; disaggregate the Benders master's single $\theta$. And the open
+problem --- \emph{is the excess of PTF over $q$ bounded by a constant?}
+\end{frame}
+
+%------------------------------------------------------------------ thanks
+\begin{frame}[plain]
+\vspace{2.2em}
+\centering
+{\Large Thank you}\\[1.6em]
+{\small Report, code, benchmark data and the independent verification program:\\
+\texttt{github.com/shankar-n/JGP-SSP-Codes-Shankar}}\\[1.2em]
+{\footnotesize\color{cGrey} Every number in this talk is reproduced from the raw result
+files by\\ \texttt{verification/analyse\_campaign\_results.py -{}-check}}
+\end{frame}
+
+%==============================================================================
+\appendix
+%==============================================================================
+
+\begin{frame}{Backup --- instances solved, all twelve configurations}
+\vspace{0.3em}
+\centering\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+Configuration & Catanzaro & Crama & Laporte3 & Laporte4 & Laporte5 & Laporte7 & All\\
+\midrule
+SSPMF              & $73/171$ & $68/160$ & $340/340$ & $330/330$ & $161/336$ & $66/80$ & $1038/1417$\\
+CATZ-F4            & $55/171$ & $44/160$ & $340/340$ & $330/330$ & $72/327$  & $44/78$ & $885/1406$\\
+LSS                & $52/132$ & $42/124$ & $340/340$ & $330/330$ & $39/101$  & $41/42$ & $844/1069$\\
+\midrule
+BBC-LP+T           & $38/168$ & $34/156$ & $340/340$ & $192/330$ & $84/336$  & $39/80$ & $727/1410$\\
+BBC-LP             & $38/169$ & $35/151$ & $340/340$ & $191/329$ & $83/338$  & $39/80$ & $726/1407$\\
+BBC-K              & $39/166$ & $34/145$ & $340/340$ & $190/329$ & $83/335$  & $39/80$ & $725/1395$\\
+BBC-LP+F+H         & $43/171$ & $37/160$ & $316/340$ & $157/330$ & $97/339$  & $40/80$ & $690/1420$\\
+BBC-LP+F           & $37/169$ & $32/160$ & $313/340$ & $156/329$ & $85/340$  & $36/80$ & $659/1418$\\
+BBC-LP+F+C         & $37/170$ & $32/160$ & $311/340$ & $157/329$ & $84/336$  & $36/79$ & $657/1414$\\
+BBC-LP+ACC         & $43/170$ & $37/160$ & $286/340$ & $154/330$ & $97/339$  & $39/80$ & $656/1419$\\
+BBC-K+F            & $37/171$ & $21/121$ & $316/340$ & $156/329$ & $86/338$  & $35/79$ & $651/1378$\\
+BBC-LP+F+P         & $35/171$ & $32/160$ & $282/340$ & $155/328$ & $83/336$  & $35/79$ & $622/1414$\\
+\bottomrule
+\end{tabular}
+\vspace{0.5em}
+
+{\scriptsize Denominators are runs that returned a result. $427$ of $16{,}994$ runs failed;
+$352$ of those are LSS, concentrated on Laporte5, so the LSS row is not comparable.}
+\end{frame}
+
+\begin{frame}{Backup --- the ablation}
+\vspace{0.6em}
+\centering
+\begin{tabular}{@{}llrr@{}}
+\toprule
+Configuration & what it adds & solved & difference\\
+\midrule
+BBC-LP+F   & ---                        & $659$ & ---\\
+BBC-LP+F+H & hybrid-genetic incumbent   & $690$ & $+31$\\
+BBC-LP+F+C & conflict-graph row         & $657$ & $-2$\\
+BBC-LP+ACC & all three together         & $656$ & $-3$\\
+BBC-LP+F+P & Pareto-optimal cut lifting & $622$ & $-37$\\
+\midrule
+BBC-LP     & \emph{fractional separation removed} & $726$ & $+67$\\
+\bottomrule
+\end{tabular}
+\vspace{1.0em}
+\keyline{}
+\centering
+Removing a feature outperforms every addition.\\[0.3em]
+{\small Only the strengthening that improves the \emph{incumbent} helps. Every attempt at
+the \emph{bound} costs more than it returns.}
+\end{frame}
+
+\begin{frame}{Backup --- the two cost conventions}
+\vspace{0.6em}
+{\small Formulations disagree on whether the initial magazine is free. The two costs
+differ by the size of the initial load, so native objectives are \textbf{not} comparable
+across methods.}
+\vspace{0.8em}
+\begin{itemize}\itemsep4pt\small
+  \item Every comparison in this work is on the \emph{empty-start} cost of the returned
+  sequence, re-evaluated by the loading oracle.
+  \item SSPMF reports the free-initial cost. Difference $=b$ on $1{,}029$ of its $1{,}038$
+  closed instances; smaller on the other nine --- exactly those whose optimal sequence
+  starts with a job needing fewer than $b$ tools.
+  \item An instance must be keyed by \emph{(family, name, jobs, tools, capacity)}. Crama
+  reuses file names across four capacities; keying without it manufactures disagreements
+  that do not exist.
+  \item Ten instances declare a tool that no job requires, so the bound is $|\U|-b$ and
+  not $|T|-b$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Backup --- learned cut selection, on knapsack cover cuts}
+\vspace{0.6em}
+\centering
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+knapsack size $n$ & learned policy & random selection & improvement\\
+\midrule
+$10$ & $1.3855$ & $0.8734$ & $+58.6\%$\\
+$12$ & $1.1639$ & $0.7014$ & $+65.9\%$\\
+$20$ & $0.7482$ & $0.5021$ & $+49.0\%$\\
+$22$ & $0.6692$ & $0.4568$ & $+46.5\%$\\
+$24$ & $0.6383$ & $0.3888$ & $+64.2\%$\\
+$26$ & $0.5661$ & $0.3279$ & $+72.7\%$\\
+\bottomrule
+\end{tabular}
+\vspace{1.0em}
+\keyline{}
+\begin{center}
+\small
+Mean tightening of the linear bound on held-out instances. One training seed per size,
+$2{,}000$ episodes.\\[0.4em]
+\textbf{The machinery learns. This is not the SSP, and no claim about the SSP is made
+from it.}
+\end{center}
+\end{frame}
+
+\end{document}

@@ -22,55 +22,60 @@ outcome. Table~\ref{tab:families} gives the sizes.
 
 \begin{table}[h]\centering
 \footnotesize
-\begin{tabular}{@{}lrl@{}}
+\begin{tabular}{@{}lrrrl@{}}
 \toprule
-Family & Instances & Source \\
+Family & Instances & Jobs $n$ & Tools $\lvert T\rvert$ & Source \\
 \midrule
-Catanzaro & $171$ & \citet{Catanzaro2015} \\
-Crama     & $40$  & \citet{Crama1994} \\
-Laporte3  & $340$ & \citet{Laporte2004} \\
-Laporte4  & $330$ & \citet{Laporte2004} \\
-Laporte5  & $340$ & \citet{Laporte2004} \\
-Laporte7  & $80$  & \citet{Laporte2004} \\
+Catanzaro & $171$ & $8$--$40$  & $5$--$60$  & \citet{Catanzaro2015} \\
+Crama     & $160$ & $10$--$40$ & $10$--$60$ & \citet{Crama1994} \\
+Laporte3  & $340$ & $8$        & $15$--$25$ & \citet{Laporte2004} \\
+Laporte4  & $330$ & $9$        & $15$--$25$ & \citet{Laporte2004} \\
+Laporte5  & $340$ & $15$       & $15$--$25$ & \citet{Laporte2004} \\
+Laporte7  & $80$  & $10$--$15$ & $10$--$20$ & \citet{Laporte2004} \\
 \midrule
-Total     & $1{,}301$ & \\
+Total     & $1{,}421$ & & & \\
 \bottomrule
 \end{tabular}
-\caption{The instance families. Every instance of every family is attempted under
-every solver configuration; see the note on the state of the campaign in
-Section~\ref{ssec:results-solved}.}
+\caption{The instance families. An instance is a matrix together with a magazine
+capacity. The Crama collection publishes the same matrices at four different
+capacities, so its $40$ matrices give $160$ instances; the same convention is applied
+throughout.}
 \label{tab:families}
 \end{table}
 
 \paragraph{Protocol.}
-Every run is given a single uniform time limit of one hour and $16$ gigabytes of
-memory. There is no early stopping and no per-configuration retirement rule, so the
-number of instances solved is reported against the full family size rather than
-against an outcome-dependent count of attempts. All other solver parameters are left
-at their defaults, so that the comparison measures the formulations rather than
-parameter tuning.
+Every run of the Benders solver and of the compact baselines is given a single uniform
+time limit of one hour and $16$ gigabytes of memory. There is no early stopping and no
+per-configuration retirement rule. All other solver parameters are left at their
+defaults, so that the comparison measures the formulations rather than parameter
+tuning. The branch-and-price prototypes are run separately, under a ten-minute limit,
+for the reason given in Section~\ref{ssec:results-bnp}.
 
 \paragraph{Hardware and software.}
 All runs were executed on the LIMOS SLURM cluster, confined to a homogeneous pool of
 identical nodes (AMD EPYC~7452, $2\times32$ cores, $512$\,GB of memory), so that
 wall-clock times are comparable across runs. The mixed-integer solver is CPLEX~22.1.1
 throughout, pinned to four dedicated threads per run. The branch-and-price prototypes
-run single-threaded under PySCIPOpt.
+run single-threaded under PySCIPOpt. The campaign was distributed over $120$ SLURM
+array shards and produced $16{,}994$ individual runs.
 
 \paragraph{Configurations.}
-Eleven solver configurations were run. Three are the reimplemented compact baselines:
-F4 of \citet{Catanzaro2015}, LSS of \citet{Laporte2004}, and SSPMF of
-\citet{daSilva2024}. The remaining eight are the Benders solver, in an ablation over
-its cut families and its strengthenings. The naming is as follows: \texttt{BBC-LP}
-uses the dual optimality cuts, \texttt{BBC-K} the combinatorial cuts, \texttt{+T} adds
-the triplet bounds, \texttt{+F} enables fractional separation, \texttt{+C} the
-conflict-graph row, \texttt{+H} the hybrid-genetic incumbent, \texttt{+P} the
-Pareto-optimal cut lifting, and \texttt{+ACC} all three strengthenings together.
+Twelve solver configurations were run. Three are the reimplemented compact baselines:
+F4 of \citet{Catanzaro2015}, written \texttt{CATZ-F4}; LSS of \citet{Laporte2004}; and
+SSPMF of \citet{daSilva2024}. The remaining nine are the Benders solver, in an ablation
+over its cut families and its strengthenings. The naming is as follows:
+\texttt{BBC-LP} uses the dual optimality cuts, \texttt{BBC-K} the combinatorial cuts,
+\texttt{+T} adds the triplet bounds, \texttt{+F} enables fractional separation,
+\texttt{+C} the conflict-graph row, \texttt{+H} the hybrid-genetic incumbent,
+\texttt{+P} the Pareto-optimal cut lifting, and \texttt{+ACC} all three strengthenings
+together.
 
 \paragraph{The reported quantity.}
 The common metric is the empty-start cost of the sequence a method returns, evaluated
-by the loading oracle. This is well defined for every method regardless of its native
-objective, and it is what makes the cross-method comparison of
+by the loading oracle. Each formulation has its own native objective, and two of them
+use the free-initial convention, so the native values are not comparable across
+methods. The empty-start cost of the returned sequence is defined for every method
+regardless of its formulation, and it is what makes the cross-method comparison of
 Section~\ref{ssec:validation} meaningful.
 
 \subsection{Validation}\label{ssec:validation}
@@ -78,62 +83,106 @@ Section~\ref{ssec:validation} meaningful.
 Correctness was established before any result was recorded, and again from the results
 themselves.
 
-\emph{Before the campaign.} Every exact solver was checked against brute-force optima
-on a bank of small instances, in every combination of its option flags. The loading
-oracle itself was verified against an exact dynamic program over magazine states; the
-verification described in Appendix~\ref{app:verify} repeats this on $83{,}670$
-instance-and-sequence pairs and finds no disagreement.
+\paragraph{Before the campaign.}
+Every exact solver was checked against brute-force optima on a bank of small instances,
+in every combination of its option flags. The loading oracle itself was verified
+against an exact dynamic program over magazine states; the verification described in
+Appendix~\ref{app:verify} repeats this on $83{,}670$ instance-and-sequence pairs and
+finds no disagreement.
 
-\emph{During the campaign.} The harness converts every native objective to the common
-empty-start cost before any comparison. Across every instance solved to optimality by
-more than one method --- $974$ instances --- no two methods ever disagree on that cost.
+\paragraph{Identifying an instance.}
+An instance is identified by the family it comes from, its file name, its number of
+jobs, its number of tools, and its magazine capacity. All five are needed. The Crama
+collection reuses the same file names at four different capacities, so two runs that
+agree on the name can be runs on different instances. An earlier version of this
+analysis keyed on the name alone; it reported disagreements between methods that, on
+inspection, were comparisons between an instance at one capacity and the same matrix at
+another. The comparison below uses the full identifier.
 
-\emph{A defect found and corrected.} The first campaign gave the Benders solver poor
-results. The cause was that its master problem lacked the coverage row
-$\theta\ge\lvert\U\rvert$ of Section~\ref{ssec:bbc}, which every other method carries
-implicitly through its formulation. The row was added and the whole campaign re-run.
-All numbers below come from the corrected solver. The episode is reported because it
-is the reason the earlier interim results were superseded, and because it illustrates
-the general point of Section~\ref{sec:disc}: on this problem a missing bound is
-expensive in a way that a missing search improvement is not.
+\paragraph{Cross-method agreement.}
+Of the $1{,}421$ instances, $1{,}115$ were solved to proven optimality by at least one
+method and $999$ by at least two. On those $999$ there are $41{,}673$ pairs of methods
+that both proved an optimum. \emph{In none of them do the two disagree.} Every pair of
+methods that both closed an instance returned a sequence of the same empty-start cost.
+
+\paragraph{The two conventions, measured.}
+Proposition~\ref{prop:conv} states that the empty-start and free-initial costs of a
+sequence differ by the size of the initial load. The campaign confirms it on real
+instances. The SSPMF model reports the free-initial cost natively, and on all
+$1{,}038$ instances it closed, the difference between its reported value and the
+empty-start cost of the same sequence equals the magazine capacity $b$ on $1{,}029$ of
+them. On the other nine it is smaller than $b$, and those are exactly the instances on
+which an optimal sequence begins with a job that needs fewer than $b$ tools, so the
+magazine is not filled at the start. The two baselines that report the empty-start cost
+natively, \texttt{CATZ-F4} and LSS, show a difference of zero on all $1{,}729$ runs in
+which they closed an instance.
+
+\paragraph{Tools that no job needs.}
+Four matrices in the collection contain a tool that appears in no job's requirement
+set: Crama \texttt{s2n007} and \texttt{s2n009}, Laporte3 \texttt{L28-7} and Laporte5
+\texttt{L6-8}. Counted with the capacities at which they appear, that is ten of the
+$1{,}421$ instances. The coverage bound of Corollary~\ref{cor:lb} must therefore be read as
+$q=\lvert\U\rvert-b$, using the set $\U$ of tools that some job actually requires, and
+not as $\lvert T\rvert-b$ using the tool count declared in the instance file. On those
+ten the two differ, and the smaller value is the correct one: on Laporte3
+instance \texttt{L28-7}, which declares $25$ tools of which one is never required and
+has $b=5$, the optimum in the free-initial convention is $19$, which is
+$\lvert\U\rvert-b=24-5$ and not $\lvert T\rvert-b=20$. All coverage-bound figures in
+this section use $\lvert\U\rvert$.
+
+\paragraph{A defect found and corrected.}
+The first campaign gave the Benders solver poor results. The cause was that its master
+problem lacked the coverage row $\theta\ge\lvert\U\rvert$ of Section~\ref{ssec:bbc},
+which every other method carries implicitly through its formulation. The row was added
+and the whole campaign re-run. All numbers below come from the corrected solver. The
+episode is reported because it is the reason the earlier interim results were
+superseded, and because it illustrates the general point of Section~\ref{sec:disc}: on
+this problem a missing bound is expensive in a way that a missing search improvement is
+not.
+
+\paragraph{Runs that failed.}
+Of the $16{,}994$ runs, $427$ returned no result. Three hundred and seventy-eight of
+these are crashes of the worker subprocess and $49$ are a failure of the harness itself
+when closing its log file on the cluster filesystem. The failures are not spread
+evenly: $352$ of the $378$ crashes belong to the LSS baseline, and $239$ of those to
+the Laporte5 family alone, whose $15$-job instances give LSS its largest models. LSS is
+therefore reported against a denominator of $1{,}069$ rather than $1{,}421$, and its
+success rate is not comparable with the others, because the runs it lost are
+concentrated on the family it finds hardest. The remaining $75$ failures are scattered
+across the nine Benders configurations, at most $26$ in any one of them.
 
 \subsection{How far each method gets}\label{ssec:results-solved}
 
-\paragraph{The campaign is still running.}
-The runs are distributed over the cluster as independent jobs, and the campaign had
-not finished when this section was prepared. What follows is therefore a snapshot: it
-covers the runs completed so far, and not every configuration yet has a result on
-every instance.
-
-This is handled rather than ignored. Table~\ref{tab:solves} reports both the number
-solved and the number attempted for each configuration, and every comparison between
-two configurations in this section is made on the instances that both attempted.
-Absolute solved counts across configurations with different denominators are not
-comparable, and are not compared. The conclusions of Section~\ref{sec:disc} rest on
-those paired comparisons and on the split of Section~\ref{ssec:results-tight}, both of
-which are insensitive to which runs happen to have returned.
+Table~\ref{tab:solves} reports, for each configuration and each family, the number of
+instances solved to proven optimality against the number of runs that returned a
+result.
 
 \begin{table}[t]\centering
 \scriptsize
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lrrrrrrr@{}}
 \toprule
-Family & SSPMF & LSS & BBC-LP & BBC-LP+T & BBC-K & BBC-LP+F & BBC-LP+F+H\\
+Configuration & Catanzaro & Crama & Laporte3 & Laporte4 & Laporte5 & Laporte7 & All\\
 \midrule
-Catanzaro & $64/74$   & $52/139$  & $38/171$  & $38/171$  & $39/171$  & $37/145$  & $43/157$\\
-Crama     & ---       & $6/24$    & $8/40$    & $8/40$    & $10/40$   & $1/13$    & $4/18$\\
-Laporte3  & $340/340$ & $340/340$ & $340/340$ & $340/340$ & $340/340$ & $313/340$ & $316/340$\\
-Laporte4  & $330/330$ & $330/330$ & $191/330$ & $192/330$ & $190/330$ & $156/330$ & $157/330$\\
-Laporte5  & $64/99$   & $34/322$  & $83/340$  & $84/340$  & $83/340$  & $85/339$  & $97/340$\\
-Laporte7  & $54/58$   & $41/80$   & $39/80$   & $39/80$   & $39/80$   & $36/80$   & $40/80$\\
+SSPMF              & $73/171$ & $68/160$ & $340/340$ & $330/330$ & $161/336$ & $66/80$ & $1038/1417$\\
+\texttt{CATZ-F4}   & $55/171$ & $44/160$ & $340/340$ & $330/330$ & $72/327$  & $44/78$ & $885/1406$\\
+LSS                & $52/132$ & $42/124$ & $340/340$ & $330/330$ & $39/101$  & $41/42$ & $844/1069$\\
 \midrule
-All       & $852/901$ & $803/1235$& $699/1301$& $701/1301$& $701/1301$& $628/1247$& $657/1265$\\
+\texttt{BBC-LP+T}  & $38/168$ & $34/156$ & $340/340$ & $192/330$ & $84/336$  & $39/80$ & $727/1410$\\
+\texttt{BBC-LP}    & $38/169$ & $35/151$ & $340/340$ & $191/329$ & $83/338$  & $39/80$ & $726/1407$\\
+\texttt{BBC-K}     & $39/166$ & $34/145$ & $340/340$ & $190/329$ & $83/335$  & $39/80$ & $725/1395$\\
+\texttt{BBC-LP+F+H}& $43/171$ & $37/160$ & $316/340$ & $157/330$ & $97/339$  & $40/80$ & $690/1420$\\
+\texttt{BBC-LP+F}  & $37/169$ & $32/160$ & $313/340$ & $156/329$ & $85/340$  & $36/80$ & $659/1418$\\
+\texttt{BBC-LP+F+C}& $37/170$ & $32/160$ & $311/340$ & $157/329$ & $84/336$  & $36/79$ & $657/1414$\\
+\texttt{BBC-LP+ACC}& $43/170$ & $37/160$ & $286/340$ & $154/330$ & $97/339$  & $39/80$ & $656/1419$\\
+\texttt{BBC-K+F}   & $37/171$ & $21/121$ & $316/340$ & $156/329$ & $86/338$  & $35/79$ & $651/1378$\\
+\texttt{BBC-LP+F+P}& $35/171$ & $32/160$ & $282/340$ & $155/328$ & $83/336$  & $35/79$ & $622/1414$\\
 \bottomrule
 \end{tabular}
-\caption{Instances solved to proven optimality, against instances attempted, under a
-one-hour limit. A dash means the configuration produced no result on that family.
-Denominators differ between columns, so the columns are not directly comparable; the
-comparisons in the text are made on common subsets.}
+\caption{Instances solved to proven optimality, against runs that returned a result,
+under a one-hour limit. Denominators below the family size are the failed runs of
+Section~\ref{ssec:validation}; the LSS row is the one where this matters, and its
+totals should not be read against the others.}
 \label{tab:solves}
 \end{table}
 
@@ -141,18 +190,22 @@ Three things can be read from Table~\ref{tab:solves}.
 
 The multicommodity model of \citet{daSilva2024} is the strongest single method, as its
 authors report. That their claim replicates on an independent implementation and a
-different instance collection is worth recording in its own right.
+different instance collection is worth recording in its own right. It closes $1{,}038$
+instances; the best Benders configuration closes $727$.
 
-The Laporte3 family is solved completely by every method, and Laporte4 splits the
-methods sharply: the compact models solve all of it, and the Benders solver solves
-about three-fifths. The Catanzaro family is the hardest for every method.
+The families separate the methods rather than rank them uniformly. Laporte3 is solved
+completely by six of the twelve configurations. Laporte4 splits them sharply: the
+three compact models solve all $330$, and the Benders solver solves between $154$ and
+$192$. Catanzaro and Crama are hard for everything, and no method closes more than
+half of either.
 
-The Benders variants behave almost identically to one another except for the
-fractional-separation ones, which are worse. Section~\ref{ssec:results-bbc} takes that
-apart.
+Among the Benders variants, the three that do not separate at fractional points
+(\texttt{BBC-LP}, \texttt{BBC-LP+T}, \texttt{BBC-K}) are the three best, within two
+instances of one another. Every configuration carrying \texttt{+F} is worse than all
+three. Section~\ref{ssec:results-bbc} takes that apart.
 
 \paragraph{Solving times.}
-Table~\ref{tab:times} reports times on the $515$ instances that all seven of these
+Table~\ref{tab:times} reports times on the $535$ instances that all eight of the listed
 configurations solve. The shifted geometric mean with a shift of ten seconds is used,
 following standard practice for exact-method comparisons, because it is insensitive to
 both very small and very large individual values.
@@ -163,24 +216,25 @@ both very small and very large individual values.
 \toprule
 Method & shifted geometric mean (s) & median (s) & maximum (s)\\
 \midrule
-SSPMF      & $1.95$  & $0.142$ & $48.7$\\
-BBC-K      & $15.07$ & $0.018$ & $845.8$\\
-BBC-LP+T   & $16.77$ & $0.065$ & $1126.0$\\
-BBC-LP     & $16.86$ & $0.065$ & $1128.4$\\
-BBC-LP+F+H & $32.62$ & $0.003$ & $3584.6$\\
-LSS        & $34.55$ & $17.626$& $2211.5$\\
-BBC-LP+F   & $35.61$ & $0.078$ & $3586.6$\\
+SSPMF              & $1.90$  & $0.140$  & $48.7$\\
+\texttt{BBC-K}     & $14.50$ & $0.018$  & $845.8$\\
+\texttt{BBC-LP+T}  & $16.03$ & $0.066$  & $1126.0$\\
+\texttt{BBC-LP}    & $16.11$ & $0.067$  & $1128.4$\\
+\texttt{BBC-LP+F+H}& $30.74$ & $0.003$  & $3584.6$\\
+\texttt{BBC-LP+F}  & $33.73$ & $0.107$  & $3586.6$\\
+LSS                & $37.68$ & $18.254$ & $2211.5$\\
+\texttt{CATZ-F4}   & $92.83$ & $74.304$ & $3506.5$\\
 \bottomrule
 \end{tabular}
-\caption{Solving times on the $515$ instances that all seven configurations solve.
-The Benders solver has by far the lowest median and a high mean, which is the
-signature of a method that either finishes almost at once or struggles.}
+\caption{Solving times on the $535$ instances that all eight configurations solve. The
+Benders solver has by far the lowest median and a high mean, which is the signature of
+a method that either finishes almost at once or struggles.}
 \label{tab:times}
 \end{table}
 
 The pattern in Table~\ref{tab:times} is as informative as the ranking. The Benders
-solver's median is two to three orders of magnitude below the multicommodity model's,
-while its mean is an order of magnitude above. It either closes an instance
+solver's median is one to three orders of magnitude below every compact model's, while
+its mean is an order of magnitude above SSPMF's. It either closes an instance
 immediately or does not close it at all. Section~\ref{ssec:results-tight} identifies
 what separates the two cases, and it is not the size of the instance.
 
@@ -191,9 +245,9 @@ Section~\ref{ssec:accel} recorded that fractional separation had been inert in t
 earlier campaign because of a defect in the cut-injection call, so the idea could not
 be tested. The defect is corrected, and the corrected version was run.
 
-The cuts are now generated in very large numbers. Across the $1{,}247$ instances that
+The cuts are now generated in very large numbers. Across the $1{,}415$ instances that
 both \texttt{BBC-LP} and \texttt{BBC-LP+F} attempted, the fractional configuration
-added $60{,}627{,}660$ cuts, and the configuration without fractional separation added
+added $67{,}513{,}396$ cuts, and the configuration without fractional separation added
 none, which is the expected control.
 
 They do not help. Table~\ref{tab:frac} gives the comparison.
@@ -202,30 +256,34 @@ They do not help. Table~\ref{tab:frac} gives the comparison.
 \footnotesize
 \begin{tabular}{@{}lrr@{}}
 \toprule
-On the $1{,}247$ common instances & \texttt{BBC-LP} & \texttt{BBC-LP+F}\\
+On the $1{,}415$ common instances & \texttt{BBC-LP} & \texttt{BBC-LP+F}\\
 \midrule
-fractional cuts added        & $0$   & $60{,}627{,}660$\\
-solved to optimality         & $697$ & $628$\\
+fractional cuts added        & $0$   & $67{,}513{,}396$\\
+solved to optimality         & $726$ & $659$\\
+median nodes explored        & $77{,}504$ & $3{,}795$\\
 \midrule
-\multicolumn{3}{@{}l}{final dual bound, comparing the two on the $1{,}238$ instances where both are recorded:}\\
-\quad strictly higher with fractional cuts & \multicolumn{2}{r}{$3$}\\
-\quad equal                                & \multicolumn{2}{r}{$1{,}075$}\\
-\quad strictly lower with fractional cuts  & \multicolumn{2}{r}{$160$}\\
+\multicolumn{3}{@{}l}{final dual bound, on the $1{,}404$ instances where both are recorded:}\\
+\quad strictly higher with fractional cuts & \multicolumn{2}{r}{$0$}\\
+\quad equal                                & \multicolumn{2}{r}{$1{,}228$}\\
+\quad strictly lower with fractional cuts  & \multicolumn{2}{r}{$176$}\\
 \bottomrule
 \end{tabular}
-\caption{The effect of enabling fractional Benders cuts. Sixty million cuts enter the
-master and the dual bound improves on three instances out of $1{,}238$. Sixty-nine
-instances that the base solver closes are lost, and on $160$ instances the bound
-reached within the time limit is worse, because the time is spent generating and
-managing cuts rather than searching.}
+\caption{The effect of enabling fractional Benders cuts. Sixty-seven million cuts
+enter the master. The bound at termination is never higher than without them, and on
+$176$ instances it is lower, because the hour is spent generating and managing cuts
+instead of searching. Sixty-seven instances that the base solver closes are lost.}
 \label{tab:frac}
 \end{table}
 
 This is a clean negative result and it is worth stating plainly. The mechanism works:
-the cuts are valid, they are generated, and they enter the master. What they do not do
-is raise the bound. On the instances where the coverage bound is loose --- the
-instances where a stronger bound would be worth having --- the fractional dual
-information adds essentially nothing to what the integer cuts already provide.
+the cuts are valid, they are generated, and they enter the master. The node counts show
+they do tighten the relaxation locally, since the search explores twenty times fewer
+nodes. What they do not do is raise the bound that matters. On no instance in the
+comparison is the bound at termination higher with them than without.
+
+The reading is that the fractional dual information is not new information. The
+integer cuts already give the master everything the loading dual has to say, and the
+fractional ones re-derive it at a cost of an hour of separation.
 
 \paragraph{The three strengthenings.}
 Table~\ref{tab:ablation} compares each strengthening against \texttt{BBC-LP+F} on the
@@ -237,17 +295,20 @@ instances both attempted.
 \toprule
 Configuration & what it adds & common & solved & difference\\
 \midrule
-\texttt{BBC-LP+F}   & ---                              & ---     & ---   & ---\\
-\texttt{BBC-LP+F+H} & hybrid-genetic incumbent          & $1{,}247$ & $657$ & $+29$\\
-\texttt{BBC-LP+F+C} & conflict-graph row                & $1{,}244$ & $626$ & $-2$\\
-\texttt{BBC-LP+ACC} & all three together                & $1{,}243$ & $621$ & $-7$\\
-\texttt{BBC-LP+F+P} & Pareto-optimal cut lifting        & $1{,}224$ & $591$ & $-37$\\
+\texttt{BBC-LP+F}   & ---                        & ---       & ---   & ---\\
+\texttt{BBC-LP+F+H} & hybrid-genetic incumbent   & $1{,}421$ & $690$ & $+31$\\
+\texttt{BBC-LP+F+C} & conflict-graph row         & $1{,}421$ & $657$ & $-2$\\
+\texttt{BBC-LP+ACC} & all three together         & $1{,}421$ & $656$ & $-3$\\
+\texttt{BBC-LP+F+P} & Pareto-optimal cut lifting & $1{,}421$ & $622$ & $-37$\\
+\midrule
+\texttt{BBC-LP}     & fractional separation removed & $1{,}415$ & $726$ & $+67$\\
 \bottomrule
 \end{tabular}
-\caption{Each strengthening against \texttt{BBC-LP+F}, on the instances both
-attempted. Only the one that improves the incumbent helps. The two that aim at the
-dual bound cost more time than they return, and combining all three does not recover
-the loss.}
+\caption{Each strengthening against \texttt{BBC-LP+F}, on the instances both attempted.
+Only the one that improves the incumbent helps. The two that aim at the dual bound
+cost more time than they return, and combining all three does not recover the loss.
+The last row is the comparison of Table~\ref{tab:frac}, repeated here because removing
+a feature outperforms every addition.}
 \label{tab:ablation}
 \end{table}
 
@@ -260,13 +321,20 @@ grounds: on most instances the coverage row already dominates it.
 \paragraph{Where the search stops.}
 Two further measurements locate the difficulty precisely.
 
-First, of the $699$ instances \texttt{BBC-LP} solves, $255$ are closed at the root
-node, without branching at all.
+First, of the $726$ instances \texttt{BBC-LP} solves, $259$ are closed at the root
+node, without branching at all. The root relaxation value was recorded on $1{,}178$ of
+the $1{,}421$ runs, and on $883$ of those the optimum is also known. On those $883$ the
+root value equals the optimum $294$ times, and the split is sharp: among the runs that
+went on to close the instance it is already the optimum in $264$ of $497$, and among
+the runs that did not close it in only $30$ of $386$. Where it is not the optimum it is
+short of it by at least one unit and by $16.7\%$ at the median, rising to $42.9\%$.
 
-Second, consider the runs that hit the time limit. There are $593$ of them. For $272$
-of those the optimum is known, because some other method proved it. On $194$ of those
-$272$, which is $71\%$, the Benders solver's incumbent already \emph{equals} that
-optimum. It had found the answer and could not prove it.
+Second, consider the runs that hit the time limit. Across the nine Benders
+configurations there are $6{,}562$ of them, and for $3{,}874$ the optimum is known
+because some method proved it. On $2{,}571$ of those $3{,}874$, which is $66\%$, the
+Benders solver's incumbent already \emph{equals} that optimum. It had found the answer
+and could not prove it. For \texttt{BBC-LP} alone the figure is $229$ of $386$, or
+$59\%$.
 
 Taken together: when the bound is good the solver finishes at the root, and when the
 bound is bad it finds the optimum quickly and then spends an hour failing to certify
@@ -279,83 +347,176 @@ instances from hard ones for any configuration-based method. That prediction is
 directly testable, because for each instance with a known optimum it can be checked
 whether the optimum equals the bound.
 
-Of the $974$ instances whose optimum is known, $494$ have the coverage bound tight and
-$480$ do not. The split is almost even, at $50.7\%$, which means the standard instance
-collections are not concentrated in either regime.
+Of the $1{,}115$ instances whose optimum is known, $523$ have the coverage bound tight
+and $592$ do not. The split is close to even, at $46.9\%$ tight, which means the
+standard instance collections are not concentrated in either regime. Where the bound is
+loose it is loose by a wide margin: the optimum exceeds it by $5.71$ on average and by
+as much as $30$.
 
-Splitting the Benders solver's results by that criterion gives
-Table~\ref{tab:tightness}.
+Splitting the results by that criterion gives Table~\ref{tab:tightness}.
 
 \begin{table}[h]\centering
 \footnotesize
-\begin{tabular}{@{}lrrr@{}}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-& instances & solved by \texttt{BBC-LP} & solved \\
+& instances & \texttt{BBC-LP} solves & SSPMF solves\\
 \midrule
-coverage bound tight ($\Zst=q$)  & $494$ & $465$ & $94\%$\\
-coverage bound loose ($\Zst>q$)  & $480$ & $234$ & $49\%$\\
+coverage bound tight ($\Zst=q$)  & $523$ & $492$ \; ($94\%$) & $523$ \; ($100\%$)\\
+coverage bound loose ($\Zst>q$)  & $592$ & $234$ \; ($40\%$) & $515$ \; ($87\%$)\\
 \bottomrule
 \end{tabular}
-\caption{The Benders solver's success rate, split by whether the coverage bound equals
-the optimum. The bound, not the size of the instance, is what decides the outcome.}
+\caption{Success rate split by whether the coverage bound equals the optimum. The
+bound, not the size of the instance, is what decides the outcome for the Benders
+solver. The multicommodity model is affected by the same split but far less, because
+it is not relying on that bound alone.}
 \label{tab:tightness}
 \end{table}
 
-This is the central measurement of the campaign. The same solver, on the same
-hardware, under the same time limit, closes $94\%$ of one class and $49\%$ of the
-other. The classification is not by number of jobs, number of tools or density; it is
-by a single structural property of the instance, and it is the property the theory of
+This is the central measurement of the campaign. The same solver, on the same hardware,
+under the same time limit, closes $94\%$ of one class and $40\%$ of the other. The
+classification is not by number of jobs, number of tools or density; it is by a single
+structural property of the instance, and it is the property the theory of
 Section~\ref{sec:gap} identifies.
+
+The SSPMF column is the useful control. Its relaxation is also equal to $q$, so if the
+bound were the whole story it should show the same collapse. It does not: it falls from
+$100\%$ to $87\%$ where the Benders solver falls from $94\%$ to $40\%$. A compact model
+gives the branch-and-bound search a full description of the problem to work with at
+every node, and the search recovers much of what the bound does not supply. The Benders
+master sees only the cuts it has accumulated, and when the bound is loose it has very
+little else.
 
 \subsection{Branch-and-price}\label{ssec:results-bnp}
 
-The two position-indexed prototypes, PCF$'$ and PTF, were implemented, validated
-against brute-force optima on small instances, and run under the protocol used for the
-earlier interim campaign. Their runs under the uniform protocol of Section~\ref{ssec:bench} are in progress at
-the time of writing, so no results from them appear in this section.
+The two position-indexed prototypes were run separately from the campaign above. They
+are implemented in Python over PySCIPOpt with a Python pricer, so a single node costs
+orders of magnitude more than a node of a compiled solver, and comparing their
+wall-clock times against CPLEX would measure the implementation language rather than
+the formulation. In total $2{,}581$ runs were made over $469$ instances in seven
+configurations: PCF$'$ alone; PCF$'$ with each of the four accelerations of
+Section~\ref{ssec:pos} separately, written \texttt{+HP} for heuristic pricing,
+\texttt{+MC} for multiple pricing, \texttt{+WS} for warm starting and \texttt{+STAB}
+for dual stabilisation; PCF$'$ with all four together, written \texttt{+ACC}; and PTF.
+The time limit is thirty minutes on the Catanzaro and Crama families and ten minutes on
+the Laporte families.
 
-What can be stated without those runs is structural, and it is the more important part.
-Proposition~\ref{prop:pcf} shows that the position--configuration relaxation equals the
-coverage bound $q$, so a branch-and-price built on it inherits exactly the limitation
-that Table~\ref{tab:tightness} measures for the Benders solver.
-Proposition~\ref{prop:ptf} shows that the position--transition relaxation can exceed
-$q$, which makes it the one construction in this report that is not so limited.
-Establishing by how much, and on which instances, is the natural next experiment.
+Two properties of this run make its counts weaker evidence than the campaign above, and
+both are stated before the numbers. First, the harness carries an early-stop rule: once
+a configuration has failed to close six increasingly hard instances in succession, the
+remaining harder instances are skipped for that configuration. The number of runs a
+configuration received therefore depends on how it performed, so the denominators in
+Table~\ref{tab:bnp} are not comparable across rows. Second, no repetition or seed
+variation was run. Every comparison drawn below is made either on instances that both
+configurations attempted, or on the root relaxation value, which the early-stop rule
+cannot bias because it is recorded before any search.
 
-The comparison with the Job Grouping Problem is informative here.
+\paragraph{They agree with the campaign.}
+On the $507$ runs that proved an optimum and where the same instance was also closed in
+the campaign of Section~\ref{ssec:results-solved}, the two agree on every one. As in
+Section~\ref{ssec:validation}, the native objective is the free-initial cost and the
+difference from the empty-start cost is exactly $b$ on all $507$.
+
+\paragraph{What they solve.}
+Table~\ref{tab:bnp} gives the counts. Nothing above nine jobs was closed by any
+configuration: all $608$ runs on the $30$-job and $40$-job instances reached the time
+limit. This is the expected consequence of a Python pricer and is not evidence about
+the formulation.
+
+\begin{table}[h]\centering
+\footnotesize
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Configuration & what it adds & runs & solved & median time (s) & median columns\\
+\midrule
+PCF$'$\texttt{+MC}   & multiple pricing          & $422$ & $102$ & $11.4$ & $1{,}504$\\
+PCF$'$               & ---                       & $415$ & $91$  & $23.7$ & $1{,}574$\\
+PCF$'$\texttt{+HP}   & heuristic pricing         & $360$ & $73$  & $19.7$ & $5{,}173$\\
+PTF                  & position--transition rows & $387$ & $73$  & $2.4$  & $1{,}279$\\
+PCF$'$\texttt{+WS}   & warm-started pool         & $359$ & $64$  & $14.9$ & $1{,}610$\\
+PCF$'$\texttt{+ACC}  & all four together         & $337$ & $60$  & $28.1$ & $1{,}221$\\
+PCF$'$\texttt{+STAB} & dual stabilisation        & $301$ & $44$  & $35.7$ & $1{,}133$\\
+\bottomrule
+\end{tabular}
+\caption{The branch-and-price prototypes. Median time is over the runs that closed;
+median columns is over all runs. The run counts are outcome-dependent through the
+early-stop rule, so the rows are not comparable; the comparison that matters is the
+one below, which is made on common instances.}
+\label{tab:bnp}
+\end{table}
+
+\paragraph{The measurement that matters.}
+Proposition~\ref{prop:pcf} states that the position--configuration relaxation equals
+the coverage bound $q$, and Proposition~\ref{prop:ptf} states that the
+position--transition relaxation can exceed it. Both are testable directly, because the
+prototypes record the root relaxation value.
+
+\emph{PCF$'$ never exceeds $q$.} On all $2{,}114$ PCF$'$ runs for which a root
+relaxation value was recorded, that value equals $\lvert\U\rvert-b$ exactly. Not one
+run, in any of the six PCF$'$ configurations, produced a root bound above the counting
+bound. This is Proposition~\ref{prop:pcf} confirmed on the benchmark rather than on
+paper.
+
+\emph{PTF exceeds $q$, and almost never.} Of the $233$ PTF runs with a recorded root
+relaxation, three are strictly above $\lvert\U\rvert-b$: Catanzaro \texttt{A0-0}, where
+the bound is $2.013$ against $q=2$, and Laporte3 \texttt{L11-6} and \texttt{L11-7},
+where it is $6$ against $q=5$. Proposition~\ref{prop:ptf} is therefore not vacuous. But
+$230$ of $233$ runs sit exactly on $q$, and on the two Laporte3 instances the optima
+are $12$ and $13$, so a bound of $6$ instead of $5$ closes a small part of a large gap.
+
+\emph{The bound is often already the answer.} On $990$ of the $1{,}846$ runs where both
+the root relaxation and the optimum are known, the root relaxation \emph{equals} the
+optimum. These are the tight instances of Section~\ref{ssec:results-tight}, seen from
+the other side: where the coverage bound is tight, a configuration-based relaxation
+needs no strengthening at all, and where it is loose, neither PCF$'$ nor PTF supplies
+one.
+
+Head to head on the $320$ instances both attempted, PCF$'$ and PTF each close $73$.
+Their node counts differ by a factor of fifty --- a median of $96$ against $2$ ---
+because the PTF pricer prices coupled pairs of configurations and costs far more per
+node. The stronger relaxation does not convert into more instances closed.
+
+\paragraph{The comparison with the Job Grouping Problem.}
 \citet{Otiai2024} builds a branch-and-price for that problem whose set-covering
 relaxation is strong enough to close benchmark instances in a handful of nodes. For the
 SSP, \citet{Moreira2026} reports that the trivial bound $\lvert T\rvert-b$ obtained by
 the multicommodity model was the best available bound on all thirty instances of three
 of his subgroups, with the configuration model giving the best bound on four instances
-of the remaining, tighter subgroup. The configuration relaxation for the SSP is
-therefore not, in general, an improvement on the counting bound, which is the same
-conclusion Proposition~\ref{prop:pcf} reaches analytically.
+of the remaining, tighter subgroup. The measurements above say the same thing on a
+larger collection and with the mechanism visible: the configuration relaxation for the
+SSP is not, in general, an improvement on the counting bound.
 
 \subsection{What the campaign establishes}\label{ssec:results-summary}
 
-Five statements are supported by the measurements above.
+Six statements are supported by the measurements above.
 
 \begin{enumerate}[topsep=4pt,itemsep=3pt]
   \item The reimplemented multicommodity model of \citet{daSilva2024} is the strongest
   single method in this study, which replicates the claim of its authors on an
-  independent implementation.
+  independent implementation and a different instance collection.
 
-  \item Cross-method agreement is complete. On all $974$ instances solved by more than
-  one method, no two methods disagree on the cost of the schedule returned.
+  \item Cross-method agreement is complete. On the $999$ instances solved by more than
+  one method, all $41{,}673$ pairs of methods agree on the cost of the schedule
+  returned.
 
   \item Fractional Benders cuts, once the implementation defect is corrected, are
-  generated in very large numbers and are counterproductive. They raise the dual bound
-  on three instances out of $1{,}238$ and cost sixty-nine solved instances.
+  generated in very large numbers and are counterproductive. Sixty-seven million of
+  them never raise the bound at termination on a single instance, and they cost
+  sixty-seven solved instances.
 
   \item Of four strengthenings of the Benders solver, only the one that improves the
   incumbent helps. The three that aim at the bound are neutral or harmful.
 
   \item Whether the coverage bound equals the optimum decides whether the Benders
-  solver closes the instance: $94\%$ against $49\%$. Where it fails, the incumbent is
-  already optimal $71\%$ of the time.
+  solver closes the instance: $94\%$ against $40\%$. Where it fails, the incumbent is
+  already optimal $59\%$ of the time.
+
+  \item The position--configuration relaxation equals the coverage bound on every one
+  of $2{,}114$ runs, and the position--transition relaxation exceeds it on three runs of
+  $233$. The first is Proposition~\ref{prop:pcf} confirmed; the second is
+  Proposition~\ref{prop:ptf} confirmed and, at the same time, shown to be of little
+  practical use as it stands.
 \end{enumerate}
 
 \noindent
-The first two are checks that the study is sound. The last three all say the same
-thing, which Section~\ref{sec:disc} takes up.
+The first two are checks that the study is sound. The last four all say the same thing,
+which Section~\ref{sec:disc} takes up.
