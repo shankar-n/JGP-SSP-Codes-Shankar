@@ -1,0 +1,1 @@
+slurmstepd-node35: error: Detected 2 oom_kill events in StepId=20012.batch. Some of the step tasks have been OOM Killed.

@@ -1,0 +1,1 @@
+slurmstepd-node34: error: Detected 1 oom_kill event in StepId=19989.batch. Some of the step tasks have been OOM Killed.

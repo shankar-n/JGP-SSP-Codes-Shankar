@@ -1,0 +1,110 @@
+%==============================================================================
+\section{How every claim in this report was checked}\label{app:verify}
+%==============================================================================
+
+This appendix describes the verification applied to the results of this report, so
+that a reader who wishes to check them can do so directly. Section~\ref{sec:ai}
+refers to it.
+
+\subsection{Principle}\label{ssec:verify-principle}
+
+Three rules were followed.
+
+\emph{Independence.} The verification program shares no code with the solvers, the
+campaign harness, or any script written during the research. Agreement between them is
+therefore corroboration, not a second run of one implementation.
+
+\emph{No assumed results.} The program does not use the results it is checking. The
+loading rule of Proposition~\ref{prop:ktns} is not assumed optimal; it is implemented
+separately and compared against an exact dynamic program over magazine states, so the
+proposition itself is tested. The optimum $\Zst$ is computed by a dynamic program over
+subsets of jobs, which is cross-checked against brute-force enumeration of all
+permutations on the smallest instances, and which uses none of the methods of
+Section~\ref{sec:exact}.
+
+\emph{Exhaustive where possible.} On small instances the program enumerates rather than
+samples. Where a statement concerns a family too large to enumerate, the sample and its
+generation parameters are stated, and the statement is labelled an Observation rather
+than a Proposition.
+
+\subsection{What is covered}\label{ssec:verify-covered}
+
+\begin{itemize}[topsep=4pt,itemsep=2pt]
+  \item \textbf{The loading oracle.} KTNS against the exact dynamic program, on
+  $83{,}670$ instance-and-sequence pairs, including every permutation of every instance
+  in a random bank. No disagreement. The same comparison was run against the
+  implementation used by the solvers, with the same result.
+  \item \textbf{The convention identity} of Proposition~\ref{prop:conv}, on random
+  instances.
+  \item \textbf{Both lower bounds} and Corollary~\ref{cor:lb}, on every instance in the
+  random census.
+  \item \textbf{Every named instance} in Sections~\ref{sec:prelim} and \ref{sec:gap}:
+  the $k$-ring for $k=3,\dots,9$ in both readings; the sliding-window ring; the
+  witness $W$ of Proposition~\ref{prop:refute}; the pair $I_0$, $I_1$ of
+  Proposition~\ref{prop:noclutter}; the $\Kst=4$ instance; the smallest sub-optimal
+  instance of Observation~\ref{obs:smallest}; the copies of
+  Observation~\ref{obs:unbounded-true}; the star and non-matroid instances of
+  Propositions~\ref{prop:chromK} and \ref{prop:nonmatroid}.
+  \item \textbf{Every bound in Section~\ref{ssec:ratio} and \ref{ssec:law}}, checked
+  for violations on a random census of $200$ instances: Theorem~\ref{thm:uncond},
+  Corollaries~\ref{cor:zerogap}, \ref{cor:smallZ} and \ref{cor:z3},
+  Lemma~\ref{lem:transcap}, and Propositions~\ref{prop:k3} and \ref{prop:genk}. No
+  violation.
+  \item \textbf{The closed form of Proposition~\ref{prop:hk3}}, on instances with
+  $\Kst=3$ drawn at random until $45$ were obtained. No disagreement.
+  \item \textbf{The covering relaxation} of Proposition~\ref{prop:oddring}, by solving
+  the fractional cover as a linear program for $k=3,\dots,8$. This is what identified
+  that the statement requires $k\ge4$.
+  \item \textbf{The setup-cost collapse} of Theorem~\ref{thm:collapse}, by enumerating
+  all feasible groupings and all orderings of an instance and minimising the augmented
+  objective directly. This is also what identified that the threshold must be read in
+  the walk value.
+  \item \textbf{The PCF relaxation} of Proposition~\ref{prop:pcf}, by building the
+  linear program explicitly over all configurations and solving it, with and without
+  the counting rows.
+\end{itemize}
+
+\subsection{What the verification found}\label{ssec:verify-found}
+
+The checking is described here rather than only its conclusion, because two of its
+findings changed the content of this report.
+
+The first is the distinction of Section~\ref{ssec:frames}. The $k$-ring family is
+treated in the literature as the canonical example of a positive gap for the two-phase
+heuristic, with the gap unbounded on copies of it. The verification found that every
+$k$-ring has \emph{zero} gap for the method as specified, and that the published values
+are walk values. That is why
+Section~\ref{ssec:frames} exists, why Table~\ref{tab:rings} has two gap columns, and
+why Proposition~\ref{prop:unbounded} is now stated for the walk value with
+Observation~\ref{obs:unbounded-true} supplying a different family for the other
+reading.
+
+The second is Proposition~\ref{prop:oddring}, which had been stated for all $k$ and
+fails at $k=3$, where the whole job set forms a single feasible group.
+
+Both were errors of statement rather than of proof: the arguments were sound for the
+objects they were really about. That is the characteristic failure mode this appendix
+exists to catch, and it is the reason the verification does not assume the results it
+checks.
+
+A third finding concerns the campaign analysis rather than the structural results, and
+is recorded in Section~\ref{ssec:validation} and Appendix~\ref{app:repro}. Two
+properties of the result files can silently corrupt any analysis of them. An instance
+must be identified by capacity as well as by name, because the Crama collection reuses
+file names across four capacities and merging them manufactures disagreements between
+methods that do not exist. And the coverage bound must be computed from the tools some
+job actually requires, not from the tool count declared in the file, which is wrong on
+the ten instances that declare a tool no job needs. Neither trap is in a solver. Both
+are in the code that reads the results, which is the part least likely to be checked.
+
+\subsection{Running it}\label{ssec:verify-running}
+
+The program is \texttt{verification/verify\_report\_independent.py} in the repository.
+It requires Python~3 and SciPy, needs no commercial solver, and completes in roughly
+twenty-five minutes. It prints one line per claim, naming the section of this report the
+claim comes from, the value that section states, and the value the computation
+produces, and exits with a non-zero status if any of them disagree.
+
+The campaign numbers of Section~\ref{sec:comp} are produced by a separate analysis over
+the raw per-instance result files, described in Appendix~\ref{app:repro}. No number in
+Section~\ref{sec:comp} is carried over from an earlier campaign.
