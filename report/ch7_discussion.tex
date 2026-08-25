@@ -287,89 +287,64 @@ did not exist before the two readings were separated.
 
 \subsection{Limitations}\label{ssec:limits}
 
-These are ordered by how much they threaten the report's conclusions, the most serious
-first.
+Six, ordered by how much they threaten the conclusions above.
 
 \paragraph{The census of heuristic gaps is on small instances.}
-Observation~\ref{obs:census} says that positive heuristic gaps are rare, always equal
-to one, and always need $b\ge4$. It rests on a census of instances with three to five
-jobs, because the optimum there is computed by exhaustion. Nothing in it shows that the
-same holds at industrial sizes, and the agreement with \citet{Burger2015} comes from a
-different method rather than a wider range of sizes. This is the least secure empirical
-claim in the report and the first a reader should discount. The structural results of
+Observation~\ref{obs:census} says that positive heuristic gaps are rare, always equal to
+one, and always need $b\ge4$. It rests on a census of instances with three to five jobs,
+because the optimum there is computed by exhaustion. Nothing in it shows the same holds
+at industrial sizes, and the agreement with \citet{Burger2015} comes from a different
+method rather than a wider range of sizes. This is the least secure empirical claim in
+the report and the first a reader should discount. The structural results of
 Sections~\ref{ssec:exact} and \ref{ssec:ratio} do not depend on it; those are proved for
 every instance and every capacity.
 
 \paragraph{The window family has been measured at its ceiling, not inside a solver.}
-Table~\ref{tab:ceilings} and Figure~\ref{fig:ceilings} report the strongest bound each
-family could certify, computed by enumerating every sequence of $62$ instances at eight
-jobs. A linear relaxation will realise less than that, possibly much less, and no
-measurement inside a branch-and-price run exists yet. Both families are measured the
-same way, so the comparison between them survives even though neither figure is
-achievable in practice. What follows safely is that the arc-supported family is
-exhausted, since that is a statement about a ceiling. That the window family will
+Table~\ref{tab:ceilings} and Figure~\ref{fig:ceilings} give the strongest bound each
+family could certify, found by enumerating every sequence of $62$ instances at eight
+jobs. A linear relaxation will realise less, possibly much less, and no measurement
+inside a branch-and-price run exists yet. Both families are measured the same way, so
+the comparison between them survives. What follows safely is that the arc-supported
+family is exhausted, since that is a claim about a ceiling; that the window family will
 deliver inside a solver is not established.
 
-\paragraph{One time limit, one machine, one collection.}
-Every solve count and time in Section~\ref{sec:comp} comes from one hour on one
-homogeneous node type over the standard collections. A longer limit would move the
-counts, and Table~\ref{tab:cumulative} shows by how much and that it would not move them
-equally for all methods. The conclusions of Section~\ref{ssec:disc-bound} rest instead
-on the split by bound tightness and on the ablation, both of them comparisons made under
-identical conditions, so they do not turn on where the limit is set.
-
-\paragraph{The compact baseline is F4, and F4 is not the strongest of its family.}
-\citet{Catanzaro2015} recommend F5, which was not implemented, so the ranking in
-Table~\ref{tab:solves} understates what a compact model can do. The omission runs
-against this report's own conclusion rather than for it: a stronger baseline would widen
-a margin that already favours the compact models over the methods built here. It has no
-bearing on the bound results, which concern relaxation values rather than solver speed.
-
 \paragraph{Four hundred and twenty-seven runs returned no result.}
-This affects the denominators in Table~\ref{tab:solves}, and it is the one failure that
-changes a conclusion rather than a footnote. Of the $352$ that belong to the LSS
-baseline, each is recorded as a subprocess termination with no captured exception, so
-the proximate cause is not in the result files. What the campaign does establish is that
-none occurs before $1{,}063$ seconds, that they are spread evenly over the ten shards,
-and that the obvious size explanation fails, the crashed runs being smaller than the
-completed ones. The loss is also not random with respect to difficulty: SSPMF proves
+This affects the denominators in Table~\ref{tab:solves} and is the one failure that
+changes a conclusion. Of the $352$ belonging to LSS, each is recorded as a subprocess
+termination with no captured exception, so the proximate cause is not in the result
+files; none occurs before $1{,}063$ seconds, they are spread evenly over the ten shards,
+and the crashed runs are smaller than the completed ones, which rules out the obvious
+size explanation. The loss is not random with respect to difficulty either: SSPMF proves
 optimality on $78\%$ of the instances LSS completed and on $60\%$ of those it lost, so
 LSS never attempted the hard third of the collection. That is why
 Section~\ref{ssec:results-solved} reports the three compact models without ranking them
-against each other. It does not touch the comparison that matters, between the compact
-models as a group and the methods built here, because that gap is an order of magnitude
-larger than the missing runs. The other $75$ failures are spread across nine
-configurations, and $49$ of them carry an explicit credential-expiry error from the
-cluster filesystem (Section~\ref{ssec:validation}), so they are infrastructure losses
-rather than evidence about any method.
+against each other. It does not touch the comparison between the compact models as a
+group and the methods built here, which is an order of magnitude larger than the missing
+runs. Of the other $75$, spread across nine configurations, $49$ carry a credential
+expiry error from the cluster filesystem and are infrastructure losses.
+
+\paragraph{The comparison is one hour, one machine, one collection, and F4 rather than F5.}
+Every solve count and time in Section~\ref{sec:comp} comes from a single one-hour limit
+on one homogeneous node type over the standard collections;
+Figure~\ref{fig:cactus} shows how the counts would move under a longer limit and that
+they would not move equally for all methods. \citet{Catanzaro2015} recommend
+Formulation~5, which was not implemented, so the compact baseline here is weaker than
+the best available. Both points run against this report's own conclusion rather than for
+it, and neither touches the bound results, which concern relaxation values rather than
+solver speed.
 
 \paragraph{The branch-and-price prototypes run in Python; the baselines run in C.}
 A node of a Python pricer costs orders of magnitude more than a node inside CPLEX, and
-the run counts in Table~\ref{tab:bnp} are additionally outcome-dependent through the
-early-stop rule. Nothing above nine jobs was closed, and that fact carries no
-information about the formulations. None of the conclusions drawn from these runs uses a
-solve count: they rest on the root relaxation value, which is recorded before any search
-and so is affected by neither problem.
+the counts in Table~\ref{tab:bnp} are additionally outcome-dependent through the
+early-stop rule. Nothing above nine jobs was closed, and that carries no information
+about the formulations. None of the conclusions drawn from these runs uses a solve
+count: they rest on the root relaxation value, recorded before any search and so
+affected by neither problem.
 
 \paragraph{The learned cut-selection prototype was not run on the SSP.}
 It was trained and measured on knapsack cover cuts, with one seed per size and no
-repetition. It shows that the agent learns, and says nothing about this problem, which
-bears on Section~\ref{ssec:rl} and nothing else.
-Section~\ref{ssec:disc-locality} explains why running it on the SSP as built would not
-have helped: cut selection chooses among cuts a method can already generate, and those
-cuts have almost no headroom left.
-
-\paragraph{The setup-cost parameter has no measured range.}
-Theorem~\ref{thm:collapse} locates the transition between the SSP and the Job Grouping
-Problem at a threshold in $\rho$, the ratio of the fixed cost of a machine stop to the
-cost of exchanging one tool. No published source giving comparable measurements of the
-two quantities was found, so where real installations sit on that spectrum is not
-established here. The theorem is a statement about the model and is proved; what is
-missing is an empirical value for one of its inputs, which affects how the result should
-be applied rather than whether it holds.
-
-\paragraph{PTF exceeds the coverage bound, but only just.}
-The excess is one unit, on three runs of $233$, against gaps of six to eight.
-Proposition~\ref{prop:ptf} says the relaxation \emph{can} exceed $q$ and establishes it
-by witness, so the qualitative claim is secure. Whether the excess can be made to grow
-is Problem~\ref{prob:ptf-gap} and is open; no quantitative claim is made.
+repetition. It shows that the agent learns, and says nothing about this problem. That
+bears on Section~\ref{ssec:rl} and nothing else, and
+Section~\ref{ssec:disc-locality} explains why running it here would not have helped:
+cut selection chooses among cuts a method can already generate, and those cuts have
+almost no headroom left.
