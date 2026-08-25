@@ -1,3 +1,0 @@
-solved instances with |U| known: 0
-bound-tight (opt == |U|): 0  (0.0%)
-bound-loose:              0
