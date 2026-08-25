@@ -52,22 +52,13 @@ fall below $q$ in the great majority of cases \citep{daSilva2024}, not in all.}
 
 \subsection{Compact formulations and the limit they reach}\label{ssec:compact}
 
-Three compact formulations from the literature serve as baselines. All three were
-reimplemented for this study, and Section~\ref{ssec:validation} describes how they
-were checked.
-
-\citet{Catanzaro2015} give a family of five formulations in job-position and ordering
-variables. Formulation~4 is used here. Formulations~3 and~4 have the same linear
-relaxation and Formulation~4 is the smaller, which is the authors' own reason for
-excluding Formulation~3 from their experiments. Formulation~5 is stronger still, and
-the authors recommend it as the best of the family; it was not implemented in this
-study, and Section~\ref{ssec:limits} records that as a limitation.
-
-\citet{Laporte2004} formulate the problem with tool-state variables on a
-travelling-salesman skeleton, with subtour elimination separated lazily and three
-families of valid inequalities. \citet{daSilva2024} give a multicommodity-flow model
-in which each tool routes one unit of flow through the position network. The last is
-singled out by its relaxation.
+Three compact formulations from the literature serve as baselines: Formulation~4 of
+\citet{Catanzaro2015}, the tool-state model of \citet{Laporte2004}, and the
+multicommodity-flow model of \citet{daSilva2024}. Section~\ref{ssec:sota-compact}
+describes all three and records the omission of the stronger Formulation~5 as a
+limitation. All three were reimplemented for this study, and
+Section~\ref{ssec:validation} describes how they were checked. The last is singled out
+here by its relaxation.
 
 \begin{proposition}[\citealp{daSilva2024}]\label{prop:sspmf-lp}
 The linear relaxation of the multicommodity-flow formulation equals

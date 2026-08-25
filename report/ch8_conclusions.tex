@@ -4,10 +4,9 @@
 
 \subsection{What this report establishes}\label{ssec:concl-summary}
 
-One idea organises everything above: the equivalence between the SSP and a walk
-through magazine configurations. It gives a structural theory of the standard
-heuristic and a family of exact methods, and the same quantity turns out to govern
-both.
+The equivalence between the SSP and a walk through magazine configurations organises
+everything above. It yields a structural theory of the standard heuristic and a family
+of exact methods, and one quantity --- the coverage bound --- governs both.
 
 \paragraph{On the structural side.}
 The two-phase heuristic admits two readings, and separating them is a prerequisite for
@@ -53,22 +52,21 @@ it doing so on three runs out of $233$.
 
 \paragraph{On the empirical side.}
 A campaign over $1{,}421$ instances and twelve configurations, under a single one-hour
-limit, establishes that the coverage bound decides the outcome: $94\%$ of bound-tight
-instances are closed against $40\%$ of bound-loose ones. Where the solver fails, its
-incumbent is already optimal $66\%$ of the time. Fractional Benders cuts, tested
-properly for the first time after a defect was corrected, are generated in enormous
-numbers and raise the bound at termination on no instance at all. Of four
-strengthenings only the one improving the incumbent helps. The branch-and-price
-prototypes measure the same bound from the other side: the position--configuration
-relaxation equals $q$ on every one of $2{,}114$ runs, and the position--transition
-relaxation exceeds it on three of $233$. The multicommodity model of
-\citet{daSilva2024} is reproduced as the strongest single method. Across $41{,}673$
-pairs of methods that both proved an optimum, none disagree.
+limit, is reported in Section~\ref{sec:comp} and summarised in
+Section~\ref{ssec:results-summary}. Four of its measurements --- the incumbent at the
+time limit, the ablation, the split by whether the coverage bound is tight, and the
+root relaxation reported by the branch-and-price prototypes --- are independent of one
+another and agree. What they agree on is that the obstacle is the bound rather than the
+search: nothing that improves the search closes the loose instances, and nothing built
+here improves the bound. Two further measurements exist to make that reading
+trustworthy rather than to support it, and both do: no two methods that proved the same
+optimum disagree on its value, and the reimplemented compact baselines are reported
+without a ranking, because the runs that failed are the ones that would have decided it.
 
-The conclusion those measurements support is that a configuration-based exact method
-for the SSP is limited by the strength of its bound and not by its implementation.
-This is a negative result about a family of methods, and it is a useful one, because it
-says where effort should not go.
+The methods built here are therefore bound-limited rather than
+implementation-limited: a negative result about a family of methods rather than about
+one solver. Section~\ref{ssec:disc-locality} sets out where a stronger bound could
+come from.
 
 \subsection{Further work}\label{ssec:further}
 
@@ -94,12 +92,12 @@ the position--transition polytope explain the three runs where its bound exceeds
 
 \paragraph{A bound that reaches into the loose half.}
 This is the direction the campaign points to most strongly, and
-Section~\ref{ssec:disc-locality} takes the first step along it. The arc-supported
-information is exhausted: on the loose instances the strongest bound any arc-indexed
-family could ever certify closes $8.9\%$ of the gap on average and nothing at all on
-three quarters of them. The window family of inequality~\eqref{eq:window} closes
-$30.9\%$, is valid, is robust in the branch-and-price sense, and is implemented in
-\texttt{src/BNP/window\_cuts.py}. What remains is to measure it inside the solver
+Section~\ref{ssec:disc-locality} takes the first step along it: the arc-supported
+information the solvers carry today is exhausted, and the window family of
+inequality~\eqref{eq:window} has roughly four times the remaining headroom
+(Table~\ref{tab:ceilings}). It is valid, it is robust in the branch-and-price sense,
+and it is implemented in \texttt{src/BNP/window\_cuts.py}. What remains is to measure it
+inside the solver
 rather than at its ceiling, and to separate the longer windows rather than taking a
 static pool of short ones. Two further families suggest themselves from the same
 reading: chaining PTF per configuration rather than per tool, which is what confines

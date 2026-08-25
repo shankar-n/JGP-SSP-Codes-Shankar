@@ -23,6 +23,17 @@
 \usepackage{enumitem}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc,decorations.pathreplacing}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\pgfplotsset{
+  reportaxis/.style={
+    width=0.97\linewidth, height=6.2cm, font=\footnotesize,
+    axis line style={black!55}, tick style={black!55},
+    grid=major, grid style={black!12, line width=0.3pt},
+    every axis plot/.append style={line width=0.9pt},
+    legend cell align=left,
+    legend style={font=\scriptsize, draw=black!30, fill=white, fill opacity=0.92,
+                  text opacity=1, row sep=1pt, inner sep=3pt}}}
 % ---- figure colour palette (used across all TikZ figures) --------------------
 % Conventional monochrome: everything is dark ink; grayscale fills only.
 \definecolor{cBlue}{HTML}{111111}
@@ -32,7 +43,7 @@
 \definecolor{cPurple}{HTML}{111111}
 \definecolor{cTeal}{HTML}{111111}
 \usepackage[numbers,sort&compress]{natbib}
-\usepackage[hidelinks]{hyperref}
+\usepackage[hidelinks,plainpages=false,pdfpagelabels]{hyperref}
 \usepackage{graphicx}
 \usepackage{comment}
 \usepackage{setspace}
@@ -69,34 +80,73 @@
 
 \begin{document}
 
-% ---- Cover page (layout copied from the department's model cover) -----------
-\newcommand{\coverlogo}[2]{\IfFileExists{cover/#1.png}{\includegraphics[height=#2]{cover/#1.png}}{}}
+% ---- Cover page -------------------------------------------------------------
+% Logos are centred on a common horizontal axis rather than sharing a baseline,
+% and are sized so that the three read as equal weight despite very different
+% aspect ratios (uca 1.03, inp_isima 2.34, limos 1.68).
+\newcommand{\coverlogo}[2]{%
+  \IfFileExists{cover/#1.png}%
+    {\raisebox{-0.5\height}{\includegraphics[height=#2]{cover/#1.png}}}{}}
+% Title lines are set in a \makebox so the longer line may overhang the text
+% block into the (generous) margin instead of forcing a ragged three-way break.
+\newcommand{\titleline}[1]{\makebox[\textwidth][c]{#1}\par}
+\newcommand{\coverrule}{\makebox[\textwidth][c]{%
+  \rule{\dimexpr\textwidth+32mm\relax}{0.4pt}}\par}
+
 \begin{titlepage}
 \centering
-\makebox[\textwidth]{\coverlogo{uca}{22mm}\hfill\coverlogo{inp_isima}{20mm}\hfill\coverlogo{limos}{15mm}}\par
+\makebox[\textwidth]{%
+  \coverlogo{uca}{17mm}\hfill
+  \coverlogo{inp_isima}{13.5mm}\hfill
+  \coverlogo{limos}{11.5mm}}\par
+\vspace{7mm}
+\makebox[\textwidth][c]{\rule{\dimexpr\textwidth+32mm\relax}{0.8pt}}\par
+
+\vspace*{\fill}
+
+{\normalsize\scshape Internship report\par}
+\vspace{6mm}
+\coverrule
+\vspace{7mm}
+{\Large\bfseries
+  \titleline{Studying structural properties and exact models}
+  \vspace{5pt}
+  \titleline{for solving the Job Sequencing and Tool Switching Problem}}
+\vspace{7mm}
+\coverrule
+
+\vspace{16mm}
+{\large Shankar Narayanan\par}
+
+\vspace*{\fill}
+
+{\bfseries Advisors}\\[3pt]
+Prof.~Rafael Colares \qquad Prof.~Annegret Wagler\\[9pt]
+{\bfseries Academic supervisor}\\[3pt]
+Dr.~Renaud Chicoisne\par
+\vspace{9mm}
+{\itshape Laboratoire d'Informatique, de Mod\'elisation\\
+et d'Optimisation des Syst\`emes (LIMOS)\par}
+\vspace{2mm}
+{\small Universit\'e Clermont Auvergne\par}
+
 \vspace{20mm}
-{\LARGE\bfseries Studying structural properties and exact models \\[4pt]
-	for solving the Job Sequencing and Tool Switching Problem\par}
-\vspace{16mm}
-{\large\bfseries Shankar Narayanan\par}
-\vspace{13mm}
-Internship report\par
-\vspace{16mm}
-{\bfseries Advisors:}\\[2pt]
-Prof.~Rafael Colares \quad Prof.~Annegret Wagler\\[7pt]
-{\bfseries Supervisor:}\\[2pt]
-Dr.~Renaud Chicoisne\\[7pt]
-{\itshape Laboratoire d'Informatique, de Mod\'elisation et d'Optimisation des
-Syst\`emes (LIMOS)}\par
-\vfill
-{\large\today\par}
+{\today\par}
 \end{titlepage}
 
+% ---- Front matter: roman numerals, single-spaced contents -------------------
+\pagenumbering{roman}
 \input{ch0_abstract}
+\clearpage
+\begingroup
+\singlespacing
+\setcounter{tocdepth}{2}
 \tableofcontents
+\endgroup
 \clearpage
 \input{ch0_notation}
 \clearpage
+\pagenumbering{arabic}
 
 \input{ch1_introduction}
 \input{ch2_preliminaries}
@@ -113,6 +163,8 @@ Syst\`emes (LIMOS)}\par
 \input{appB_verification}
 \input{appC_reproducibility}
 
+\clearpage
+\addcontentsline{toc}{section}{References}
 \bibliographystyle{plainnat}
 \bibliography{references}
 

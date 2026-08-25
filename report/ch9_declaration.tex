@@ -6,47 +6,24 @@ In accordance with institutional guidelines on the use of artificial intelligenc
 academic work, the following is declared.
 
 \paragraph{What was used, and for what.}
-A generative AI assistant was used throughout this internship. It was used for
-literature search and summarisation; for drafting and copy-editing the prose and the
-\LaTeX{} source of this report; for scaffolding, debugging and refactoring the
-experimental code; for producing figures and tables from data; and for developing the
-statements, proofs and constructions of Section~\ref{sec:gap}.
+A generative AI assistant was used throughout this internship: for literature search
+and summarisation; for drafting and copy-editing the prose and the \LaTeX{} source of
+this report; for scaffolding, debugging and refactoring the experimental code; for
+producing figures and tables from data; and for developing the statements, proofs and
+constructions of Section~\ref{sec:gap}.
 
 \paragraph{What was not.}
 The research directions were set by the advisors, and Section~\ref{ssec:intro-done}
-records which of them proposed which. The experimental work --- running the campaigns
-on the cluster, diagnosing the missing coverage row, the PORTA enumeration, the
-instance generator, and the cross-solver checking --- was carried out by the author.
+records which of them proposed which. Running the campaigns on the cluster, diagnosing
+the missing coverage row, the PORTA enumeration, the instance generator and the
+cross-solver checking were the author's work.
 
 \paragraph{How the results were checked.}
-A declaration of this kind is worth only as much as the checking behind it, so the
-checking is described rather than asserted.
-
-Every quantitative claim in this report is reproduced by an independent verification
-program. That program was written from scratch and shares no code with the solvers,
-the campaign harness, or the scripts used during the research, so agreement between
-them is corroboration rather than a repeated run of one implementation. It does not
-assume the results it is checking: the loading rule of Proposition~\ref{prop:ktns} is
-tested against an exact dynamic program rather than used, and the optimum is computed
-by a dynamic program over subsets rather than by any method described in
-Section~\ref{sec:exact}. Appendix~\ref{app:verify} lists what it covers and how to run
-it.
-
-The campaign numbers are recomputed from the raw per-instance result files by a
-separate analysis script, and no number is carried over from an earlier campaign.
-Where a claim could not be verified, it is not made: Remark~\ref{rem:rho} records one
-such case, where a numerical claim about industrial setup times appeared in an earlier
-draft, could not be traced to any source, and has been removed rather than retained
-with a citation.
-
-\paragraph{Where the checking has limits.}
-Two limits should be stated. The verification is exhaustive only on small instances;
-on larger ones it checks consistency between methods rather than absolute correctness.
-And a program that reproduces a result confirms the result, not the argument given for
-it, so the proofs were additionally re-derived step by step during preparation.
-Appendix~\ref{app:verify} records two errors of statement that this process caught.
+Every quantitative claim here is reproduced by a separate verification program, and the
+numbers in Section~\ref{sec:comp} are recomputed from the raw per-instance result files
+rather than carried over from an earlier campaign. Appendix~\ref{app:verify} describes
+both, says what they cover, and says where their coverage stops.
 
 \paragraph{Responsibility.}
-Every passage, every line of code and every result in this report was reviewed by the
-author, and every quantitative result was checked against independent ground truth.
-The author takes full responsibility for the content of this report.
+The author read every passage, line of code and result in this report, and is
+responsible for its content.

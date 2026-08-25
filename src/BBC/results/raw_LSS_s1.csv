@@ -1,0 +1,143 @@
+instance,benchmark_set,J,T,C,density,solver,config,comb_cuts,frac_cuts,triplet_bounds,status,obj,obj_ktns,time_s,gap_pct,nodes,lp_iters,cb_invocations,cuts_sec,cuts_benders,cuts_comb,cuts_frac,root_lp_bound,dual_bound,notes
+L2-10,Laporte3,8,15,10,0.2,LSS,LSS,,,,MIP_optimal,15.0,15,11.6812,,,,,,,,,,,
+L2-8,Laporte3,8,15,10,0.2417,LSS,LSS,,,,MIP_optimal,15.0,15,11.3133,,,,,,,,,,,
+L1-7,Laporte3,8,15,5,0.2833,LSS,LSS,,,,MIP_optimal,19.0,19,0.3242,,,,,,,,,,,
+L3-1,Laporte3,8,15,10,0.475,LSS,LSS,,,,MIP_optimal,17.0,17,1.4489,,,,,,,,,,,
+L34-1,Laporte3,8,20,15,0.1688,LSS,LSS,,,,MIP_optimal,20.0,20,14.0407,,,,,,,,,,,
+L33-5,Laporte3,8,20,10,0.1938,LSS,LSS,,,,MIP_optimal,20.0,20,17.0717,,,,,,,,,,,
+L32-9,Laporte3,8,20,5,0.2062,LSS,LSS,,,,MIP_optimal,21.0,21,0.5431,,,,,,,,,,,
+L7-2,Laporte3,8,20,15,0.275,LSS,LSS,,,,MIP_optimal,20.0,20,16.87,,,,,,,,,,,
+L5-7,Laporte3,8,20,10,0.325,LSS,LSS,,,,MIP_optimal,22.0,22,8.3733,,,,,,,,,,,
+L6-8,Laporte3,8,20,10,0.35,LSS,LSS,,,,MIP_optimal,23.0,23,5.7443,,,,,,,,,,,
+L6-4,Laporte3,8,20,10,0.3875,LSS,LSS,,,,MIP_optimal,26.0,26,1.2648,,,,,,,,,,,
+L6-1,Laporte3,8,20,10,0.4125,LSS,LSS,,,,MIP_optimal,29.0,29,1.2185,,,,,,,,,,,
+L10-2,Laporte3,8,20,15,0.5125,LSS,LSS,,,,MIP_optimal,24.0,24,6.1459,,,,,,,,,,,
+L11-1,Laporte3,8,20,15,0.6062,LSS,LSS,,,,MIP_optimal,25.0,25,1.3155,,,,,,,,,,,
+L31-2,Laporte3,8,25,20,0.125,LSS,LSS,,,,MIP_optimal,25.0,25,30.3553,,,,,,,,,,,
+L31-7,Laporte3,8,25,20,0.155,LSS,LSS,,,,MIP_optimal,25.0,25,18.11,,,,,,,,,,,
+L30-10,Laporte3,8,25,15,0.16,LSS,LSS,,,,MIP_optimal,25.0,25,19.237,,,,,,,,,,,
+L30-8,Laporte3,8,25,15,0.165,LSS,LSS,,,,MIP_optimal,25.0,25,17.9642,,,,,,,,,,,
+L19-5,Laporte3,8,25,20,0.215,LSS,LSS,,,,MIP_optimal,25.0,25,16.9488,,,,,,,,,,,
+L20-2,Laporte3,8,25,20,0.27,LSS,LSS,,,,MIP_optimal,25.0,25,60.8382,,,,,,,,,,,
+L12-5,Laporte3,8,25,10,0.275,LSS,LSS,,,,MIP_optimal,31.0,31,7.518,,,,,,,,,,,
+L14-2,Laporte3,8,25,15,0.29,LSS,LSS,,,,MIP_optimal,25.0,25,22.1369,,,,,,,,,,,
+L19-3,Laporte3,8,25,20,0.3,LSS,LSS,,,,MIP_optimal,25.0,25,17.9167,,,,,,,,,,,
+L16-6,Laporte3,8,25,15,0.315,LSS,LSS,,,,MIP_optimal,25.0,25,24.6875,,,,,,,,,,,
+L16-2,Laporte3,8,25,15,0.325,LSS,LSS,,,,MIP_optimal,25.0,25,20.703,,,,,,,,,,,
+L15-1,Laporte3,8,25,15,0.345,LSS,LSS,,,,MIP_optimal,28.0,28,15.6621,,,,,,,,,,,
+L17-7,Laporte3,8,25,15,0.365,LSS,LSS,,,,MIP_optimal,27.0,27,13.4838,,,,,,,,,,,
+L21-1,Laporte3,8,25,20,0.405,LSS,LSS,,,,MIP_optimal,26.0,26,15.7864,,,,,,,,,,,
+L23-7,Laporte3,8,25,20,0.435,LSS,LSS,,,,MIP_optimal,25.0,25,15.4227,,,,,,,,,,,
+L21-3,Laporte3,8,25,20,0.49,LSS,LSS,,,,MIP_optimal,27.0,27,16.1005,,,,,,,,,,,
+L25-4,Laporte3,8,25,20,0.5,LSS,LSS,,,,MIP_optimal,25.0,25,15.1691,,,,,,,,,,,
+L25-6,Laporte3,8,25,20,0.52,LSS,LSS,,,,MIP_optimal,26.0,26,8.9458,,,,,,,,,,,
+L26-2,Laporte3,8,25,20,0.56,LSS,LSS,,,,MIP_optimal,28.0,28,8.3846,,,,,,,,,,,
+L26-6,Laporte3,8,25,20,0.675,LSS,LSS,,,,MIP_optimal,31.0,31,0.636,,,,,,,,,,,
+L2-2,Laporte4,9,15,10,0.1852,LSS,LSS,,,,MIP_optimal,15.0,15,126.2477,,,,,,,,,,,
+L1-10,Laporte4,9,15,5,0.2444,LSS,LSS,,,,MIP_optimal,17.0,17,5.6523,,,,,,,,,,,
+L2-3,Laporte4,9,15,10,0.2889,LSS,LSS,,,,MIP_optimal,15.0,15,85.9111,,,,,,,,,,,
+L4-7,Laporte4,9,15,10,0.4889,LSS,LSS,,,,MIP_optimal,18.0,18,7.0904,,,,,,,,,,,
+L29-5,Laporte4,9,20,15,0.1667,LSS,LSS,,,,MIP_optimal,20.0,20,126.0914,,,,,,,,,,,
+L27-6,Laporte4,9,20,5,0.1833,LSS,LSS,,,,MIP_optimal,21.0,21,5.8071,,,,,,,,,,,
+L28-7,Laporte4,9,20,10,0.2,LSS,LSS,,,,MIP_optimal,20.0,20,164.9208,,,,,,,,,,,
+L5-8,Laporte4,9,20,10,0.2667,LSS,LSS,,,,MIP_optimal,21.0,21,97.8499,,,,,,,,,,,
+L7-3,Laporte4,9,20,15,0.3333,LSS,LSS,,,,MIP_optimal,20.0,20,109.1012,,,,,,,,,,,
+L6-2,Laporte4,9,20,10,0.3667,LSS,LSS,,,,MIP_optimal,26.0,26,18.5223,,,,,,,,,,,
+L6-5,Laporte4,9,20,10,0.3833,LSS,LSS,,,,MIP_optimal,25.0,25,9.6498,,,,,,,,,,,
+L9-5,Laporte4,9,20,15,0.4278,LSS,LSS,,,,MIP_optimal,21.0,21,66.0854,,,,,,,,,,,
+L10-4,Laporte4,9,20,15,0.5111,LSS,LSS,,,,MIP_optimal,23.0,23,25.6685,,,,,,,,,,,
+L11-6,Laporte4,9,20,15,0.6,LSS,LSS,,,,MIP_optimal,28.0,28,10.565,,,,,,,,,,,
+L32-7,Laporte4,9,25,15,0.1333,LSS,LSS,,,,MIP_optimal,25.0,25,190.7076,,,,,,,,,,,
+L32-3,Laporte4,9,25,15,0.1467,LSS,LSS,,,,MIP_optimal,25.0,25,170.3857,,,,,,,,,,,
+L30-9,Laporte4,9,25,5,0.1511,LSS,LSS,,,,MIP_optimal,25.0,25,8.9324,,,,,,,,,,,
+L31-2,Laporte4,9,25,10,0.16,LSS,LSS,,,,MIP_optimal,25.0,25,196.6394,,,,,,,,,,,
+L14-8,Laporte4,9,25,15,0.2,LSS,LSS,,,,MIP_optimal,25.0,25,205.4023,,,,,,,,,,,
+L18-10,Laporte4,9,25,20,0.2667,LSS,LSS,,,,MIP_optimal,25.0,25,155.4174,,,,,,,,,,,
+L18-1,Laporte4,9,25,20,0.28,LSS,LSS,,,,MIP_optimal,25.0,25,149.3108,,,,,,,,,,,
+L14-6,Laporte4,9,25,15,0.2889,LSS,LSS,,,,MIP_optimal,25.0,25,199.2481,,,,,,,,,,,
+L12-4,Laporte4,9,25,10,0.3067,LSS,LSS,,,,MIP_optimal,34.0,34,7.7766,,,,,,,,,,,
+L22-7,Laporte4,9,25,20,0.32,LSS,LSS,,,,MIP_optimal,25.0,25,156.3425,,,,,,,,,,,
+L15-4,Laporte4,9,25,15,0.3511,LSS,LSS,,,,MIP_optimal,29.0,29,63.6474,,,,,,,,,,,
+L20-5,Laporte4,9,25,20,0.3689,LSS,LSS,,,,MIP_optimal,25.0,25,114.0312,,,,,,,,,,,
+L19-9,Laporte4,9,25,20,0.3956,LSS,LSS,,,,MIP_optimal,25.0,25,114.2403,,,,,,,,,,,
+L20-8,Laporte4,9,25,20,0.4222,LSS,LSS,,,,MIP_optimal,26.0,26,319.7691,,,,,,,,,,,
+L23-2,Laporte4,9,25,20,0.4711,LSS,LSS,,,,MIP_optimal,28.0,28,88.9802,,,,,,,,,,,
+L17-5,Laporte4,9,25,15,0.4933,LSS,LSS,,,,MIP_optimal,36.0,36,3.8391,,,,,,,,,,,
+L17-3,Laporte4,9,25,15,0.5156,LSS,LSS,,,,MIP_optimal,40.0,40,4.6819,,,,,,,,,,,
+L20-3,Laporte4,9,25,20,0.6,LSS,LSS,,,,MIP_optimal,31.0,31,12.5484,,,,,,,,,,,
+L25-8,Laporte4,9,25,20,0.6756,LSS,LSS,,,,MIP_optimal,34.0,34,5.2727,,,,,,,,,,,
+L4-6,Laporte7,10,10,7,0.23,LSS,LSS,,,,MIP_optimal,10.0,10,1317.6122,,,,,,,,,,,
+A4-7,Catanzaro,10,10,7,0.27,LSS,LSS,,,,MIP_optimal,10.0,10,633.7367,,,,,,,,,,,
+A1-8,Catanzaro,10,10,4,0.27,LSS,LSS,,,,MIP_optimal,11.0,11,23.0992,,,,,,,,,,,
+A3-4,Catanzaro,10,10,6,0.29,LSS,LSS,,,,MIP_optimal,10.0,10,234.958,,,,,,,,,,,
+L4-1,Laporte7,10,10,7,0.3,LSS,LSS,,,,MIP_optimal,10.0,10,326.8465,,,,,,,,,,,
+L4-3,Laporte7,10,10,7,0.31,LSS,LSS,,,,MIP_optimal,10.0,10,274.2504,,,,,,,,,,,
+L4-4,Laporte7,10,10,7,0.32,LSS,LSS,,,,MIP_optimal,10.0,10,419.5526,,,,,,,,,,,
+A2-5,Catanzaro,10,10,5,0.32,LSS,LSS,,,,MIP_optimal,11.0,11,77.358,,,,,,,,,,,
+L2-8,Laporte7,10,10,5,0.33,LSS,LSS,,,,MIP_optimal,11.0,11,47.3392,,,,,,,,,,,
+L2-3,Laporte5,,,,,LSS,LSS,,,,error,,,1454.32,,,,,,,,,,,subprocess crash: 
+L2-4,Laporte5,,,,,LSS,LSS,,,,error,,,1702.88,,,,,,,,,,,subprocess crash: 
+L3-3,Laporte5,,,,,LSS,LSS,,,,error,,,1846.2,,,,,,,,,,,subprocess crash: 
+L4-4,Laporte5,,,,,LSS,LSS,,,,error,,,1589.5,,,,,,,,,,,subprocess crash: 
+B4-7,Catanzaro,,,,,LSS,LSS,,,,error,,,1890.61,,,,,,,,,,,subprocess crash: 
+B2-9,Catanzaro,,,,,LSS,LSS,,,,error,,,2112.82,,,,,,,,,,,subprocess crash: 
+B2-3,Catanzaro,,,,,LSS,LSS,,,,error,,,2257.21,,,,,,,,,,,subprocess crash: 
+L6-8,Laporte5,,,,,LSS,LSS,,,,error,,,1914.68,,,,,,,,,,,subprocess crash: 
+L7-2,Laporte7,,,,,LSS,LSS,,,,error,,,2011.04,,,,,,,,,,,subprocess crash: 
+L6-9,Laporte7,,,,,LSS,LSS,,,,error,,,2090.29,,,,,,,,,,,subprocess crash: 
+L6-6,Laporte5,,,,,LSS,LSS,,,,error,,,1484.41,,,,,,,,,,,subprocess crash: 
+L5-4,Laporte5,15,20,5,0.19,LSS,LSS,,,,MIP_time_limit_feasible,29.0,29,3600.0143,,,,,,,,,,,
+B4-5,Catanzaro,,,,,LSS,LSS,,,,error,,,1698.27,,,,,,,,,,,subprocess crash: 
+L8-6,Laporte7,,,,,LSS,LSS,,,,error,,,1571.38,,,,,,,,,,,subprocess crash: 
+L6-10,Laporte7,,,,,LSS,LSS,,,,error,,,2337.16,,,,,,,,,,,subprocess crash: 
+L7-10,Laporte5,,,,,LSS,LSS,,,,error,,,2320.41,,,,,,,,,,,subprocess crash: 
+L10-9,Laporte5,15,20,15,0.32,LSS,LSS,,,,MIP_time_limit_feasible,21.0,21,3604.1516,,,,,,,,,,,
+L7-7,Laporte5,,,,,LSS,LSS,,,,error,,,2628.69,,,,,,,,,,,subprocess crash: 
+L8-7,Laporte5,15,20,10,0.3767,LSS,LSS,,,,MIP_time_limit_feasible,37.0,37,3603.3196,,,,,,,,,,,
+L11-3,Laporte5,15,20,15,0.4167,LSS,LSS,,,,MIP_time_limit_feasible,25.0,25,3601.3728,,,,,,,,,,,
+L11-5,Laporte5,,,,,LSS,LSS,,,,error,,,2339.36,,,,,,,,,,,subprocess crash: 
+L14-6,Laporte5,15,20,15,0.6067,LSS,LSS,,,,MIP_time_limit_feasible,36.0,36,3605.1804,,,,,,,,,,,
+L19-8,Laporte5,,,,,LSS,LSS,,,,error,,,2571.01,,,,,,,,,,,subprocess crash: 
+L16-4,Laporte5,,,,,LSS,LSS,,,,error,,,2139.31,,,,,,,,,,,subprocess crash: 
+L25-7,Laporte5,,,,,LSS,LSS,,,,error,,,1398.12,,,,,,,,,,,subprocess crash: 
+L19-5,Laporte5,,,,,LSS,LSS,,,,error,,,1786.9,,,,,,,,,,,subprocess crash: 
+L26-9,Laporte5,,,,,LSS,LSS,,,,error,,,2255.56,,,,,,,,,,,subprocess crash: 
+L20-9,Laporte5,,,,,LSS,LSS,,,,error,,,2271.22,,,,,,,,,,,subprocess crash: 
+L26-6,Laporte5,,,,,LSS,LSS,,,,error,,,1650.61,,,,,,,,,,,subprocess crash: 
+L29-10,Laporte5,,,,,LSS,LSS,,,,error,,,2349.61,,,,,,,,,,,subprocess crash: 
+L29-9,Laporte5,,,,,LSS,LSS,,,,error,,,1594.78,,,,,,,,,,,subprocess crash: 
+L29-1,Laporte5,,,,,LSS,LSS,,,,error,,,1498.15,,,,,,,,,,,subprocess crash: 
+L28-1,Laporte5,,,,,LSS,LSS,,,,error,,,3174.61,,,,,,,,,,,subprocess crash: 
+L27-3,Laporte5,15,25,20,0.344,LSS,LSS,,,,MIP_time_limit_feasible,26.0,26,3603.5775,,,,,,,,,,,
+L30-8,Laporte5,,,,,LSS,LSS,,,,error,,,2144.79,,,,,,,,,,,subprocess crash: 
+L23-1,Laporte5,15,25,15,0.392,LSS,LSS,,,,MIP_time_limit_feasible,39.0,39,3600.8806,,,,,,,,,,,
+L30-10,Laporte5,,,,,LSS,LSS,,,,error,,,1984.12,,,,,,,,,,,subprocess crash: 
+L31-2,Laporte5,,,,,LSS,LSS,,,,error,,,2428.05,,,,,,,,,,,subprocess crash: 
+L32-10,Laporte5,,,,,LSS,LSS,,,,error,,,1431.95,,,,,,,,,,,subprocess crash: 
+L32-9,Laporte5,,,,,LSS,LSS,,,,error,,,2101.18,,,,,,,,,,,subprocess crash: 
+L33-7,Laporte5,15,25,20,0.5707,LSS,LSS,,,,MIP_time_limit_feasible,34.0,34,3604.8839,,,,,,,,,,,
+L34-3,Laporte5,15,25,20,0.68,LSS,LSS,,,,MIP_optimal,40.0,40,2454.1563,,,,,,,,,,,
+C4-10,Catanzaro,30,40,25,0.2233,LSS,LSS,,,,MIP_time_limit_feasible,67.0,67,3600.4402,,,,,,,,,,,
+C2-8,Catanzaro,30,40,17,0.2358,LSS,LSS,,,,MIP_time_limit_feasible,119.0,118,3600.0225,,,,,,,,,,,
+C4-9,Catanzaro,30,40,25,0.2433,LSS,LSS,,,,MIP_time_limit_feasible,80.0,77,3600.024,,,,,,,,,,,
+C2-1,Catanzaro,30,40,17,0.2525,LSS,LSS,,,,MIP_time_limit_feasible,116.0,115,3600.0183,,,,,,,,,,,
+D4-2,Catanzaro,40,60,30,0.2004,LSS,LSS,,,,MIP_time_limit_infeasible,,,3600.0629,,,,,,,,,,,
+D2-5,Catanzaro,40,60,22,0.2146,LSS,LSS,,,,MIP_time_limit_feasible,262.0,251,3600.0554,,,,,,,,,,,
+D4-4,Catanzaro,40,60,30,0.2271,LSS,LSS,,,,MIP_time_limit_feasible,218.0,164,3600.0649,,,,,,,,,,,
+D2-9,Catanzaro,40,60,22,0.2283,LSS,LSS,,,,MIP_time_limit_infeasible,,,3600.0196,,,,,,,,,,,
+s1n001,Crama,10,10,4,0.28,LSS,LSS,,,,MIP_optimal,11.0,11,16.2361,,,,,,,,,,,
+s2n001,Crama,,,,,LSS,LSS,,,,error,,,2500.74,,,,,,,,,,,subprocess crash: 
+s3n001,Crama,30,40,15,0.2583,LSS,LSS,,,,MIP_time_limit_feasible,134.0,134,3600.046,,,,,,,,,,,
+s4n001,Crama,40,60,20,0.2179,LSS,LSS,,,,MIP_time_limit_infeasible,,,3600.0622,,,,,,,,,,,
+s1n001,Crama,10,10,5,0.28,LSS,LSS,,,,MIP_optimal,10.0,10,171.7042,,,,,,,,,,,
+s2n001,Crama,15,20,8,0.2167,LSS,LSS,,,,MIP_time_limit_feasible,22.0,22,3601.9376,,,,,,,,,,,
+s3n001,Crama,30,40,17,0.2583,LSS,LSS,,,,MIP_time_limit_feasible,125.0,121,3600.6301,,,,,,,,,,,
+s4n001,Crama,40,60,22,0.2179,LSS,LSS,,,,MIP_time_limit_feasible,280.0,246,3600.0428,,,,,,,,,,,
+s1n001,Crama,10,10,6,0.28,LSS,LSS,,,,MIP_optimal,10.0,10,419.5887,,,,,,,,,,,
+s2n001,Crama,,,,,LSS,LSS,,,,error,,,1849.28,,,,,,,,,,,subprocess crash: 
+s3n001,Crama,30,40,20,0.2583,LSS,LSS,,,,MIP_time_limit_feasible,107.0,107,3600.0159,,,,,,,,,,,
+s4n001,Crama,40,60,25,0.2179,LSS,LSS,,,,MIP_time_limit_feasible,239.0,213,3600.0609,,,,,,,,,,,
+s1n001,Crama,10,10,7,0.28,LSS,LSS,,,,MIP_optimal,10.0,10,630.2432,,,,,,,,,,,
+s2n001,Crama,,,,,LSS,LSS,,,,error,,,1939.85,,,,,,,,,,,subprocess crash: 
+s3n001,Crama,30,40,25,0.2583,LSS,LSS,,,,MIP_time_limit_feasible,77.0,75,3600.7047,,,,,,,,,,,
+s4n001,Crama,40,60,30,0.2179,LSS,LSS,,,,MIP_time_limit_infeasible,,,3600.0654,,,,,,,,,,,

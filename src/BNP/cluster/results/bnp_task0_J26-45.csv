@@ -1,0 +1,43 @@
+instance,benchmark_set,J,T,C,density,solver,config,status,obj,obj_ktns,time_s,gap_pct,nodes,ncols,root_lp_bound,notes
+C4-10,Catanzaro,30,40,25,0.2233,PCFp,PCFp,time_limit,62.0,62,1830.09,,67,2621,14.999999999999998,
+C4-10,Catanzaro,30,40,25,0.2233,PCFp,PCFp+HP,time_limit,113.0,66,1800.24,,126,1981,14.999999999999995,
+C4-10,Catanzaro,30,40,25,0.2233,PCFp,PCFp+MC,time_limit,62.0,62,1829.43,,67,2621,14.999999999999998,
+C4-10,Catanzaro,30,40,25,0.2233,PCFp,PCFp+WS,time_limit,137.0,61,1800.2,,201,1558,15.0,
+C4-10,Catanzaro,30,40,25,0.2233,PCFp,PCFp+STAB,time_limit,64.0,60,1800.2,,123,1703,14.999999999999998,
+C4-10,Catanzaro,30,40,25,0.2233,PCFp,PCFp+ACC,time_limit,149.0,66,1800.2,,84,1714,15.0,
+C4-10,Catanzaro,30,40,25,0.2233,PTF,PTF,time_limit,47.0,69,1834.59,,1,2215,,
+C2-8,Catanzaro,30,40,17,0.2358,PCFp,PCFp,time_limit,201.0,130,1800.19,,42,1443,22.99999999999999,
+C2-8,Catanzaro,30,40,17,0.2358,PCFp,PCFp+HP,time_limit,198.0,130,1800.45,,1,19215,,
+C2-8,Catanzaro,30,40,17,0.2358,PCFp,PCFp+MC,time_limit,201.0,130,1800.21,,42,1443,22.99999999999999,
+C2-8,Catanzaro,30,40,17,0.2358,PCFp,PCFp+WS,time_limit,176.0,115,1829.63,,68,1492,22.999999999999986,
+C2-8,Catanzaro,,,,,PCFp,PCFp+STAB,time_limit,,,1860.1,,,,,OS timeout
+C2-8,Catanzaro,30,40,17,0.2358,PCFp,PCFp+ACC,time_limit,176.0,115,1815.48,,52,1411,22.999999999999986,
+C2-8,Catanzaro,30,40,17,0.2358,PTF,PTF,time_limit,113.0,130,1805.27,,1,1914,,
+C4-9,Catanzaro,30,40,25,0.2433,PCFp,PCFp,time_limit,80.0,71,1800.2,,53,2053,15.000000000000004,
+C4-9,Catanzaro,,,,,PCFp,PCFp+HP,time_limit,,,1860.1,,,,,OS timeout
+C4-9,Catanzaro,30,40,25,0.2433,PCFp,PCFp+MC,time_limit,80.0,71,1800.21,,47,2023,15.000000000000004,
+C4-9,Catanzaro,30,40,25,0.2433,PCFp,PCFp+WS,time_limit,87.0,73,1800.2,,110,1555,14.999999999999998,
+C4-9,Catanzaro,30,40,25,0.2433,PCFp,PCFp+STAB,time_limit,80.0,71,1800.57,,157,1306,15.000000000000004,
+C4-9,Catanzaro,30,40,25,0.2433,PCFp,PCFp+ACC,time_limit,87.0,73,1800.21,,61,1868,14.999999999999998,
+C4-9,Catanzaro,30,40,25,0.2433,PTF,PTF,time_limit,51.0,73,1816.82,,1,2135,,
+C4-1,Catanzaro,30,40,25,0.2525,PCFp,PCFp,time_limit,135.0,79,1819.22,,72,1633,15.0,
+C4-1,Catanzaro,30,40,25,0.2525,PCFp,PCFp+HP,time_limit,135.0,79,1800.23,,39,3131,15.000000000000005,
+C4-1,Catanzaro,30,40,25,0.2525,PCFp,PCFp+MC,time_limit,135.0,79,1807.54,,72,1629,15.0,
+C4-1,Catanzaro,30,40,25,0.2525,PCFp,PCFp+WS,time_limit,80.0,71,1819.0,,119,1654,15.000000000000002,
+C4-1,Catanzaro,30,40,25,0.2525,PCFp,PCFp+STAB,time_limit,84.0,67,1800.2,,115,1174,14.999999999999996,
+C4-1,Catanzaro,30,40,25,0.2525,PCFp,PCFp+ACC,time_limit,80.0,71,1804.23,,78,1412,15.000000000000002,
+C4-1,Catanzaro,30,40,25,0.2525,PTF,PTF,time_limit,53.0,76,1839.68,,1,2192,,
+C2-2,Catanzaro,30,40,17,0.2583,PCFp,PCFp,time_limit,190.0,130,1800.19,,129,930,23.0,
+C2-2,Catanzaro,30,40,17,0.2583,PCFp,PCFp+HP,time_limit,204.0,133,1800.66,,2,18662,23.0,
+C2-2,Catanzaro,30,40,17,0.2583,PCFp,PCFp+MC,time_limit,190.0,130,1800.21,,129,930,23.0,
+C2-2,Catanzaro,30,40,17,0.2583,PCFp,PCFp+WS,time_limit,156.0,128,1800.2,,51,1050,23.000000000000004,
+C2-2,Catanzaro,30,40,17,0.2583,PCFp,PCFp+STAB,time_limit,190.0,130,1800.2,,46,1171,23.0,
+C2-2,Catanzaro,,,,,PCFp,PCFp+ACC,time_limit,,,1860.1,,,,,OS timeout
+C2-2,Catanzaro,30,40,17,0.2583,PTF,PTF,time_limit,116.0,133,1804.09,,1,1623,,
+D4-2,Catanzaro,40,60,30,0.2004,PCFp,PCFp,time_limit,280.0,156,1800.24,,24,721,29.999999999999982,
+D4-2,Catanzaro,40,60,30,0.2004,PCFp,PCFp+HP,time_limit,274.0,156,1800.58,,1,15894,,
+D4-2,Catanzaro,40,60,30,0.2004,PCFp,PCFp+MC,time_limit,280.0,156,1800.56,,24,721,29.999999999999982,
+D4-2,Catanzaro,,,,,PCFp,PCFp+WS,time_limit,,,1860.1,,,,,OS timeout
+D4-2,Catanzaro,40,60,30,0.2004,PCFp,PCFp+STAB,time_limit,280.0,156,1853.14,,18,681,29.999999999999982,
+D4-2,Catanzaro,,,,,PCFp,PCFp+ACC,time_limit,,,1860.1,,,,,OS timeout
+D4-2,Catanzaro,,,,,PTF,PTF,time_limit,,,1860.1,,,,,OS timeout

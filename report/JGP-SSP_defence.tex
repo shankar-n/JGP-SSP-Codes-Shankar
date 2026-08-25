@@ -19,7 +19,7 @@
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{tikz}
-\usetikzlibrary{fit,positioning,arrows.meta}
+\usetikzlibrary{fit,positioning,arrows.meta,decorations.pathreplacing}
 
 % ---- palette: the report's grayscale, with one accent for what is new ---------
 \definecolor{cInk}{HTML}{111111}
@@ -191,6 +191,44 @@ An easy inner problem inside a hard outer one --- exactly what decomposition is 
 \note{90 seconds. The whole talk hinges on this asymmetry: easy inside, hard outside.
 If a juror stops you here, that is fine -- it means they are following.}
 
+
+%------------------------------------------------------------------ KTNS worked
+\begin{frame}{How the loading works, on four jobs}{Magazine holds $b=3$; grey = tool sits in the magazine}
+\vspace{-0.3em}
+\centering
+\begin{tikzpicture}[font=\footnotesize, x=1.55cm, y=0.72cm,
+  cell/.style={draw=cInk!25, minimum width=1.45cm, minimum height=0.6cm, inner sep=0pt},
+  hold/.style={cell, fill=cInk!30},
+  ins/.style={cell, fill=cAccent, text=white, font=\bfseries\scriptsize},
+  empty/.style={cell, fill=white}]
+
+  \foreach \i/\lab in {1/{job 1\\$a,b$}, 2/{job 2\\$b,c$}, 3/{job 3\\$c,d$}, 4/{job 4\\$d,a$}}
+     \node[align=center, font=\scriptsize] at (\i, 1.15) {\lab};
+  \foreach \j/\t in {1/a, 2/b, 3/c, 4/d}
+     \node[font=\scriptsize] at (0.25, -\j+1) {tool $\t$};
+
+  \node[ins]   at (1,0)  {$+$}; \node[hold]  at (2,0)  {}; \node[hold] at (3,0) {}; \node[hold] at (4,0) {};
+  \node[ins]   at (1,-1) {$+$}; \node[hold]  at (2,-1) {}; \node[empty] at (3,-1) {}; \node[empty] at (4,-1) {};
+  \node[empty] at (1,-2) {};    \node[ins]   at (2,-2) {$+$}; \node[hold] at (3,-2) {}; \node[hold] at (4,-2) {};
+  \node[empty] at (1,-3) {};    \node[empty] at (2,-3) {};    \node[ins]  at (3,-3) {$+$}; \node[hold] at (4,-3) {};
+
+  \node[font=\scriptsize, align=left, text=cInk, anchor=west] at (4.75,-1)
+     {tool $b$ is dropped here:\\ it is never needed again};
+  \node[font=\scriptsize, align=left, text=cGrey, anchor=west] at (4.75,0)
+     {tool $a$ is kept instead ---\\ job 4 will want it};
+\end{tikzpicture}
+\vspace{0.2em}
+\keyline{}
+\centering
+{\footnotesize \textbf{Four insertions in total.} The only decision is what to drop when
+the magazine is full, and the rule is \emph{drop the tool whose next use is furthest
+away}. That rule is provably optimal once the job order is fixed --- so this half of the
+problem has been solved since 1988.}
+\end{frame}
+\note{90 seconds. Walk the columns left to right. The teaching moment is the third
+column: both a and b could go, and the rule keeps a because job 4 needs it.
+Say "this half of the problem is completely solved -- and it has been since 1988".}
+
 %------------------------------------------------------------------ two-phase
 \begin{frame}{Nobody solves it directly}{The two-phase method, and the question nobody had answered}
 \vspace{0.5em}
@@ -211,6 +249,68 @@ industry uses.}
 \end{frame}
 \note{90 seconds. Emphasise step 3. Almost everyone forgets step 3, and forgetting it
 is exactly the error in the literature that Result 1 corrects.}
+
+
+%------------------------------------------------------------------ the two frames
+\begin{frame}{\new{Result 1.} The same grouping, measured two different ways}
+\vspace{-0.8em}
+\centering
+\begin{tikzpicture}[font=\footnotesize, x=0.95cm, y=0.46cm, scale=1,
+  cell/.style={draw=cInk!25, minimum width=0.88cm, minimum height=0.36cm, inner sep=0pt},
+  hold/.style={cell, fill=cInk!30},
+  ins/.style={cell, fill=cAccent, text=white, font=\bfseries\scriptsize},
+  fill0/.style={cell, fill=cAccent!25, text=cInk, font=\bfseries\scriptsize},
+  empty/.style={cell, fill=white},
+  cfg/.style={draw=cInk!45, fill=cLight, rounded corners=2pt, minimum height=0.62cm, minimum width=1.9cm}]
+
+  % ---- top: one fixed magazine per group
+  \node[font=\scriptsize\bfseries, anchor=west] at (0.3,1.85) {A.\ one fixed magazine per group};
+  \node[cfg] (g1) at (1.75,0.75) {$\{1,2,3\}$};
+  \node[cfg] (g2) at (4.15,0.75) {$\{3,4,5\}$};
+  \node[cfg] (g3) at (6.55,0.75) {$\{5,6,1\}$};
+  \draw[->,cInk] (g1)--(g2) node[midway,above=1pt,font=\scriptsize]{$+2$};
+  \draw[->,cInk] (g2)--(g3) node[midway,above=1pt,font=\scriptsize]{$+2$};
+  \node[font=\scriptsize\bfseries, anchor=west, align=left] at (7.55,0.75) {cost\\$4$};
+
+  % ---- bottom: the same jobs, loading re-optimised across the flattened order
+  \node[font=\scriptsize\bfseries, anchor=west] at (0.3,-0.55)
+    {B.\ same job order, loading re-optimised over the whole sequence};
+  \foreach \i in {1,...,6} \node[font=\scriptsize] at (\i+0.6, -1.15) {\i};
+  \foreach \j/\t in {1/1, 2/2, 3/3, 4/4, 5/5, 6/6}
+     \node[font=\scriptsize] at (0.15, -\j-1.55) {$\t$};
+  % tool 1
+  \node[fill0] at (1.6,-2.55){$+$}; \node[hold] at (2.6,-2.55){}; \node[hold] at (3.6,-2.55){};
+  \node[hold] at (4.6,-2.55){};   \node[hold] at (5.6,-2.55){}; \node[hold] at (6.6,-2.55){};
+  % tool 2
+  \node[fill0] at (1.6,-3.55){$+$}; \node[hold] at (2.6,-3.55){}; \node[empty] at (3.6,-3.55){};
+  \node[empty] at (4.6,-3.55){};  \node[empty] at (5.6,-3.55){};\node[empty] at (6.6,-3.55){};
+  % tool 3
+  \node[fill0] at (1.6,-4.55){$+$}; \node[hold] at (2.6,-4.55){}; \node[hold] at (3.6,-4.55){};
+  \node[empty] at (4.6,-4.55){};  \node[empty] at (5.6,-4.55){};\node[empty] at (6.6,-4.55){};
+  % tool 4
+  \node[empty] at (1.6,-5.55){};  \node[empty] at (2.6,-5.55){};\node[ins] at (3.6,-5.55){$+$};
+  \node[hold] at (4.6,-5.55){};   \node[empty] at (5.6,-5.55){};\node[empty] at (6.6,-5.55){};
+  % tool 5
+  \node[empty] at (1.6,-6.55){};  \node[empty] at (2.6,-6.55){};\node[empty] at (3.6,-6.55){};
+  \node[ins] at (4.6,-6.55){$+$}; \node[hold] at (5.6,-6.55){}; \node[hold] at (6.6,-6.55){};
+  % tool 6
+  \node[empty] at (1.6,-7.55){};  \node[empty] at (2.6,-7.55){};\node[empty] at (3.6,-7.55){};
+  \node[empty] at (4.6,-7.55){};  \node[ins] at (5.6,-7.55){$+$};\node[hold] at (6.6,-7.55){};
+  \node[font=\scriptsize\bfseries, anchor=west, align=left, text=cAccent] at (7.55,-5) {cost\\$3$};
+  \node[fill0] at (1.55,-8.7) {}; \node[font=\scriptsize, anchor=west] at (2.15,-8.7)
+    {filling the empty magazine --- free by convention};
+  \node[ins]  at (1.55,-9.6) {}; \node[font=\scriptsize, anchor=west] at (2.15,-9.6)
+    {a tool switch --- this is what the objective counts};
+\end{tikzpicture}
+\vspace{-0.4em}
+\keyline{}
+\centering
+{\footnotesize The literature reports \textbf{A}; the method as specified does \textbf{B}.
+\new{Every ring from $k=3$ to $9$ has gap zero under B.}}
+\end{frame}
+\note{Two and a half minutes. The hook of the talk. Point at A, then B, then say the
+difference out loud: four versus three, and the three is what the method returns.
+Expect the first question here.}
 
 %------------------------------------------------------------------ RESULT 1
 \begin{frame}{\new{Result 1.} The textbook worst case is not a worst case}
@@ -353,7 +453,7 @@ The strongest of them relaxes to}
   \new{q \;=\; |\U| - b}
 \]
 {\small --- every tool that does not fit in the initial magazine must be inserted at
-some point. Twenty years of formulation work reaching a bound that fits on one line.}
+some point. The strongest relaxation available is this counting argument.}
 \vspace{0.9em}
 \keyline{}
 \textbf{Two methods built to get past it:}
@@ -366,8 +466,9 @@ some point. Twenty years of formulation work reaching a bound that fits on one l
   provably exceed $q$.
 \end{itemize}
 \end{frame}
-\note{90 seconds. Say 'twenty years of formulation work reaching a bound that fits on
-one line' -- it sets up everything after it.}
+\note{90 seconds. The point to land: the strongest relaxation anyone has for this
+problem is a one-line counting argument. Say it as a fact about the problem, not as a
+criticism of the papers -- it sets up everything after it.}
 
 %------------------------------------------------------------------ RESULT 3
 \begin{frame}{\new{Result 3.} The bound decides the outcome}{$1{,}421$ instances $\cdot$ 12 configurations $\cdot$ $16{,}994$ runs $\cdot$ one hour each}
@@ -375,7 +476,7 @@ one line' -- it sets up everything after it.}
 \centering
 \begin{tabular}{@{}lrrr@{}}
 \toprule
- & instances & Benders & strongest compact model\\
+ & instances & Benders & SSPMF\\
 \midrule
 coverage bound tight $(\Zst=q)$  & $523$ & \new{$94\%$} & $100\%$\\
 coverage bound loose $(\Zst>q)$  & $592$ & \new{$40\%$} & $87\%$\\
@@ -484,6 +585,51 @@ back. That happens because of the \emph{global interleaving} of the schedule.}
 \note{Two minutes, and this is the intellectual centre of the talk. Get the word
 'local' to land. Cost is global, every inequality is local, therefore the bound cannot
 move. 87.4 per cent is the evidence.}
+
+
+%------------------------------------------------------------------ locality picture
+\begin{frame}{Why a re-insertion is invisible to the inequalities we have}
+\vspace{-0.4em}
+\centering
+\begin{tikzpicture}[font=\footnotesize, x=1.28cm, y=0.72cm,
+  cell/.style={draw=cInk!25, minimum width=1.2cm, minimum height=0.55cm, inner sep=0pt},
+  hold/.style={cell, fill=cInk!30},
+  ins/.style={cell, fill=cAccent, text=white, font=\bfseries\scriptsize},
+  empty/.style={cell, fill=white}]
+  \foreach \i in {1,...,6} \node[font=\scriptsize] at (\i, 0.75) {pos.\ \i};
+  \node[font=\scriptsize, anchor=east] at (0.45, 0) {tool $t$};
+  \node[ins]  at (1,0){$+$}; \node[empty] at (2,0){}; \node[empty] at (3,0){};
+  \node[empty] at (4,0){};   \node[empty] at (5,0){}; \node[ins]   at (6,0){$+$};
+  \node[font=\scriptsize, anchor=east, text=cGrey] at (0.45,-0.85) {other tools};
+  \foreach \i in {1,...,6} \node[hold] at (\i,-0.85){};
+  \draw[decorate, decoration={brace, amplitude=4pt, mirror}, cInk]
+       (1.62,-1.35) -- (5.38,-1.35);
+  \node[font=\scriptsize, align=center, text=cInk] at (3.5,-1.95)
+    {these jobs fill the magazine, so $t$ is evicted and brought back};
+  \draw[->, cAccent, thick] (1.0,0.40) to[bend left=22] (6.0,0.40);
+  \node[font=\scriptsize\bfseries, text=cAccent, fill=white, inner sep=1pt]
+       at (3.5,1.30) {the cost is created across this whole span};
+\end{tikzpicture}
+\vspace{0.1em}
+\keyline{}
+\begin{columns}[T]
+\column{0.47\textwidth}
+{\scriptsize\textbf{What the cost really is}\\[0.3em]
+$\Zst=\sum_t(\text{blocks of tool }t)$.\\
+One block each gives exactly $q$.\\
+Everything above $q$ is a \textbf{re-insertion}, caused by what sits \emph{between} two
+uses of a tool.}
+\column{0.47\textwidth}
+{\scriptsize\textbf{What our inequalities see}\\[0.3em]
+The Benders master indexes everything by \textbf{arcs} --- pairs of neighbours. PCF$'$
+indexes by \textbf{a single position}.\\[0.3em]
+\new{Neither can see a span.} Measured: on $87.4\%$ of runs the master's root bound is
+exactly $q$ and nothing else contributes.}
+\end{columns}
+\end{frame}
+\note{Two minutes, and this is the intellectual centre. Trace the arrow with your hand
+from position 1 to position 6 and say: an arc sees one step, the cost is created across
+five. That sentence is the whole diagnosis.}
 
 %------------------------------------------------------------------ RESULT 5 window
 \begin{frame}{\new{Result 5.} A family that is not local, and what it is worth}
@@ -608,8 +754,11 @@ BBC-LP+F+P         & $35/171$ & $32/160$ & $282/340$ & $155/328$ & $83/336$  & $
 \end{tabular}
 \vspace{0.5em}
 
-{\scriptsize Denominators are runs that returned a result. $427$ of $16{,}994$ runs failed;
-$352$ of those are LSS, concentrated on Laporte5, so the LSS row is not comparable.}
+{\scriptsize Denominators are runs that returned a result. $427$ of $16{,}994$ failed;
+$352$ are LSS. Those losses are not random --- SSPMF proves $78\%$ of what LSS completed
+and $60\%$ of what it lost --- so LSS never attempted the hard third and its row is not
+comparable. The three compact models are not cleanly separable; all three beat every
+configuration built here.}
 \end{frame}
 
 \begin{frame}{Backup --- the ablation}

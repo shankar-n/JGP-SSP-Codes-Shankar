@@ -1,31 +1,22 @@
 %==============================================================================
-\section{How every claim in this report was checked}\label{app:verify}
+\section{How the results were checked}\label{app:verify}
 %==============================================================================
 
-This appendix describes the verification applied to the results of this report, so
-that a reader who wishes to check them can do so directly. Section~\ref{sec:ai}
-refers to it.
+This appendix says how the results of this report were checked, so that a reader who
+wants to repeat the check can.
 
-\subsection{Principle}\label{ssec:verify-principle}
+\subsection{How the program works}\label{ssec:verify-principle}
 
-Three rules were followed.
-
-\emph{Independence.} The verification program shares no code with the solvers, the
-campaign harness, or any script written during the research. Agreement between them is
-therefore corroboration, not a second run of one implementation.
-
-\emph{No assumed results.} The program does not use the results it is checking. The
-loading rule of Proposition~\ref{prop:ktns} is not assumed optimal; it is implemented
-separately and compared against an exact dynamic program over magazine states, so the
-proposition itself is tested. The optimum $\Zst$ is computed by a dynamic program over
-subsets of jobs, which is cross-checked against brute-force enumeration of all
-permutations on the smallest instances, and which uses none of the methods of
-Section~\ref{sec:exact}.
-
-\emph{Exhaustive where possible.} On small instances the program enumerates rather than
-samples. Where a statement concerns a family too large to enumerate, the sample and its
-generation parameters are stated, and the statement is labelled an Observation rather
-than a Proposition.
+It shares no code with the solvers, the campaign harness, or any script written during
+the research, so where the two agree, that is a second opinion rather than the same
+calculation run twice. It also avoids using the results it is checking. The loading rule
+of Proposition~\ref{prop:ktns} is implemented separately and compared against an exact
+dynamic program over magazine states rather than assumed optimal, and the optimum $\Zst$
+comes from a dynamic program over subsets of jobs, cross-checked against brute-force
+enumeration on the smallest instances, which uses none of the methods of
+Section~\ref{sec:exact}. On small instances it enumerates rather than samples; where a
+family is too large to enumerate, the sample and its generation parameters are given and
+the statement is labelled an Observation rather than a Proposition.
 
 \subsection{What is covered}\label{ssec:verify-covered}
 
@@ -66,8 +57,7 @@ than a Proposition.
 
 \subsection{What the verification found}\label{ssec:verify-found}
 
-The checking is described here rather than only its conclusion, because two of its
-findings changed the content of this report.
+Two findings changed the content of this report.
 
 The first is the distinction of Section~\ref{ssec:frames}. The $k$-ring family is
 treated in the literature as the canonical example of a positive gap for the two-phase
@@ -83,19 +73,19 @@ The second is Proposition~\ref{prop:oddring}, which had been stated for all $k$ 
 fails at $k=3$, where the whole job set forms a single feasible group.
 
 Both were errors of statement rather than of proof: the arguments were sound for the
-objects they were really about. That is the characteristic failure mode this appendix
-exists to catch, and it is the reason the verification does not assume the results it
-checks.
+objects they were actually about.
 
-A third finding concerns the campaign analysis rather than the structural results, and
-is recorded in Section~\ref{ssec:validation} and Appendix~\ref{app:repro}. Two
-properties of the result files can silently corrupt any analysis of them. An instance
-must be identified by capacity as well as by name, because the Crama collection reuses
-file names across four capacities and merging them manufactures disagreements between
-methods that do not exist. And the coverage bound must be computed from the tools some
-job actually requires, not from the tool count declared in the file, which is wrong on
-the ten instances that declare a tool no job needs. Neither trap is in a solver. Both
-are in the code that reads the results, which is the part least likely to be checked.
+A third finding concerns the campaign analysis rather than the structural results. Two
+properties of the raw result files can silently corrupt any analysis of them; both are
+in the code that reads the results rather than in any solver, and
+Appendix~\ref{app:repro} states them.
+
+\subsection{Where the checking stops}\label{ssec:verify-limits}
+
+The checking is exhaustive only on small instances. On larger ones it compares methods
+against each other, which catches disagreement but not an error they share. And
+reproducing a number confirms the number rather than the argument given for it, so the
+proofs were re-derived by hand as well.
 
 \subsection{Running it}\label{ssec:verify-running}
 

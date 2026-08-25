@@ -12,21 +12,16 @@ Benders decomposition, and whether a decomposition can exploit it against modern
 compact models had not been tested.
 
 \paragraph{What the section asks, and in what order.}
-Numbers on their own settle nothing, so each subsection below states the question it
-answers before the measurement that answers it.
-Section~\ref{ssec:bench} fixes the protocol.
-Section~\ref{ssec:validation} asks whether the implementations are sound, because every
-comparison after it is worthless if they are not.
-Section~\ref{ssec:results-solved} asks how far each method gets, which establishes the
-ranking but explains nothing.
-Section~\ref{ssec:results-bbc} asks whether the difficulty is finding good solutions or
-proving them optimal, and whether the standard strengthenings move it.
-Section~\ref{ssec:results-tight} asks what separates the instances a method closes from
-those it does not, and finds a single structural property that does.
-Section~\ref{ssec:results-bnp} asks the same question of the branch-and-price
-prototypes, which can report their relaxation value directly and so answer it without
-reference to solving times at all.
-Section~\ref{sec:disc} then asks why the answer is what it is.
+Each subsection states the question it answers before the measurement that answers it.
+Section~\ref{ssec:bench} fixes the protocol and Section~\ref{ssec:validation} asks
+whether the implementations are sound. Section~\ref{ssec:results-solved} asks how far
+each method gets; Section~\ref{ssec:results-bbc} whether the difficulty is finding good
+solutions or proving them optimal, and whether the standard strengthenings move it;
+Section~\ref{ssec:results-tight} what separates the instances a method closes from
+those it does not. Section~\ref{ssec:results-bnp} puts the same question to the
+branch-and-price prototypes, which report their relaxation value directly and so answer
+it without reference to solving times. Section~\ref{sec:disc} then asks why the answer
+is what it is.
 
 \subsection{Experimental design}\label{ssec:bench}
 
@@ -147,23 +142,50 @@ $\lvert\U\rvert-b=24-5$ and not $\lvert T\rvert-b=20$. All coverage-bound figure
 this section use $\lvert\U\rvert$.
 
 \paragraph{A defect found and corrected.}
-The Benders master requires the coverage row $\theta\ge\lvert\U\rvert$ of
-Section~\ref{ssec:bbc} explicitly, because unlike every other method here it does not
-carry that bound implicitly through a formulation. Omitting it costs the solver most of
-its performance. This is reported because it quantifies the general point of
-Section~\ref{sec:disc}: on this problem a missing bound is expensive in a way that a
-missing search improvement is not.
+The Benders master carries the coverage row $\theta\ge\lvert\U\rvert$ of
+Section~\ref{ssec:bbc} as an explicit constraint. It has to: unlike every other method
+here, the master has no formulation of the loading problem from which that bound would
+follow, so without the row it is not available to the relaxation at all.
+Observation~\ref{obs:rootq} shows how much work the row does --- on $87.4\%$ of runs the
+root relaxation is exactly $\lvert\U\rvert$ and nothing else contributes.
 
 \paragraph{Runs that failed.}
-Of the $16{,}994$ runs, $427$ returned no result. Three hundred and seventy-eight of
-these are crashes of the worker subprocess and $49$ are a failure of the harness itself
-when closing its log file on the cluster filesystem. The failures are not spread
-evenly: $352$ of the $378$ crashes belong to the LSS baseline, and $239$ of those to
-the Laporte5 family alone, whose $15$-job instances give LSS its largest models. LSS is
-therefore reported against a denominator of $1{,}069$ rather than $1{,}421$, and its
-success rate is not comparable with the others, because the runs it lost are
-concentrated on the family it finds hardest. The remaining $75$ failures are scattered
-across the nine Benders configurations, at most $26$ in any one of them.
+Of the $16{,}994$ runs, $427$ returned no result. Forty-nine are a failure of the
+harness itself while closing its log file on the cluster filesystem, and the remaining
+$378$ are crashes of the worker subprocess. They are not spread evenly: $352$ of the
+crashes belong to the LSS baseline, $239$ of those to the Laporte5 family.
+
+The two groups have different causes, and one of them is recorded.
+
+\emph{The Benders failures.} Of the $75$ failures scattered across the nine Benders
+configurations, at most $26$ in any one, $49$ carry an explicit exception:
+\texttt{OSError: [Errno 127] Key has expired}. That is expiry of the job's filesystem
+credentials on a cluster whose home directories are served over an authenticated mount.
+The run lost the ability to write its own output; nothing about the instance or the
+solver is implicated. These are infrastructure losses, and they change no comparison
+drawn between configurations.
+
+\emph{The LSS crashes.} The remaining $352$ are recorded as
+\texttt{subprocess crash} with an empty message: the worker was terminated without
+raising, so no exception was captured and the proximate cause is not in the result
+files. What the timing shows is that they are not startup failures and not a bad node.
+No crash occurs before $1{,}063$ seconds; the median is $2{,}069$ and the maximum
+$3{,}582$, just inside the limit. They are distributed evenly over the ten shards, at
+between $32$ and $38$ each, so no single node or batch accounts for them. And $239$ of
+the $352$ are Laporte5.
+
+A run that survives at least eighteen minutes and is then killed without raising is
+consistent with a resource limit reached during the search rather than a defect in the
+model, but the campaign does not record enough to establish that: it would take the
+scheduler's accounting record for the job, which is not part of the result files. The
+obvious size explanation is separately excluded --- measured by $n\lvert T\rvert$ the
+crashed runs are \emph{smaller} than the completed ones, median $400$ against $500$.
+
+What is established either way is that the loss is not random with respect to
+difficulty. On the instances LSS completed, SSPMF proves optimality $78\%$ of the time;
+on the $352$ it lost, only $60\%$. The instances LSS never attempted are the harder
+ones, so its totals are flattering and its rate is not comparable with the others.
+Section~\ref{ssec:limits} records what follows from that.
 
 \subsection{How far each method gets}\label{ssec:results-solved}
 
@@ -210,10 +232,19 @@ totals should not be read against the others.}
 
 Three things can be read from Table~\ref{tab:solves}.
 
-The multicommodity model of \citet{daSilva2024} is the strongest single method, as its
-authors report. That their claim replicates on an independent implementation and a
-different instance collection is itself a result. It closes $1{,}038$
-instances; the best Benders configuration closes $727$.
+The compact models dominate the decomposition. SSPMF closes $1{,}038$ instances against
+$727$ for the best Benders configuration, and that gap is far larger than anything the
+missing runs could account for.
+
+Among the compact models themselves the ranking is less clear than the totals suggest,
+because LSS did not complete a third of its runs. On the $1{,}067$ instances that LSS
+and SSPMF both attempted, LSS proves $844$ optima and SSPMF $827$; on the $1{,}066$
+that LSS and \texttt{CATZ-F4} both attempted, \texttt{CATZ-F4} proves $865$ against LSS's
+$844$. Since the runs LSS lost are the harder ones, its position in both comparisons is
+flattered by an unknown amount. The honest reading is that the three compact models are
+close to one another on this collection and that separating them would need the lost
+runs recovered; what the campaign does establish is that all three are ahead of the
+methods built here.
 
 The families separate the methods rather than rank them uniformly. Laporte3 is solved
 completely by six of the twelve configurations. Laporte4 splits them sharply: the
@@ -284,6 +315,36 @@ LSS                & $57$  & $246$ & $532$ & $759$ & $819$ & $844$  & $1069$\\
 \label{tab:cumulative}
 \end{table}
 
+\begin{figure}[h]\centering
+\begin{tikzpicture}
+\begin{semilogxaxis}[reportaxis, width=0.95\linewidth, height=6.6cm,
+  xlabel={wall-clock time (seconds, log scale)}, ylabel={instances closed},
+  xmin=0.05, xmax=3600, ymin=0, ymax=1120,
+  xtick={0.1,1,10,60,300,3600},
+  xticklabels={$0.1$,$1$,$10$,$60$,$300$,$3600$},
+  ytick={0,200,400,600,800,1000},
+  yticklabel style={/pgf/number format/fixed,/pgf/number format/1000 sep={,}},
+  legend pos=south east, legend columns=2, transpose legend]
+  \addplot[black,    no marks]                  table[x=t,y=SSPMF]   {figdata/cactus.dat}; \addlegendentry{SSPMF}
+  \addplot[black,    no marks, dashed]          table[x=t,y=CATZF4]  {figdata/cactus.dat}; \addlegendentry{\texttt{CATZ-F4}}
+  \addplot[black,    no marks, dotted]          table[x=t,y=LSS]     {figdata/cactus.dat}; \addlegendentry{LSS}
+  \addplot[black!55, no marks]                  table[x=t,y=BBCLP]   {figdata/cactus.dat}; \addlegendentry{\texttt{BBC-LP}}
+  \addplot[black!55, no marks, dashed]          table[x=t,y=BBCK]    {figdata/cactus.dat}; \addlegendentry{\texttt{BBC-K}}
+  \addplot[black!55, no marks, dotted]          table[x=t,y=BBCLPpF] {figdata/cactus.dat}; \addlegendentry{\texttt{BBC-LP+F}}
+\end{semilogxaxis}
+\end{tikzpicture}
+\caption{Every solved run in the campaign, not the six sampled columns of
+Table~\ref{tab:cumulative}: for each method, the number of instances closed by each
+wall-clock time. The curves cross, and where they cross is what matters here. Before about
+two seconds the configurations built here lead the field --- \texttt{BBC-K} has a
+median solve time of $0.06$ seconds against $59.8$ for \texttt{CATZ-F4} --- because a
+Benders master with a tight coverage row closes an instance at the root immediately or
+not at all. After two seconds they stop moving and every compact model overtakes them.
+The decomposition is not running out of time. It has stopped making progress, and what
+would restart it is a bound that improves when the solver branches.}
+\label{fig:cactus}
+\end{figure}
+
 The shapes differ, and the difference is the point. \texttt{BBC-LP} closes $403$
 instances in the first second and $726$ in the full hour: more than half of everything
 it will ever solve is solved before a compact model has finished building its model.
@@ -348,8 +409,9 @@ median nodes explored        & $77{,}504$ & $3{,}795$\\
 \end{tabular}
 \caption{The effect of enabling fractional Benders cuts. Sixty-seven million cuts
 enter the master. The bound at termination is never higher than without them, and on
-$176$ instances it is lower, because the hour is spent generating and managing cuts
-instead of searching. Sixty-seven instances that the base solver closes are lost.}
+$176$ instances it is lower. The node counts are consistent with the hour going into
+generating and managing cuts instead of searching, though the campaign does not isolate
+that mechanism. Sixty-seven instances that the base solver closes are lost.}
 \label{tab:frac}
 \end{table}
 
@@ -446,10 +508,45 @@ coverage bound loose ($\Zst>q$)  & $592$ & $234$ \; ($40\%$) & $515$ \; ($87\%$)
 \end{tabular}
 \caption{Success rate split by whether the coverage bound equals the optimum. The
 bound, not the size of the instance, is what decides the outcome for the Benders
-solver. The multicommodity model is affected by the same split but far less, because
-it is not relying on that bound alone.}
+solver. The multicommodity model is affected by the same split but far less. A natural
+reading is that a compact model gives its search a full description of the problem at
+every node, so the search recovers what the bound does not supply; the campaign shows the
+difference but does not test that explanation.}
 \label{tab:tightness}
 \end{table}
+
+\begin{figure}[h]\centering
+\begin{tikzpicture}
+\begin{axis}[reportaxis, height=6.2cm,
+  xlabel={how loose the coverage bound is on the instance \ (\,$\Zst-q$\,)},
+  ylabel={instances closed (\%)},
+  xmin=-0.6, xmax=8.6, ymin=0, ymax=112,
+  xtick={0,1,2,3,4,5,6,7,8},
+  xticklabels={$0$,$1$,$2$,$3$,$4$,$5$--$6$,$7$--$9$,$10$--$14$,$15+$},
+  ytick={0,20,40,60,80,100},
+  legend style={at={(0.03,0.06)}, anchor=south west}]
+  \addplot[black, mark=*, mark size=1.9]
+    coordinates {(0,100.0)(1,100.0)(2,100.0)(3,100.0)(4,100.0)(5,96.6)(6,84.3)(7,63.9)(8,9.3)};
+  \addlegendentry{SSPMF (compact)}
+  \addplot[black!55, mark=o, mark size=1.9, dashed]
+    coordinates {(0,94.1)(1,30.4)(2,37.8)(3,42.9)(4,60.7)(5,34.1)(6,47.0)(7,52.5)(8,9.3)};
+  \addlegendentry{\texttt{BBC-LP} (this report)}
+  \node[font=\scriptsize, text=black!55, anchor=west] at (axis cs:0.15,104) {$523$ instances};
+  \node[font=\scriptsize, text=black!55, anchor=east] at (axis cs:7.85,15) {$43$ instances};
+\end{axis}
+\end{tikzpicture}
+\caption{The $1{,}115$ instances of known optimum, grouped by how far the optimum
+exceeds the coverage bound, against the share each method closes. This is
+Table~\ref{tab:tightness} resolved into its whole response curve, and the curve says
+more than the two-way split does. The Benders solver does not degrade: it falls off a
+cliff between a bound that is exact and a bound that is wrong by one, from $94\%$ to
+$30\%$, and then wanders without trend --- once the bound is loose at all, by how much
+stops mattering. The compact model degrades smoothly instead, holding $100\%$ out to a
+gap of four. But the two meet again at the right-hand end: on the $43$ instances whose
+bound is loose by fifteen or more, \emph{both} close $9.3\%$. The compact model is not
+immune to the bound; it has further to fall.}
+\label{fig:tightsplit}
+\end{figure}
 
 This is the central measurement of the campaign. The same solver, on the same hardware,
 under the same time limit, closes $94\%$ of one class and $40\%$ of the other. The
@@ -574,36 +671,19 @@ SSP is not, in general, an improvement on the counting bound.
 
 \subsection{What the campaign establishes}\label{ssec:results-summary}
 
-Six statements are supported by the measurements above.
+Two of the results above are checks that the study is sound. Cross-method agreement is
+complete: on the $999$ instances solved by more than one method, all $41{,}673$ pairs
+agree on the cost of the schedule returned. And the three reimplemented compact models
+all close substantially more instances than any configuration built here, without being
+cleanly separable from one another, because the LSS runs that failed are the harder
+ones.
 
-\begin{enumerate}[topsep=4pt,itemsep=3pt]
-  \item The reimplemented multicommodity model of \citet{daSilva2024} is the strongest
-  single method in this study, which replicates the claim of its authors on an
-  independent implementation and a different instance collection.
-
-  \item Cross-method agreement is complete. On the $999$ instances solved by more than
-  one method, all $41{,}673$ pairs of methods agree on the cost of the schedule
-  returned.
-
-  \item Fractional Benders cuts, once the implementation defect is corrected, are
-  generated in very large numbers and are counterproductive. Sixty-seven million of
-  them never raise the bound at termination on a single instance, and they cost
-  sixty-seven solved instances.
-
-  \item Of four strengthenings of the Benders solver, only the one that improves the
-  incumbent helps. The three that aim at the bound are neutral or harmful.
-
-  \item Whether the coverage bound equals the optimum decides whether the Benders
-  solver closes the instance: $94\%$ against $40\%$. Where it fails, the incumbent is
-  already optimal $59\%$ of the time.
-
-  \item The position--configuration relaxation equals the coverage bound on every one
-  of $2{,}114$ runs, and the position--transition relaxation exceeds it on three runs of
-  $233$. The first is Proposition~\ref{prop:pcf} confirmed; the second is
-  Proposition~\ref{prop:ptf} confirmed and, at the same time, shown to be of little
-  practical use as it stands.
-\end{enumerate}
-
-\noindent
-The first two are checks that the study is sound. The last four all say the same thing,
-which Section~\ref{sec:disc} takes up.
+The remaining four converge on one statement. Whether the coverage bound equals the
+optimum decides whether the Benders solver closes an instance, and where it fails the
+incumbent is usually already optimal. Of four strengthenings, only the one that
+improves the incumbent helps; the three aimed at the bound are neutral or harmful, and
+the sixty-seven million fractional cuts are the extreme case, raising the bound at
+termination on no instance while costing sixty-seven solved ones. Both branch-and-price
+relaxations sit on the coverage bound or barely above it, confirming
+Propositions~\ref{prop:pcf} and \ref{prop:ptf} and showing the second to be of little
+practical use as it stands. Section~\ref{sec:disc} takes that up.

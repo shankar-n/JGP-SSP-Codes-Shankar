@@ -1,0 +1,1 @@
+data/From_Felipe/data/Laporte/Tabela3/L1-1.txt 8 15 5 15 10 13 13 18 24 180
