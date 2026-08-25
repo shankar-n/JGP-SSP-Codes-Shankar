@@ -61,6 +61,9 @@
   \scriptsize Academic supervisor: Dr.\ Renaud Chicoisne}
 \date{2 September 2026}
 
+% Speaker notes: uncomment the next line to print notes on a second screen.
+% \setbeameroption{show notes on second screen=right}
+
 \begin{document}
 
 %------------------------------------------------------------------ title
@@ -98,6 +101,33 @@ price can be named.}
 \end{columns}
 \end{frame}
 
+
+%------------------------------------------------------------------ outline
+\begin{frame}{Where this goes}
+\vspace{0.6em}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\textbf{Part I --- the heuristic}\\[0.4em]
+{\footnotesize
+\textbf{1.} The textbook worst case has no gap\\[0.25em]
+\textbf{2.} The gap is the price of fewest groups\\[0.25em]
+\textbf{3.} An open question of Prof.\ Wagler's, closed}
+\column{0.48\textwidth}
+\textbf{Part II --- the exact methods}\\[0.4em]
+{\footnotesize
+\textbf{4.} One bound decides every outcome\\[0.25em]
+\textbf{5.} Why that bound will not move\\[0.25em]
+\textbf{6.} A family of inequalities that could}
+\end{columns}
+\vspace{1.4em}
+\keyline{}
+\centering
+{\small Everything measured here comes from $16{,}994$ solver runs and is
+re-derivable from the raw files by one command.}
+\end{frame}
+\note{Roughly 25 minutes. Part I is about 11, Part II about 12, two spare.
+Say: "the through-line is a single quantity, and I will keep coming back to it."}
+
 %------------------------------------------------------------------ problem
 \begin{frame}{The problem}{One machine, many tools, a magazine that holds only a few}
 \vspace{0.2em}
@@ -133,6 +163,8 @@ price can be named.}
   total number of tool insertions is smallest.
 \end{itemize}
 \end{frame}
+\note{Two minutes. Point at the swap arrows, not the tools. The number to say out loud
+is four insertions for three jobs -- it makes the scale of the problem obvious.}
 
 %------------------------------------------------------------------ two decisions
 \begin{frame}{Two decisions that behave completely differently}
@@ -156,6 +188,8 @@ couples jobs that sit far apart in the order.}
 \centering
 An easy inner problem inside a hard outer one --- exactly what decomposition is built for.
 \end{frame}
+\note{90 seconds. The whole talk hinges on this asymmetry: easy inside, hard outside.
+If a juror stops you here, that is fine -- it means they are following.}
 
 %------------------------------------------------------------------ two-phase
 \begin{frame}{Nobody solves it directly}{The two-phase method, and the question nobody had answered}
@@ -175,6 +209,8 @@ industry uses.}
 {\small How far from optimal can it be? On which instances is it exact?}
 \end{center}
 \end{frame}
+\note{90 seconds. Emphasise step 3. Almost everyone forgets step 3, and forgetting it
+is exactly the error in the literature that Result 1 corrects.}
 
 %------------------------------------------------------------------ RESULT 1
 \begin{frame}{\new{Result 1.} The textbook worst case is not a worst case}
@@ -202,6 +238,9 @@ Every $k$-ring, $k=3,\dots,9$: the method as actually specified is \new{optimal}
 the rest of the analysis correct.}
 \end{center}
 \end{frame}
+\note{Two and a half minutes -- the hook, do not rush it. Pause after 'every ring has
+gap zero'. Expect a question here; the answer is that the published values are walk
+values, measured with one fixed magazine per group.}
 
 %------------------------------------------------------------------ why
 \begin{frame}{\new{Result 2.} The gap is exactly the price of using the fewest groups}
@@ -263,6 +302,48 @@ the largest job. \textbf{Two completely different methods, the same regime.}}
 \end{center}
 \end{frame}
 
+
+%------------------------------------------------------------------ the star
+\begin{frame}{\new{Result 3.} An open question, closed}{Grouping branch-and-price is fast only when its covering relaxation is ideal}
+\vspace{0.1em}
+{\small Odd rings are one obstruction. \textbf{Are they the only one?}}
+\vspace{0.3em}
+\keyline{}
+\vspace{0.1em}
+\begin{columns}[T]
+\column{0.44\textwidth}
+{\footnotesize At $b=3$ with two tools per job the question becomes \emph{finite}:\\[0.5em]
+a tool is a \textbf{vertex}, a job is an \textbf{edge},\\
+a feasible group is a subgraph on $\le3$ vertices,\\
+and the $k$-ring is the cycle $C_k$.\\[0.6em]
+So the whole family can be enumerated: \textbf{151} instances up to isomorphism.}
+\column{0.52\textwidth}
+\centering
+\begin{tikzpicture}[font=\small,scale=0.95,every node/.style={transform shape},
+  v/.style={circle,draw=cInk!60,fill=cLight,minimum size=0.55cm,inner sep=0pt,font=\scriptsize}]
+  \node[v] (a) at (0,0) {$a$};
+  \node[v] (b) at (-1.25,1.0) {$b$};
+  \node[v] (c) at (0,1.45) {$c$};
+  \node[v] (d) at (1.25,1.0) {$d$};
+  \draw[semithick,cInk] (a)--(b) node[midway,left,font=\scriptsize]{$T_1$};
+  \draw[semithick,cInk] (a)--(c) node[midway,right,font=\scriptsize]{$T_2$};
+  \draw[semithick,cInk] (a)--(d) node[midway,right,font=\scriptsize]{$T_3$};
+  \node[font=\scriptsize,text=cGrey,align=center] at (0,-0.75)
+    {any two jobs fit in a magazine of three;\\ all three need four tools};
+\end{tikzpicture}
+\end{columns}
+\vspace{0.2em}
+\keyline{}
+\centering
+{\footnotesize \textbf{No.} $76$ of $151$ are non-integral, and \new{eleven are bipartite} ---
+no odd cycle at all. The smallest obstruction is this \new{three-job star}: fractional
+cover $\tfrac32$ against $\Kst=2$. The odd ring needs five jobs.}
+\end{frame}
+\note{This is the one a jury can check on the spot. Draw it if asked.
+The point to land: what the star and the ring share is odd structure among the JOBS
+-- three pairwise compatible, not jointly compatible -- not circular structure among
+the tools. That is where a characterisation should be looked for. 90 seconds.}
+
 %------------------------------------------------------------------ exact side
 \begin{frame}{The exact side, and the wall it runs into}
 \vspace{0.5em}
@@ -285,6 +366,8 @@ some point. Twenty years of formulation work reaching a bound that fits on one l
   provably exceed $q$.
 \end{itemize}
 \end{frame}
+\note{90 seconds. Say 'twenty years of formulation work reaching a bound that fits on
+one line' -- it sets up everything after it.}
 
 %------------------------------------------------------------------ RESULT 3
 \begin{frame}{\new{Result 3.} The bound decides the outcome}{$1{,}421$ instances $\cdot$ 12 configurations $\cdot$ $16{,}994$ runs $\cdot$ one hour each}
@@ -309,6 +392,41 @@ coverage bound loose $(\Zst>q)$  & $592$ & \new{$40\%$} & $87\%$\\
   disagreed}.
 \end{itemize}
 \end{frame}
+
+
+%------------------------------------------------------------------ shape of failure
+\begin{frame}{The shape of the failure, not just its size}
+\vspace{0.1em}
+\centering
+{\footnotesize instances closed within a given time}\\[0.3em]
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+ & $1$s & $10$s & $60$s & $300$s & $900$s & $3600$s\\
+\midrule
+SSPMF            & $482$ & $735$ & $946$ & $959$ & $982$ & $\mathbf{1038}$\\
+LSS              & $57$  & $246$ & $532$ & $759$ & $819$ & $\mathbf{844}$\\
+\texttt{BBC-LP}  & \new{$403$} & $469$ & $525$ & $572$ & $650$ & \new{$\mathbf{726}$}\\
+\bottomrule
+\end{tabular}
+\vspace{0.4em}
+\keyline{}
+\begin{itemize}\itemsep2pt\footnotesize
+  \item The Benders solver closes \textbf{403 instances in the first second} and $726$ in
+  the full hour. More than half of everything it will ever solve is done before a compact
+  model has finished building. Then it flattens.
+  \item The compact models start lower and keep climbing. \textbf{More time would not help
+  the two equally.}
+  \item Where it does not finish: median gap at the limit \new{$22.9\%$}, and only $50$ of
+  $681$ runs get within five per cent of proven.
+\end{itemize}
+\vspace{0.2em}
+\centering
+{\footnotesize It is sitting on the right answer --- optimal $59\%$ of the time --- with a
+quarter-sized hole in the certificate.}
+\end{frame}
+\note{This is the sharpest pair of numbers in the talk. Say them slowly.
+"403 in the first second, 726 in the hour" and "median certificate gap 22.9 per cent
+while the incumbent is already optimal". Two minutes.}
 
 %------------------------------------------------------------------ RESULT 3b
 \begin{frame}{The same number, from a completely different direction}
@@ -335,6 +453,9 @@ PTF root relaxation exceeds $q$   & $3$ of $233$ runs\\
 \centering\small
 This is a property of the problem, not of any one implementation.
 \end{frame}
+\note{90 seconds. The line that matters: a different algorithm, a different formulation
+and a different solver arrive at the same number. That is what makes it a property of
+the problem and not of my code.}
 
 %------------------------------------------------------------------ RESULT 4 diagnosis
 \begin{frame}{\new{Result 4.} Why the bound will not move}
@@ -360,6 +481,9 @@ back. That happens because of the \emph{global interleaving} of the schedule.}
   The pairwise and triplet rows contribute \emph{nothing}.
 \end{itemize}
 \end{frame}
+\note{Two minutes, and this is the intellectual centre of the talk. Get the word
+'local' to land. Cost is global, every inequality is local, therefore the bound cannot
+move. 87.4 per cent is the evidence.}
 
 %------------------------------------------------------------------ RESULT 5 window
 \begin{frame}{\new{Result 5.} A family that is not local, and what it is worth}
@@ -388,6 +512,9 @@ arc-supported --- what both solvers carry today & $8.9\%$ & $0\%$ & $46/62$\\
 
 {\small The arc family is \emph{exhausted}. The window family has somewhere to go.}
 \end{frame}
+\note{Two minutes. State clearly that both figures are CEILINGS -- what each family
+could deliver at best. The honest claim is that the arc family is exhausted; the window
+family is promising and not yet measured inside a solver.}
 
 %------------------------------------------------------------------ negatives
 \begin{frame}{Four things that did not work --- and why that is the evidence}
@@ -414,6 +541,9 @@ These are not four separate disappointments. They are \emph{four independent
 measurements of the same thing}: every one of them attacks the bound, and every one of
 them fails in the way the diagnosis predicts.
 \end{frame}
+\note{90 seconds. Do not apologise for this slide. Four independent attacks on the
+bound, four failures, all in the direction the diagnosis predicts. That is the evidence,
+not a list of disappointments.}
 
 %------------------------------------------------------------------ conclusions
 \begin{frame}{Conclusions}
@@ -435,6 +565,8 @@ them fails in the way the diagnosis predicts.
 rather than per tool; disaggregate the Benders master's single $\theta$. And the open
 problem --- \emph{is the excess of PTF over $q$ bounded by a constant?}
 \end{frame}
+\note{90 seconds, then stop talking. Leave the open problem on screen -- it invites the
+first question onto ground you have prepared.}
 
 %------------------------------------------------------------------ thanks
 \begin{frame}[plain]
@@ -548,6 +680,52 @@ $2{,}000$ episodes.\\[0.4em]
 \textbf{The machinery learns. This is not the SSP, and no claim about the SSP is made
 from it.}
 \end{center}
+\end{frame}
+
+
+\begin{frame}{Backup --- the window inequality}
+\vspace{0.5em}
+{\small For a stretch of positions $W=[p,r]$, every tool needed inside $W$ is either
+already loaded at $p-1$ --- where the magazine holds exactly $b$ --- or inserted within
+$W$:}
+\[
+  \sum_{t}\sum_{k\in W} w_{t,k} \;\;\ge\;\;
+  \bigl|\{t \text{ present somewhere in } W\}\bigr| \;-\; \sum_{t} a_{t,p-1}
+\]
+\vspace{-0.4em}
+\keyline{}
+\begin{itemize}\itemsep3pt\small
+  \item \textbf{Proved}, not merely tested. One auxiliary variable per tool and window
+  linearises it.
+  \item \textbf{Robust}: only master variables appear, so its dual never reaches the
+  pricing problem. The set-union knapsack oracle is untouched.
+  \item The per-tool counting rows already in the master are the case $W=[2,n]$, so this
+  \emph{generalises} what is there.
+  \item $84\%$ of the windows that carry the bound have length $\le 4$, so a static pool
+  suffices --- no separation routine needed.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Backup --- how to check any number in this talk}
+\vspace{0.3em}
+\begin{itemize}\itemsep4pt\footnotesize
+  \item \texttt{verification/verify\_report\_independent.py} --- re-derives every
+  small-instance claim from scratch, sharing no code with the solvers. \textbf{57 checks,
+  all passing.} No commercial solver needed.
+  \item \texttt{verification/analyse\_campaign\_results.py -{}-check} --- recomputes every
+  figure in the computational section from the raw per-instance files and compares it
+  against what the report states.
+  \item \texttt{verification/bound\_probe.py} --- reproduces the ceiling comparison
+  between the two inequality families.
+  \item \texttt{src/BNP/window\_cuts.py} --- the implementation, with a brute-force
+  validity self-test over $1{,}200{,}816$ integer points.
+\end{itemize}
+\vspace{0.5em}
+\keyline{}
+\centering
+{\footnotesize The loading rule is checked against an exact dynamic program on $349{,}872$
+instance-and-sequence pairs, and across $41{,}673$ pairs of methods that both proved an
+optimum, none disagree.}
 \end{frame}
 
 \end{document}
