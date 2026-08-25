@@ -82,6 +82,10 @@ RUNBOOK_NEXT.md
 report_s3_review.md
 RESEARCH_PLAN.md
 CLEANUP_PLAN.md
+DEFENCE_P*.*
+REPO_*.*
+verification/
+references/
 plans-genai/
 skills/
 .vscode/

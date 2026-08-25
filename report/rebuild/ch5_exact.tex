@@ -228,10 +228,8 @@ intention is to attack tailing-off: an integer-only scheme learns about the load
 cost only once an order is fully committed, whereas a fractional cut extracts the same
 dual information from a partial order and removes it from the relaxation at once.
 
-In the first campaign this option was inert. Every cut it constructed was discarded by
-an incorrect solver call, so no fractional cuts were recorded, and the campaign could
-not test the idea. The defect was corrected, and Section~\ref{ssec:results-bbc}
-reports what the corrected version does.
+Whether that pays is an empirical question, and Section~\ref{ssec:results-bbc} answers
+it.
 
 \paragraph{A strong incumbent at the root.}
 A branch-and-bound search prunes in proportion to the quality of its incumbent. A
@@ -342,6 +340,8 @@ cost. Its linear relaxation \emph{without} the counting rows (T) equals $0$. Wit
 them it equals $q$.
 \end{proposition}
 
+The proof is in Appendix~\ref{app:proofs}.
+
 The vanishing of the plain relaxation is the fractional pathology of
 \citet{Tang1988} again: a single convex blend of configurations, repeated at every
 position, satisfies (P), (Cov) and (W) at zero cost. The counting rows restore the
@@ -403,10 +403,13 @@ this PTF.
 PTF is exact, and its linear relaxation is at least $q$ and can be strictly greater.
 \end{proposition}
 
-On an instance whose optimum exceeds both bounds of Corollary~\ref{cor:lb}, the PTF
-relaxation returns $2.10$ against a coverage bound of $2$; on the $6$-ring it is tight
-at $\Zst=3$. PTF is therefore the first relaxation in this family to improve on the
-elementary bound, and it does so with a fixed, polynomial row set.
+The proof is in Appendix~\ref{app:proofs}. The second claim is established by a
+witness, not by a general argument, which is why it says \emph{can}.
+
+The witnesses are the three instances of Section~\ref{ssec:results-bnp} on which the
+recorded root relaxation exceeds $q$. PTF is therefore the first relaxation in this
+family to improve on the elementary bound, and it does so with a fixed, polynomial row
+set.
 
 The proposition says the relaxation \emph{can} exceed $q$. It says nothing about how
 often, or by how much, and Section~\ref{ssec:results-bnp} finds that on the standard

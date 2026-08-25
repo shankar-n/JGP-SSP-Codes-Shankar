@@ -95,6 +95,69 @@ $D_1\cap D_4$; the ordering $(D_1,C,D_4)$ then has wrap
 $\lvert(D_1\cap D_4)\setminus C\rvert\le1$.
 \end{proof}
 
+\begin{proof}[Proof of Proposition~\ref{prop:pcf}]
+Write $a_t^{k}=\sum_{C\ni t}y_C^{k}$ for the presence of tool $t$ at position $k$, and
+recall that every configuration holds exactly $b$ tools. If $\lvert\U\rvert\le b$ then
+$q=0$ and the second claim is immediate, so assume $\lvert\U\rvert>b$.
+
+\emph{Exactness.} In an integer point, (P) places exactly one configuration $C_k$ at
+each position, and (Cov) gives every job $j$ a position whose configuration contains
+$T_j$. Assigning each job to such a position and running the jobs of a position
+consecutively produces a schedule; no insertion occurs between two jobs at the same
+position, so its free-initial cost is $\sum_{k\ge2}d(C_{k-1},C_k)$. Minimising a
+non-negative objective drives (W) to equality, so that sum is exactly the objective.
+Conversely a schedule with magazines $C_1,\dots,C_n$ gives an integer point of the same
+cost. The two sets therefore correspond with equal cost.
+
+\emph{Without (T) the relaxation is $0$.} Every job satisfies $\lvert T_j\rvert\le b$,
+so each $T_j$ extends to at least one configuration; choose one per job and let
+$\mathcal{C}$ be the resulting set, of size $m\le n$. Put $y_C^{k}=1/m$ for every
+$C\in\mathcal{C}$ and every $k$. Then (P) holds with equality, and for each job $j$,
+\[
+  \sum_{k}\sum_{C\supseteq T_j}y_C^{k}\;=\;n\cdot\frac{\lvert\{C\in\mathcal{C}:C\supseteq T_j\}\rvert}{m}\;\ge\;\frac{n}{m}\;\ge\;1,
+\]
+so (Cov) holds. The point does not depend on $k$, so the right-hand side of (W) is $0$
+at every position and $w\equiv0$ is feasible. The objective is $0$.
+
+\emph{With (T) the relaxation is at least $q$.} Summing (T) over $t\in\U$,
+\[
+  \sum_{t\in\U}\sum_{k\ge2}w_t^{k}\;\ge\;\lvert\U\rvert-\sum_{t\in\U}a_t^{1}
+  \;\ge\;\lvert\U\rvert-\sum_{t\in T}a_t^{1}
+  \;=\;\lvert\U\rvert-b\sum_{C}y_C^{1}\;=\;\lvert\U\rvert-b\;=\;q,
+\]
+using $\lvert C\rvert=b$ and (P) at $k=1$. The left-hand side is at most the objective.
+
+\emph{And at most $q$.} Since $\lvert\U\rvert>b$, the configurations of $\mathcal{C}$
+may be chosen inside $\U$, so $\lvert C\cap\U\rvert=b$ for each. Take the blended point
+above and set $w_t^{2}=1-a_t^{1}$ for $t\in\U$ and $w_t^{k}=0$ otherwise. Each value
+lies in $[0,1]$, and (W) at $k=2$ has right-hand side $0$, so the point is feasible;
+(T) holds with equality. Its objective is
+\[
+  \sum_{t\in\U}\bigl(1-a_t^{1}\bigr)
+  \;=\;\lvert\U\rvert-\sum_{C}y_C^{1}\lvert C\cap\U\rvert
+  \;=\;\lvert\U\rvert-b\;=\;q. \qedhere
+\]
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{prop:ptf}]
+\emph{Exactness} follows the argument for PCF, with a column now carrying an ordered
+pair of consecutive configurations and the chaining rows forcing the second element of
+the pair at position $k$ to agree, tool by tool, with the first element at position
+$k+1$.
+
+\emph{The relaxation is at least $q$.} PTF carries the same per-tool counting rows as
+PCF, and the summation in the previous proof uses only those rows together with
+$\lvert C\rvert=b$ at the first position. Both hold in PTF, so the same chain of
+inequalities applies unchanged.
+
+\emph{It can be strictly greater}, and this half is established by exhibiting witnesses
+rather than by a general argument. Three appear in the campaign of
+Section~\ref{ssec:results-bnp}, where the root relaxation is recorded on every run: on
+Catanzaro \texttt{A0-0} it is $2.0134$ against $q=2$, and on Laporte3 \texttt{L11-6} and
+\texttt{L11-7} it is $6$ against $q=5$. A witness is all the statement requires; how
+large the excess can be made is Problem~\ref{prob:ptf-gap} and is open.
+\end{proof}
+
 \begin{proof}[Proof of Proposition~\ref{prop:pcfprime}]
 \emph{Exactness.} Take an optimal schedule and collapse equal consecutive magazines to
 the sequence of distinct magazines it visits, a trajectory $D_1,\dots,D_m$ with

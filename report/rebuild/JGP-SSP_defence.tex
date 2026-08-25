@@ -240,23 +240,26 @@ is given optimally. It is the price of the cardinality restriction, and nothing 
 
 %------------------------------------------------------------------ consequences
 \begin{frame}{What follows from it}
-\vspace{0.2em}\small
-\begin{itemize}\itemsep6pt
+\vspace{0.1em}\small
+\begin{itemize}\itemsep3pt
   \item \textbf{Zero-gap classes for every capacity} --- families on which the two-phase
   method is provably exact.
-  \item \textbf{Worst-case guarantees} strictly better than the trivial $b(\Kst-1)$, and
-  the extremal behaviour settled exactly at three groups.
+  \item \textbf{Worst-case guarantees} better than the trivial $b(\Kst-1)$; extremal
+  behaviour settled exactly at three groups.
   \item \textbf{A census.} In $420$ random instances exactly one has a positive
-  heuristic gap. Every positive gap found anywhere in this work equals \emph{one}, and
-  every instance carrying one has $b\ge4$.
+  heuristic gap. Every positive gap found anywhere equals \emph{one}, and every instance
+  carrying one has $b\ge4$.
+  \item \new{\textbf{An open question of Prof.\ Wagler's, closed.}} At $b=3$ a job is an
+  \emph{edge} and a tool a \emph{vertex}, so the family is finite and can be enumerated.
+  Odd rings are \emph{not} the only obstruction to integrality --- the smallest is a
+  three-job \textbf{star}, which has no odd cycle at all.
 \end{itemize}
-\vspace{0.5em}
+\vspace{0.3em}
 \keyline{}
 \begin{center}
-{\small The last point is an exhaustive combinatorial search on small instances.\\
-Burger et al.\ report from a \emph{printing press} that the decomposition degrades
-as the magazine grows relative to the largest job.\\[0.4em]
-\textbf{Two completely different methods, the same regime.}}
+{\footnotesize The census is exhaustive on small instances. Burger et al.\ report from a
+\emph{printing press} that the decomposition degrades as the magazine grows relative to
+the largest job. \textbf{Two completely different methods, the same regime.}}
 \end{center}
 \end{frame}
 
@@ -387,7 +390,7 @@ arc-supported --- what both solvers carry today & $8.9\%$ & $0\%$ & $46/62$\\
 \end{frame}
 
 %------------------------------------------------------------------ negatives
-\begin{frame}{What was tried and did not work --- and why}
+\begin{frame}{Four things that did not work --- and why that is the evidence}
 \vspace{0.1em}
 \begin{itemize}\itemsep4pt\small
   \item \textbf{Fractional Benders cuts.} $67.5$ million generated; node count fell
@@ -407,8 +410,9 @@ arc-supported --- what both solvers carry today & $8.9\%$ & $0\%$ & $46/62$\\
 \vspace{0.2em}
 \keyline{}
 \centering\small
-Each of these is a \emph{tested} idea rather than an untested one. Knowing which you have
-is the difference between a research direction and a dead end.
+These are not four separate disappointments. They are \emph{four independent
+measurements of the same thing}: every one of them attacks the bound, and every one of
+them fails in the way the diagnosis predicts.
 \end{frame}
 
 %------------------------------------------------------------------ conclusions

@@ -16,7 +16,8 @@ times over.
 The first answer is in the direct measurement. On the runs that hit the time limit and
 whose optimum is known from elsewhere, the Benders solver's incumbent already equals
 that optimum $66\%$ of the time across its nine configurations, and $59\%$ of the time
-for the plain one. It is not looking for the answer. It has the answer.
+for the plain one. In those runs the solver has already found the answer and spends the
+remaining hour failing to certify it.
 
 The second answer is in the ablation. Four strengthenings were implemented. The one
 that improves the incumbent, a hybrid genetic search run at the root, gains thirty-one
@@ -27,9 +28,8 @@ this way.
 
 The third answer is the split by coverage-bound tightness. The same solver closes
 $94\%$ of the instances on which the elementary bound $q$ happens to equal the
-optimum, and $40\%$ of those on which it does not. That classification is not by size
-or density. It is by a single structural property, and it is the property
-Section~\ref{sec:gap} identifies as governing the whole problem.
+optimum, and $40\%$ of those on which it does not. The classification is by a single structural property rather than by size or density,
+and it is the property Section~\ref{sec:gap} identifies as governing the problem.
 
 The fourth answer comes from the other method entirely. The branch-and-price prototype
 reports its root relaxation on every run, and on all $2{,}114$ runs of the
@@ -40,20 +40,16 @@ The natural objection is that this is a statement about one implementation. It i
 and Proposition~\ref{prop:pcf} is why. The position--configuration relaxation, arrived
 at from a completely different direction, equals $q$ exactly --- proved in
 Section~\ref{ssec:pos} and then measured on the benchmark. So does the multicommodity
-relaxation of \citet{daSilva2024}, proved by its own authors. Three independent routes
-to the same value is not a coincidence of engineering; it is a property of the problem.
+relaxation of \citet{daSilva2024}, proved by its own authors. Three independent routes reach the same value, which makes it a property of the
+problem rather than of any one implementation.
 A configuration-based exact method for the SSP is limited by the strength of its bound
 and not by its implementation.
 
-The fractional-cut result deserves a separate remark, because it is the strongest form
-of this conclusion available. Before the campaign, the honest position was that
-fractional Benders cuts had never been tested here, because a defect had silently
-discarded them. The temptation was to treat that as an open question with a promising
-answer. The corrected run generated sixty-seven million cuts, cut the node count by a
-factor of twenty, and raised the bound at termination on no instance at all. That is
-not an untested idea; it is a tested idea that does not work on this problem, and
-knowing which of the two one has is the difference between a research direction and a
-dead end.
+The fractional-cut result is the strongest form of this conclusion. Separating at
+fractional points is the standard remedy when a Benders scheme tails off, and it does
+what it is supposed to do locally: sixty-seven million cuts reduce the node count by a
+factor of twenty. It nonetheless raises the bound at termination on no instance at all.
+The remedy is not being applied badly; it is being applied to the wrong obstacle.
 
 \subsection{Where a stronger bound could come from}\label{ssec:disc-locality}
 
@@ -93,10 +89,11 @@ configurations fractionally at each position and pays no transition. That is why
 Proposition~\ref{prop:pcf} holds, and it is why the measured root value is $q$ on every
 one of $2{,}114$ runs.
 
-PTF is the exception that confirms the reading. Putting a transition inside the column
-is precisely what stops the relaxation dodging it, and PTF is the only construction here
-that ever exceeds $q$. It does so rarely because its chaining between consecutive pairs
-is enforced per tool rather than per configuration, so the mixing returns one level up.
+PTF is the one construction here that ever exceeds $q$, and the reason is the same one
+stated positively: a column carries a transition, so the relaxation cannot avoid paying
+for it. It exceeds $q$ rarely because the chaining between consecutive pairs is enforced
+tool by tool rather than configuration by configuration, which restores the fractional
+mixing one level up.
 
 \begin{observation}[The coverage row is carrying the master alone]\label{obs:rootq}
 On $9{,}084$ of the $10{,}396$ Benders runs for which a root relaxation value was
@@ -107,28 +104,41 @@ confined to the dense instances.
 \end{observation}
 
 \paragraph{A family that is not local.}
-Let $W=[p,r]$ be a contiguous block of positions. Every tool required somewhere inside
-$W$ is either already in the magazine at position $p-1$, which holds exactly $b$ tools,
-or is inserted at some position of $W$. Writing $w_{t,k}$ for the insertion of tool $t$
-at position $k$ and $a_{t,k}$ for its presence, this gives
+Let $W=[p,r]$ be a contiguous block of positions with $p\ge2$. Write $w_{t,k}$ for the
+insertion of tool $t$ at position $k$ and $a_{t,k}$ for its presence, as in the
+position-indexed formulation of Section~\ref{ssec:pos}.
+
+\begin{proposition}[Window inequality]\label{prop:window}
+For every contiguous block of positions $W=[p,r]$ and every feasible point of PCF,
 \begin{equation}\label{eq:window}
   \sum_{t\in\U}\ \sum_{k=p}^{r} w_{t,k}
   \;\;\ge\;\;
   \bigl\lvert\{t: a_{t,k}=1 \text{ for some } k\in W\}\bigr\rvert
-  \;-\; \sum_{t\in\U} a_{t,p-1},
+  \;-\; \sum_{t\in\U} a_{t,p-1}.
 \end{equation}
-which linearises with one auxiliary variable per tool and window. Two things make the
-family worth having. It speaks about a stretch of the schedule rather than a point, so
-it can charge a re-insertion that no arc-indexed or single-position row can see. And it
-contains only master variables, so it is a \emph{robust} cut in the sense of
-\citet{Poggi2011}: its dual never reaches the pricing problem, and the set-union
-knapsack oracle of Section~\ref{ssec:pos} is untouched. The per-tool coverage rows
-already in the master are exactly the case $W=[1,n-1]$ summed over tools, so
-\eqref{eq:window} strictly generalises what is there.
+\end{proposition}
 
-Inequality~\eqref{eq:window} was checked at $1{,}200{,}816$ integer points --- every
-window of every sequence of a bank of random instances, evaluated against the loading
-the rule actually produces --- with no violation.
+\begin{proof}
+Let $S$ be the set of tools present at some position of $W$ and $A$ the set present at
+position $p-1$. Fix $t\in S\setminus A$. Then $a_{t,p-1}=0$ and $a_{t,k}=1$ for some
+$k\in W$, so there is a smallest such $k$, and at it $a_{t,k}-a_{t,k-1}=1$. Constraint
+(W) gives $w_{t,k}\ge1$. Distinct tools contribute to distinct terms, so the left-hand
+side is at least $\lvert S\setminus A\rvert\ge\lvert S\rvert-\lvert A\rvert$, which is
+the right-hand side.
+\end{proof}
+
+The inequality linearises with one auxiliary variable per tool and window. Two
+properties make the family useful. It constrains a stretch of the schedule rather than
+a single point, so it can charge a re-insertion that no arc-indexed or single-position
+row can see. And it contains only master variables, so it is a \emph{robust} cut in the
+sense of \citet{Poggi2011}: its dual never reaches the pricing problem, and the
+set-union knapsack oracle of Section~\ref{ssec:pos} is unchanged. The per-tool counting
+rows (T) already in the master are the case $W=[2,n]$ summed over tools, so
+Proposition~\ref{prop:window} generalises them.
+
+The implementation was additionally checked against the loading rule at $1{,}200{,}816$
+integer points --- every window of every sequence of a bank of random instances --- with
+no violation. That is a test of the code, not of the proposition.
 
 \paragraph{What it would be worth.}
 A family is worth implementing only if the bound it could deliver is materially better
@@ -165,11 +175,11 @@ Two readings follow. The arc-supported family is exhausted: on three quarters of
 loose instances the best bound it could ever certify is the coverage bound itself. And
 the window family has real headroom, roughly two fifths of the remaining gap at the
 median. Measured on the same instances, $84\%$ of the windows that carry the bound have
-length at most four and $70\%$ have length two or three, so a static pool of short
+length at most four and $71\%$ have length two or three, so a static pool of short
 windows captures most of the value and no separation routine is required.
 
-\paragraph{Which method should carry it.}
-Not the Benders master. Expressing \eqref{eq:window} in arc space needs a family of job
+\paragraph{Where the family belongs.}
+In the position-indexed master, not the Benders master. Expressing \eqref{eq:window} in arc space needs a family of job
 sets to be simultaneously contiguous, which is a product of indicators and has no useful
 linear form --- the same obstruction that makes the triplet rows worthless. In the
 position-indexed master the window is a range of position indices and the inequality is
@@ -211,47 +221,96 @@ did not exist before the two readings were separated.
 
 \subsection{Limitations}\label{ssec:limits}
 
-Several limitations bear on how far the conclusions above can be pushed.
+The limitations are ordered by how much they threaten the report's conclusions, most
+first, and each states the claim it bears on before the limit itself.
 
-\paragraph{PTF's advantage was measured but not exercised.}
-Proposition~\ref{prop:ptf} says the position--transition relaxation can exceed $q$, and
-Section~\ref{ssec:results-bnp} finds it doing so on three runs out of $233$. That
-settles that the proposition is not vacuous. It does not settle whether the advantage
-can be made large. The three cases are small instances, the excess is one unit, and
-whether a family exists on which the gap between the PTF relaxation and $q$ grows is
-open. Problem~\ref{prob:ptf-gap} states it.
+\paragraph{The census of heuristic gaps is on small instances.}
+\emph{Bears on:} Observation~\ref{obs:census}, that positive heuristic gaps are rare,
+equal to one, and require $b\ge4$.
+\emph{The limit:} the census enumerates instances with three to five jobs, because it
+computes the optimum by exhaustion. Nothing in it establishes that the same holds at
+industrial sizes, and the agreement with \citet{Burger2015} is corroboration from a
+different method, not an extension of the range.
+\emph{Weight:} this is the least secure of the report's empirical claims, and the one a
+reader should discount first. The structural results of Sections~\ref{ssec:exact} and
+\ref{ssec:ratio} do not depend on it; they are proved for every instance and every
+capacity.
 
-\paragraph{Formulation 5 of \citet{Catanzaro2015} was not implemented.}
-F4 was used as the compact baseline from that family. Their own conclusions recommend
-F5 as the best of the family, and their experiments show it solving more instances
-than F4. The comparison in Section~\ref{sec:comp} is therefore against the second
-strongest member of that family, not the strongest, and the compact side of the
-comparison is correspondingly favourable to the methods of this report.
+\paragraph{The window family has been measured at its ceiling, not inside a solver.}
+\emph{Bears on:} Table~\ref{tab:ceilings} and the claim that the family has roughly four
+times the headroom of the arc-supported one.
+\emph{The limit:} the figure is the strongest bound the family could certify, computed
+by enumerating every sequence of $62$ instances of one family at eight jobs. A linear
+relaxation will realise less than that, possibly much less, and no measurement inside a
+branch-and-price run exists yet.
+\emph{Weight:} the comparison between the two families is on equal terms, both being
+ceilings, so the \emph{ratio} is meaningful even though neither absolute figure is
+achievable. The claim to take from it is that the arc family is exhausted, which is a
+ceiling result and therefore safe. The claim that the window family will deliver is not
+yet established.
 
-\paragraph{Some runs of the campaign were lost.}
-Of $16{,}994$ runs, $427$ returned no result, as Section~\ref{ssec:validation} records.
-The losses are concentrated in the LSS baseline on one family, so the LSS totals are
-computed on a smaller and harder-than-average denominator and are not comparable with
-the others. The Benders and multicommodity totals are affected at the level of tens of
-runs out of fourteen hundred, which does not change any comparison drawn from them.
+\paragraph{One time limit, one machine, one collection.}
+\emph{Bears on:} every solve count and time in Section~\ref{sec:comp}.
+\emph{The limit:} one hour, one homogeneous node type, and the standard collections. A
+longer limit would move the counts; the cumulative curves of Table~\ref{tab:cumulative}
+show by how much, and show that it would not move them equally for all methods.
+\emph{Weight:} the conclusions of Section~\ref{ssec:disc-bound} rest on the split by
+bound tightness and on the ablation, both of which are internal comparisons under
+identical conditions and so are insensitive to where the limit is set.
 
-\paragraph{The branch-and-price prototypes are a language apart.}
-They are written in Python with a Python pricer, against baselines compiled into
-CPLEX. Their solve counts are therefore a lower bound on what the formulations can do
-and should not be read against Table~\ref{tab:solves}. Their run counts are also
-outcome-dependent through the early-stop rule of Section~\ref{ssec:results-bnp}. The
-one quantity they report that is free of both problems is the root relaxation value,
-which is why the conclusions drawn from them in Section~\ref{ssec:results-bnp} rest on
-that and not on solve counts.
+\paragraph{The compact baseline is F4, and F4 is not the strongest of its family.}
+\emph{Bears on:} the ranking in Table~\ref{tab:solves}.
+\emph{The limit:} \citet{Catanzaro2015} recommend F5, which was not implemented.
+\emph{Weight:} the omission runs against this report's own conclusion rather than for
+it. A stronger compact baseline would widen a margin that already favours the compact
+models over the methods built here. It has no bearing on the bound results, which
+concern relaxation values rather than solver speed.
 
-\paragraph{The learned cut-selection prototype was never run on the SSP.}
-Section~\ref{ssec:rl} reports it on knapsack cover cuts, which is what it was built and
-trained on, and Table~\ref{tab:rl} gives one training seed per size with no repetition.
-It shows that the agent learns. It shows nothing about the SSP, and nothing in this
-report claims otherwise.
+\paragraph{Four hundred and twenty-seven runs returned no result.}
+\emph{Bears on:} the denominators in Table~\ref{tab:solves}.
+\emph{The limit:} $352$ of the failures belong to the LSS baseline and $239$ of those to
+one family, so the LSS row is computed on a smaller and harder-than-average subset and
+its rate is not comparable with the others.
+\emph{Weight:} the remaining $75$ failures are spread across nine configurations, at most
+$26$ in any one, which changes no comparison drawn between them. The LSS row should be
+read as a lower bound and nothing more.
 
-\paragraph{The setup-cost spectrum is not calibrated.}
-Theorem~\ref{thm:collapse} locates the transition between the SSP and the JGP in terms
-of the parameter $\rho$, but no source giving comparable measurements of machine stop
-time and per-tool exchange time was found, so where real installations fall on that
-spectrum is not established here. Remark~\ref{rem:rho} states this.
+\paragraph{The branch-and-price prototypes run in Python; the baselines run in C.}
+\emph{Bears on:} the solve counts in Table~\ref{tab:bnp}.
+\emph{The limit:} a node of a Python pricer costs orders of magnitude more than a node
+inside CPLEX, and the run counts are additionally outcome-dependent through the
+early-stop rule. Nothing above nine jobs was closed, and that fact carries no
+information about the formulations.
+\emph{Weight:} none of the conclusions drawn from these runs uses a solve count. They
+rest on the root relaxation value, which is recorded before any search and is therefore
+immune to both problems.
+
+\paragraph{The learned cut-selection prototype was not run on the SSP.}
+\emph{Bears on:} Section~\ref{ssec:rl} and nothing else.
+\emph{The limit:} it was trained and measured on knapsack cover cuts, with one seed per
+size and no repetition. It shows that the agent learns and says nothing about this
+problem.
+\emph{Weight:} Section~\ref{ssec:disc-locality} explains why running it on the SSP as
+built would not have helped: cut selection chooses among cuts a method can already
+generate, and the measurement there is that those cuts have almost no headroom left.
+
+\paragraph{The setup-cost parameter has no measured range.}
+\emph{Bears on:} the practical reading of Theorem~\ref{thm:collapse}, which locates the
+transition between the SSP and the Job Grouping Problem at a threshold in the parameter
+$\rho$, the ratio of the fixed cost of a machine stop to the cost of exchanging one
+tool.
+\emph{The limit:} no published source giving comparable measurements of the two
+quantities was found, so where real installations sit on that spectrum is not
+established here.
+\emph{Weight:} the theorem is a statement about the model and is proved. What is missing
+is an empirical value for one of its inputs, which affects how the result should be
+applied and not whether it holds.
+
+\paragraph{PTF exceeds the coverage bound, but only just.}
+\emph{Bears on:} Proposition~\ref{prop:ptf} and the claim that it is the one construction
+here to improve on the counting bound.
+\emph{The limit:} the excess is one unit, on three runs of $233$, against gaps of six to
+eight. The proposition says the relaxation \emph{can} exceed $q$ and is established by
+witness; whether the excess can be made to grow is Problem~\ref{prob:ptf-gap} and is
+open.
+\emph{Weight:} the qualitative claim is secure and the quantitative one is not made.

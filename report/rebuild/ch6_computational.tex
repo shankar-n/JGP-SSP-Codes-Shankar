@@ -11,6 +11,23 @@ has a polynomially solvable loading subproblem, which is the textbook preconditi
 Benders decomposition, and whether a decomposition can exploit it against modern
 compact models had not been tested.
 
+\paragraph{What the section asks, and in what order.}
+Numbers on their own settle nothing, so each subsection below states the question it
+answers before the measurement that answers it.
+Section~\ref{ssec:bench} fixes the protocol.
+Section~\ref{ssec:validation} asks whether the implementations are sound, because every
+comparison after it is worthless if they are not.
+Section~\ref{ssec:results-solved} asks how far each method gets, which establishes the
+ranking but explains nothing.
+Section~\ref{ssec:results-bbc} asks whether the difficulty is finding good solutions or
+proving them optimal, and whether the standard strengthenings move it.
+Section~\ref{ssec:results-tight} asks what separates the instances a method closes from
+those it does not, and finds a single structural property that does.
+Section~\ref{ssec:results-bnp} asks the same question of the branch-and-price
+prototypes, which can report their relaxation value directly and so answer it without
+reference to solving times at all.
+Section~\ref{sec:disc} then asks why the answer is what it is.
+
 \subsection{Experimental design}\label{ssec:bench}
 
 \paragraph{Instances.}
@@ -87,17 +104,16 @@ themselves.
 Every exact solver was checked against brute-force optima on a bank of small instances,
 in every combination of its option flags. The loading oracle itself was verified
 against an exact dynamic program over magazine states; the verification described in
-Appendix~\ref{app:verify} repeats this on $83{,}670$ instance-and-sequence pairs and
+Appendix~\ref{app:verify} repeats this on $349{,}872$ instance-and-sequence pairs and
 finds no disagreement.
 
 \paragraph{Identifying an instance.}
 An instance is identified by the family it comes from, its file name, its number of
 jobs, its number of tools, and its magazine capacity. All five are needed. The Crama
 collection reuses the same file names at four different capacities, so two runs that
-agree on the name can be runs on different instances. An earlier version of this
-analysis keyed on the name alone; it reported disagreements between methods that, on
-inspection, were comparisons between an instance at one capacity and the same matrix at
-another. The comparison below uses the full identifier.
+agree on the name can be runs on different instances. Keying on the name alone merges
+rows describing different instances and produces apparent disagreements between methods
+where none exists. The comparison below uses the full identifier.
 
 \paragraph{Cross-method agreement.}
 Of the $1{,}421$ instances, $1{,}115$ were solved to proven optimality by at least one
@@ -131,14 +147,12 @@ $\lvert\U\rvert-b=24-5$ and not $\lvert T\rvert-b=20$. All coverage-bound figure
 this section use $\lvert\U\rvert$.
 
 \paragraph{A defect found and corrected.}
-The first campaign gave the Benders solver poor results. The cause was that its master
-problem lacked the coverage row $\theta\ge\lvert\U\rvert$ of Section~\ref{ssec:bbc},
-which every other method carries implicitly through its formulation. The row was added
-and the whole campaign re-run. All numbers below come from the corrected solver. The
-episode is reported because it is the reason the earlier interim results were
-superseded, and because it illustrates the general point of Section~\ref{sec:disc}: on
-this problem a missing bound is expensive in a way that a missing search improvement is
-not.
+The Benders master requires the coverage row $\theta\ge\lvert\U\rvert$ of
+Section~\ref{ssec:bbc} explicitly, because unlike every other method here it does not
+carry that bound implicitly through a formulation. Omitting it costs the solver most of
+its performance. This is reported because it quantifies the general point of
+Section~\ref{sec:disc}: on this problem a missing bound is expensive in a way that a
+missing search improvement is not.
 
 \paragraph{Runs that failed.}
 Of the $16{,}994$ runs, $427$ returned no result. Three hundred and seventy-eight of
@@ -152,6 +166,14 @@ concentrated on the family it finds hardest. The remaining $75$ failures are sca
 across the nine Benders configurations, at most $26$ in any one of them.
 
 \subsection{How far each method gets}\label{ssec:results-solved}
+
+\emph{The question.} How many instances does each method close, and does the
+decomposition compete with the compact models it was built to improve on?
+
+This is the coarsest measurement in the section and the least explanatory. It
+establishes a ranking, and that ranking is the starting point for everything after it,
+but by itself it says nothing about \emph{why} the ranking is what it is.
+Sections~\ref{ssec:results-bbc} and \ref{ssec:results-tight} take that up.
 
 Table~\ref{tab:solves} reports, for each configuration and each family, the number of
 instances solved to proven optimality against the number of runs that returned a
@@ -190,7 +212,7 @@ Three things can be read from Table~\ref{tab:solves}.
 
 The multicommodity model of \citet{daSilva2024} is the strongest single method, as its
 authors report. That their claim replicates on an independent implementation and a
-different instance collection is worth recording in its own right. It closes $1{,}038$
+different instance collection is itself a result. It closes $1{,}038$
 instances; the best Benders configuration closes $727$.
 
 The families separate the methods rather than rank them uniformly. Laporte3 is solved
@@ -238,12 +260,68 @@ its mean is an order of magnitude above SSPMF's. It either closes an instance
 immediately or does not close it at all. Section~\ref{ssec:results-tight} identifies
 what separates the two cases, and it is not the size of the instance.
 
+\paragraph{How the solved count accumulates.}
+The shifted geometric mean summarises the instances a method solves; it says nothing
+about the ones it does not. Table~\ref{tab:cumulative} gives the whole curve: how many
+instances each method has closed by one second, ten seconds, and so on to the limit.
+
+\begin{table}[h]\centering
+\footnotesize
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+Method & $1$s & $10$s & $60$s & $300$s & $900$s & $3600$s & attempted\\
+\midrule
+SSPMF              & $482$ & $735$ & $946$ & $959$ & $982$ & $1038$ & $1417$\\
+\texttt{CATZ-F4}   & $128$ & $254$ & $444$ & $662$ & $795$ & $885$  & $1406$\\
+LSS                & $57$  & $246$ & $532$ & $759$ & $819$ & $844$  & $1069$\\
+\midrule
+\texttt{BBC-LP}    & $403$ & $469$ & $525$ & $572$ & $650$ & $726$  & $1407$\\
+\texttt{BBC-K}     & $431$ & $490$ & $531$ & $570$ & $699$ & $725$  & $1395$\\
+\texttt{BBC-LP+F}  & $362$ & $435$ & $466$ & $508$ & $542$ & $659$  & $1418$\\
+\bottomrule
+\end{tabular}
+\caption{Instances closed within a given time. The two groups have different shapes.}
+\label{tab:cumulative}
+\end{table}
+
+The shapes differ, and the difference is the point. \texttt{BBC-LP} closes $403$
+instances in the first second and $726$ in the full hour: more than half of everything
+it will ever solve is solved before a compact model has finished building its model.
+After that it flattens. SSPMF starts lower relative to its own total, at $482$ of
+$1{,}038$, and keeps climbing throughout; LSS closes $57$ in the first second and
+$844$ by the end. Extending the limit would therefore not affect the methods equally.
+The Benders solver is not slow. It is fast on one class of instance and unable to
+finish on the other, which is the behaviour Section~\ref{ssec:results-tight} explains.
+
+\paragraph{How far from proven the unsolved runs are.}
+The complement of the solved count is the gap remaining when the limit is reached,
+measured between the incumbent and the dual bound. For \texttt{BBC-LP} the median over
+its $681$ time-limited runs is $22.9\%$ and the mean is $28.6\%$, with a maximum of
+$73\%$; the nine Benders configurations lie between $26.0\%$ and $29.5\%$ on the mean.
+Only $50$ of those $681$ runs finish within five per cent of proven.
+
+That figure should be read against the one in the next paragraph. On the runs where the
+optimum is known independently, the solver's incumbent already equals it $59\%$ of the
+time. It is therefore sitting on the right answer with a certified gap of roughly a
+quarter, and the hour is spent failing to close a gap that exists only in the
+certificate.
+
 \subsection{The Benders solver and its strengthenings}\label{ssec:results-bbc}
 
+\emph{The question.} A branch-and-bound method can fail for two reasons: it cannot find
+a good solution, or it finds one and cannot prove it optimal. The two call for opposite
+remedies, and the ablation below is designed to tell them apart. Four strengthenings
+were implemented, one aimed at the incumbent and three at the dual bound. If the
+difficulty is search, the first should be marginal and the others should help. If the
+difficulty is the bound, the pattern should be reversed.
+
+That is what makes this subsection informative rather than merely a list of settings:
+the outcome discriminates between two explanations, and it was not obvious in advance
+which one it would pick.
+
 \paragraph{Fractional cuts.}
-Section~\ref{ssec:accel} recorded that fractional separation had been inert in the
-earlier campaign because of a defect in the cut-injection call, so the idea could not
-be tested. The defect is corrected, and the corrected version was run.
+Separating Benders cuts at fractional points is a standard acceleration whose value on
+this problem had not been established. The measurement below settles it.
 
 The cuts are now generated in very large numbers. Across the $1{,}415$ instances that
 both \texttt{BBC-LP} and \texttt{BBC-LP+F} attempted, the fractional configuration
@@ -275,7 +353,7 @@ instead of searching. Sixty-seven instances that the base solver closes are lost
 \label{tab:frac}
 \end{table}
 
-This is a clean negative result and it is worth stating plainly. The mechanism works:
+The mechanism works:
 the cuts are valid, they are generated, and they enter the master. The node counts show
 they do tighten the relaxation locally, since the search explores twenty times fewer
 nodes. What they do not do is raise the bound that matters. On no instance in the
@@ -336,9 +414,10 @@ Benders solver's incumbent already \emph{equals} that optimum. It had found the 
 and could not prove it. For \texttt{BBC-LP} alone the figure is $229$ of $386$, or
 $59\%$.
 
-Taken together: when the bound is good the solver finishes at the root, and when the
-bound is bad it finds the optimum quickly and then spends an hour failing to certify
-it. The search is not the bottleneck. The bound is.
+Taken together these two measurements describe a solver that finishes at the root when
+the bound is good, and that finds the optimum quickly and then spends an hour failing to
+certify it when the bound is bad. In neither case is the search the constraint on what
+it can do.
 
 \subsection{The coverage bound decides the outcome}\label{ssec:results-tight}
 
@@ -387,6 +466,14 @@ master sees only the cuts it has accumulated, and when the bound is loose it has
 little else.
 
 \subsection{Branch-and-price}\label{ssec:results-bnp}
+
+\emph{The question.} Everything above measures the bound indirectly, through how many
+instances a solver closes. The prototypes can answer directly, because they report the
+value of their root relaxation on every run. Two propositions of Section~\ref{ssec:pos}
+predict what that value will be --- that PCF$'$ equals the coverage bound and that PTF
+can exceed it --- and the campaign is a chance to test a proof against a benchmark
+rather than against another proof. That is the purpose of this subsection; the solve
+counts are secondary and, for the reasons given next, weak evidence.
 
 The two position-indexed prototypes were run separately from the campaign above. They
 are implemented in Python over PySCIPOpt with a Python pricer, so a single node costs
@@ -444,7 +531,7 @@ one below, which is made on common instances.}
 \label{tab:bnp}
 \end{table}
 
-\paragraph{The measurement that matters.}
+\paragraph{What the root relaxation shows.}
 Proposition~\ref{prop:pcf} states that the position--configuration relaxation equals
 the coverage bound $q$, and Proposition~\ref{prop:ptf} states that the
 position--transition relaxation can exceed it. Both are testable directly, because the

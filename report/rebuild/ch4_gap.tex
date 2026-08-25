@@ -67,9 +67,9 @@ and it is strictly positive exactly when no minimum-cardinality grouping attains
 overall minimum of $\gamma$.
 \end{corollary}
 
-This locates the loss exactly. It is not a failure of the sequencing phase, which
-orders whatever it is given optimally. It is the price of the cardinality
-restriction imposed by the grouping phase.
+This locates the loss exactly: it is the price of the cardinality restriction imposed by
+the grouping phase, and not a failure of the sequencing phase, which orders optimally
+whatever it is given.
 
 \begin{example}[Where the ring loses, in the walk model]\label{ex:ring-why}
 The optimum of the $6$-ring is realised by a \emph{four}-configuration grouping,
@@ -446,14 +446,16 @@ search over all instances with at most four jobs finds no smaller one.
 \end{observation}
 
 \begin{observation}[Positive heuristic gaps are rare and small]\label{obs:census}
-In a random sample of $420$ instances, drawn with three to five jobs, four to eight
-tools, capacity between two and five, and each job's requirement a uniformly random
-subset of admissible size, exactly one has $H>\Zst$. Every positive heuristic gap
-found anywhere in this study equals one, and every instance carrying one has
-$b\ge4$.
+Draw instances with three to five jobs, four to eight tools, capacity between two and
+five, and each job's requirement a uniformly random subset of admissible size. In
+$1{,}260$ such instances, drawn as three independent samples of $420$, \emph{none} has
+$H>\Zst$. Positive gaps nevertheless exist and are found by directed search: the
+smallest is the four-job instance of Observation~\ref{obs:smallest}. Every positive
+heuristic gap found anywhere in this study equals one, and every instance carrying one
+has $b\ge4$.
 \end{observation}
 
-The last part of that observation is worth pausing on. A positive heuristic gap
+The last part of that observation matters. A positive heuristic gap
 requires the magazine to be large relative to the jobs. That is precisely the regime
 in which \citet{Burger2015} report the decomposition degrading: as the difference
 between the magazine size and the largest job size grows, the quality of the
@@ -666,9 +668,47 @@ $\rset{1,2,3}$, so the whole job set is one feasible group and $\Kst=1$.
 
 This locates a first provable obstruction for the set-covering relaxation behind
 grouping branch-and-price \citep{Crama1994Column,Otiai2024}: odd circular structure,
-in exact parallel to odd holes in perfect-graph theory \citep{Chudnovsky2006}. Whether
-odd-ring-like structure is the only obstruction is open, and
-Section~\ref{ssec:further} records what is known about it.
+in exact parallel to odd holes in perfect-graph theory \citep{Chudnovsky2006}.
+
+It is natural to ask whether it is the \emph{only} obstruction. At $b=3$ with every job
+requiring exactly two tools the question is finite, because the family is then a family
+of graphs: a tool is a vertex, a job is an edge, and a feasible group is a set of edges
+spanning at most three vertices. The $k$-ring is the cycle $C_k$. Every such instance up
+to isomorphism on at most six tools can therefore be enumerated and tested, and the
+answer is negative.
+
+\begin{proposition}[A non-ring obstruction]\label{prop:starobstruction}
+At $b=3$ the three-job star
+\[
+  T_1=\rset{a,b},\qquad T_2=\rset{a,c},\qquad T_3=\rset{a,d}
+\]
+has fractional cover $\tfrac32$ and $\Kst=2$. It contains no odd cycle, so odd-ring
+structure among the tools is not necessary for the covering relaxation to be
+non-integral.
+\end{proposition}
+
+\begin{proof}
+Any two of the three jobs together require three tools and form a feasible group; all
+three require four and do not. The maximal feasible groups are therefore the three
+pairs, and each job lies in exactly two of them, so weight $\tfrac12$ on each pair
+covers every job and the fractional cover is at most $\tfrac32$. The dual packing
+$y_j=\tfrac12$ is feasible because no group holds more than two jobs, so by
+linear-programming duality the fractional cover equals $\tfrac32$. No single group holds
+all three jobs, so $\Kst=2$. The tool graph is the star $K_{1,3}$, which is bipartite.
+\end{proof}
+
+\begin{observation}[How common the obstruction is]\label{obs:starobstruction}
+Of the $151$ instances of this family with at most six tools, exactly $76$ have a
+non-integral covering relaxation. Eleven of those are bipartite. The star of
+Proposition~\ref{prop:starobstruction}, with three jobs, is the smallest non-integral
+instance of the family; the smallest ring witness has five.
+\end{observation}
+
+What the star and the odd ring share is not circular structure among the \emph{tools} ---
+the star has none --- but odd structure among the \emph{jobs}: in both cases three jobs
+are pairwise compatible and not jointly compatible. That is the odd hole, seen in the compatibility hypergraph on jobs
+rather than in the graph on tools, and it is where a characterisation should be sought.
+Section~\ref{ssec:further} records what remains open.
 
 \subsection{The setup-cost spectrum}\label{ssec:collapse}
 

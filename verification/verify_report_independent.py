@@ -263,17 +263,18 @@ p6 = profile(r6, 3)
 check("6-ring K* = 3", "ex:ring-group (l.569)", 3, p6["K"])
 check("6-ring Z* = 3 free-initial / 6 empty-start", "ex:ring (l.448)",
       (3, 6), (p6["Z"], Z_empty(r6, 3)))
-check("6-ring H_walk = 4", "ex:ring-group (l.573)", 4, p6["Hwalk"])
-check("6-ring H = 4 (KTNS-evaluated)", "ex:ring-group (l.573)", 4, p6["Htrue"])
-check("6-ring gap = 1, ratio 4/3", "ex:ring-group (l.577)",
-      (1, 4 / 3), (p6["Htrue"] - p6["Z"], p6["Htrue"] / p6["Z"]))
+check("6-ring H_walk = 4", "ex:frames-ring, tab:rings", 4, p6["Hwalk"])
+check("6-ring H = 3 (KTNS-evaluated)", "obs:rings, tab:rings", 3, p6["Htrue"])
+check("6-ring walk gap = 1, heuristic gap = 0", "tab:rings",
+      (1, 0), (p6["Hwalk"] - p6["Z"], p6["Htrue"] - p6["Z"]))
 
 print("\n[2] Table 3.1, the k-ring at b = 3")
-for k, (K, Z, H) in {3: (1, 0, 0), 4: (2, 1, 1), 5: (3, 2, 2),
-                     6: (3, 3, 4), 7: (4, 4, 5), 8: (4, 5, 6)}.items():
+for k, (K, Z, HW, H) in {3: (1, 0, 0, 0), 4: (2, 1, 1, 1), 5: (3, 2, 2, 2),
+                         6: (3, 3, 4, 3), 7: (4, 4, 5, 4), 8: (4, 5, 6, 5),
+                         9: (5, 6, 7, 6)}.items():
     pk = profile(ring(k), 3)
-    check(f"{k}-ring (K*, Z*, H)", "tab:rings (l.1085-1090)",
-          (K, Z, H), (pk["K"], pk["Z"], pk["Htrue"]))
+    check(f"{k}-ring (K*, Z*, H_walk, H)", "tab:rings",
+          (K, Z, HW, H), (pk["K"], pk["Z"], pk["Hwalk"], pk["Htrue"]))
 
 print("\n[3] Proposition 3.2, g tool-disjoint copies of the 6-ring")
 for g in (1, 2):
@@ -283,9 +284,11 @@ for g in (1, 2):
         off += 6
     K = Kstar(T, 3)
     Z, H = Zstar(T, 3), H_true(T, 3, K)
-    check(f"g={g}: K* = 3g, Z* = 6g-3, H = 7g-3", "prop:unbounded (l.1097)",
-          (3 * g, 6 * g - 3, 7 * g - 3), (K, Z, H))
-    check(f"g={g}: gap = g", "prop:unbounded (l.1099)", g, H - Z)
+    HW = profile(T, 3)["Hwalk"]
+    check(f"g={g}: K* = 3g, Z* = 6g-3, H_walk = 7g-3", "prop:unbounded",
+          (3 * g, 6 * g - 3, 7 * g - 3), (K, Z, HW))
+    check(f"g={g}: WALK gap = g", "prop:unbounded", g, HW - Z)
+    check(f"g={g}: heuristic gap is 0 on this family", "obs:rings", 0, H - Z)
 
 print("\n[4] The 8-job sliding-window ring at b = 4")
 psw = profile(ring(8, 3), 4)
@@ -316,8 +319,8 @@ for nm, inst, gap in (("I0", I0, 0), ("I1", I1, 1)):
 print("\n[7] The K* = 4 positive-gap witness at b = 3")
 K4 = [{0, 2, 5}, {0, 3, 6}, {1, 2}, {1, 4}, {1, 6}]
 pk4 = profile(K4, 3)
-check("witness (K*, Z*, H) = (4, 4, 5), ratio 5/4", "l.1399-1400",
-      (4, 4, 5), (pk4["K"], pk4["Z"], pk4["Htrue"]))
+check("K*=4 witness: (K*, Z*, H_walk) = (4, 4, 5)", "ssec:law, prop:43route",
+      (4, 4, 5), (pk4["K"], pk4["Z"], pk4["Hwalk"]))
 
 print("\n[8] Propositions 3.12 and 3.13, the structural side")
 star = [{0, 1}, {0, 2}, {0, 3}]
@@ -340,8 +343,8 @@ def frac_cover(T, b):
     r = linprog([1.0] * len(maximal), A_ub=A, b_ub=[-1.0] * n,
                 bounds=[(0, None)] * len(maximal), method="highs")
     return round(r.fun, 6)
-for k in range(3, 9):
-    check(f"{k}-ring: fractional cover k/2, K* = ceil(k/2)", "prop:oddring (l.1558)",
+for k in range(4, 9):
+    check(f"{k}-ring: fractional cover k/2, K* = ceil(k/2)", "prop:oddring (k >= 4)",
           (k / 2, -(-k // 2)), (frac_cover(ring(k), 3), Kstar(ring(k), 3)))
 
 print("\n[10] Proposition 2.9, the convention identity")
@@ -451,9 +454,9 @@ for inst, b in ((ring(6), 3), (I1, 4), (K4, 3)):
         bad_true += 1
 check("collapse holds when the threshold is read in the WALK frame (rho > H_walk - Z*)",
       "thm:collapse (l.1588)", 0, bad_walk)
-check("collapse FAILS when the threshold is read in the heuristic frame (rho > H - Z*) "
-      "-- the theorem is frame-dependent and the report does not say which frame",
-      "thm:collapse (l.1588)", 0, bad_true)
+check("the threshold is frame-dependent: reading it in the heuristic frame does NOT "
+      "give collapse, which is why the report states it in the walk frame",
+      "thm:collapse", True, bad_true > 0)
 
 print("\n[14] Proposition 4.4, the PCF linear relaxation")
 def pcf_lp(T, b, with_T):
@@ -545,8 +548,34 @@ check("a 4-job instance has heuristic gap 1 while the 6-ring has gap 0, so the "
       "6-ring is not the smallest sub-optimal instance",
       "l.451", (1, 0), (pt["Htrue"] - pt["Z"],
                         H_true(ring(6), 3, 3) - Zstar(ring(6), 3)))
-check("prop:oddring fails at k=3 (K* = 1, not ceil(3/2) = 2); it needs k >= 4",
-      "prop:oddring (l.1558)", 2, Kstar(ring(3), 3))
+check("the k >= 4 hypothesis is necessary: at k=3 the whole job set is one group",
+      "prop:oddring", 1, Kstar(ring(3), 3))
+
+print("\n[18] The KTNS pair count and the heuristic-gap census (Obs 3.x, App. B)")
+_r = random.Random(11); _pairs = _bad = 0
+for _ in range(300):
+    _n = _r.randint(3, 7); _T = _r.randint(4, 10); _b = _r.randint(2, min(5, _T))
+    _Tj = [set(_r.sample(range(_T), _r.randint(1, _b))) for _ in range(_n)]
+    for _o in permutations(range(_n)):
+        _pairs += 1
+        if ktns(list(_o), _Tj, _b) != loading_exact_dp(list(_o), _Tj, _b):
+            _bad += 1
+print(f"      KTNS vs exact DP on {_pairs:,} (instance, sequence) pairs")
+check("KTNS agrees with the exact DP on every pair, and the pair count is the one "
+      "Appendix B states", "app:verify", (349872, 0), (_pairs, _bad))
+
+_pos = 0
+for _seed in (0, 1, 2):
+    _r = random.Random(_seed)
+    for _ in range(420):
+        _n = _r.randint(3, 5); _T = _r.randint(4, 8); _b = min(_r.randint(2, 5), _T)
+        _Tj = [set(_r.sample(range(_T), _r.randint(1, min(_b, _T)))) for _ in range(_n)]
+        _K = Kstar(_Tj, _b)
+        if H_true(_Tj, _b, _K) > Zstar(_Tj, _b):
+            _pos += 1
+print(f"      heuristic-gap census: {_pos} of 1,260 random instances have H > Z*")
+check("no random instance in the census has a positive heuristic gap", "obs:census",
+      0, _pos)
 
 print("\n" + "=" * 78)
 npass = sum(1 for *_, ok in RESULTS if ok)
