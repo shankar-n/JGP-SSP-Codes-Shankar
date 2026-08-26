@@ -28,7 +28,7 @@ saying anything correct about it (Section~\ref{ssec:frames}). Within that settin
   guess $\mathrm{gap}\le\Kst-2$ is false for the walk value
   (Proposition~\ref{prop:refute}).
   \item For the method as actually specified, positive gaps are rare, always equal to
-  one in everything tested, and always require $b\ge4$
+  one in everything tested, and never occur at $b=2$
   (Observations~\ref{obs:rings}--\ref{obs:census}). Unboundedness survives, but with a
   different witness family from the one the walk model suggests
   (Observation~\ref{obs:unbounded-true}).
@@ -94,12 +94,15 @@ the position--transition polytope explain the three runs where its bound exceeds
 This is the direction the campaign points to most strongly, and
 Section~\ref{ssec:disc-locality} takes the first step along it: the arc-supported
 information the solvers carry today is exhausted, and the window family of
-inequality~\eqref{eq:window} has roughly four times the remaining headroom
-(Table~\ref{tab:ceilings}). It is valid, it is robust in the branch-and-price sense,
-and it is implemented in \texttt{src/BNP/window\_cuts.py}. What remains is to measure it
-inside the solver
-rather than at its ceiling, and to separate the longer windows rather than taking a
-static pool of short ones. Two further families suggest themselves from the same
+inequality~\eqref{eq:window} has roughly four times the remaining headroom at its
+ceiling (Table~\ref{tab:ceilings}). That family has now been measured inside the master
+and it delivers nothing: the root relaxation is unchanged on all $37$ instances tested
+(Observation~\ref{obs:windowroot}). The robust encoding is the reason. Counting the
+tools an integral schedule would need inside a window requires tying the row to the
+column variables, which puts the cut's dual into the pricing problem and forfeits the one
+property that made it cheap. Whether a non-robust encoding pays for itself is open, and
+so is whether the rows help inside the tree despite leaving the root alone. Two further
+families suggest themselves from the same
 reading: chaining PTF per configuration rather than per tool, which is what confines
 its advantage to three runs in Section~\ref{ssec:results-bnp}, and disaggregating the
 Benders master's single $\theta$ into one variable per position, which is the standard

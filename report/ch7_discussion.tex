@@ -244,6 +244,19 @@ median. Measured on the same instances, $84\%$ of the windows that carry the bou
 length at most four and $71\%$ have length two or three, so a static pool of short
 windows captures most of the value and no separation routine is required.
 
+\begin{observation}[The window family is inactive at the PCF$'$ root]\label{obs:windowroot}
+The family of Proposition~\ref{prop:window} was added to the PCF$'$ master --- $15$
+windows of length two to four, $660$ rows and $225$ auxiliary variables per instance ---
+and the root relaxation recomputed on $37$ of the $62$ loose Laporte3 instances. The root
+value equals $q$ on all $37$ with the rows and without them; the family raises the bound
+on none, including instances whose gap is ten or eleven. Every window row is slack at the
+LP optimum, by between $0.5$ and $3.4$. The reason is visible in the solution: the LP
+holds each tool partially present at every position, so $\sum_t \max_{k\in W} a_{t,k}$
+stays near $b$ instead of counting the distinct tools an integral schedule would need
+inside $W$, and no tool ever \emph{enters} a window. The relaxation evades the family in
+the same way it evades the arc-supported ones.
+\end{observation}
+
 \paragraph{Where the family belongs.}
 In the position-indexed master, not the Benders master. Expressing \eqref{eq:window} in arc space needs a family of job
 sets to be simultaneously contiguous, which is a product of indicators and has no useful
@@ -269,7 +282,7 @@ instances on which the available exact methods are weakest.
 
 \paragraph{The gap opens where the magazine is large.}
 Observation~\ref{obs:census} finds that every instance with a positive heuristic gap
-has $b\ge4$, and that positive gaps are rare in a random sample. Independently,
+needs $b\ge3$, and that positive gaps are rare in a random sample. Independently,
 \citet{Burger2015} report from an industrial study that the decomposition does well
 when the largest job nearly fills the magazine, and that its solution quality
 decreases as the gap between the magazine size and the largest job size grows. One of
@@ -291,22 +304,29 @@ Six, ordered by how much they threaten the conclusions above.
 
 \paragraph{The census of heuristic gaps is on small instances.}
 Observation~\ref{obs:census} says that positive heuristic gaps are rare, always equal to
-one, and always need $b\ge4$. It rests on a census of instances with three to five jobs,
-because the optimum there is computed by exhaustion. Nothing in it shows the same holds
-at industrial sizes, and the agreement with \citet{Burger2015} comes from a different
-method rather than a wider range of sizes. This is the least secure empirical claim in
-the report and the first a reader should discount. The structural results of
+one, and never occur at $b=2$. The census runs from three to eight jobs, because the
+optimum there is computed by exhaustion. Nothing in it shows the same holds at
+industrial sizes, and the agreement with \citet{Burger2015} comes from a different
+method rather than a wider range of sizes. An earlier and narrower version of this
+census supported a stronger claim, that positive gaps need $b\ge4$, which the extended
+search refuted (Remark~\ref{rem:census-b3}); the claim now made is correspondingly
+weaker. This remains the least secure empirical statement in the report and the first a
+reader should discount. The structural results of
 Sections~\ref{ssec:exact} and \ref{ssec:ratio} do not depend on it; those are proved for
 every instance and every capacity.
 
-\paragraph{The window family has been measured at its ceiling, not inside a solver.}
+\paragraph{A ceiling is not a bound, and for the window family the difference is
+everything.}
 Table~\ref{tab:ceilings} and Figure~\ref{fig:ceilings} give the strongest bound each
 family could certify, found by enumerating every sequence of $62$ instances at eight
-jobs. A linear relaxation will realise less, possibly much less, and no measurement
-inside a branch-and-price run exists yet. Both families are measured the same way, so
-the comparison between them survives. What follows safely is that the arc-supported
-family is exhausted, since that is a claim about a ceiling; that the window family will
-deliver inside a solver is not established.
+jobs. Both families are measured the same way, so the comparison between them is fair,
+and the arc-supported family being exhausted is a claim about a ceiling and therefore
+safe. The window family's ceiling, however, turns out to be unreachable. Added to the
+PCF$'$ master and measured at the root on $37$ of those instances, the family raises the
+relaxation on \emph{none} of them (Observation~\ref{obs:windowroot}). The ceiling was
+computed over integral sequences; the relaxation is fractional, and the two are not
+comparable. Any future ceiling computation in this line should be read with that in
+mind.
 
 \paragraph{Four hundred and twenty-seven runs returned no result.}
 This affects the denominators in Table~\ref{tab:solves} and is the one failure that

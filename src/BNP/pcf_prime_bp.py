@@ -241,10 +241,20 @@ class BPPricer(Pricer):
         return {'result': SCIP_RESULT.SUCCESS}
 
 
+try:
+    from window_cuts import add_window_cuts
+except Exception:                                   # keep the module importable without it
+    add_window_cuts = None
+
+LAST_WINDOW_STATS = {}
+
+
 def branch_and_price(J, T, b, Tj, timelimit=90, accel=None):
     """Exact PCF' B&P. `accel` (dict) toggles pricing accelerations:
         heuristic_pricing, multiple_pricing, warm_start, stabilize (bools),
-        kcols (int, default 5), stab_alpha (float in [0,1), default 0.5).
+        kcols (int, default 5), stab_alpha (float in [0,1), default 0.5),
+        window_cuts (bool), window_max_len (int, default 4),
+        root_only (bool -- stop after the root bound, for pilots).
     Returns (status, IP, nodes, ncols, seq, root_lp)."""
     accel = accel or {}
     n = J; U = sorted({t for s in Tj for t in s})
@@ -275,6 +285,14 @@ def branch_and_price(J, T, b, Tj, timelimit=90, accel=None):
             m.addCons(w[(t, p)] - a[(t, p)] + a[(t, p - 1)] >= 0, f"W_{t}_{p}")
     for t in U:
         m.addCons(quicksum(w[(t, p)] for p in range(1, n)) + a[(t, 0)] >= 1, f"T_{t}")
+    LAST_WINDOW_STATS.clear()
+    if accel.get("window_cuts"):
+        if add_window_cuts is None:
+            raise RuntimeError("window_cuts requested but window_cuts.py is not importable")
+        LAST_WINDOW_STATS.update(
+            add_window_cuts(m, a, w, n, T, b, Tj,
+                            max_len=int(accel.get("window_max_len", 4)),
+                            min_len=int(accel.get("window_min_len", 2))))
     Link = {(t, p): m.addCons(a[(t, p)] - quicksum(y[(C, pp)] for (C, pp) in y if pp == p and t in C) == 0,
                               f"L_{t}_{p}", modifiable=True) for t in range(T) for p in range(n)}
     pr = BPPricer(); m.includePricer(pr, "BPPricer", "PCF' branch-and-price")
@@ -291,6 +309,9 @@ def branch_and_price(J, T, b, Tj, timelimit=90, accel=None):
         rlp = m.getDualbound(); rlp = None if rlp is None or abs(rlp) > 1e15 else rlp
     except Exception:
         rlp = None
+    if accel.get("root_only"):                            # pilot: the bound is the measurement
+        LAST_STATS.clear(); LAST_STATS.update(rounds=pr.data.get('rounds', 0), ncols=len(y))
+        return m.getStatus(), None, m.getNNodes(), len(y), None, rlp
     m.setParam("limits/nodes", -1); m.optimize()          # resume to optimum (cumulative budget)
     LAST_STATS.clear(); LAST_STATS.update(rounds=pr.data.get('rounds', 0), ncols=len(y))
     if m.getNSols() == 0:

@@ -442,17 +442,36 @@ search over all instances with at most four jobs finds no smaller one.
 \end{observation}
 
 \begin{observation}[Positive heuristic gaps are rare and small]\label{obs:census}
-Draw instances with three to five jobs, four to eight tools, capacity between two and
-five, and each job's requirement a uniformly random subset of admissible size. In
-$1{,}260$ such instances, drawn as three independent samples of $420$, \emph{none} has
-$H>\Zst$. Positive gaps nevertheless exist and are found by directed search: the
-smallest is the four-job instance of Observation~\ref{obs:smallest}. Every positive
-heuristic gap found anywhere in this study equals one, and every instance carrying one
-has $b\ge4$.
+Draw instances with a uniformly random requirement of admissible size for each job. In
+$1{,}260$ instances with three to five jobs, four to eight tools and capacity between
+two and five, drawn as three independent samples of $420$, \emph{none} has $H>\Zst$.
+Extending the census to larger instances finds them, but only just: $3$ of $1{,}260$ at
+six jobs and $2$ of $1{,}260$ at seven. Every positive heuristic gap found anywhere in
+this study equals one.
+
+Capacity, not job count, is what admits them. A targeted census at fixed capacity finds
+no positive gap in $11{,}000$ instances at $b=2$, spread over four to eight jobs, while
+at $b=3$ they occur at a rate of roughly one in a thousand and are present at every job
+count from five upwards. The smallest found at $b=3$ has five jobs and seven tools,
+\[
+  T_1=\rset{4,6},\quad T_2=\rset{0,1,3},\quad T_3=\rset{1,6},\quad
+  T_4=\rset{0,5,6},\quad T_5=\rset{4,5,7},
+\]
+with $\Kst=4$, $\Zst=4$ and $H=5$.
 \end{observation}
 
-The last part of that observation matters. A positive heuristic gap
-requires the magazine to be large relative to the jobs. That is precisely the regime
+\begin{remark}[A correction]\label{rem:census-b3}
+An earlier draft of this report stated that every instance carrying a positive heuristic
+gap has $b\ge4$, on the strength of the $1{,}260$-instance census alone. The targeted
+search above refutes that: the witness just given has $b=3$. The census had missed it
+because positive gaps at $b=3$ are about a thousand times rarer than the sample could
+resolve. What survives is the weaker and now better-supported statement that $b=2$
+admits none in eleven thousand draws, and that the gap needs a magazine large enough to
+hold more than one job's requirements with room to spare.
+\end{remark}
+
+The capacity condition matters. A positive heuristic gap
+needs the magazine to be large relative to the jobs. That is the regime
 in which \citet{Burger2015} report the decomposition degrading: as the difference
 between the magazine size and the largest job size grows, the quality of the
 heuristic's solutions decreases. Their finding is empirical and industrial, this one
