@@ -72,8 +72,8 @@ unused tools the two quantities differ, and it is $q$, not $\lvert T\rvert-b$, t
 bounds the optimum. The instances of the computational study all satisfy the
 hypothesis.
 
-This result matters twice. It says that the strongest compact relaxation available is
-no stronger than an elementary counting bound. And since $q$ equals $\Zst$ on a large
+This result matters twice. It says that the strongest of the compact relaxations
+considered here is no stronger than an elementary counting bound. And since $q$ equals $\Zst$ on a large
 part of the instance space (Section~\ref{sec:gap}), it predicts that such a model will
 be fast exactly where the bound is tight and weak where it is not.
 Section~\ref{ssec:results-tight} tests that prediction directly.
@@ -181,9 +181,11 @@ with $y,z\ge0$. Row~\eqref{eq:sp-link} is the only place the master's variables 
 when the master selects the arc $(i,j)$, a tool present at $j$ but absent at $i$ must be
 inserted at $j$; when it does not, the row is slack. Row~\eqref{eq:sp-depot} does the
 same for the first job, charging its whole requirement because the magazine starts
-empty. The constraint matrix has the consecutive-ones property along the selected path
-and is totally unimodular, so the relaxation is integral and, by
-Proposition~\ref{prop:ktns}, its optimum equals $\KTNS$ of the order.
+empty. For a fixed $\bar x$ the master's variables appear only on the right-hand side,
+so what remains is a linear program in $y$ and $z$ alone; its constraint matrix has the
+consecutive-ones property along the path $\bar x$ selects and is therefore totally
+unimodular, so the relaxation is integral and, by Proposition~\ref{prop:ktns}, its
+optimum equals $\KTNS$ of the order.
 
 \paragraph{The cut, in full.}
 Only $\bar x$ appears on the right-hand side of \eqref{eq:sp-link} and

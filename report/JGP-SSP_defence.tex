@@ -82,7 +82,7 @@ One line of arithmetic --- the tools some job needs, minus what fits in the maga
   \new{q \;=\; |\U| - b}
 \]
 decides \emph{both} how good the standard industrial heuristic is,
-\emph{and} whether any exact method can close an instance.
+\emph{and} whether the exact methods built here can close an instance.
 \end{minipage}
 \end{center}
 \vspace{1.2em}
@@ -94,7 +94,8 @@ decides \emph{both} how good the standard industrial heuristic is,
 price can be named.}
 \column{0.31\textwidth}
 {\footnotesize\textbf{2. The exact methods}\\[0.3em]
-\color{cGrey} Three unrelated formulations all stop at $q$. Measured, not conjectured.}
+\color{cGrey} Three unrelated formulations all stop at $q$. Measured, not conjectured.
+A fourth does not --- and that is the control.}
 \column{0.31\textwidth}
 {\footnotesize\textbf{3. What to do about it}\\[0.3em]
 \color{cGrey} Why every inequality we have is too local, and a family that is not.}
@@ -115,7 +116,7 @@ price can be named.}
 \column{0.48\textwidth}
 \textbf{Part II --- the exact methods}\\[0.4em]
 {\footnotesize
-\textbf{4.} One bound decides what these methods close\\[0.25em]
+\textbf{4.} One bound predicts what these methods close\\[0.25em]
 \textbf{5.} Why that bound will not move\\[0.25em]
 \textbf{6.} A family of inequalities that could}
 \end{columns}
@@ -474,7 +475,7 @@ problem is a one-line counting argument. Say it as a fact about the problem, not
 criticism of the papers -- it sets up everything after it.}
 
 %------------------------------------------------------------------ RESULT 3
-\begin{frame}{\new{Result 4.} The bound decides the outcome}{$1{,}421$ instances $\cdot$ 12 configurations $\cdot$ $16{,}994$ runs $\cdot$ one hour each}
+\begin{frame}{\new{Result 4.} The bound predicts the outcome --- for one kind of method}{$1{,}421$ instances $\cdot$ 12 configurations $\cdot$ $16{,}994$ runs $\cdot$ one hour each}
 \vspace{0.6em}
 \centering
 \begin{tabular}{@{}lrrrr@{}}
@@ -488,15 +489,16 @@ coverage bound loose $(\Zst>q)$  & $592$ & \new{$40\%$} & $87\%$  & $87\%$\\
 \vspace{1.0em}
 \keyline{}
 \begin{itemize}\itemsep3pt\small
-  \item Same solver, same hardware, same time limit. The classification is not by number
-  of jobs, tools, or density --- it is by one structural property.
+  \item Same solver, same hardware, same limit. The classification is by one structural
+  property --- not jobs, tools or density.
   \item \new{It is a property of the \emph{method}, not the instance.} \texttt{CATZ-F4},
-  whose relaxation is not $q$, moves the other way --- and closes \textbf{all $43$} of
-  the instances where the bound is loosest, where Benders and SSPMF close four each.
-  \item Of the runs that hit the limit and whose optimum is known, \textbf{$66\%$ already
-  held that optimum} and could not certify it.
-  \item Across $41{,}673$ pairs of methods that both proved an optimum, \textbf{none
-  disagreed}.
+  whose relaxation is not $q$, moves the other way and closes \textbf{all $43$} of the
+  loosest, where Benders and SSPMF close four each.
+  \item \new{Nor of every method with bound $q$.} SSPMF's is $q$ too and loses $13$
+  points. What loses $54$ is a master carrying $q$ \emph{and nothing else} --- $87.4\%$
+  of its roots sit on that row.
+  \item Of the limit-hitting runs with a known optimum, \textbf{$66\%$ already held it}.
+  Across $41{,}673$ method pairs that both proved one, \textbf{none disagreed}.
 \end{itemize}
 \end{frame}
 

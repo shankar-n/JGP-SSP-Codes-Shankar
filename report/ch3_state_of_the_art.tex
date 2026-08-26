@@ -102,8 +102,8 @@ Proposition~\ref{prop:lb2}. They report solving $17.01\%$ more instances than th
 models of \citet{Tang1988}, \citet{Laporte2004} and \citet{Catanzaro2015}, on the
 instance sets of \citet{Yanasse2009}.
 
-That is where the compact models stop: the strongest compact relaxation available
-coincides with a counting argument that fits in one sentence. \citet{daSilva2024}
+That is where the compact models reviewed above stop: the strongest relaxation among
+them coincides with a counting argument that fits in one sentence. \citet{daSilva2024}
 also record, for the earlier models, that their relaxations fall below $M-C$ in the
 great majority of cases; this is a statement about most instances, not all, and
 Table~\ref{tab:methods} in Section~\ref{sec:exact} is hedged accordingly.
@@ -208,8 +208,20 @@ What the literature does not contain is a worst-case analysis of the decompositi
 bounds on its gap or ratio, extremal instances, or conditions for exactness. The
 survey of \citet{Calmels2018} classifies sixty-one SSP papers and identifies gaps in
 the field; among them is the observation that few authors propose decomposition
-methods for the SSP at all. No worst-case guarantee has been published for any SSP
-heuristic, as far as could be determined during this internship.
+methods for the SSP at all.
+
+The exception, and the closest prior work to Section~\ref{sec:gap}, is
+\citet{CramaKlundert1999}. They study the worst-case behaviour of approximation
+algorithms for tool management problems, and their Theorem~8 relates the job grouping
+and tool switching problems in both directions: from any grouping into batches one
+obtains a schedule costing at most $b$ times the grouping value, because at most $b$
+switches are needed between consecutive batches. That is precisely the construction
+analysed here, and it makes the decomposition a $b$-approximation. What their analysis
+does not do is sharpen the ratio below $b$, characterise the instances on which the
+construction is exact, or distinguish the configuration-walk reading of the method from
+the value obtained after its final loading step --- and
+Section~\ref{ssec:frames} shows that the last distinction changes the answer to the
+first two.
 
 \subsection{Recent exact developments}\label{ssec:sota-recent}
 
@@ -250,7 +262,7 @@ so the decomposition does not systematically beat the non-decomposed formulation
 was that report which prompted Prof.~Colares to propose the same architecture for the
 SSP, on the reasoning that the SSP occupies the regime the assembly-line problem
 lacked: its subproblem is not a general program needing tailored algorithms, but a
-polynomially solvable oracle, so the cut is exact and essentially free at every
+polynomially solvable oracle, so the cut is exact and cheap to produce at every
 callback.
 
 \subsection{What is open, and what this report attacks}\label{ssec:sota-open}
@@ -261,8 +273,8 @@ First, the two-phase heuristic has a strong empirical record, one conditional
 industrial assessment \citep{Burger2015}, and no worst-case theory.
 Section~\ref{sec:gap} builds one.
 
-Second, on the exact side the strongest compact relaxation equals the coverage bound
-$q$ \citep{daSilva2024}, and the configuration relaxation does not improve on it on
+Second, on the exact side the strongest of the compact relaxations reviewed here equals
+the coverage bound $q$ \citep{daSilva2024}, and the configuration relaxation does not improve on it on
 most instances \citep{Moreira2026}. Progress therefore requires either a method that
 does not rely on a linear relaxation at all, which is the Benders route of
 Section~\ref{ssec:bbc}, or a formulation whose relaxation can exceed the bound, which

@@ -14,8 +14,11 @@ saying anything correct about it (Section~\ref{ssec:frames}). Within that settin
 
 \begin{itemize}[topsep=3pt,itemsep=2pt]
   \item The optimum equals the cheapest walk over \emph{all} feasible groupings
-  (Theorem~\ref{thm:grouping}), so the heuristic's loss is exactly the price of using
-  the fewest groups (Corollary~\ref{cor:gap}).
+  (Theorem~\ref{thm:grouping}), so the best value the two-phase construction can attain
+  differs from the optimum exactly because of the minimum-cardinality restriction
+  (Corollary~\ref{cor:gap}). This bounds the envelope $H$ of
+  Definition~\ref{def:frames}, not the output of a particular tie-breaking
+  implementation.
   \item Zero-gap classes exist for every capacity: two groups, or a tool set barely
   exceeding the magazine, or a small optimum (Corollaries~\ref{cor:zerogap} and
   \ref{cor:smallZ}).
@@ -30,8 +33,11 @@ saying anything correct about it (Section~\ref{ssec:frames}). Within that settin
   \item For the method as actually specified, positive gaps are rare in the censuses,
   equal to one on every connected instance found, and never occur at $b=2$
   (Observations~\ref{obs:rings}--\ref{obs:census}). Unboundedness survives, but with a
-  different witness family from the one the walk model suggests, and that family is
-  disconnected (Observation~\ref{obs:unbounded-true}).
+  different witness family from the one the walk model suggests. That family is
+  \emph{disconnected}, and its unboundedness is a conjecture supported at $g=1,2$ rather
+  than a theorem (Observation~\ref{obs:unbounded-true} and
+  Conjecture~\ref{conj:unbounded}). Whether the gap is bounded on \emph{connected}
+  instances is open.
   \item The circuit clutter of the grouping system computes $\Kst$
   (Proposition~\ref{prop:chromK}) but does not determine the gap
   (Proposition~\ref{prop:noclutter}), while blocking duality gives a first
@@ -102,8 +108,9 @@ the position--transition polytope explain the three runs where its bound exceeds
 This is the direction the campaign points to most strongly, and
 Section~\ref{ssec:disc-locality} takes the first step along it: the arc-supported
 information the solvers carry today is exhausted, and the window family of
-inequality~\eqref{eq:window} has roughly three and a half times the remaining headroom at its
-ceiling (Table~\ref{tab:ceilings}). That family has now been measured inside the master
+inequality~\eqref{eq:window} has roughly three and a half times as much room at its
+\emph{ceiling over integral schedules} (Table~\ref{tab:ceilings}). A ceiling is not a
+bound. That family has now been measured inside the master
 and it delivers nothing: the root relaxation is unchanged on all $37$ instances tested
 (Observation~\ref{obs:windowroot}). The robust encoding is the reason. Counting the
 tools an integral schedule would need inside a window requires tying the row to the
@@ -118,7 +125,8 @@ strengthening the ablation of Section~\ref{ssec:results-bbc} never tested.
 
 \paragraph{Making PTF's advantage large.}
 Section~\ref{ssec:results-bnp} finds the position--transition relaxation above the
-coverage bound on three runs of $233$, by one unit each. The construction is therefore
+coverage bound on three runs of $233$ --- by one unit on two of them and by $0.0134$ on
+the third. The construction is therefore
 sound and, as it stands, of no practical use. Problem~\ref{prob:ptf-gap} asks whether
 the excess can be made to grow; the polyhedral question underneath it is which facets
 of the position--transition polytope are responsible for the three cases where it does

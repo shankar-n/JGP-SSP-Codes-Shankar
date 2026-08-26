@@ -303,6 +303,18 @@ orders of the groups and all orders of the jobs within each group, of the KTNS c
 of the resulting job order.
 \end{definition}
 
+\begin{remark}[$H$ is an envelope, not the output of an implementation]\label{rem:envelope}
+Both $\Hwalk$ and $H$ minimise over every choice the method leaves open: which
+minimum-cardinality grouping, which order of the groups, and which order of the jobs
+inside each group. They are therefore the \emph{best} value reachable by the two-phase
+construction, not the value a particular implementation returns. Any implementation
+resolves those choices by some rule and returns a value at least as large, so a bound
+proved here for $H$ bounds the best case of the construction and is not by itself an
+approximation guarantee for a deterministic implementation of it. The choice is
+deliberate --- the alternative measures a tie-breaking rule rather than the method ---
+but every gap statement in Section~\ref{sec:gap} should be read with it in mind.
+\end{remark}
+
 \begin{proposition}\label{prop:frames}
 For every instance, $H\le\Hwalk$.
 \end{proposition}

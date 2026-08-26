@@ -30,11 +30,13 @@ this way.
 which the elementary bound $q$ happens to equal the optimum, and $40\%$ of those on
 which it does not. The classification is by a single structural property rather than by
 size or density, and it is the property Section~\ref{sec:gap} identifies as governing
-the problem. The split is not a property of the instances: the arc-based
-\texttt{CATZ-F4}, whose relaxation is not $q$, closes a \emph{larger} share of the loose
-instances than of the tight ones and closes all $43$ of the loosest
-(Table~\ref{tab:tightness}). It is a property of methods whose bound is $q$, which is
-what makes it evidence about this family of methods rather than about the SSP.
+the problem. The split is not evidence that the loose instances are intrinsically hard:
+the arc-based \texttt{CATZ-F4}, whose relaxation is not $q$, closes a \emph{larger}
+share of the loose instances than of the tight ones and closes all $43$ of the loosest
+(Table~\ref{tab:tightness}). Nor does every method whose relaxation equals $q$ collapse
+--- SSPMF loses only $13$ points across the same split. What the $54$-point loss
+measures is a master that carries $q$ and, at the root, almost nothing else. That makes
+it evidence about this way of building a solver rather than about the SSP.
 
 \emph{The other method.} The branch-and-price prototype reports its root relaxation on
 every run, and on all $2{,}114$ runs of the position--configuration formulation that
@@ -104,8 +106,9 @@ chaining and measuring.
 On $9{,}084$ of the $10{,}396$ Benders runs for which a root relaxation value was
 recorded --- $87.4\%$ --- that value equals $\lvert\U\rvert$ exactly. The pairwise row
 and the triplet rows contribute nothing at the root on almost nine runs in ten. Where
-the pairwise structure does bite it bites hard, by $7.70$ on average, but that is
-confined to the dense instances.
+the pairwise structure does bite it bites hard, by $7.70$ on average, on the $1{,}312$
+runs where it moves the root at all. Which instances those are is not characterised
+here; the campaign records no density measure.
 \end{observation}
 
 \begin{figure}[h]\centering
@@ -251,8 +254,10 @@ windows captures most of the value and no separation routine is required.
 
 \begin{observation}[The window family is inactive at the PCF$'$ root]\label{obs:windowroot}
 The family of Proposition~\ref{prop:window} was added to the PCF$'$ master --- $15$
-windows of length two to four, $660$ rows and $225$ auxiliary variables per instance ---
-and the root relaxation recomputed on $37$ of the $62$ loose Laporte3 instances. The root
+windows of length two to four, which at $n=8$ is $660$ to $1{,}090$ rows and $225$ to
+$375$ auxiliary variables depending on $\lvert T\rvert$ ---
+and the root relaxation recomputed on $38$ of the $62$ loose Laporte3 instances, of
+which $37$ returned a value and one, \texttt{L18-4}, did not. The root
 value equals $q$ on all $37$ with the rows and without them; the family raises the bound
 on none, including instances whose gap is ten or eleven. Every window row is slack at the
 LP optimum, by between $0.5$ and $3.4$. The reason is visible in the solution: the LP
@@ -267,9 +272,11 @@ In the position-indexed master, not the Benders master. Expressing \eqref{eq:win
 sets to be simultaneously contiguous, which is a product of indicators and has no useful
 linear form --- the same obstruction that makes the triplet rows worthless. In the
 position-indexed master the window is a range of position indices and the inequality is
-immediate. That is an argument for the branch-and-price side of this report over the
-Benders side, and it is the reverse of the ranking in Table~\ref{tab:solves}: the method
-that solves fewer instances today is the one with somewhere left to go.
+immediate. That is an argument about expressive power only, and
+Observation~\ref{obs:windowroot} is the reason it must be kept to that: the family was
+expressible there, was added there, and changed nothing. Being able to write a global
+inequality down is necessary for the position-indexed side to have somewhere left to
+go, and this measurement shows it is not sufficient.
 
 \subsection{Where the theory and the measurements meet}\label{ssec:disc-agree}
 
@@ -338,9 +345,10 @@ mind.
 This affects the denominators in Table~\ref{tab:solves} and is the one failure that
 changes a conclusion. Of the $352$ belonging to LSS, each is recorded as a subprocess
 termination with no captured exception, so the proximate cause is not in the result
-files; none occurs before $1{,}063$ seconds, they are spread evenly over the ten shards,
-and the crashed runs are smaller than the completed ones, which rules out the obvious
-size explanation. The loss is not random with respect to difficulty either: SSPMF proves
+files; none occurs before $1{,}063$ seconds, and they are spread evenly over the ten
+shards. The obvious size explanation cannot be ruled out --- the crashed rows record no
+size fields, and $239$ of the $352$ crashes fall in the largest family. The loss is not
+random with respect to difficulty either: SSPMF proves
 optimality on $78\%$ of the instances LSS completed and on $60\%$ of those it lost, so
 LSS never attempted the hard third of the collection. That is why
 Section~\ref{ssec:results-solved} reports the three compact models without ranking them

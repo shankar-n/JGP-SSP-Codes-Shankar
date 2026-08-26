@@ -29,9 +29,9 @@ published industrial study. A parameterised cost model places the SSP and the gr
 problem at the two ends of a single spectrum, with the transition governed by the gap
 itself.
 
-On the exact side the obstacle is a single quantity. The strongest compact formulation
-in the literature has a linear relaxation equal to the number of tools minus the
-magazine capacity, which is an elementary counting bound. Two methods are built to get
+On the exact side the obstacle is a single quantity. Of the compact formulations
+surveyed here, the strongest has a linear relaxation equal to the number of tools minus
+the magazine capacity, which is an elementary counting bound. Two methods are built to get
 past it. A branch-and-Benders-cut algorithm places the ordering in a master problem and
 settles the loading exactly with a polynomial oracle, so it never forms a weak
 relaxation. Position-indexed formulations replace the configuration walk by a fixed row
@@ -43,21 +43,26 @@ protocol, against three compact models from the literature reimplemented here. T
 baseline is not the literature at its strongest --- Formulation~4 of
 \citet{Catanzaro2015} is used where its authors recommend Formulation~5 --- and it
 closes more instances than anything built here regardless, so what the campaign yields
-is a diagnosis rather than a faster solver. For any method whose bound is that counting
-bound, whether it happens to equal the optimum decides the outcome: $94\%$ of the
-instances where it is tight are closed, against $40\%$ of the rest, and where the solver
-fails it has usually already found the optimum and cannot certify it. The split belongs
-to the methods and not to the instances --- an arc-based compact model, whose relaxation
-is a different quantity, shows no such collapse and closes every one of the instances
-where the counting bound is loosest. Of four standard strengthenings only the one
+is a diagnosis rather than a faster solver. Whether the counting bound happens to equal
+the optimum is the dominant predictor of what the Benders solver closes: $94\%$ of the
+instances where it is tight, against $40\%$ of the rest, and where it fails it has
+usually already found the optimum and cannot certify it. That split is not evidence
+that the loose instances are hard. An arc-based compact model, whose relaxation is a
+different quantity, closes every one of them; and a compact model whose relaxation is
+the counting bound loses only thirteen points across the same split. What the split
+measures is a master that carries the counting bound and, at the root, almost nothing
+else. Of four standard strengthenings only the one
 supplying a better incumbent helps, and the branch-and-price prototypes, run to read
 their relaxation value rather than to compete, report the same bound from the other
 direction.
 
 The cause is structural rather than incidental: the objective counts tool
-re-insertions, produced by the global interleaving of the schedule, while every
-inequality either method carries is supported on a single arc or a single position. A
-family that is not local is derived, proved valid, and shown --- by computing what each
-family could deliver at best --- to have roughly three and a half times the remaining headroom of
-the family the solvers carry today.
+re-insertions, produced by the global interleaving of the schedule, while apart from one
+constant coverage row every inequality either method carries is supported on a single
+arc or a single position. A family that is not local is derived and proved valid. Its
+ceiling over integral schedules is several times that of the family the solvers carry
+today --- and that ceiling is not reached: added to the master and measured, it leaves
+the root relaxation unchanged on every instance tested. Which is the more useful
+result, because it says the obstacle is not the absence of a global inequality but the
+encoding of one.
 \end{abstract}

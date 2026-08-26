@@ -196,20 +196,27 @@ That combination --- an easy inner problem inside a hard outer one --- is exactl
 what decomposition methods are built for, and it is the reason the SSP has attracted
 exact methods for four decades. Two gaps in that literature motivate this work.
 
-The first is on the practical side. Nobody solves the SSP directly. The standard
+The first is on the practical side. Exact methods for the integrated SSP exist and
+are used as baselines in Section~\ref{sec:comp}, but practice does not generally rely on
+them. The standard
 approach groups the jobs into as few magazine-fitting batches as possible, then
 orders the batches. It is fast, it is what the strongest metaheuristics start from
 \citep{Mecler2021}, and where it has been measured against exact optima it does
-well \citep{Burger2015}. No worst-case analysis of it has been published. How far
+well \citep{Burger2015}. \citet{CramaKlundert1999} analyse this construction and prove
+that it is a $b$-approximation. What has not been done is to sharpen that ratio, to say
+on which instances the method is exact, or to distinguish the two different values the
+method can be read as returning --- and the third of these turns out to change the first
+two. How far
 from optimal it can be, and on which instances it is exact, are open questions.
 
-The second is on the exact side. Every compact integer formulation of the SSP
-proposed so far has a weak linear relaxation, and the strongest of them
+The second is on the exact side. Every compact integer formulation surveyed in
+Section~\ref{sec:sota} has a weak linear relaxation, and the strongest of them
 \citep{daSilva2024} has a relaxation exactly equal to the number of tools minus the
-magazine capacity. That is an elementary counting bound: every tool that does not
-fit in the initial magazine must be inserted at some point. So the strongest
-relaxation a compact formulation currently offers is this counting argument, and a
-solver relying on it cannot prove optimality where the bound is loose.
+magazine capacity, under their assumption that every tool is used. That is an
+elementary counting bound: every tool that does not fit in the initial magazine must be
+inserted at some point. So the strongest relaxation among the compact formulations
+considered here is this counting argument, and a solver relying on it cannot prove
+optimality where the bound is loose.
 
 \subsection{What was done during this internship}\label{ssec:intro-done}
 
@@ -284,7 +291,7 @@ skip. Section~\ref{sec:sota} reviews the literature. Longer proofs are in
 Appendix~\ref{app:proofs}, the verification program in Appendix~\ref{app:verify}, and
 Appendix~\ref{app:repro} says how to reproduce every experiment.
 
-Every statement carries a label --- Theorem, Proposition, Lemma, Corollary,
+Every formal result carries a label --- Theorem, Proposition, Lemma, Corollary,
 Observation, or Conjecture --- and the labels are used strictly. A Proposition has a
 proof. An Observation was established by running a program. A Conjecture has neither,
 only evidence. Where an argument is given but has not been independently checked it is
