@@ -1,0 +1,72 @@
+%==============================================================================
+\section{An exploratory prototype: learned cut selection}\label{app:rl}\label{ssec:rl}
+%==============================================================================
+
+This appendix records a piece of work carried out during the internship that produced
+no result about the SSP. It is kept because it was done and because the negative
+outcome is informative about where learning could and could not help, and it is here
+rather than in Section~\ref{sec:exact} because nothing in it was measured on this
+problem. No claim made anywhere else in this report depends on it.
+
+At a given node the Benders solver has several admissible cuts available: a
+combinatorial cut for each candidate order it evaluates, the coverage row, and, with
+fractional separation enabled, one cut per violated fractional point. Which to add is
+currently decided by a fixed rule, and whether a learned policy would do better is a
+natural question. Prof.~Colares raised it during the internship.
+
+A prototype was built, following the cut-selection framework of \citet{Tang2020}. Cut
+selection is cast as a Markov decision process in which the state is the current
+relaxation solution together with a pool of candidate cuts, each summarised by its
+violation, support size, right-hand side and mean coefficient magnitude; an action
+selects one candidate; and the reward is the resulting increase in the dual bound. The
+policy is a softmax that is linear in those features and is trained by the REINFORCE
+policy-gradient rule with a return baseline.
+
+Because the Benders solver requires a commercial solver that was unavailable in the
+development environment, the learning components were implemented and trained on a
+self-contained cut family rather than on SSP instances. The substitute is knapsack
+cover cuts: for a knapsack instance and a minimal cover $C$, the inequality
+$\sum_{j\in C}x_j\le\lvert C\rvert-1$ is valid, the separation is elementary, and the
+linear relaxations can be solved without a commercial solver. The state, the action,
+the reward and the policy are the same objects as in the Benders case; only the feature
+extractor and the source of the candidate cuts differ.
+
+\paragraph{What was measured.}
+The agent was trained for $2{,}000$ episodes at each of six knapsack sizes, with
+learning rate $0.2$ and discount $0.95$, and evaluated on a held-out set of instances
+it had not seen. The quantity compared is the mean tightening of the linear bound
+achieved over a fixed number of separation rounds, under the learned policy against
+uniformly random selection from the same candidate pool. Table~\ref{tab:rl} gives the
+result.
+
+\begin{table}[h]\centering
+\footnotesize
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+knapsack size $n$ & learned policy & random selection & improvement\\
+\midrule
+$10$ & $1.3855$ & $0.8734$ & $+58.6\%$\\
+$12$ & $1.1639$ & $0.7014$ & $+65.9\%$\\
+$20$ & $0.7482$ & $0.5021$ & $+49.0\%$\\
+$22$ & $0.6692$ & $0.4568$ & $+46.5\%$\\
+$24$ & $0.6383$ & $0.3888$ & $+64.2\%$\\
+$26$ & $0.5661$ & $0.3279$ & $+72.7\%$\\
+\bottomrule
+\end{tabular}
+\caption{Mean bound tightening on held-out knapsack instances, learned cut selection
+against random cut selection. One training seed per size. The learning machinery works;
+the problem is not the SSP.}
+\label{tab:rl}
+\end{table}
+
+Two things follow, and only two. The learning machinery is correct and does learn: the
+policy beats random selection at every size tested, by between $46.5\%$ and $72.7\%$. And
+that is a statement about knapsack cover cuts, on a single training seed per size, with
+no repetition to separate the effect from training variance. It says nothing about the
+SSP. The prototype has not been evaluated on SSP instances, and no claim about its
+effect on this problem is made anywhere in this report.
+
+Section~\ref{ssec:further} explains why evaluating it on the SSP is unlikely to be
+worthwhile until the bound question of Section~\ref{sec:disc} is resolved: cut
+selection chooses among cuts a method can already generate, and
+Section~\ref{ssec:disc-locality} measures how little those cuts have left to give.

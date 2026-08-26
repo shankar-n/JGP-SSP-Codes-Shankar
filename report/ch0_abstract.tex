@@ -11,18 +11,20 @@ of the difficulty sits.
 
 In practice the SSP is not attacked directly. Jobs are first grouped into as few
 magazine-fitting batches as possible, and the batches are then sequenced. This
-two-phase method is fast and is what industry uses, but no worst-case analysis of it
-has been published. This report gives one. The method admits two readings that the
+two-phase method is fast and is used in industrial practice, and \citet{CramaKlundert1999}
+showed it to be a $b$-approximation, where $b$ is the magazine capacity. This report
+sharpens that. The method admits two readings that the
 literature has not separated --- the cost of a walk through one fixed magazine per
-group, and the cost the method actually returns once its final step re-optimises the
+group, and the cost obtained once its final step re-optimises the
 loading --- and the two differ on the instances most often used as examples. Within
 that setting, the optimum is shown to equal the cheapest walk over \emph{all}
-groupings, so the two-phase gap is exactly the price of insisting on the fewest
-groups; classes of instances with zero gap are identified for every capacity; upper
+groupings, so the two-phase gap --- measured on the best value the construction can
+reach, not on a particular implementation of it --- is exactly the price of insisting on
+the fewest groups; classes of instances with zero gap are identified for every capacity; upper
 bounds on the gap are proved for every instance; and the extremal behaviour is worked
-out at three groups. Positive gaps turn out to be rare, small, and confined to
-instances whose magazine is large relative to the jobs, which agrees with the one
-published industrial study. A parameterised cost model places the SSP and the grouping
+out at three groups. In the finite censuses run here, positive gaps are rare, every one observed equals one,
+and none occurs at a magazine capacity of two; that regime agrees with the one published
+industrial study. A parameterised cost model places the SSP and the grouping
 problem at the two ends of a single spectrum, with the transition governed by the gap
 itself.
 
@@ -35,13 +37,18 @@ relaxation. Position-indexed formulations replace the configuration walk by a fi
 set of polynomial size, and one of them, the position--transition formulation, has a
 linear relaxation that can provably exceed the counting bound.
 
-Both were implemented and benchmarked against three reimplemented compact models on
-$1{,}421$ instances under one uniform protocol. Whether the counting bound happens to
+Both were implemented and benchmarked on $1{,}421$ instances under one uniform
+protocol, against three compact models from the literature reimplemented here. That
+baseline is not the literature at its strongest --- Formulation~4 of
+\citet{Catanzaro2015} is used where its authors recommend Formulation~5 --- and it
+closes more instances than anything built here regardless, so what the campaign yields
+is a diagnosis rather than a faster solver. Whether the counting bound happens to
 equal the optimum decides the outcome: $94\%$ of the instances where it is tight are
 closed, against $40\%$ of the rest, and where the solver fails it has usually already
 found the optimum and cannot certify it. Of four standard strengthenings only the one
-supplying a better incumbent helps, and the branch-and-price prototypes report the same
-bound from the other direction by measuring their relaxation value directly.
+supplying a better incumbent helps, and the branch-and-price prototypes, run to read
+their relaxation value rather than to compete, report the same bound from the other
+direction.
 
 The cause is structural rather than incidental: the objective counts tool
 re-insertions, produced by the global interleaving of the schedule, while every

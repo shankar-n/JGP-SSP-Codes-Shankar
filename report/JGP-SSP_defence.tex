@@ -243,7 +243,7 @@ industry uses.}
 \vspace{1.0em}
 \keyline{}
 \begin{center}
-\textbf{No worst-case analysis of it had been published.}\\[0.4em]
+\textbf{Known: a $b$-approximation} (Crama \& van de Klundert, 1999).\\[0.4em]
 {\small How far from optimal can it be? On which instances is it exact?}
 \end{center}
 \end{frame}
@@ -704,7 +704,7 @@ non-local family the same way it evades the local ones.}
   \hfill{\color{cGrey}\scriptsize A solver whose difficulty was finding solutions would not behave this way.}
   \item \textbf{Learned cut selection.} Built and trained, but on knapsack cover cuts,
   \emph{not} on the SSP. It learns --- $46$--$73\%$ over random selection --- and says
-  nothing about this problem.
+  nothing about this problem, which is why the report puts it in an appendix.
   \hfill{\color{cGrey}\scriptsize Selection cannot pick a strong cut that does not exist.}
 \end{itemize}
 \vspace{0.2em}
@@ -786,7 +786,8 @@ BBC-LP+F+P         & $35/171$ & $32/160$ & $282/340$ & $155/328$ & $83/336$  & $
 $352$ are LSS. Those losses are not random --- SSPMF proves $78\%$ of what LSS completed
 and $60\%$ of what it lost --- so LSS never attempted the hard third and its row is not
 comparable. The three compact models are not cleanly separable; all three beat every
-configuration built here.}
+configuration built here --- and \texttt{CATZ-F4} is Catanzaro's F4, not the F5 they
+recommend, so that margin is if anything understated.}
 \end{frame}
 
 \begin{frame}{Backup --- the ablation}

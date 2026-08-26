@@ -74,7 +74,12 @@ array shards and produced $16{,}994$ individual runs.
 \paragraph{Configurations.}
 Twelve solver configurations were run. Three are the reimplemented compact baselines:
 F4 of \citet{Catanzaro2015}, written \texttt{CATZ-F4}; LSS of \citet{Laporte2004}; and
-SSPMF of \citet{daSilva2024}. The remaining nine are the Benders solver, in an ablation
+SSPMF of \citet{daSilva2024}. F4 was chosen over the F5 that \citet{Catanzaro2015}
+recommend because it is the smaller of the two models that share the F3 relaxation, and
+implementing F5 did not fit in the time available. The compact side of this comparison
+is therefore weaker than the literature allows, and every statement made from it is
+made in that knowledge; Section~\ref{ssec:results-summary} reports what follows, which
+is that the baselines win anyway. The remaining nine are the Benders solver, in an ablation
 over its cut families and its strengthenings. The naming is as follows:
 \texttt{BBC-LP} uses the dual optimality cuts, \texttt{BBC-K} the combinatorial cuts,
 \texttt{+T} adds the triplet bounds, \texttt{+F} enables fractional separation,
@@ -92,8 +97,9 @@ Section~\ref{ssec:validation} meaningful.
 
 \subsection{Validation}\label{ssec:validation}
 
-Correctness was established before any result was recorded, and again from the results
-themselves.
+The implementations were subjected to independent computational checks before any
+result was recorded, and again from the results themselves. No amount of such checking
+proves correctness; what follows is what was checked and what it found.
 
 \paragraph{Before the campaign.}
 Every exact solver was checked against brute-force optima on a bank of small instances,
@@ -289,7 +295,7 @@ The pattern in Table~\ref{tab:times} is as informative as the ranking. The Bende
 solver's median is one to three orders of magnitude below every compact model's, while
 its mean is an order of magnitude above SSPMF's. It either closes an instance
 immediately or does not close it at all. Section~\ref{ssec:results-tight} identifies
-what separates the two cases, and it is not the size of the instance.
+what separates the two cases, and it is not the size of the instance that does so.
 
 \paragraph{How the solved count accumulates.}
 The shifted geometric mean summarises the instances a method solves; it says nothing
@@ -507,8 +513,8 @@ coverage bound loose ($\Zst>q$)  & $592$ & $234$ \; ($40\%$) & $515$ \; ($87\%$)
 \bottomrule
 \end{tabular}
 \caption{Success rate split by whether the coverage bound equals the optimum. The
-bound, not the size of the instance, is what decides the outcome for the Benders
-solver. The multicommodity model is affected by the same split but far less. A natural
+bound, rather than the size of the instance, is what the outcome tracks for the
+Benders solver. The multicommodity model is affected by the same split but far less. A natural
 reading is that a compact model gives its search a full description of the problem at
 every node, so the search recovers what the bound does not supply; the campaign shows the
 difference but does not test that explanation.}
@@ -562,21 +568,27 @@ every node, and the search recovers much of what the bound does not supply. The 
 master sees only the cuts it has accumulated, and when the bound is loose it has very
 little else.
 
-\subsection{Branch-and-price}\label{ssec:results-bnp}
+\subsection{Branch-and-price: the relaxation measured directly}\label{ssec:results-bnp}
 
 \emph{The question.} Everything above measures the bound indirectly, through how many
 instances a solver closes. The prototypes can answer directly, because they report the
 value of their root relaxation on every run. Two propositions of Section~\ref{ssec:pos}
 predict what that value will be --- that PCF$'$ equals the coverage bound and that PTF
 can exceed it --- and the campaign is a chance to test a proof against a benchmark
-rather than against another proof. That is the purpose of this subsection; the solve
-counts are secondary and, for the reasons given next, weak evidence.
+rather than against another proof.
 
-The two position-indexed prototypes were run separately from the campaign above. They
-are implemented in Python over PySCIPOpt with a Python pricer, so a single node costs
-orders of magnitude more than a node of a compiled solver, and comparing their
-wall-clock times against CPLEX would measure the implementation language rather than
-the formulation. In total $2{,}581$ runs were made over $469$ instances in seven
+That is the whole purpose of this run, and it is worth being explicit about what it is
+not. It is not a fourth entry in the comparison of Section~\ref{ssec:results-solved}.
+The prototypes are implemented in Python over PySCIPOpt with a Python pricer, so a
+single node costs orders of magnitude more than a node of a compiled solver; their
+wall-clock times measure the implementation language, not the formulation, and are
+never compared against CPLEX anywhere in this report. The quantity this subsection
+exists to report is the root relaxation value, which is a property of the formulation
+and is recorded before any search happens. The solve counts are given because a
+reader will ask for them, and are read only as evidence that the prototypes are
+working code.
+
+In total $2{,}581$ runs were made over $469$ instances in seven
 configurations: PCF$'$ alone; PCF$'$ with each of the four accelerations of
 Section~\ref{ssec:pos} separately, written \texttt{+HP} for heuristic pricing,
 \texttt{+MC} for multiple pricing, \texttt{+WS} for warm starting and \texttt{+STAB}
@@ -584,49 +596,21 @@ for dual stabilisation; PCF$'$ with all four together, written \texttt{+ACC}; an
 The time limit is thirty minutes on the Catanzaro and Crama families and ten minutes on
 the Laporte families.
 
-Two properties of this run make its counts weaker evidence than the campaign above, and
-both are stated before the numbers. First, the harness carries an early-stop rule: once
-a configuration has failed to close six increasingly hard instances in succession, the
-remaining harder instances are skipped for that configuration. The number of runs a
-configuration received therefore depends on how it performed, so the denominators in
-Table~\ref{tab:bnp} are not comparable across rows. Second, no repetition or seed
-variation was run. Every comparison drawn below is made either on instances that both
-configurations attempted, or on the root relaxation value, which the early-stop rule
-cannot bias because it is recorded before any search.
+Two properties of this run make its counts weaker still, and both are stated before the
+numbers. First, the harness carries an early-stop rule: once a configuration has failed
+to close six increasingly hard instances in succession, the remaining harder instances
+are skipped for that configuration. The number of runs a configuration received
+therefore depends on how it performed, so the denominators in Table~\ref{tab:bnp} are
+not comparable across rows. Second, no repetition or seed variation was run. Every
+comparison drawn below is made either on instances that both configurations attempted,
+or on the root relaxation value, which the early-stop rule cannot bias because it is
+recorded before any search.
 
 \paragraph{They agree with the campaign.}
 On the $507$ runs that proved an optimum and where the same instance was also closed in
 the campaign of Section~\ref{ssec:results-solved}, the two agree on every one. As in
 Section~\ref{ssec:validation}, the native objective is the free-initial cost and the
 difference from the empty-start cost is exactly $b$ on all $507$.
-
-\paragraph{What they solve.}
-Table~\ref{tab:bnp} gives the counts. Nothing above nine jobs was closed by any
-configuration: all $608$ runs on the $30$-job and $40$-job instances reached the time
-limit. This is the expected consequence of a Python pricer and is not evidence about
-the formulation.
-
-\begin{table}[h]\centering
-\footnotesize
-\begin{tabular}{@{}llrrrr@{}}
-\toprule
-Configuration & what it adds & runs & solved & median time (s) & median columns\\
-\midrule
-PCF$'$\texttt{+MC}   & multiple pricing          & $422$ & $102$ & $11.4$ & $1{,}504$\\
-PCF$'$               & ---                       & $415$ & $91$  & $23.7$ & $1{,}574$\\
-PCF$'$\texttt{+HP}   & heuristic pricing         & $360$ & $73$  & $19.7$ & $5{,}173$\\
-PTF                  & position--transition rows & $387$ & $73$  & $2.4$  & $1{,}279$\\
-PCF$'$\texttt{+WS}   & warm-started pool         & $359$ & $64$  & $14.9$ & $1{,}610$\\
-PCF$'$\texttt{+ACC}  & all four together         & $337$ & $60$  & $28.1$ & $1{,}221$\\
-PCF$'$\texttt{+STAB} & dual stabilisation        & $301$ & $44$  & $35.7$ & $1{,}133$\\
-\bottomrule
-\end{tabular}
-\caption{The branch-and-price prototypes. Median time is over the runs that closed;
-median columns is over all runs. The run counts are outcome-dependent through the
-early-stop rule, so the rows are not comparable; the comparison that matters is the
-one below, which is made on common instances.}
-\label{tab:bnp}
-\end{table}
 
 \paragraph{What the root relaxation shows.}
 Proposition~\ref{prop:pcf} states that the position--configuration relaxation equals
@@ -653,6 +637,37 @@ optimum. These are the tight instances of Section~\ref{ssec:results-tight}, seen
 the other side: where the coverage bound is tight, a configuration-based relaxation
 needs no strengthening at all, and where it is loose, neither PCF$'$ nor PTF supplies
 one.
+
+\paragraph{What the prototypes close, and why that is not the measurement.}
+Table~\ref{tab:bnp} gives the counts, for completeness rather than for comparison.
+Nothing above nine jobs was closed by any configuration: all $608$ runs on the $30$-job
+and $40$-job instances reached the time limit. This is the expected consequence of a
+Python pricer and is not evidence about the formulation, which the paragraph above has
+already measured.
+
+\begin{table}[h]\centering
+\footnotesize
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Configuration & what it adds & runs & solved & median time (s) & median columns\\
+\midrule
+PCF$'$\texttt{+MC}   & multiple pricing          & $422$ & $102$ & $11.4$ & $1{,}504$\\
+PCF$'$               & ---                       & $415$ & $91$  & $23.7$ & $1{,}574$\\
+PCF$'$\texttt{+HP}   & heuristic pricing         & $360$ & $73$  & $19.7$ & $5{,}173$\\
+PTF                  & position--transition rows & $387$ & $73$  & $2.4$  & $1{,}279$\\
+PCF$'$\texttt{+WS}   & warm-started pool         & $359$ & $64$  & $14.9$ & $1{,}610$\\
+PCF$'$\texttt{+ACC}  & all four together         & $337$ & $60$  & $28.1$ & $1{,}221$\\
+PCF$'$\texttt{+STAB} & dual stabilisation        & $301$ & $44$  & $35.7$ & $1{,}133$\\
+\bottomrule
+\end{tabular}
+\caption{The branch-and-price prototypes, reported as evidence that the code runs and
+not as a performance comparison. Median time is over the runs that closed; median
+columns is over all runs. The run counts are outcome-dependent through the early-stop
+rule, so the rows are not comparable with one another, and none of them is comparable
+with the compiled solvers of Table~\ref{tab:solves}. The measurement this subsection
+exists for is the root relaxation above.}
+\label{tab:bnp}
+\end{table}
 
 Head to head on the $320$ instances both attempted, PCF$'$ and PTF each close $73$.
 Their node counts differ by a factor of fifty --- a median of $96$ against $2$ ---

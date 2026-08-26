@@ -63,6 +63,14 @@ trustworthy rather than to support it, and both do: no two methods that proved t
 optimum disagree on its value, and the reimplemented compact baselines are reported
 without a ranking, because the runs that failed are the ones that would have decided it.
 
+Two things this campaign is not should be said plainly here rather than left to
+Section~\ref{ssec:limits}. The compact baselines close more instances than
+anything built for this report, and they do so while being represented by F4 rather
+than the F5 that \citet{Catanzaro2015} recommend --- so the margin is if anything
+understated, and no claim of a faster solver is being made. And the branch-and-price
+prototypes were run to read their root relaxation, not to compete: their times measure
+a Python pricer.
+
 The methods built here are therefore bound-limited rather than
 implementation-limited: a negative result about a family of methods rather than about
 one solver. Section~\ref{ssec:disc-locality} sets out where a stronger bound could
@@ -72,7 +80,7 @@ come from.
 
 \paragraph{The exact worst case of the heuristic.}
 Section~\ref{ssec:law} settles the extremal behaviour of the walk value at three
-groups. For the value the method returns, the question is open and is now the more
+groups. For the value $H$ of Definition~\ref{def:frames}, the question is open and is now the more
 interesting one, because Section~\ref{ssec:ktnsgap} shows that the two differ
 substantially. Two concrete questions: is the heuristic gap ever larger than one on a
 connected instance, and does $\mathrm{gap}\le\Kst-2$ hold for it? Directed searches
