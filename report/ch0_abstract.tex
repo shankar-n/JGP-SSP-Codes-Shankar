@@ -22,9 +22,10 @@ groupings, so the two-phase gap --- measured on the best value the construction 
 reach, not on a particular implementation of it --- is exactly the price of insisting on
 the fewest groups; classes of instances with zero gap are identified for every capacity; upper
 bounds on the gap are proved for every instance; and the extremal behaviour is worked
-out at three groups. In the finite censuses run here, positive gaps are rare, every one observed equals one,
-and none occurs at a magazine capacity of two; that regime agrees with the one published
-industrial study. A parameterised cost model places the SSP and the grouping
+out at three groups. In the finite censuses run here, positive gaps are rare, every one
+observed in them equals one, and none occurs at a magazine capacity of two; larger gaps
+are reached only by disconnected constructions. That regime agrees with the one
+published industrial study. A parameterised cost model places the SSP and the grouping
 problem at the two ends of a single spectrum, with the transition governed by the gap
 itself.
 
@@ -42,10 +43,13 @@ protocol, against three compact models from the literature reimplemented here. T
 baseline is not the literature at its strongest --- Formulation~4 of
 \citet{Catanzaro2015} is used where its authors recommend Formulation~5 --- and it
 closes more instances than anything built here regardless, so what the campaign yields
-is a diagnosis rather than a faster solver. Whether the counting bound happens to
-equal the optimum decides the outcome: $94\%$ of the instances where it is tight are
-closed, against $40\%$ of the rest, and where the solver fails it has usually already
-found the optimum and cannot certify it. Of four standard strengthenings only the one
+is a diagnosis rather than a faster solver. For any method whose bound is that counting
+bound, whether it happens to equal the optimum decides the outcome: $94\%$ of the
+instances where it is tight are closed, against $40\%$ of the rest, and where the solver
+fails it has usually already found the optimum and cannot certify it. The split belongs
+to the methods and not to the instances --- an arc-based compact model, whose relaxation
+is a different quantity, shows no such collapse and closes every one of the instances
+where the counting bound is loosest. Of four standard strengthenings only the one
 supplying a better incumbent helps, and the branch-and-price prototypes, run to read
 their relaxation value rather than to compete, report the same bound from the other
 direction.
@@ -54,6 +58,6 @@ The cause is structural rather than incidental: the objective counts tool
 re-insertions, produced by the global interleaving of the schedule, while every
 inequality either method carries is supported on a single arc or a single position. A
 family that is not local is derived, proved valid, and shown --- by computing what each
-family could deliver at best --- to have roughly four times the remaining headroom of
+family could deliver at best --- to have roughly three and a half times the remaining headroom of
 the family the solvers carry today.
 \end{abstract}

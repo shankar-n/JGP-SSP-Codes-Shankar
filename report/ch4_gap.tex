@@ -4,7 +4,9 @@
 
 The two-phase heuristic of Section~\ref{ssec:jgp} is the standard practical method
 for the SSP. Where it has been measured against exact optima its suboptimality is
-small \citep{Burger2015}. No worst-case analysis of it has been published. This
+small \citep{Burger2015}. \citet{CramaKlundert1999} prove that the construction is a
+$b$-approximation. This section sharpens that ratio, identifies classes on which the
+method is exact, and separates the two values the method can be read as returning. This
 section gives one.
 
 The source of any gap is easy to state. The heuristic commits to a grouping with the
@@ -186,8 +188,11 @@ gives the $\min(\Kst-1,q)$ term, while $(\Kst-1)/\max(\Kst-1,q)\le1$ together wi
 $\min(b,q)\le b$ gives the $b$ term.
 \end{proof}
 
-This subsumes the trivial $b$-approximation that follows from
-$\Hwalk\le b(\Kst-1)$ and $\Zst\ge\Kst-1$, which was the bound the internship began
+This refines the $b$-approximation of \citet{CramaKlundert1999}. Their Theorem~8
+shows that any solution of the job grouping problem yields a tool-switching solution of
+cost at most $b$ times the grouping value, by the same construction studied here:
+sequence the batches and pay at most $b$ switches between consecutive ones. In the
+present notation that is $\Hwalk\le b(\Kst-1)$ against $\Zst\ge\Kst-1$. It was the bound the internship began
 with. It tightens automatically on instances with few groups, with a small tool
 excess, or with a small magazine.
 
@@ -446,8 +451,12 @@ Draw instances with a uniformly random requirement of admissible size for each j
 $1{,}260$ instances with three to five jobs, four to eight tools and capacity between
 two and five, drawn as three independent samples of $420$, \emph{none} has $H>\Zst$.
 Extending the census to larger instances finds them, but only just: $3$ of $1{,}260$ at
-six jobs and $2$ of $1{,}260$ at seven. Every positive heuristic gap found anywhere in
-this study equals one.
+six jobs and $2$ of $1{,}260$ at seven. Every positive heuristic gap found in these
+censuses equals one. That is a statement about randomly drawn instances and not about
+the problem: the tool-disjoint constructions of
+Observation~\ref{obs:unbounded-true} reach two and are conjectured to grow without
+bound. What no search here has produced is a \emph{connected} instance with a gap above
+one, which is the open question recorded in Section~\ref{ssec:further}.
 
 Capacity, not job count, is what admits them. A targeted census at fixed capacity finds
 no positive gap in $11{,}000$ instances at $b=2$, spread over four to eight jobs, while

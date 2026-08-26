@@ -115,15 +115,16 @@ price can be named.}
 \column{0.48\textwidth}
 \textbf{Part II --- the exact methods}\\[0.4em]
 {\footnotesize
-\textbf{4.} One bound decides every outcome\\[0.25em]
+\textbf{4.} One bound decides what these methods close\\[0.25em]
 \textbf{5.} Why that bound will not move\\[0.25em]
 \textbf{6.} A family of inequalities that could}
 \end{columns}
 \vspace{1.4em}
 \keyline{}
 \centering
-{\small Everything measured here comes from $16{,}994$ solver runs and is
-re-derivable from the raw files by one command.}
+{\small The campaign behind Part II is $16{,}994$ solver runs; the branch-and-price
+prototypes and the censuses are separate runs again. Every number is re-derivable from
+the raw files --- four scripts, listed in the backup slides.}
 \end{frame}
 \note{Roughly 25 minutes. Part I is about 11, Part II about 12, two spare.
 Say: "the through-line is a single quantity, and I will keep coming back to it."}
@@ -324,10 +325,11 @@ measured with \emph{one fixed magazine per group} --- step 3 of the method is le
 $k$ & $\Kst$ & $\Zst$ & $\Hwalk$ & walk gap & \new{heuristic gap}\\
 \midrule
 $4$ & $2$ & $1$ & $1$ & $0$ & \new{$0$}\\
+$5$ & $3$ & $2$ & $2$ & $0$ & \new{$0$}\\
 $6$ & $3$ & $3$ & $4$ & $1$ & \new{$0$}\\
-$7$ & $3$ & $4$ & $5$ & $1$ & \new{$0$}\\
-$8$ & $3$ & $5$ & $6$ & $1$ & \new{$0$}\\
-$9$ & $4$ & $6$ & $7$ & $1$ & \new{$0$}\\
+$7$ & $4$ & $4$ & $5$ & $1$ & \new{$0$}\\
+$8$ & $4$ & $5$ & $6$ & $1$ & \new{$0$}\\
+$9$ & $5$ & $6$ & $7$ & $1$ & \new{$0$}\\
 \bottomrule
 \end{tabular}
 \vspace{0.5em}
@@ -385,22 +387,20 @@ is given optimally. It is the price of the cardinality restriction, and nothing 
   method is provably exact.
   \item \textbf{Worst-case guarantees} better than the trivial $b(\Kst-1)$; extremal
   behaviour settled exactly at three groups.
-  \item \textbf{A census.} In $1{,}260$ random instances at three to five jobs,
-  \emph{none} has a positive heuristic gap; extending it finds $3$ of $1{,}260$ at six
-  jobs and $2$ at seven. Every positive gap found anywhere equals \emph{one}. Capacity is
-  what admits them: none at all in $11{,}000$ draws at $b=2$, but they occur at $b=3$ ---
-  the smallest has five jobs.
+  \item \textbf{A census.} $3$ of $1{,}260$ random instances at six jobs have a positive
+  heuristic gap and $2$ of $1{,}260$ at seven; none at all below six. Every gap found in
+  the censuses equals \emph{one} --- larger ones exist, but only on \emph{disconnected}
+  constructions. Capacity is what admits them: none in $11{,}000$ draws at $b=2$.
   \item \new{\textbf{An open question of Prof.\ Wagler's, closed.}} At $b=3$ a job is an
-  \emph{edge} and a tool a \emph{vertex}, so the family is finite and can be enumerated.
-  Odd rings are \emph{not} the only obstruction to integrality --- the smallest is a
-  three-job \textbf{star}, which has no odd cycle at all.
+  \emph{edge} and a tool a \emph{vertex}, so the family becomes enumerable --- $151$
+  instances on at most six tools. Odd rings are \emph{not} the only obstruction to
+  integrality: the smallest is a three-job \textbf{star}, with no odd cycle at all.
 \end{itemize}
 \vspace{0.3em}
 \keyline{}
 \begin{center}
-{\footnotesize The census is exhaustive on small instances. Burger et al.\ report from a
-\emph{printing press} that the decomposition degrades as the magazine grows relative to
-the largest job. \textbf{Two completely different methods, the same regime.}}
+{\footnotesize Burger et al.\ find \textbf{the same regime} at a \emph{printing press}:
+the decomposition degrades as the magazine grows relative to the largest job.}
 \end{center}
 \end{frame}
 
@@ -418,7 +418,8 @@ the largest job. \textbf{Two completely different methods, the same regime.}}
 a tool is a \textbf{vertex}, a job is an \textbf{edge},\\
 a feasible group is a subgraph on $\le3$ vertices,\\
 and the $k$-ring is the cycle $C_k$.\\[0.6em]
-So the whole family can be enumerated: \textbf{151} instances up to isomorphism.}
+So the family becomes enumerable: \textbf{151} instances up to isomorphism
+\emph{on at most six tools}.}
 \column{0.52\textwidth}
 \centering
 \begin{tikzpicture}[font=\small,scale=0.95,every node/.style={transform shape},
@@ -449,7 +450,7 @@ the tools. That is where a characterisation should be looked for. 90 seconds.}
 %------------------------------------------------------------------ exact side
 \begin{frame}{The exact side, and the wall it runs into}
 \vspace{0.5em}
-{\small Every compact formulation proposed in forty years has a weak linear relaxation.
+{\small Every compact formulation proposed in two decades has a weak linear relaxation.
 The strongest of them relaxes to}
 \[
   \new{q \;=\; |\U| - b}
@@ -473,15 +474,15 @@ problem is a one-line counting argument. Say it as a fact about the problem, not
 criticism of the papers -- it sets up everything after it.}
 
 %------------------------------------------------------------------ RESULT 3
-\begin{frame}{\new{Result 3.} The bound decides the outcome}{$1{,}421$ instances $\cdot$ 12 configurations $\cdot$ $16{,}994$ runs $\cdot$ one hour each}
+\begin{frame}{\new{Result 4.} The bound decides the outcome}{$1{,}421$ instances $\cdot$ 12 configurations $\cdot$ $16{,}994$ runs $\cdot$ one hour each}
 \vspace{0.6em}
 \centering
-\begin{tabular}{@{}lrrr@{}}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
- & instances & Benders & SSPMF\\
+ & instances & Benders & SSPMF & \texttt{CATZ-F4}\\
 \midrule
-coverage bound tight $(\Zst=q)$  & $523$ & \new{$94\%$} & $100\%$\\
-coverage bound loose $(\Zst>q)$  & $592$ & \new{$40\%$} & $87\%$\\
+coverage bound tight $(\Zst=q)$  & $523$ & \new{$94\%$} & $100\%$ & $72\%$\\
+coverage bound loose $(\Zst>q)$  & $592$ & \new{$40\%$} & $87\%$  & $87\%$\\
 \bottomrule
 \end{tabular}
 \vspace{1.0em}
@@ -489,6 +490,9 @@ coverage bound loose $(\Zst>q)$  & $592$ & \new{$40\%$} & $87\%$\\
 \begin{itemize}\itemsep3pt\small
   \item Same solver, same hardware, same time limit. The classification is not by number
   of jobs, tools, or density --- it is by one structural property.
+  \item \new{It is a property of the \emph{method}, not the instance.} \texttt{CATZ-F4},
+  whose relaxation is not $q$, moves the other way --- and closes \textbf{all $43$} of
+  the instances where the bound is loosest, where Benders and SSPMF close four each.
   \item Of the runs that hit the limit and whose optimum is known, \textbf{$66\%$ already
   held that optimum} and could not certify it.
   \item Across $41{,}673$ pairs of methods that both proved an optimum, \textbf{none
@@ -515,10 +519,11 @@ LSS              & $57$  & $246$ & $532$ & $759$ & $819$ & $\mathbf{844}$\\
 \keyline{}
 \begin{itemize}\itemsep2pt\footnotesize
   \item The Benders solver closes \textbf{403 instances in the first second} and $726$ in
-  the full hour. More than half of everything it will ever solve is done before a compact
-  model has finished building. Then it flattens.
-  \item The compact models start lower and keep climbing. \textbf{More time would not help
-  the two equally.}
+  the full hour --- more than half of everything it will ever solve is done in that first
+  second. \texttt{CATZ-F4} is at $14\%$ of its total there, LSS at $6\%$.
+  \item But nothing here has stopped: over the last decade of the axis \texttt{BBC-LP}
+  still gains $153$ and \texttt{CATZ-F4} $210$, against $78$ for SSPMF. \textbf{More time
+  would move every count, and not equally.}
   \item Where it does not finish: median gap at the limit \new{$22.9\%$}, and only $50$ of
   $681$ runs get within five per cent of proven.
 \end{itemize}
@@ -547,8 +552,9 @@ PTF root relaxation exceeds $q$   & $3$ of $233$ runs\\
 \begin{itemize}\itemsep5pt
   \item PCF$'$: \textbf{proved} in the report, then confirmed on every single run, across
   six different acceleration settings. Not one exception.
-  \item PTF: the proposition is \textbf{not vacuous} --- but the advantage is one unit,
-  on three small instances, against gaps of six to eight.
+  \item PTF: the proposition is \textbf{not vacuous} --- but on two Laporte3 instances
+  the advantage is one unit against gaps of $7$ and $8$, and on the third it is
+  $0.0134$. Sound, and of no practical use as it stands.
   \item Benders master, PCF$'$, and the literature's multicommodity model: three
   unrelated routes, one number.
 \end{itemize}
@@ -561,7 +567,7 @@ and a different solver arrive at the same number. That is what makes it a proper
 the problem and not of my code.}
 
 %------------------------------------------------------------------ RESULT 4 diagnosis
-\begin{frame}{\new{Result 4.} Why the bound will not move}
+\begin{frame}{\new{Result 5.} Why the bound will not move}
 \vspace{0.1em}
 Write $\beta_t$ for the number of blocks of positions in which tool $t$ sits in the magazine:
 \[
@@ -626,7 +632,7 @@ uses of a tool.}
 The Benders master indexes everything by \textbf{arcs} --- pairs of neighbours. PCF$'$
 indexes by \textbf{a single position}.\\[0.3em]
 \new{Neither can see a span.} Measured: on $87.4\%$ of runs the master's root bound is
-exactly $q$ and nothing else contributes.}
+exactly the coverage row $|\U|$ and nothing else contributes.}
 \end{columns}
 \end{frame}
 \note{Two minutes, and this is the intellectual centre. Trace the arrow with your hand
@@ -634,7 +640,7 @@ from position 1 to position 6 and say: an arc sees one step, the cost is created
 five. That sentence is the whole diagnosis.}
 
 %------------------------------------------------------------------ RESULT 5 window
-\begin{frame}{\new{Result 5.} A family that is not local, and what it is worth}
+\begin{frame}{\new{Result 6.} A family that is not local, and what it is worth}
 \vspace{0.1em}
 {\small For a stretch of positions $W=[p,r]$: every tool needed inside $W$ is either
 already loaded at $p-1$, or inserted within $W$.}
@@ -642,8 +648,9 @@ already loaded at $p-1$, or inserted within $W$.}
   \sum_{t}\sum_{k\in W} w_{t,k} \;\;\ge\;\;
   \bigl|\{t \text{ present somewhere in } W\}\bigr| \;-\; \sum_{t} a_{t,p-1}
 \]
-{\small Valid --- checked at $1{,}200{,}816$ integer points, no violation. And
-\textbf{robust}: only master variables, so the pricing oracle is untouched.}
+{\small \textbf{Proved} valid in the report; the implementation additionally checked at
+$1{,}200{,}816$ integer points, no violation. And \textbf{robust}: only master
+variables, so the pricing oracle is untouched.}
 \vspace{0.4em}
 \keyline{}
 \centering

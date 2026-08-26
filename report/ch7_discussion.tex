@@ -30,7 +30,11 @@ this way.
 which the elementary bound $q$ happens to equal the optimum, and $40\%$ of those on
 which it does not. The classification is by a single structural property rather than by
 size or density, and it is the property Section~\ref{sec:gap} identifies as governing
-the problem.
+the problem. The split is not a property of the instances: the arc-based
+\texttt{CATZ-F4}, whose relaxation is not $q$, closes a \emph{larger} share of the loose
+instances than of the tight ones and closes all $43$ of the loosest
+(Table~\ref{tab:tightness}). It is a property of methods whose bound is $q$, which is
+what makes it evidence about this family of methods rather than about the SSP.
 
 \emph{The other method.} The branch-and-price prototype reports its root relaxation on
 every run, and on all $2{,}114$ runs of the position--configuration formulation that
@@ -123,7 +127,7 @@ confined to the dense instances.
 \end{tikzpicture}
 \caption{Observation~\ref{obs:rootq} drawn over all $10{,}396$ Benders runs that
 recorded a root relaxation. The first bar is every run whose root value is
-\emph{exactly} the coverage row --- $9{,}084$ of them, more than seven times the whole
+\emph{exactly} the coverage row --- $9{,}084$ of them, nearly seven times the whole
 remainder combined. The pairwise row, the triplet rows and every optimality cut
 generated before the first branching decision, taken together, move the relaxation not
 at all on eighty-seven runs in a hundred. This is the diagnosis behind the rest of this
@@ -230,7 +234,8 @@ so both are limits a linear relaxation falls short of. The arc-supported family 
 either solver in this report carries --- is flat at zero for the first $46$ instances
 and only then rises; on three quarters of these instances the strongest bound it could
 ever produce is the coverage bound it already has, however it is separated or tuned.
-The window family is flat at zero for $18$ and then climbs to a plateau near two
+The window family is flat at zero for $18$ and then climbs, with its longest flat
+stretch at one half --- $13$ of the $62$ instances --- and only three reaching two
 thirds. The two peaks are similar, $60\%$ against $67\%$, so the difference between the
 families lies in how often each certifies anything at all, rather than in how much it
 certifies when it does.}
@@ -303,8 +308,9 @@ did not exist before the two readings were separated.
 Six, ordered by how much they threaten the conclusions above.
 
 \paragraph{The census of heuristic gaps is on small instances.}
-Observation~\ref{obs:census} says that positive heuristic gaps are rare, always equal to
-one, and never occur at $b=2$. The census runs from three to eight jobs, because the
+Observation~\ref{obs:census} says that positive heuristic gaps are rare, equal to one
+wherever a connected instance produced one, and never occur at $b=2$. The census runs
+from three to eight jobs, because the
 optimum there is computed by exhaustion. Nothing in it shows the same holds at
 industrial sizes, and the agreement with \citet{Burger2015} comes from a different
 method rather than a wider range of sizes. An earlier and narrower version of this
