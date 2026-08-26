@@ -4,7 +4,7 @@
 
 This section reviews the SSP literature. It is organised around one question:
 how strong a lower bound can be obtained, and by what means. That question
-organises the exact literature completely, and it also explains why the heuristic
+organises much of the exact literature, and it also explains why the heuristic
 literature looks the way it does.
 
 \subsection{Origins: the loading rule, and the hardness of ordering}\label{ssec:sota-origins}
@@ -234,7 +234,7 @@ search equipped with a new family of lower bounds, reporting the strongest exact
 results to date.
 
 Their bounds are combinatorial and are computed inside the search rather than as a
-linear relaxation. That is the pattern. Every recent advance has come from leaving
+linear relaxation. That is the pattern. Several of the strongest recent advances have come from leaving
 the compact linear-programming setting, whether for a search with sharper
 combinatorial bounds, for a decomposition whose subproblem is settled exactly, or for
 a relaxation engineered to exceed the counting bound. The two methods of
@@ -262,7 +262,8 @@ so the decomposition does not systematically beat the non-decomposed formulation
 was that report which prompted Prof.~Colares to propose the same architecture for the
 SSP, on the reasoning that the SSP occupies the regime the assembly-line problem
 lacked: its subproblem is not a general program needing tailored algorithms, but a
-polynomially solvable oracle, so the cut is exact and cheap to produce at every
+polynomially solvable oracle, so each cut comes from an exactly solved polynomial-time
+subproblem at every
 callback.
 
 \subsection{What is open, and what this report attacks}\label{ssec:sota-open}
@@ -270,8 +271,12 @@ callback.
 Three observations set the agenda.
 
 First, the two-phase heuristic has a strong empirical record, one conditional
-industrial assessment \citep{Burger2015}, and no worst-case theory.
-Section~\ref{sec:gap} builds one.
+industrial assessment \citep{Burger2015}, and a classical worst-case guarantee:
+\citet{CramaKlundert1999} prove the construction to be a $b$-approximation. What it does
+not have is an \emph{instance-sensitive} theory --- a bound that tightens on the
+instance at hand, a characterisation of the instances where the construction is exact,
+or any separation of the two readings the construction admits.
+Section~\ref{sec:gap} builds one, on top of theirs.
 
 Second, on the exact side the strongest of the compact relaxations reviewed here equals
 the coverage bound $q$ \citep{daSilva2024}, and the configuration relaxation does not improve on it on

@@ -1,68 +1,58 @@
 \begin{abstract}
-\setstretch{1.15}
+\setstretch{1.0}
 \noindent
-A machine that makes many different parts needs many different tools, but it can
-hold only a few of them at a time. Running a set of jobs therefore means stopping to
-change tools, and each stop costs production time. The Job Sequencing and Tool
-Switching Problem (SSP) asks for the order of jobs, and the tool loading at each
-step, that makes the total number of tool changes as small as possible. Choosing the
-loading for a fixed order is easy. Choosing the order is NP-hard, and it is where all
-of the difficulty sits.
+A machine that makes many different parts needs many different tools but can hold only a
+few at a time, so running a set of jobs means stopping to change tools, and each stop
+costs production time. The Job Sequencing and Tool Switching Problem (SSP) asks for the
+order of jobs, and the loading at each step, that makes the total number of tool changes
+smallest. The loading for a fixed order is easy; the order is NP-hard, and it is where
+all of the difficulty sits.
 
-In practice the SSP is not attacked directly. Jobs are first grouped into as few
-magazine-fitting batches as possible, and the batches are then sequenced. This
-two-phase method is fast and is used in industrial practice, and \citet{CramaKlundert1999}
-showed it to be a $b$-approximation, where $b$ is the magazine capacity. This report
-sharpens that. The method admits two readings that the
-literature has not separated --- the cost of a walk through one fixed magazine per
-group, and the cost obtained once its final step re-optimises the
-loading --- and the two differ on the instances most often used as examples. Within
-that setting, the optimum is shown to equal the cheapest walk over \emph{all}
-groupings, so the two-phase gap --- measured on the best value the construction can
-reach, not on a particular implementation of it --- is exactly the price of insisting on
-the fewest groups; classes of instances with zero gap are identified for every capacity; upper
-bounds on the gap are proved for every instance; and the extremal behaviour is worked
-out at three groups. In the finite censuses run here, positive gaps are rare, every one
-observed in them equals one, and none occurs at a magazine capacity of two; larger gaps
-are reached only by disconnected constructions. That regime agrees with the one
-published industrial study. A parameterised cost model places the SSP and the grouping
-problem at the two ends of a single spectrum, with the transition governed by the gap
-itself.
+In practice the SSP is not attacked directly: jobs are first grouped into as few
+magazine-fitting batches as possible, and the batches are then sequenced.
+\citet{CramaKlundert1999} showed this two-phase method to be a $b$-approximation, for
+$b$ the magazine capacity. This report sharpens that into an instance-sensitive theory.
+The method admits two readings the literature has not separated --- the cost of a walk
+through one fixed magazine per group, and the cost once its final step re-optimises the
+loading --- and the two differ on the instances most often used as examples. Within that
+setting the optimum equals the cheapest walk over \emph{all} groupings, so the gap ---
+measured on the best value the construction can reach, not on one implementation of it
+--- is exactly the price of insisting on the fewest groups. Zero-gap classes follow for
+every capacity, upper bounds for every instance, and the extremal behaviour at three
+groups. In the censuses run here positive gaps are rare, every one observed equals one,
+and none occurs at capacity two; the only larger-gap construction found is
+disconnected, and its unboundedness remains conjectural. That regime agrees with the one
+published industrial study.
 
 On the exact side the obstacle is a single quantity. Of the compact formulations
-surveyed here, the strongest has a linear relaxation equal to the number of tools minus
-the magazine capacity, which is an elementary counting bound. Two methods are built to get
-past it. A branch-and-Benders-cut algorithm places the ordering in a master problem and
-settles the loading exactly with a polynomial oracle, so it never forms a weak
-relaxation. Position-indexed formulations replace the configuration walk by a fixed row
-set of polynomial size, and one of them, the position--transition formulation, has a
-linear relaxation that can provably exceed the counting bound.
+surveyed here, the strongest relaxes to the number of tools minus the magazine capacity,
+an elementary counting bound. Two methods are built to get past it: a
+branch-and-Benders-cut algorithm, which settles the loading exactly with a polynomial
+oracle and so never forms a weak relaxation, and position-indexed formulations, one of
+which can provably exceed the counting bound.
 
-Both were implemented and benchmarked on $1{,}421$ instances under one uniform
-protocol, against three compact models from the literature reimplemented here. That
-baseline is not the literature at its strongest --- Formulation~4 of
-\citet{Catanzaro2015} is used where its authors recommend Formulation~5 --- and it
-closes more instances than anything built here regardless, so what the campaign yields
-is a diagnosis rather than a faster solver. Whether the counting bound happens to equal
+Both were benchmarked on $1{,}421$ instances under one protocol against three compact
+models reimplemented here. That baseline is not the literature at its strongest ---
+Formulation~4 of \citet{Catanzaro2015} stands in for the Formulation~5 its authors
+recommend --- and it closes more instances than anything built here regardless, so the
+campaign yields a diagnosis and not a faster solver. Whether the counting bound equals
 the optimum is the dominant predictor of what the Benders solver closes: $94\%$ of the
-instances where it is tight, against $40\%$ of the rest, and where it fails it has
-usually already found the optimum and cannot certify it. That split is not evidence
-that the loose instances are hard. An arc-based compact model, whose relaxation is a
-different quantity, closes every one of them; and a compact model whose relaxation is
-the counting bound loses only thirteen points across the same split. What the split
-measures is a master that carries the counting bound and, at the root, almost nothing
-else. Of four standard strengthenings only the one
-supplying a better incumbent helps, and the branch-and-price prototypes, run to read
-their relaxation value rather than to compete, report the same bound from the other
-direction.
+instances where it is tight against $40\%$ of the rest, and where it fails it has
+usually already found the optimum and cannot certify it. That split is not evidence that
+the loose instances are hard --- an arc-based compact model closes every one of them,
+and a model whose relaxation \emph{is} the counting bound loses only thirteen points
+across it. What it measures is a master carrying that bound and, at the root, little
+else.
 
-The cause is structural rather than incidental: the objective counts tool
-re-insertions, produced by the global interleaving of the schedule, while apart from one
-constant coverage row every inequality either method carries is supported on a single
-arc or a single position. A family that is not local is derived and proved valid. Its
-ceiling over integral schedules is several times that of the family the solvers carry
-today --- and that ceiling is not reached: added to the master and measured, it leaves
-the root relaxation unchanged on every instance tested. Which is the more useful
-result, because it says the obstacle is not the absence of a global inequality but the
-encoding of one.
+The limitation is structural rather than incidental, in this sense. What is proved: the
+objective counts re-insertions produced by the global interleaving of the schedule;
+apart from one constant coverage row every inequality either method carries is supported
+on a single arc or a single position; and two independent configuration relaxations sit
+exactly on the counting bound. That this locality is what defeats the search is the
+reading those facts support, not a further theorem. A family that is not local is
+derived and proved valid, with a ceiling over integral schedules several times that of
+the family the solvers carry today --- but the ceiling is not reached. Measured inside
+the master it leaves the root relaxation unchanged on all $37$ instances for which both
+root values were obtained. The obstacle is the encoding of a global inequality, not the
+absence of one.
 \end{abstract}

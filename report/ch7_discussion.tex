@@ -286,11 +286,15 @@ drawing out, because each was arrived at independently.
 \paragraph{The bound governs both sides.}
 Section~\ref{sec:gap} shows that $q$ equals the optimum on a large part of the
 instance space, and that where it does the two-phase heuristic tends to be exact.
-Section~\ref{sec:comp} shows that where it does, the exact methods close at the root,
-and where it does not they branch without closing. The same quantity that makes the
-heuristic exact makes the exact methods fast. That is not obvious in advance: it says
-that the instances on which one would most want an exact method are exactly the
-instances on which the available exact methods are weakest.
+Section~\ref{sec:comp} shows that where it does, the methods built here close at the
+root, and where it does not they branch without closing. The same quantity sits on both
+sides. The association is what is measured; the wording should not promote it to a
+mechanism, and Section~\ref{ssec:results-tight} shows why: \texttt{CATZ-F4}, whose
+relaxation is not $q$, closes a larger share of the loose instances than of the tight
+ones, so a tight $q$ does not make an exact method fast in general --- it makes the
+methods whose bound is $q$ fast. Restricted that way the coincidence still bites, and
+unpleasantly: the instances on which one would most want a configuration-based exact
+method are exactly the instances on which it is weakest.
 
 \paragraph{The gap opens where the magazine is large.}
 Observation~\ref{obs:census} finds that every instance with a positive heuristic gap
