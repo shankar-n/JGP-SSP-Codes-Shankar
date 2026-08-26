@@ -541,23 +541,38 @@
 }
 
 % ============================================================
-% UNVERIFIED references — DO NOT CITE until confirmed
+% Verification record for the references that were once in doubt
 % ============================================================
+% An earlier draft carried a list of citations that could not be
+% confirmed. Each has since been checked against the source itself, and
+% this block records the outcome rather than the suspicion.
 %
-% daSilva (2021): Claimed to develop CG for SSP with set-covering master
-%   and bin-packing pricing. Cited in ssp_v3.tex as \cite{daSilva2021}.
-%   ASK Prof. Colares — this may be a Colares group internal report.
+% Burger et al. (2015)  CONFIRMED against the PDF (references/Useless/
+%   printing2.pdf). J Sched 18(2):131-145, DOI 10.1007/s10951-014-0400-2,
+%   Stellenbosch University. Both claims this report makes from it are
+%   verbatim in its Conclusion: that the two-phase decomposition does well
+%   "especially in cases where the largest job size is only slightly
+%   smaller than the magazine size" and degrades "as the difference
+%   between the magazine size and the largest job size grows"; and that
+%   they pose the fixed-stop-cost trade-off as future work, which is the
+%   question Section 4 answers.
 %
-% Ghiani, Laporte, Semet (2007): Claimed SSP = min-cost Hamiltonian cycle
-%   on configurations. Cited in ssp_v3.tex as \cite{Ghiani2007}.
-%   Note: Ghiani, Laporte, Semet exist as authors (VRP book etc.) but
-%   a 2007 SSP-specific paper has not been confirmed.
+% da Silva, Chaves, Yanasse  CONFIRMED. Int. J. Production Research
+%   59(12):3617-3632, 2021, DOI 10.1080/00207543.2020.1748906. The key is
+%   daSilva2024 for historical reasons; the printed year is 2021, from the
+%   year field below, and is correct.
 %
-% Burger et al. (2015): Cited in research.md for Color Print Scheduling
-%   Problem isomorphic to SSP, multiple optimal JGP solutions.
-%   NOT FOUND in any database. May be hallucinated.
+% Salonen et al. (2006)  EXISTS -- it is in the reference list of Burger
+%   et al. (2015), which is where the "remarkably well" claim about the
+%   two-phase decomposition originates. Not cited here: this report takes
+%   that claim from Burger et al., who tested it.
 %
-% Salonen et al. (2006): JGP+GSP "remarkably well". NOT FOUND.
+% Ghiani, Laporte, Semet (2007)  NOT CONFIRMED and NOT CITED. No entry
+%   below, no \cite anywhere in the report.
+%
+% daSilva (2021) column generation with a set-covering master  NOT
+%   CONFIRMED and NOT CITED. This is a different, unlocated work from the
+%   multicommodity paper above; no entry below, no \cite anywhere.
 % ============================================================
 
 @inproceedings{DezaKhalil2023,
@@ -665,4 +680,16 @@
   year      = {2014},
   pages     = {59--86},
   note      = {Source for the robust/non-robust cut distinction used in Section 7.2}
+}
+
+@article{CramaKlundert1999,
+  title   = {Worst-case performance of approximation algorithms for tool
+             management problems},
+  author  = {Crama, Yves and van de Klundert, Joris},
+  journal = {Naval Research Logistics},
+  volume  = {46},
+  number  = {5},
+  pages   = {445--462},
+  year    = {1999},
+  publisher = {Wiley}
 }
