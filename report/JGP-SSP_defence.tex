@@ -385,9 +385,11 @@ is given optimally. It is the price of the cardinality restriction, and nothing 
   method is provably exact.
   \item \textbf{Worst-case guarantees} better than the trivial $b(\Kst-1)$; extremal
   behaviour settled exactly at three groups.
-  \item \textbf{A census.} In $420$ random instances exactly one has a positive
-  heuristic gap. Every positive gap found anywhere equals \emph{one}, and every instance
-  carrying one has $b\ge4$.
+  \item \textbf{A census.} In $1{,}260$ random instances at three to five jobs,
+  \emph{none} has a positive heuristic gap; extending it finds $3$ of $1{,}260$ at six
+  jobs and $2$ at seven. Every positive gap found anywhere equals \emph{one}. Capacity is
+  what admits them: none at all in $11{,}000$ draws at $b=2$, but they occur at $b=3$ ---
+  the smallest has five jobs.
   \item \new{\textbf{An open question of Prof.\ Wagler's, closed.}} At $b=3$ a job is an
   \emph{edge} and a tool a \emph{vertex}, so the family is finite and can be enumerated.
   Odd rings are \emph{not} the only obstruction to integrality --- the smallest is a
@@ -656,11 +658,36 @@ arc-supported --- what both solvers carry today & $8.9\%$ & $0\%$ & $46/62$\\
 \end{tabular}
 \vspace{0.4em}
 
-{\small The arc family is \emph{exhausted}. The window family has somewhere to go.}
+{\small The arc family is \emph{exhausted}. The window family has headroom at its
+\emph{ceiling} --- but see the next slide: the ceiling did not transfer.}
 \end{frame}
-\note{Two minutes. State clearly that both figures are CEILINGS -- what each family
-could deliver at best. The honest claim is that the arc family is exhausted; the window
-family is promising and not yet measured inside a solver.}
+\note{Two minutes. Both figures are CEILINGS -- the best each family could ever certify,
+computed over integral sequences. The arc family being exhausted is a ceiling result and
+is safe. Do NOT sell the window family here; the next slide reports that it delivers
+nothing at the root, and being the one to say so is much stronger than being corrected.}
+
+%------------------------------------------------------------------ window measured
+\begin{frame}{And then we measured it}
+\begin{itemize}\itemsep4pt
+  \item The window family was added to the PCF$'$ master --- $15$ windows, $660$ rows,
+  $225$ variables per instance --- and the root relaxation recomputed on $37$ loose
+  instances.
+  \item \new{\textbf{The bound moved on none of them.}} Root $=q$ with the rows and
+  without, including instances whose gap is ten or eleven.
+  \item \textbf{Why.} Every window row is \emph{slack} at the LP optimum. The relaxation
+  keeps each tool partly present at every position, so $\sum_t \max_{k\in W}a_{t,k}$
+  stays near $b$ and no tool ever \emph{enters} a window.
+\end{itemize}
+\vspace{0.3em}
+\keyline{}
+\begin{center}
+{\footnotesize A ceiling computed over \emph{integral} sequences is not a bound on a
+\emph{fractional} relaxation. That is the lesson, and it is in the report.}
+\end{center}
+\end{frame}
+\note{90 seconds. This is a negative result about my own proposal and I am reporting it
+myself -- say it plainly. The mechanism is the interesting part: the relaxation evades the
+non-local family the same way it evades the local ones.}
 
 %------------------------------------------------------------------ negatives
 \begin{frame}{Four things that did not work --- and why that is the evidence}
@@ -702,14 +729,15 @@ not a list of disappointments.}
   \item A configuration-based exact method for the SSP is \textbf{bound-limited, not
   implementation-limited}. Established four independent ways.
   \item The bound will not move because every inequality we have is \textbf{local} and
-  the cost is not. \new{A non-local family exists, is valid and robust, and has roughly
-  four times the headroom.}
+  the cost is not. \new{A non-local family exists and is valid --- but in its robust
+  form it leaves the root bound unchanged.}
 \end{itemize}
 \vspace{0.4em}
 \keyline{}
-\small\textbf{Next:} measure the window family inside the solver; chain PTF per configuration
-rather than per tool; disaggregate the Benders master's single $\theta$. And the open
-problem --- \emph{is the excess of PTF over $q$ bounded by a constant?}
+\small\textbf{Next:} a non-robust encoding of the window family, which costs the pricing
+oracle; chain PTF per configuration rather than per tool; disaggregate the Benders
+master's single $\theta$. And the open problem --- \emph{is the excess of PTF over $q$
+bounded by a constant?}
 \end{frame}
 \note{90 seconds, then stop talking. Leave the open problem on screen -- it invites the
 first question onto ground you have prepared.}
