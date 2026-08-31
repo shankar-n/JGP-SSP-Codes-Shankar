@@ -21,7 +21,7 @@ becomes an oracle returning exact cuts, and the master's bound is assembled from
 subproblem values rather than from a linear relaxation of the loading. The algorithm
 never forms that relaxation at all --- which is a statement about the loading and not
 about the master, whose own root bound Observation~\ref{obs:rootq} finds sitting on the
-coverage row on $87.2\%$ of recorded runs. This places the solver in the lineage of logic-based
+coverage row on $87.4\%$ of runs. This places the solver in the lineage of logic-based
 \citep{Hooker2003} and combinatorial \citep{Codato2006} Benders decomposition.
 
 Branch-and-price attacks the same weakness from the other side. Reformulating over
@@ -413,16 +413,23 @@ leaves $C$ and enters $C'$. The formulation is
                     =\sum_{(D,D'):\,t\in D} z_{D,D'}^{k+1}, & t&\in T,\ k=1,\dots,n-2;\\
   \text{(Cov)}\quad & \sum_{k=1}^{n-1}\,\sum_{(C,C'):\,T_j\subseteq C} z_{C,C'}^{k}
                     +\!\!\sum_{(C,C'):\,T_j\subseteq C'} z_{C,C'}^{\,n-1}\ \ge\ 1,
-                    & j&\in J.
+                    & j&\in J;\\
+  \text{(T)}\quad & \sum_{k=1}^{n-1}\sum_{(C,C'):\,t\notin C,\ t\in C'} z_{C,C'}^{k}
+                    \;+\!\!\sum_{(C,C'):\,t\in C} z_{C,C'}^{1}\ \ge\ 1,
+                    & t&\in\U.
 \end{aligned}
 \]
 Constraint (S) selects one transition per step. The flow-consistency rows (F) require,
 tool by tool, that what enters position $k+1$ at the end of step $k$ is what leaves it
 at the start of step $k+1$, so the selected columns describe a single coherent walk.
 Constraint (Cov) serves every job at the configuration of some position, either the
-tail of a step or the head of the last one. As in PCF the rows number
-$O(n\lvert T\rvert)$ and are fixed, while the transition columns are generated. Call
-this PTF.
+tail of a step or the head of the last one. The counting rows (T) are the transition
+form of PCF's rows of the same name: every used tool is either already present in the
+configuration at the first position or is inserted by some transition. They carry the
+lower bound, and the proof of Proposition~\ref{prop:ptf} in
+Appendix~\ref{app:proofs} uses them and nothing else; the implementation generates
+them under the same name. As in PCF the rows number $O(n\lvert T\rvert)$ and are
+fixed, while the transition columns are generated. Call this PTF.
 
 \begin{proposition}\label{prop:ptf}
 PTF is exact, and its linear relaxation is at least $q$ and can be strictly greater.
@@ -431,7 +438,7 @@ PTF is exact, and its linear relaxation is at least $q$ and can be strictly grea
 The proof is in Appendix~\ref{app:proofs}. The second claim is established by a
 witness, not by a general argument, which is why it says \emph{can}.
 
-The witnesses are the three instances of Section~\ref{ssec:results-bnp} on which the
+The witnesses are the two instances of Observation~\ref{obs:ptf-strict} on which the
 recorded root relaxation exceeds $q$. PTF is therefore the first relaxation in this
 family to improve on the elementary bound, and it does so with a fixed, polynomial row
 set.

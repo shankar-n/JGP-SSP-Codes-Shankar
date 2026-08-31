@@ -26,7 +26,7 @@
 \setbeamercolor{frametitle}{fg=navy,bg=warm}
 \setbeamercolor{footline}{fg=muted,bg=white}
 \setbeamerfont{normal text}{size=\fontsize{14.2}{17.3}\selectfont}
-\setbeamerfont{frametitle}{series=\bfseries,size=\fontsize{23}{27}\selectfont}
+\setbeamerfont{frametitle}{series=\bfseries,size=\fontsize{16}{19}\selectfont}
 \setbeamerfont{footline}{size=\fontsize{8.5}{10}\selectfont}
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{itemize item}{\color{teal}\raisebox{.15ex}{\small$\blacktriangleright$}}
@@ -37,8 +37,10 @@
 
 \setbeamertemplate{frametitle}{%
   \nointerlineskip
-  \begin{beamercolorbox}[wd=\paperwidth,ht=.83cm,dp=.19cm,leftskip=.78cm,rightskip=.6cm]{frametitle}
+  \begin{beamercolorbox}[wd=\paperwidth,dp=.22cm,leftskip=.78cm,rightskip=.6cm]{frametitle}
+    \vskip.12cm
     \usebeamerfont{frametitle}\insertframetitle
+    \vskip.02cm
   \end{beamercolorbox}%
   \color{teal}\rule{\paperwidth}{1.05pt}%
 }
@@ -66,7 +68,7 @@
 \newcommand{\theory}[1]{{\color{teal}\bfseries #1}}
 \newcommand{\exact}[1]{{\color{orange}\bfseries #1}}
 \newcommand{\quiet}[1]{{\color{muted}#1}}
-\newcommand{\source}[1]{\vfill\hfill{\fontsize{7.8}{9.2}\selectfont\color{muted}#1}}
+\newcommand{\source}[1]{\vfill\hfill{\fontsize{7.8}{9.2}\selectfont\color{muted}#1}\vspace{.05cm}}
 
 \title{Job Sequencing and Tool Switching}
 \author{Shankar Narayanan}
@@ -141,7 +143,7 @@
 \end{frame}
 
 % 3 -------------------------------------------------------------------------
-\begin{frame}{KTNS settles loading; finding the order remains hard}
+\begin{frame}{Loading is easy; the order is the hard part}
 \begin{columns}[T,onlytextwidth]
 \column{.44\textwidth}
 \theory{Fixed order}
@@ -182,7 +184,7 @@ When a tool must leave, remove the loaded tool whose next use is furthest away.
 \end{frame}
 
 % 4 -------------------------------------------------------------------------
-\begin{frame}{The literature leaves one theory gap and one exact-method gap}
+\begin{frame}{Two gaps the literature leaves open}
 \begin{tikzpicture}[x=1cm,y=1cm,>=Stealth]
   \node[font=\large\bfseries,teal,anchor=east] at (2.15,1.55) {Grouping};
   \draw[->,teal,line width=1.2pt] (2.45,1.55)--(11.75,1.55);
@@ -211,15 +213,15 @@ When a tool must leave, remove the loaded tool whose next use is furthest away.
 \end{frame}
 
 % 5 -------------------------------------------------------------------------
-\begin{frame}{Grouping commits to $\Kst$ before it sees the best sequence}
+\begin{frame}{Grouping commits before it sees the sequence}
 \centering
 \begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
  stage/.style={font=\large\bfseries,align=center,text width=2.3cm},
  note/.style={font=\small,align=center,text width=2.45cm,text=muted}]
   \node[stage] (j) at (1.0,1.25) {Jobs};
-  \node[stage,teal] (g) at (4.15,1.25) {Minimum\grouping};
-  \node[stage] (s) at (7.35,1.25) {Group and\job order};
-  \node[stage,orange] (k) at (10.55,1.25) {KTNS\cost $H$};
+  \node[stage,teal] (g) at (4.15,1.25) {Minimum\\grouping};
+  \node[stage] (s) at (7.35,1.25) {Group and\\job order};
+  \node[stage,orange] (k) at (10.55,1.25) {KTNS\\cost $H$};
   \draw[->,line width=1.2pt,navy!55] (j)--(g);
   \draw[->,line width=1.2pt,navy!55] (g)--(s);
   \draw[->,line width=1.2pt,navy!55] (s)--(k);
@@ -247,7 +249,7 @@ When a tool must leave, remove the loaded tool whose next use is furthest away.
 \end{frame}
 
 % 6 -------------------------------------------------------------------------
-\begin{frame}{Without the $\Kst$ restriction, grouping is exact}
+\begin{frame}{Drop the fewest-groups rule: grouping is exact}
 \begin{columns}[T,onlytextwidth]
 \column{.60\textwidth}
 \vspace{.12cm}
@@ -315,7 +317,7 @@ $\text{cost}=q+R$}\par
 \end{frame}
 
 % 8 -------------------------------------------------------------------------
-\begin{frame}{One shared tool makes the lifted family connected and uniquely grouped}
+\begin{frame}{One shared tool makes the family connected}
 \begin{columns}[T,onlytextwidth]
 \column{.47\textwidth}
 \centering
@@ -351,7 +353,7 @@ unique minimum grouping}\par\vspace{.08cm}
 \end{frame}
 
 % 9 -------------------------------------------------------------------------
-\begin{frame}{The unrestricted order reaches coverage: $\Zst=8g-5$}
+\begin{frame}{The unrestricted order reaches coverage}
 \begin{columns}[T,onlytextwidth]
 \column{.58\textwidth}
 \centering
@@ -418,7 +420,7 @@ has exactly one return per copy. Therefore
 \end{frame}
 
 % 11 ------------------------------------------------------------------------
-\begin{frame}{The additive gap is $g$, although the ratio tends to $9/8$}
+\begin{frame}{The additive gap grows without bound}
 \begin{columns}[T,onlytextwidth]
 \column{.66\textwidth}
 \centering
@@ -451,7 +453,7 @@ The additive loss is unbounded, even though all jobs remain connected through $u
 \end{frame}
 
 % 12 ------------------------------------------------------------------------
-\begin{frame}{Benders puts the hard order in the master and exact loading in the oracle}
+\begin{frame}{Order in the master, loading in an exact oracle}
 \centering
 \begin{tikzpicture}[node distance=1.15cm,>=Stealth,
  block/.style={draw=navy!35,minimum width=3.0cm,minimum height=1.22cm,align=center,font=\large\bfseries}]
@@ -470,7 +472,7 @@ The additive loss is unbounded, even though all jobs remain connected through $u
 \end{frame}
 
 % 13 ------------------------------------------------------------------------
-\begin{frame}{The master searches paths, but starts from local and coverage bounds}
+\begin{frame}{The master starts from local and coverage bounds}
 \begin{columns}[T,onlytextwidth]
 \column{.36\textwidth}
 \centering
@@ -541,32 +543,32 @@ fixed path}\par
 \end{frame}
 
 % 15 ------------------------------------------------------------------------
-\begin{frame}{A dual solution gives a global cut supported only on arcs}
-\vspace{.05cm}
+\begin{frame}{The dual cut is supported only on arcs}
+\vspace{.01cm}
 \[
 \boxed{\quad \theta\ge \alpha+\sum_{i\ne j}\beta_{ij}x_{ij},
 \qquad \beta_{ij}=\sum_t\bar\lambda_{ijt}.\quad}
 \]
-\vspace{.28cm}
+\vspace{.02cm}
 \begin{columns}[T,onlytextwidth]
 \column{.31\textwidth}
 \theory{Valid globally}\par\vspace{.08cm}
 The dual feasible region does not depend on the proposed order.
 \column{.31\textwidth}
 \theory{Tight locally}\par\vspace{.08cm}
-An optimal dual solution prices the order that generated it exactly.
+An optimal dual prices the generating order exactly.
 \column{.31\textwidth}
 \exact{Arc-supported}\par\vspace{.08cm}
-Every learned coefficient is attached to an immediate predecessor arc.
+Every learned coefficient sits on one predecessor arc.
 \end{columns}
-\vspace{.47cm}
+\vspace{.04cm}
 \centering
-\begin{tikzpicture}[>=Stealth]
+\begin{tikzpicture}[>=Stealth,scale=.90,every node/.style={transform shape}]
   \foreach \x/\n in {0/1,2.2/2,4.4/3,6.6/4}{\node[circle,draw=navy!40,fill=warm,minimum size=.60cm,font=\small] (n\n) at (\x,0) {$\n$};}
   \draw[->,teal,line width=1.4pt] (n1)--(n2) node[midway,above,font=\small] {$\beta_{12}$};
   \draw[->,teal,line width=1.4pt] (n2)--(n3) node[midway,above,font=\small] {$\beta_{23}$};
   \draw[->,teal,line width=1.4pt] (n3)--(n4) node[midway,above,font=\small] {$\beta_{34}$};
-  \draw[orange,dashed,line width=1.2pt] (n1.south) to[bend right=20] node[below,font=\small] {a tool may leave and return across the whole span} (n4.south);
+  \draw[orange,dashed,line width=1.2pt] (n1.south) to[bend right=20] node[below,font=\small] {a tool may leave and return across the span} (n4.south);
 \end{tikzpicture}
 \source{Report: Equation 20 and locality discussion in Chapter 7.}
 \end{frame}
@@ -609,7 +611,7 @@ $1$ hour & per run; fixed denominator
 \end{frame}
 
 % 17 ------------------------------------------------------------------------
-\begin{frame}{Every compact baseline certifies more instances than every tested Benders regime}
+\begin{frame}{Every compact baseline certifies more than Benders}
 \centering
 \includegraphics[width=.94\textwidth,height=5.85cm,keepaspectratio]{assets/defence_figures/solve_counts_all.pdf}
 
@@ -619,7 +621,7 @@ $1$ hour & per run; fixed denominator
 \end{frame}
 
 % 18 ------------------------------------------------------------------------
-\begin{frame}{On common solved cases, Benders is often quick but has a long tail}
+\begin{frame}{Benders is quick, with a long tail}
 \centering
 \includegraphics[width=.94\textwidth,height=5.86cm,keepaspectratio]{assets/defence_figures/common_solved_time_boxplot.pdf}
 
@@ -629,7 +631,7 @@ $1$ hour & per run; fixed denominator
 \end{frame}
 
 % 19 ------------------------------------------------------------------------
-\begin{frame}{BBC closure drops when the coverage bound misses the optimum}
+\begin{frame}{Closure drops when the bound misses the optimum}
 \begin{columns}[T,onlytextwidth]
 \column{.53\textwidth}
 \centering
@@ -650,41 +652,41 @@ $223/383$ & time-limited, known-optimum BBC--LP incumbents already equal the opt
 \end{frame}
 
 % 20 ------------------------------------------------------------------------
-\begin{frame}{The next question is how to price tool residency across a span}
+\begin{frame}{Next: pricing tool residency across a span}
 \begin{columns}[T,onlytextwidth]
 \column{.47\textwidth}
 \theory{What the theory isolates}
 \vspace{.20cm}
 
-Minimum grouping can force a tool to leave and return:
+Minimum grouping can force a tool out and back:
 \[
 \text{cost}=q+\text{reinsertions}.
 \]
 
-\vspace{.42cm}
+\vspace{.16cm}
 \exact{What the campaign isolates}
 \vspace{.20cm}
 
-The tested arc-supported master often finds the right order but cannot certify those returns.
+The tested master often finds the right order but cannot certify those returns.
 
 \column{.49\textwidth}
 \theory{Next exact tests}
 \begin{itemize}
   \item disaggregate $\theta$ by position;
-  \item encode job-union or configuration-level structure over a window;
-  \item test the stronger bound under a matched implementation protocol.
+  \item encode job-union structure over a window;
+  \item test the stronger bound under a matched protocol.
 \end{itemize}
 
-\vspace{.38cm}
+\vspace{.12cm}
 \theory{Use the grouping result}
 \begin{itemize}
-  \item search $\Kst,\Kst+1,\ldots,\Kst+\delta$ groupings;
-  \item flatten each with KTNS and use the orders as SSP seeds.
+  \item search $\Kst,\ldots,\Kst+\delta$ groupings;
+  \item flatten each with KTNS; use the orders as seeds.
 \end{itemize}
 \end{columns}
-\vspace{.26cm}
+\vspace{.02cm}
 \centering
-{\large\bfseries The work narrows the next algorithmic experiment; it does not claim a new SOTA solver.}
+{\bfseries The work narrows the next experiment; it claims no new SOTA solver.}
 \source{Report: Discussion and further work, Chapters 7--8.}
 \end{frame}
 
@@ -720,7 +722,7 @@ Family denominators: $160,160,340,330,340,80$; total $1{,}410$.
 \end{frame}
 
 % 22 ------------------------------------------------------------------------
-\begin{frame}{Backup: the tested fractional regime spends more and certifies less}
+\begin{frame}{Backup: fractional cuts spend more, certify less}
 \centering
 \includegraphics[width=.94\textwidth,height=5.48cm,keepaspectratio]{assets/defence_figures/fractional_separation_tradeoff.pdf}
 
