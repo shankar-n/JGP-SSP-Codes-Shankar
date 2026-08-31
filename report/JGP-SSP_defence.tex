@@ -14,15 +14,13 @@
 % Accent palette used by the diagrams and by the generated figures.
 % navy is aliased to the theme's structure colour so the two agree.
 \definecolor{navy}{HTML}{353E7C}
-\definecolor{teal}{HTML}{11705F}
 \definecolor{orange}{HTML}{C25A1E}
-\definecolor{coral}{HTML}{B5423F}
 \definecolor{blue}{HTML}{2A4E9B}
 \definecolor{muted}{HTML}{444B57}
 \definecolor{srcgray}{HTML}{7A8290}
 \definecolor{linegray}{HTML}{C8CEDA}
 \definecolor{warm}{HTML}{F2F3F7}
-\definecolor{paleteal}{HTML}{E2EFEB}
+\definecolor{paleteal}{HTML}{E6E9F4}
 \definecolor{paleorange}{HTML}{F8EBE0}
 
 \setbeamercolor{structure}{fg=navy}
@@ -32,13 +30,13 @@
 \setbeamerfont{frametitle}{size=\large}
 \setbeamerfont{block title}{series=\bfseries}
 \setbeamertemplate{itemize item}{\color{navy}$\bullet$}
-\setbeamertemplate{itemize subitem}{\color{teal}--}
+\setbeamertemplate{itemize subitem}{\color{navy}--}
 
 \newcommand{\Zst}{Z^{\ast}}
 \newcommand{\Kst}{K^{\ast}}
 \newcommand{\Hwalk}{H_{\mathrm{walk}}}
 \newcommand{\U}{U}
-\newcommand{\theory}[1]{{\color{teal}\bfseries #1}}
+\newcommand{\theory}[1]{{\color{navy}\bfseries #1}}
 \newcommand{\exact}[1]{{\color{orange}\bfseries #1}}
 \newcommand{\quiet}[1]{{\color{muted}#1}}
 \newcommand{\source}[1]{\vfill\hfill{\fontsize{7.6}{9}\selectfont\color{srcgray}#1}}
@@ -89,10 +87,10 @@
   \node[job] (a1) at (1.05,1.40) {$J_1$\\$\{a,b\}$};
   \node[job] (a2) at (4.25,1.40) {$J_2$\\$\{b,c\}$};
   \node[job] (a3) at (7.45,1.40) {$J_3$\\$\{c,d\}$};
-  \draw[->,line width=1.1pt,teal] (a1)--(a2) node[midway,above,font=\small] {$+c$};
-  \draw[->,line width=1.1pt,teal] (a2)--(a3) node[midway,above,font=\small] {$+d$};
-  \node[font=\small,teal] at (1.05,.67) {start: $+a,+b$};
-  \node[font=\fontsize{19}{22}\selectfont\bfseries,teal,anchor=west] at (8.75,1.40) {$4$ insertions};
+  \draw[->,line width=1.1pt,navy] (a1)--(a2) node[midway,above,font=\small] {$+c$};
+  \draw[->,line width=1.1pt,navy] (a2)--(a3) node[midway,above,font=\small] {$+d$};
+  \node[font=\small,navy] at (1.05,.67) {start: $+a,+b$};
+  \node[font=\large\bfseries,navy,anchor=west] at (8.75,1.40) {$4$ insertions};
 
   \node[lab] at (-.30,-.90) {order $1,3,2$};
   \node[job] (b1) at (1.05,-.90) {$J_1$\\$\{a,b\}$};
@@ -101,7 +99,7 @@
   \draw[->,line width=1.1pt,orange] (b1)--(b2) node[midway,above,font=\small] {$+c,+d$};
   \draw[->,line width=1.1pt,orange] (b2)--(b3) node[midway,above,font=\small] {$+b$};
   \node[font=\small,orange] at (1.05,-1.63) {start: $+a,+b$};
-  \node[font=\fontsize{19}{22}\selectfont\bfseries,orange,anchor=west] at (8.75,-.90) {$5$ insertions};
+  \node[font=\large\bfseries,orange,anchor=west] at (8.75,-.90) {$5$ insertions};
   \draw[orange,line width=1.5pt] (6.73,-1.22) -- (8.15,-1.22);
   \node[font=\small,orange,anchor=west] at (6.45,-1.82) {$b$ was removed, then returned};
 \end{tikzpicture}
@@ -128,10 +126,10 @@ When a tool must leave, remove the loaded tool whose next use is furthest away.
 
 \column{.52\textwidth}
 \centering
-{\fontsize{28}{32}\selectfont\bfseries\color{navy}$40{,}320$}\par
+{\Large\bfseries\color{navy}$40{,}320$}\par
 {\small orders of the eight-job instance \texttt{L1-1}}\par
 \vspace{.28cm}
-{\fontsize{27}{31}\selectfont\bfseries\color{teal}$180$}\par
+{\Large\bfseries\color{navy}$180$}\par
 {\small are optimal}\par
 \vspace{.38cm}
 \begin{tikzpicture}[x=.42cm,y=1cm]
@@ -139,8 +137,8 @@ When a tool must leave, remove the loaded tool whose next use is furthest away.
   \foreach \x/\v in {0/10,3/13,8/18,14/24}{\draw[navy!35] (\x,-.09)--(\x,.09);\node[font=\scriptsize,below] at (\x,-.10) {\v};}
   \draw[dashed,navy,line width=1pt] (0,-.28)--(0,.65);
   \node[font=\small,navy,anchor=south west] at (.12,.37) {$q=10$};
-  \fill[teal] (3,0) circle (4pt);
-  \node[font=\small\bfseries,teal,anchor=south] at (3,.18) {$\Zst=13$};
+  \fill[navy] (3,0) circle (4pt);
+  \node[font=\small\bfseries,navy,anchor=south] at (3,.18) {$\Zst=13$};
   \fill[orange] (8,0) circle (4pt);
   \node[font=\small\bfseries,orange,anchor=south] at (8,.18) {median $18$};
   \node[font=\scriptsize,muted] at (7,-.62) {free-initial tool-switch cost};
@@ -177,10 +175,10 @@ sequence is chosen once and paid for every shift.
 % 4 -------------------------------------------------------------------------
 \begin{frame}{Two gaps the literature leaves open}
 \begin{tikzpicture}[x=1cm,y=1cm,>=Stealth]
-  \node[font=\large\bfseries,teal,anchor=east] at (2.15,1.55) {Grouping};
-  \draw[->,teal,line width=1.2pt] (2.45,1.55)--(11.75,1.55);
+  \node[font=\large\bfseries,navy,anchor=east] at (2.15,1.55) {Grouping};
+  \draw[->,navy,line width=1.2pt] (2.45,1.55)--(11.75,1.55);
   \foreach \x/\yr/\txt in {3.0/1999/{$b$-approximation},6.1/2015/{industrial evidence},9.25/open/{instance-sensitive gap}}{
-    \fill[teal] (\x,1.55) circle (3.5pt);
+    \fill[navy] (\x,1.55) circle (3.5pt);
     \node[font=\scriptsize,above=.10cm,align=center] at (\x,1.55) {\yr};
     \node[font=\small,below=.20cm,align=center,text width=2.4cm] at (\x,1.55) {\txt};}
 
@@ -235,9 +233,9 @@ reformulation over configurations -- get past it?
   \node[cfg] (c1) at (0,0)    {$\{a,b,c\}$};
   \node[cfg] (c2) at (3.35,0) {$\{b,c,d\}$};
   \node[cfg] (c3) at (6.70,0) {$\{c,d,e\}$};
-  \node[cfg,draw=teal!70,fill=paleteal] (c4) at (10.05,0) {$\{d,e,f\}$};
+  \node[cfg,draw=navy!70,fill=paleteal] (c4) at (10.05,0) {$\{d,e,f\}$};
   \foreach \i/\j/\l in {c1/c2/{$+d$},c2/c3/{$+e$},c3/c4/{$+f$}}{
-    \draw[->,teal,line width=1.3pt] (\i)--(\j) node[midway,above,font=\small,teal] {\l};}
+    \draw[->,navy,line width=1.3pt] (\i)--(\j) node[midway,above,font=\small,navy] {\l};}
   \node[font=\scriptsize,align=center,below=.30cm of c1] {jobs served\\here};
   \node[font=\scriptsize,align=center,below=.30cm of c4] {jobs served\\here};
 \end{tikzpicture}
@@ -263,244 +261,114 @@ This single quantity governs \theory{both} halves of the talk.
 
 \section{Structural Results}
 
-% 5 -------------------------------------------------------------------------
-\begin{frame}{Grouping commits before it sees the sequence}
+\begin{frame}{The two-phase method, and the one place the loss enters}
+\vspace{.3cm}
 \centering
 \begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
- stage/.style={font=\large\bfseries,align=center,text width=2.3cm},
- note/.style={font=\small,align=center,text width=2.45cm,text=muted}]
-  \node[stage] (j) at (1.0,1.25) {Jobs};
-  \node[stage,teal] (g) at (4.15,1.25) {Minimum\\grouping};
-  \node[stage] (s) at (7.35,1.25) {Group and\\job order};
-  \node[stage,orange] (k) at (10.55,1.25) {KTNS\\cost $H$};
-  \draw[->,line width=1.2pt,navy!55] (j)--(g);
-  \draw[->,line width=1.2pt,navy!55] (g)--(s);
-  \draw[->,line width=1.2pt,navy!55] (s)--(k);
-  \node[note] at (1.0,.25) {$T_j\subseteq\U$};
-  \node[note] at (4.15,.25) {$\left|\bigcup_{j\in G}T_j\right|\le b$\\fewest groups $=\Kst$};
-  \node[note] at (7.35,.25) {best choices over every tie};
-  \node[note] at (10.55,.25) {best final loading for that order};
+  st/.style={draw=navy!40,fill=warm,rounded corners=2pt,minimum width=2.5cm,
+             minimum height=1.0cm,align=center,font=\small}]
+  \node[st] (a) at (0,0)    {\textbf{Group}\\fewest batches};
+  \node[st] (b) at (3.6,0)  {\textbf{Order}\\groups and jobs};
+  \node[st,draw=orange!70,fill=paleorange] (c) at (7.2,0) {\textbf{KTNS}\\re-optimise loading};
+  \draw[->,navy,line width=1pt] (a)--(b);
+  \draw[->,navy,line width=1pt] (b)--(c);
+  \node[font=\scriptsize,navy,align=center,below=.25cm of a] {the commitment\\happens here};
 \end{tikzpicture}
 
-\vspace{.36cm}
-{\color{linegray}\rule{.88\textwidth}{.7pt}}
-\vspace{.25cm}
+\vspace{.7cm}
+\begin{block}{Where the loss comes from}
+Allowing \emph{all} feasible groupings makes the construction \textbf{exact}: the optimum
+equals the cheapest walk over every grouping. So the loss is not a defect of the method
+--- it is the price of insisting on the \textbf{fewest} groups.
+\end{block}
 
-\begin{columns}[T,onlytextwidth]
-\column{.47\textwidth}
-\centering
-{\fontsize{21}{25}\selectfont\color{navy}$\Zst$}\par
-\small best KTNS cost over every job order
-\column{.47\textwidth}
-\centering
-{\fontsize{21}{25}\selectfont\color{orange}$H-\Zst$}\par
-\small loss that remains even under favourable tie-breaking
-\end{columns}
+\vspace{.35cm}
+\centering\small
+Two readings must be separated: the walk through one fixed magazine per group, and the
+value after KTNS re-optimises. \textbf{They differ.}
 \cit{Crama \& van de Klundert, 1999}
 \end{frame}
 
-% 6 -------------------------------------------------------------------------
-\begin{frame}{Drop the fewest-groups rule: grouping is exact}
+
+\begin{frame}{The main structural result: the loss is unbounded}
+\vspace{.05cm}
 \begin{columns}[T,onlytextwidth]
-\column{.60\textwidth}
-\vspace{.12cm}
-\[
-  \Zst=\min_{\mathcal P\ \mathrm{feasible}}\gamma(\mathcal P)
-\]
-\[
-  \Hwalk=\min_{\substack{\mathcal P\ \mathrm{feasible}\\|\mathcal P|=\Kst}}
-  \gamma(\mathcal P),
-  \qquad H\le\Hwalk.
-\]
-\vspace{.25cm}
-
-The approximation enters when the first phase keeps only the groupings with the fewest groups.
-
-\column{.36\textwidth}
+\column{.40\textwidth}
 \centering
-\begin{tikzpicture}
-  \draw[navy!35,fill=warm,line width=1pt] (0,0) ellipse (2.05cm and 1.48cm);
-  \draw[teal,fill=paleteal,line width=1.2pt] (.25,-.08) ellipse (1.22cm and .78cm);
-  \node[font=\small,align=center] at (-.15,1.08) {all feasible\\groupings};
-  \node[font=\small\bfseries,teal,align=center] at (.25,-.08) {$|\mathcal P|=\Kst$};
-\end{tikzpicture}
-\vspace{.22cm}
-
-{\fontsize{20}{24}\selectfont
-$\text{cost}=q+R$}\par
-\small $q=|\U|-b$; $R$ counts reinsertions.
-\end{columns}
-\end{frame}
-
-% 7 -------------------------------------------------------------------------
-\begin{frame}{Four jobs are enough for a genuine grouping loss}
-\begin{columns}[T,onlytextwidth]
-\column{.50\textwidth}
-\centering
-{\small Required tools; capacity $b=4$}\par\vspace{.12cm}
-\begin{tikzpicture}[x=.52cm,y=.52cm]
-  \foreach \x/\t in {1/1,2/2,3/3,4/4,5/5,6/6,7/7}{\node[font=\small\bfseries] at (\x,1) {\t};}
-  \foreach \y/\j in {0/A,-1/B,-2/C,-3/D}{\node[font=\small\bfseries,anchor=east] at (.28,\y) {\j};}
-  \foreach \x in {1,...,7}{\foreach \y in {0,-1,-2,-3}{\draw[navy!16] (\x-.38,\y-.38) rectangle (\x+.38,\y+.38);}}
-  \foreach \x/\y in {1/0,2/0,3/-1,4/-1,1/-2,3/-2,5/-2,6/-2,2/-3,5/-3,6/-3,7/-3}{\fill[teal] (\x,\y) circle (4.3pt);}
-\end{tikzpicture}
-\vspace{.18cm}
-
-\theory{$A$ and $B$ are the only feasible pair.}
-
-\column{.46\textwidth}
-\vspace{.18cm}
-\theory{Unrestricted order}
-\[
- B,C,A,D \quad\Longrightarrow\quad \Zst=q=3.
-\]
-\vspace{.28cm}
-\exact{Every minimum grouping}
-\[
- A\text{ and }B\text{ consecutive}
- \quad\Longrightarrow\quad H=4.
-\]
-\vspace{.20cm}
-{\large One forced adjacency creates one reinsertion.}
-\end{columns}
-\end{frame}
-
-% 8 -------------------------------------------------------------------------
-\begin{frame}{One shared tool makes the family connected}
-\begin{columns}[T,onlytextwidth]
-\column{.47\textwidth}
-\centering
-\begin{tikzpicture}[>=Stealth,
- job/.style={draw=navy!35,fill=warm,minimum width=1.15cm,minimum height=.62cm,font=\small\bfseries},
+\begin{tikzpicture}[x=1cm,y=1cm,scale=.92,every node/.style={transform shape},
+ job/.style={draw=navy!35,fill=warm,minimum width=1.05cm,minimum height=.56cm,font=\small\bfseries},
  big/.style={job,fill=paleorange,draw=orange!70}]
-  \node[job] (a) at (-1.55,.62) {$A_i$};
-  \node[job] (b) at (1.55,.62) {$B_i$};
-  \node[big] (c) at (-1.55,-.92) {$C_i$};
-  \node[big] (d) at (1.55,-.92) {$D_i$};
-  \node[draw=teal,fill=paleteal,circle,minimum size=.74cm,font=\bfseries] (u) at (0,1.72) {$u$};
-  \node[draw=navy!45,fill=white,circle,minimum size=.74cm,font=\bfseries] (v) at (0,-2.02) {$v_i$};
+  \node[job] (a) at (-1.35,.55) {$A_i$};
+  \node[job] (b) at (1.35,.55) {$B_i$};
+  \node[big] (c) at (-1.35,-.85) {$C_i$};
+  \node[big] (d) at (1.35,-.85) {$D_i$};
+  \node[draw=navy,fill=paleteal,circle,minimum size=.68cm,font=\bfseries] (u) at (0,1.55) {$u$};
+  \node[draw=navy!45,fill=white,circle,minimum size=.68cm,font=\bfseries] (v) at (0,-1.85) {$v_i$};
   \begin{scope}[on background layer]
     \foreach \n in {a,b,c,d}{\draw[navy!22] (u)--(\n);\draw[navy!22] (v)--(\n);}
-    \draw[teal,line width=1.8pt] (a)--(b);
   \end{scope}
-  \node[fill=white,inner sep=1.4pt,font=\small,text=teal] at (0,.62) {fits: $6$};
-  \node[font=\scriptsize,teal,align=center] at (0,2.62) {$u$ is in every job\\across every copy};
+  \node[font=\scriptsize,navy,align=center] at (0,2.35) {$u$ in every job,\\every copy};
 \end{tikzpicture}
 
-\column{.49\textwidth}
-\vspace{.08cm}
-\begin{itemize}
-  \item $C_i$ and $D_i$ fill all six slots.
-  \item $A_i\cup B_i$ uses exactly six tools.
-  \item Small jobs from different copies use seven.
-\end{itemize}
-\vspace{.28cm}
-\centering
-{\fontsize{23}{27}\selectfont\bfseries\color{teal}
-unique minimum grouping}\par\vspace{.08cm}
-{\fontsize{25}{29}\selectfont $\Kst=3g$}
+\column{.56\textwidth}
+\vspace{.1cm}
+\begin{block}{Theorem}
+For every $g\ge1$ there is a \textbf{connected} instance with $b=6$,
+\[
+ \lvert\U\rvert=8g+1,\quad \Kst=3g,\quad \Zst=8g-5,\quad H=9g-5 .
+\]
+Hence $H-\Zst=g$: the loss of the two-phase method is \textbf{unbounded}, even on
+connected instances.
+\end{block}
+\vspace{.2cm}
+{\small
+Take $g$ copies of a four-job seed, add one universal tool and a private marker per
+copy. The minimum grouping becomes \emph{unique}, and each copy is forced to let one
+private tool leave and return.}
 \end{columns}
+
+\vspace{.2cm}
+\centering\small
+The \textbf{ratio} tends to $9/8$: the additive loss grows, the factor does not.
 \end{frame}
 
-% 9 -------------------------------------------------------------------------
-\begin{frame}{The unrestricted order reaches coverage}
-\begin{columns}[T,onlytextwidth]
-\column{.58\textwidth}
+
+\begin{frame}{Structural results at a glance}
+\vspace{.15cm}
 \centering
-\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
- job/.style={draw=teal!60,fill=paleteal,minimum width=1.35cm,minimum height=.72cm,font=\large\bfseries}]
-  \node[job] (b) at (0,1.1) {$B_i$};
-  \node[job] (c) at (2.1,1.1) {$C_i$};
-  \node[job] (a) at (4.2,1.1) {$A_i$};
-  \node[job] (d) at (6.3,1.1) {$D_i$};
-  \draw[->,teal,line width=1.3pt] (b)--(c);
-  \draw[->,teal,line width=1.3pt] (c)--(a);
-  \draw[->,teal,line width=1.3pt] (a)--(d);
-  \draw[teal,line width=2pt] (-.55,-.05)--(6.85,-.05);
-  \node[font=\small,teal,above] at (3.15,-.05) {$u$ remains loaded};
-  \node[font=\small,align=center] at (3.15,-.82) {repeat copy by copy; every newly loaded private tool\\is appearing for the first time};
-\end{tikzpicture}
+\small
+\begin{tabular}{@{}p{6.9cm}l@{}}
+\toprule
+\textbf{Result} & \textbf{Status}\\
+\midrule
+Optimum $=$ cheapest walk over all groupings & proved\\[3pt]
+Loss $=$ price of minimum cardinality (walk value) & proved\\[3pt]
+Zero-gap classes for every capacity & proved\\[3pt]
+Ratio bound $\min(b,\Kst-1,q)$, uniform over tie-breaking & proved\\[3pt]
+Closed form and extremal behaviour at three groups & proved\\[3pt]
+Four jobs necessary and sufficient for a positive loss & proved\\[3pt]
+\textbf{Connected family with unbounded additive loss} & \textbf{proved}\\[3pt]
+Constant-factor bound at $b=3$ & open\\
+\bottomrule
+\end{tabular}
 
-\column{.38\textwidth}
-\vspace{.28cm}
-\[
- |\U|=8g+1,\qquad b=6
-\]
-\[
- q=|\U|-b=8g-5.
-\]
-\vspace{.28cm}
-No reinsertion is needed, so the coverage lower bound is attained:
-\[
-\boxed{\Zst=q=8g-5}.
-\]
-\end{columns}
-\end{frame}
-
-% 10 ------------------------------------------------------------------------
-\begin{frame}{Every minimum grouping forces one return per copy}
-\begin{columns}[T,onlytextwidth]
-\column{.51\textwidth}
-\centering
-\begin{tikzpicture}[>=Stealth]
-  \node[draw=teal!70,fill=paleteal,minimum width=3.25cm,minimum height=.82cm,font=\large\bfseries] (ab) at (0,1.25) {$[A_i\; B_i]$};
-  \node[draw=orange!65,fill=paleorange,minimum width=1.10cm,minimum height=.82cm,font=\large\bfseries] (c) at (-1.18,-.52) {$C_i$};
-  \node[draw=orange!65,fill=paleorange,minimum width=1.10cm,minimum height=.82cm,font=\large\bfseries] (d) at (1.18,-.52) {$D_i$};
-  \begin{scope}[on background layer]
-    \draw[->,orange,line width=1.5pt]
-      (ab.west) .. controls (-2.55,.9) and (-2.75,-1.55) .. (0,-1.62) .. controls (1.9,-1.66) and (2.1,-1.0) .. (d.south east);
-  \end{scope}
-  \node[font=\small\bfseries,orange,align=center] at (0,-2.30) {at least one private tool\\must return};
-\end{tikzpicture}
-
-\column{.45\textwidth}
-\theory{Lower bound}
-\[
-H\ge q+g=(8g+1-6)+g=9g-5.
-\]
-\vspace{.25cm}
-\exact{Matching grouped order}
-\[
-A_i,B_i,C_i,D_i
-\]
-has exactly one return per copy. Therefore
-\[
-\boxed{H=9g-5}.
-\]
-\end{columns}
-\end{frame}
-
-% 11 ------------------------------------------------------------------------
-\begin{frame}{The additive gap grows without bound}
-\begin{columns}[T,onlytextwidth]
-\column{.66\textwidth}
-\centering
-\begin{tikzpicture}[x=.92cm,y=.071cm,>=Stealth]
-  \draw[->,navy!70] (.55,0)--(7.15,0) node[below,font=\small] {$g$};
-  \draw[->,navy!70] (.80,0)--(.80,54) node[left,font=\small] {cost};
-  \foreach \x in {1,...,6}{\draw[navy!20] (\x+.55,0)--(\x+.55,2);\node[font=\scriptsize,below] at (\x+.55,0) {\x};}
-  \foreach \y in {10,20,30,40,50}{\draw[navy!12] (.80,\y)--(6.75,\y);\node[font=\scriptsize,anchor=east] at (.68,\y) {\y};}
-  \draw[teal,line width=2.2pt] plot coordinates {(1.55,3)(2.55,11)(3.55,19)(4.55,27)(5.55,35)(6.55,43)};
-  \draw[orange,line width=2.2pt] plot coordinates {(1.55,4)(2.55,13)(3.55,22)(4.55,31)(5.55,40)(6.55,49)};
-  \node[font=\small\bfseries,teal,anchor=west] at (4.25,25) {$\Zst=8g-5$};
-  \node[font=\small\bfseries,orange,anchor=west] at (4.25,46) {$H=9g-5$};
-  \draw[<->,orange,line width=1pt] (6.55,43)--(6.55,49);
-  \node[font=\small,orange,anchor=west] at (6.67,46) {$g$};
-\end{tikzpicture}
-
-\column{.30\textwidth}
 \vspace{.40cm}
-{\fontsize{24}{28}\selectfont\bfseries\color{teal}
-$H-\Zst=g$}\par
-\vspace{.35cm}
-The additive loss is unbounded, even though all jobs remain connected through $u$.
-\vspace{.35cm}
-\[
-\frac{H}{\Zst}\longrightarrow\frac98.
-\]
-\small This family does not prove a universal $9/8$ ratio bound.
-\end{columns}
+{\small In the finite censuses, positive gaps are rare and none occurs at $b=2$.}
 \end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \section{Exact Methods}
 
@@ -511,11 +379,11 @@ The additive loss is unbounded, even though all jobs remain connected through $u
               minimum height=1.42cm,align=center,font=\small}]
   \node[box,fill=warm] (p) at (0,1.50)
      {\textbf{The obstacle}\\ every compact model surveyed relaxes to $q$ or below};
-  \node[box,fill=paleteal,draw=teal!65] (a) at (-3.1,-.62)
+  \node[box,fill=paleteal,draw=navy!65] (a) at (-3.1,-.62)
      {\textbf{Route 1: decompose}\\ never relax the loading at all};
   \node[box,fill=paleorange,draw=orange!65] (b) at (3.1,-.62)
      {\textbf{Route 2: reformulate}\\ optimise over configurations};
-  \draw[->,teal,line width=1.3pt]   (p.south) -- ++(0,-.28) -| (a.north);
+  \draw[->,navy,line width=1.3pt]   (p.south) -- ++(0,-.28) -| (a.north);
   \draw[->,orange,line width=1.3pt] (p.south) -- ++(0,-.28) -| (b.north);
 \end{tikzpicture}
 
@@ -533,160 +401,224 @@ relaxation can provably exceed $q$.
 \cit{da Silva et al., 2021; Rahmaniani et al., 2017}
 \end{frame}
 
-% 12 ------------------------------------------------------------------------
-\begin{frame}{Order in the master, loading in an exact oracle}
+\begin{frame}{Branch-and-Benders-cut: the idea}
+\vspace{.35cm}
 \centering
-\begin{tikzpicture}[node distance=1.15cm,>=Stealth,
- block/.style={draw=navy!35,minimum width=3.0cm,minimum height=1.22cm,align=center,font=\large\bfseries}]
-  \node[block,fill=warm] (m) {Master\\chooses an order};
-  \node[block,fill=paleteal,draw=teal!65,right=of m] (s) {Loading LP\\prices it exactly};
-  \node[block,fill=paleorange,draw=orange!65,right=of s] (c) {Dual solution\\gives a cut};
-  \draw[->,teal,line width=1.5pt] (m)--(s) node[midway,above,font=\small] {$\bar x$};
-  \draw[->,orange,line width=1.5pt] (s)--(c) node[midway,above,font=\small] {true cost};
-  \draw[->,navy!70,line width=1.4pt] (c.south) |- ($(m.south)+(0,-.92)$) -- (m.south);
-  \node[font=\small,navy,align=center,fill=white,inner sep=2.4pt] at (4.18,-1.72)
-    {repeat inside branch-and-bound until the lower bound\\meets the cost of the best order};
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+ blk/.style={draw=navy!40,rounded corners=2pt,minimum width=3.6cm,minimum height=1.35cm,
+             align=center,font=\small}]
+  \node[blk,fill=warm] (m) at (0,0) {\textbf{Master} \; (hard)\\choose the job order\\minimise the stand-in $\theta$};
+  \node[blk,fill=paleorange,draw=orange!70] (s) at (6.4,0) {\textbf{Subproblem} \; (easy)\\load the tools for that\\order, \emph{exactly}};
+  \draw[->,navy,line width=1.1pt] (m.north east) to[bend left=18] node[above,font=\scriptsize] {an order $\bar x$} (s.north west);
+  \draw[->,orange,line width=1.1pt] (s.south west) to[bend left=18] node[below,font=\scriptsize,align=center] {a cut: $\theta\ge$ true cost} (m.south east);
 \end{tikzpicture}
-\vspace{.55cm}
 
-{\large The decomposition is natural because the fixed-order subproblem is polynomial and exact.}
-\cit{Hooker \& Ottosson, 2003; Codato \& Fischetti, 2006}
+\vspace{.75cm}
+\begin{block}{Why this problem invites Benders}
+For a \textbf{fixed} order the loading is solvable in polynomial time. So the subproblem
+is not relaxed --- it is solved exactly, and the master's bound is built from true
+subproblem values rather than from a weak relaxation of the loading.
+\end{block}
+\cit{Hooker \& Ottosson, 2003; Codato \& Fischetti, 2006; Rahmaniani et al., 2017}
 \end{frame}
 
-% 13 ------------------------------------------------------------------------
-\begin{frame}{The master starts from local and coverage bounds}
-\begin{columns}[T,onlytextwidth]
-\column{.36\textwidth}
-\centering
-\begin{tikzpicture}[>=Stealth]
-  \foreach \x/\n in {0/d,1.45/1,2.9/2,4.35/3}{\node[circle,draw=navy!45,fill=warm,minimum size=.69cm,font=\small\bfseries] (n\n) at (\x,1.25) {$\n$};}
-  \draw[->,teal,line width=1.5pt] (nd)--(n1);
-  \draw[->,teal,line width=1.5pt] (n1)--(n2);
-  \draw[->,teal,line width=1.5pt] (n2)--(n3);
-  \draw[->,navy!30] (n3) to[bend left=37] (nd);
-  \node[font=\small,align=center] at (2.18,.20) {$x_{ij}=1$ if $j$ follows $i$\\$d$ marks the start and end};
-\end{tikzpicture}
 
-\column{.60\textwidth}
-\small
+\begin{frame}{The master problem}
+\vspace{.4cm}
+Arc variables $x_{ij}\in\{0,1\}$ on jobs plus a depot $d$ marking start and end, so the
+$x$ describe a Hamiltonian path.
+\vspace{.35cm}
 \[
-\min\ \theta,\qquad
-\sum_{i\ne j}x_{ij}=1,\qquad
-\sum_{j\ne i}x_{ij}=1,
+\min\;\theta
+\qquad\text{s.t.}\qquad
+\sum_{i\ne j}x_{ij}=1\;\;(\forall j),\qquad
+\sum_{j\ne i}x_{ij}=1\;\;(\forall i),
 \]
 \[
-\sum_{i,j\in S}x_{ij}\le |S|-1\qquad(S\subseteq J).
-\]
-\vspace{.05cm}
-\theory{Starting lower bounds}
-\[
-\theta\ge|\U|,
+\sum_{i,j\in S}x_{ij}\le\lvert S\rvert-1 \quad (S\subseteq J),
 \qquad
-\theta\ge\sum_{i,j\in J}w_{ij}x_{ij}
-       +\sum_{j\in J}|T_j|x_{dj},
+\theta\;\ge\;\lvert\U\rvert .
 \]
-where $w_{ij}=\max(0,|T_i\cup T_j|-b)$.
-\end{columns}
+
+\vspace{.45cm}
+\begin{block}{Two bounds the master starts from}
+The \textbf{coverage row} $\theta\ge\lvert\U\rvert$, and a \textbf{pairwise row}
+$\theta\ \ge\ \sum_{i,j}w_{ij}x_{ij}+\sum_j\lvert T_j\rvert x_{dj}$ with
+$w_{ij}=\max\bigl(0,\lvert T_i\cup T_j\rvert-b\bigr)$.
+\end{block}
 \end{frame}
 
-% 14 ------------------------------------------------------------------------
-\begin{frame}{The loading LP is integral on a fixed path}
-\begin{columns}[T,onlytextwidth]
-\column{.61\textwidth}
-\small
+
+\begin{frame}{The subproblem: loading a fixed order}
+\vspace{.3cm}
+Fix the order $\bar x$. Let $y_{j,t}=1$ if tool $t$ is in the magazine while job $j$
+runs, and $z_{j,t}$ charge an insertion of $t$ at $j$.
+\vspace{.2cm}
+{\small
 \[
 \begin{aligned}
-\min\quad &\sum_{j,t}z_{jt}\\
-\text{s.t.}\quad
-&y_{jt}\ge1 &&(t\in T_j),\\
-&\sum_ty_{jt}\le b &&(j\in J),\\
-&z_{jt}\ge y_{jt}-y_{it}-(1-x_{ij}) &&(i\ne j),\\
-&z_{jt}\ge y_{jt}-(1-x_{dj}) &&(j\in J),\\
-&y,z\ge0.
+\min\;\; & \textstyle\sum_{j,t} z_{j,t} &&\\
+ & y_{j,t}\ \ge\ 1 && t\in T_j \quad (\nu_{jt})\\
+ & \textstyle\sum_t y_{j,t}\ \le\ b && \forall j \quad (\mu_j)\\
+ & z_{j,t}\ \ge\ y_{j,t}-y_{i,t}-(1-\bar x_{ij}) && \forall i\ne j,\ t \quad (\lambda_{ijt})\\
+ & z_{j,t}\ \ge\ y_{j,t}-(1-\bar x_{dj}) && \forall j,\ t \quad (\lambda^{d}_{jt})
 \end{aligned}
-\]
-
-\column{.35\textwidth}
-\vspace{.18cm}
-$y_{jt}$ records whether tool $t$ is loaded at job $j$.
-
-\vspace{.28cm}
-$z_{jt}$ charges an insertion when the selected path moves into $j$.
-
-\vspace{.42cm}
-\centering
-{\fontsize{20}{24}\selectfont\bfseries\color{teal}
-fixed path}\par
-{\large $\Downarrow$}\par
-{\fontsize{18}{22}\selectfont exact KTNS cost}
-\end{columns}
+\]}
+\vspace{-.15cm}
+\begin{block}{Why the oracle is exact, not a price}
+For fixed $\bar x$ the master variables sit only on the right-hand side. The remaining
+matrix has the consecutive-ones property along the selected path and is totally
+unimodular, so the relaxation is \textbf{integral} and its optimum is exactly the KTNS
+cost of that order.
+\end{block}
 \cit{Tang \& Denardo, 1988}
 \end{frame}
 
-% 15 ------------------------------------------------------------------------
-\begin{frame}{The dual cut is supported only on arcs}
-\vspace{.01cm}
+
+\begin{frame}{The Benders cut, in full}
+\vspace{.4cm}
+Only $\bar x$ appears on the right-hand side, so in the dual it appears only in the
+objective. Taking an optimal dual $(\bar\lambda,\bar\lambda^{d},\bar\mu,\bar\nu)$:
+\vspace{.3cm}
 \[
-\boxed{\quad \theta\ge \alpha+\sum_{i\ne j}\beta_{ij}x_{ij},
-\qquad \beta_{ij}=\sum_t\bar\lambda_{ijt}.\quad}
+\boxed{\;\;
+\theta\;\ge\;
+\sum_{i\ne j}\sum_{t}\bar\lambda_{ijt}\,(x_{ij}-1)
+\;+\;\sum_{j}\sum_{t}\bar\lambda^{d}_{jt}\,(x_{dj}-1)
+\;-\;b\sum_{j}\bar\mu_j
+\;+\;\sum_{j}\sum_{t\in T_j}\bar\nu_{jt}\;\;}
 \]
-\vspace{.02cm}
+
+\vspace{.5cm}
 \begin{columns}[T,onlytextwidth]
-\column{.31\textwidth}
-\theory{Valid globally}\par\vspace{.08cm}
-The dual feasible region does not depend on the proposed order.
-\column{.31\textwidth}
-\theory{Tight locally}\par\vspace{.08cm}
-An optimal dual prices the generating order exactly.
-\column{.31\textwidth}
-\exact{Arc-supported}\par\vspace{.08cm}
-Every learned coefficient sits on one predecessor arc.
+\column{.47\textwidth}
+\textbf{Valid globally.} The dual feasible region does not depend on $\bar x$, so the
+cut holds for every order.
+\column{.47\textwidth}
+\textbf{Tight locally.} At $\bar x$ it reproduces the exact loading cost. It is affine
+in $x$, so fractional separation needs no separate argument.
 \end{columns}
-\vspace{.04cm}
+\end{frame}
+
+
+\begin{frame}{One term, and 193 lost optima}
+\vspace{.5cm}
+\begin{block}{A defect found during the campaign}
+The depot sum $\sum_{j,t}\bar\lambda^{d}_{jt}(x_{dj}-1)$ was initially omitted.
+The cut then became \textbf{too tight}: it cut off genuine optima.
+\end{block}
+
+\vspace{.6cm}
+\begin{columns}[T,onlytextwidth]
+\column{.47\textwidth}
+\textbf{How it surfaced}\\[.25cm]
+{\small Randomly generated instances were solved by brute force and by the solver.
+\textbf{193} violations of the true optimum were recorded.}
+\column{.47\textwidth}
+\textbf{What was done}\\[.25cm]
+{\small The term was restored, the derivation was rewritten from the implementation,
+and the entire campaign was re-run.}
+\end{columns}
+
+\vspace{.6cm}
+\centering\small
+The first magazine is charged in full because the machine starts empty --- dropping it
+silently assumes the first job's tools are free.
+\end{frame}
+
+
+\begin{frame}{Two cut families, and what the ablation tests}
+\vspace{.4cm}
+\begin{columns}[T,onlytextwidth]
+\column{.47\textwidth}
+\textbf{\color{navy}LP dual cuts} \; (\texttt{BBC-LP})\\[.2cm]
+{\small The cut above, from an optimal dual of the loading LP at an integer master
+solution.}
+\column{.47\textwidth}
+\textbf{\color{navy}Combinatorial cuts} \; (\texttt{BBC-K})\\[.2cm]
+{\small A no-good style cut built directly from the KTNS value of the proposed order.}
+\end{columns}
+
+\vspace{.7cm}
+\begin{block}{Four strengthenings, each a standard remedy}
+\begin{itemize}\itemsep2pt
+  \item[\texttt{+F}] \textbf{fractional separation} --- cut at fractional master points, not only integer ones
+  \item[\texttt{+T}] \textbf{triplet bounds} --- a three-job strengthening of the pairwise row
+  \item[\texttt{+C}] \textbf{conflict-graph row} --- jobs that cannot share a magazine
+  \item[\texttt{+P}] \textbf{Pareto-optimal lifting} --- choose the deepest among alternative optimal duals
+  \item[\texttt{+H}] \textbf{hybrid incumbent} --- a genetic heuristic run at the root
+\end{itemize}
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Fractional separation: the remedy that should have worked}
+\vspace{.35cm}
+\begin{columns}[T,onlytextwidth]
+\column{.46\textwidth}
+\textbf{The reasoning}\\[.25cm]
+{\small When a Benders scheme tails off, the standard fix is to separate at
+\emph{fractional} points rather than waiting for integer ones. The cut is affine in
+$x$, so this is legitimate.}
+\vspace{.45cm}
+
+\textbf{It did what it should, locally}\\[.25cm]
+{\small $67.5$ million cuts generated. Median node count fell from
+$\mathbf{77{,}439}$ to $\mathbf{3{,}701}$ --- a factor of twenty.}
+
+\column{.48\textwidth}
+\begin{block}{And the bound never moved}
+Across $1{,}404$ paired runs, the dual bound at termination was
+\vspace{.15cm}
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+higher & \textbf{0}\\
+equal  & $1{,}226$\\
+lower  & $178$\\
+\end{tabular}
+\end{center}
+\vspace{.1cm}
+and $\mathbf{69}$ instances were \emph{lost}.
+\end{block}
+\vspace{.3cm}
+{\small The remedy is applied correctly, to the wrong obstacle.}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}{The other three, and the one that helped}
+\vspace{.45cm}
 \centering
-\begin{tikzpicture}[>=Stealth,scale=.90,every node/.style={transform shape}]
-  \foreach \x/\n in {0/1,2.2/2,4.4/3,6.6/4}{\node[circle,draw=navy!40,fill=warm,minimum size=.60cm,font=\small] (n\n) at (\x,0) {$\n$};}
-  \draw[->,teal,line width=1.4pt] (n1)--(n2) node[midway,above,font=\small] {$\beta_{12}$};
-  \draw[->,teal,line width=1.4pt] (n2)--(n3) node[midway,above,font=\small] {$\beta_{23}$};
-  \draw[->,teal,line width=1.4pt] (n3)--(n4) node[midway,above,font=\small] {$\beta_{34}$};
-  \draw[orange,dashed,line width=1.2pt] (n1.south) to[bend right=20] node[below,font=\small] {a tool may leave and return across the span} (n4.south);
-\end{tikzpicture}
+\begin{tabular}{@{}llr@{}}
+\toprule
+\textbf{Configuration} & \textbf{What it adds} & \textbf{Solved}\\
+\midrule
+\texttt{BBC-LP}      & ---                        & $\mathbf{724}$\\
+\texttt{BBC-LP+T}    & triplet bounds             & $723$\\
+\texttt{BBC-LP+F+H}  & hybrid incumbent           & $690$\\
+\texttt{BBC-LP+F}    & fractional separation      & $655$\\
+\texttt{BBC-LP+F+C}  & conflict-graph row         & $654$\\
+\texttt{BBC-LP+F+P}  & Pareto lifting             & $618$\\
+\bottomrule
+\end{tabular}
+
+\vspace{.6cm}
+\begin{block}{The pattern}
+Only the strengthening that improves the \textbf{incumbent} helps ($+31$ over its own
+reference). Every strengthening aimed at the \textbf{dual bound} is neutral or harmful.
+A solver whose difficulty was \emph{finding} good solutions would not behave this way.
+\end{block}
 \end{frame}
 
-\begin{frame}{Configurations as columns: PCF, PCF$'$ and PTF}
-\vspace{.06cm}
-\begin{columns}[T,onlytextwidth]
-\column{.485\textwidth}
-\theory{PCF} \quad\quiet{one configuration per position}\par\vspace{.06cm}
-{\small
-\[
-\min \sum_{t,k}w_t^{k}
-\quad\text{s.t.}\quad
-\sum_C y_C^{k}=1,\;\;
-\sum_{k\ge2}w_t^{k}+\!\!\sum_{C\ni t}y_C^{1}\ge1 .
-\]}
-\vspace{-.18cm}
-Without the counting rows the relaxation is $\mathbf{0}$; with them it is exactly
-$\mathbf{q}$.\par\vspace{.20cm}
 
-\theory{PCF$'$} \quad\quiet{prefix form}\par\vspace{.06cm}
-Removes the symmetry of empty positions. Same relaxation value.
 
-\column{.455\textwidth}
-\exact{PTF} \quad\quiet{one \emph{transition} per step}\par\vspace{.06cm}
-{\small
-\[
-\min \sum_{k}\sum_{(C,C')} d(C,C')\,z_{C,C'}^{k}
-\]}
-\vspace{-.20cm}
-A column carries a step, so the relaxation cannot avoid paying for it:
-\[\text{LP}(\mathrm{PTF})\;\ge\;q,\quad\text{and can exceed it.}\]
-\vspace{-.12cm}
-\exact{The price}\par\vspace{.06cm}
-{\small Pricing is NP-hard, and PTF prices coupled \emph{pairs}, so a node costs far
-more. Rows stay $O(n\lvert T\rvert)$ and fixed.}
-\end{columns}
-\end{frame}
+
+
+
+
+
+
+
 
 \section{Experimental Results}
 
@@ -853,10 +785,113 @@ bibliography is in the report.}
 \end{frame}
 
 
+\begin{frame}{Backup --- Branch-and-price: why reformulate at all}
+\vspace{.45cm}
+\begin{block}{The obstacle}
+Every compact model surveyed relaxes to the counting bound $q=\lvert\U\rvert-b$ or
+below. A branch-and-cut built on any of them is fast where $q$ is exact and adrift
+where it is not.
+\end{block}
+
+\vspace{.5cm}
+Reformulating over \textbf{magazine configurations} attacks this from the other side.
+A configuration is a set $C\subseteq\U$ with $\lvert C\rvert=b$; these become the
+columns, generated on demand. Three formulations were built.
+
+\vspace{.5cm}
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+& \textbf{Column} & \textbf{Linear relaxation}\\
+\midrule
+PCF        & configuration at a position & $=q$ with the counting rows, $0$ without\\
+PCF$'$     & prefix form of PCF          & $=q$, symmetry removed\\
+PTF        & \emph{transition} between two & $\ \ge q$, and can exceed it\\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+
+\begin{frame}{Backup --- PCF: configurations at positions}
+\vspace{.3cm}
+$y_C^{k}=1$ if configuration $C$ occupies position $k$; $w_t^{k}\ge0$ counts an
+insertion of $t$ at position $k$.
+\vspace{.25cm}
+{\small
+\[
+\begin{aligned}
+\min\;\; & \textstyle\sum_{t,k}w_t^{k} &&\\
+\text{(P)}\;\; & \textstyle\sum_C y_C^{k}=1, & k&=1,\dots,n\\
+\text{(Cov)}\; & \textstyle\sum_k\sum_{C\supseteq T_j}y_C^{k}\ \ge\ 1, & j&\in J\\
+\text{(W)}\;\; & w_t^{k}\ \ge\ \textstyle\sum_{C\ni t}\bigl(y_C^{k}-y_C^{k-1}\bigr), & t&\in T,\ k\ge2\\
+\text{(T)}\;\; & \textstyle\sum_{k\ge2}w_t^{k}+\sum_{C\ni t}y_C^{1}\ \ge\ 1, & t&\in\U
+\end{aligned}
+\]}
+\vspace{-.1cm}
+\begin{block}{The counting rows are load-bearing}
+Without (T) the relaxation is \textbf{zero} --- one convex blend of configurations,
+repeated at every position, satisfies (P), (Cov) and (W) at no cost. With (T) it is
+exactly $q$. \emph{Proved, and confirmed on all $2{,}108$ recorded roots.}
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Backup --- PTF: transitions as columns}
+\vspace{.3cm}
+$z_{C,C'}^{k}\ge0$ is a column for the step from position $k$ to $k+1$ leaving $C$ and
+entering $C'$, at cost $d(C,C')=\lvert C'\setminus C\rvert$.
+\vspace{.2cm}
+{\small
+\[
+\begin{aligned}
+\min\;\; & \textstyle\sum_{k}\sum_{(C,C')}d(C,C')\,z_{C,C'}^{k} &&\\
+\text{(S)}\;\; & \textstyle\sum_{(C,C')}z_{C,C'}^{k}=1, & k&=1,\dots,n-1\\
+\text{(F)}\;\; & \textstyle\sum_{(C,C'):t\in C'}z^{k}_{C,C'}=\sum_{(D,D'):t\in D}z^{k+1}_{D,D'}, & t&\in T\\
+\text{(Cov)}\; & \text{every job served at the head or tail of some step} &&\\
+\text{(T)}\;\; & \textstyle\sum_{k}\sum_{(C,C'):t\notin C,\,t\in C'}z^{k}_{C,C'}+\sum_{(C,C'):t\in C}z^{1}_{C,C'}\ \ge\ 1, & t&\in\U
+\end{aligned}
+\]}
+\vspace{-.1cm}
+\begin{block}{Why this one can beat the counting bound}
+A column \emph{carries a step}, so the relaxation cannot mix configurations without
+paying the transition. Hence $\mathrm{LP}(\mathrm{PTF})\ge q$, and it can be strictly
+greater --- the only construction in this work that provably exceeds $q$.
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Backup --- pricing, and what the prototypes measured}
+\vspace{.4cm}
+\begin{columns}[T,onlytextwidth]
+\column{.46\textwidth}
+\textbf{The pricing problem}\\[.25cm]
+{\small Choosing the entering configuration is \textbf{NP-hard}: pick $b$ tools to
+collect per-tool duals plus a bonus for each job fully covered. PTF prices
+\emph{coupled pairs}, so a node costs far more again.}
+\vspace{.4cm}
+
+\textbf{Rows stay small}\\[.25cm]
+{\small $O(n\lvert T\rvert)$ and fixed; only the columns are generated.}
+
+\column{.48\textwidth}
+\begin{block}{What was measured}
+\begin{itemize}\itemsep2pt\small
+  \item PCF$'$ root $=q$ on \textbf{all $2{,}108$} recorded runs --- the proposition
+  confirmed on the benchmark.
+  \item PTF exceeds $q$ on \textbf{2 of 232} roots, rising from $5$ to $6$ where the
+  optima are $12$ and $13$.
+  \item Nothing above nine jobs was closed: a Python pricer against compiled solvers.
+\end{itemize}
+\end{block}
+\vspace{.25cm}
+{\small Sound, and as it stands too rare and too small to close the certificate gap.}
+\end{columns}
+\end{frame}
+
 % 21 ------------------------------------------------------------------------
 \begin{frame}{Backup: certified optima by method and family}
 \centering
-\fontsize{8.3}{10.2}\selectfont
+\scriptsize
 \setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{@{}lrrrrrrr@{}}
 \toprule
@@ -900,7 +935,7 @@ Against BBC--LP+F: $+H$ certifies $31$ more; $+C$ certifies $1$ fewer; $+P$ cert
 \theory{Connected-family proof}
 \vspace{.18cm}
 
-\begin{tabular}{@{}>{\bfseries\color{teal}}l >{\raggedright\arraybackslash}p{4.35cm}@{}}
+\begin{tabular}{@{}>{\bfseries\color{navy}}l >{\raggedright\arraybackslash}p{4.35cm}@{}}
 $\Kst=3g$ & unique feasible pair in each copy\\[6pt]
 $\Zst=8g-5$ & coverage bound plus a schedule with no return\\[6pt]
 $H=9g-5$ & one forced return per copy plus a matching order\\[6pt]
