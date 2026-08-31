@@ -127,33 +127,7 @@ between a good order and a bad one, and where the bound that every exact method 
 from sits relative to both.
 
 \begin{figure}[ht]\centering
-\begin{tikzpicture}
-\begin{axis}[reportaxis, height=5.9cm,
-  ybar, bar width=8.5pt,
-  xlabel={tool switches required by an ordering},
-  ylabel={number of orderings},
-  xmin=8.6, xmax=25, ymin=0, ymax=10600,
-  xtick={10,13,14,16,18,20,22,24},
-  ytick={0,2000,4000,6000,8000},
-  scaled y ticks=false,
-  yticklabel style={/pgf/number format/fixed,
-                    /pgf/number format/1000 sep={,}},
-  clip=false]
-  \addplot[draw=black!65, fill=black!22] table[x=cost,y=count] {figdata/landscape.dat};
-  % the coverage bound: below everything achievable
-  \draw[black, line width=1pt, dashed] (axis cs:10,0) -- (axis cs:10,9700);
-  \node[anchor=west, font=\scriptsize, align=left] at (axis cs:10.25,9100)
-    {\textbf{coverage bound $q=10$}\\[-1pt] what every compact\\[-1pt] relaxation returns};
-  % the optimum
-  \draw[black, line width=1pt] (axis cs:13,0) -- (axis cs:13,6100);
-  \node[anchor=north east, font=\scriptsize, align=right] at (axis cs:12.7,6100)
-    {\textbf{optimum $\Zst=13$}\\[-1pt] reached by $180$\\[-1pt] of the $40{,}320$};
-  % the median ordering
-  \draw[black!55, line width=0.8pt, densely dotted] (axis cs:18,0) -- (axis cs:18,9700);
-  \node[anchor=west, font=\scriptsize, text=black!60, align=left] at (axis cs:18.3,9250)
-    {median ordering: $18$};
-\end{axis}
-\end{tikzpicture}
+\includegraphics[width=\linewidth]{assets/report_figures/landscape.pdf}
 \caption{Every one of the $40{,}320$ orderings of instance \texttt{L1-1}
 ($n=8$ jobs, $\lvert\U\rvert=15$ tools, magazine $b=5$), enumerated, and the tool
 switches each requires. Three things are visible at once. A randomly chosen ordering

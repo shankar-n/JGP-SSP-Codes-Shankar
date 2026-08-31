@@ -1,0 +1,13 @@
+Report figure provenance
+========================
+
+Drawn from report/figdata/*.dat, which report/make_figure_data.py
+regenerates from src/BBC/results/*.csv and the instance files.
+No value is computed here; this script only draws.
+Authority for every number: verification/analyse_campaign_results.py --check
+
+- cactus.pdf
+- tightsplit.pdf
+- rootgap.pdf
+- ceilings.pdf
+- landscape.pdf

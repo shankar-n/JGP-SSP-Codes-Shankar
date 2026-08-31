@@ -324,23 +324,7 @@ benchmark. Every non-optimal outcome remains unsolved. The two groups have diffe
 \end{table}
 
 \begin{figure}[h]\centering
-\begin{tikzpicture}
-\begin{semilogxaxis}[reportaxis, width=0.95\linewidth, height=6.6cm,
-  xlabel={wall-clock time (seconds, log scale)}, ylabel={instances closed},
-  xmin=0.05, xmax=3600, ymin=0, ymax=1120,
-  xtick={0.1,1,10,60,300,3600},
-  xticklabels={$0.1$,$1$,$10$,$60$,$300$,$3600$},
-  ytick={0,200,400,600,800,1000},
-  yticklabel style={/pgf/number format/fixed,/pgf/number format/1000 sep={,}},
-  legend pos=south east, legend columns=2, transpose legend]
-  \addplot[black,    no marks]                  table[x=t,y=SSPMF]   {figdata/cactus.dat}; \addlegendentry{SSPMF}
-  \addplot[black,    no marks, dashed]          table[x=t,y=CATZF4]  {figdata/cactus.dat}; \addlegendentry{\texttt{CATZ-F4}}
-  \addplot[black,    no marks, dotted]          table[x=t,y=LSS]     {figdata/cactus.dat}; \addlegendentry{LSS}
-  \addplot[black!55, no marks]                  table[x=t,y=BBCLP]   {figdata/cactus.dat}; \addlegendentry{\texttt{BBC-LP}}
-  \addplot[black!55, no marks, dashed]          table[x=t,y=BBCK]    {figdata/cactus.dat}; \addlegendentry{\texttt{BBC-K}}
-  \addplot[black!55, no marks, dotted]          table[x=t,y=BBCLPpF] {figdata/cactus.dat}; \addlegendentry{\texttt{BBC-LP+F}}
-\end{semilogxaxis}
-\end{tikzpicture}
+\includegraphics[width=\linewidth]{assets/report_figures/cactus.pdf}
 \caption{Every solved run in the campaign, not the six sampled columns of
 Table~\ref{tab:cumulative}: for each method, the number of instances closed by each
 wall-clock time. What separates the two groups is not where they end but how they get
@@ -539,27 +523,7 @@ the other way.}
 \end{table}
 
 \begin{figure}[h]\centering
-\begin{tikzpicture}
-\begin{axis}[reportaxis, height=6.2cm,
-  xlabel={how loose the coverage bound is on the instance \ (\,$\Zst-q$\,)},
-  ylabel={instances closed (\%)},
-  xmin=-0.6, xmax=8.6, ymin=0, ymax=112,
-  xtick={0,1,2,3,4,5,6,7,8},
-  xticklabels={$0$,$1$,$2$,$3$,$4$,$5$--$6$,$7$--$9$,$10$--$14$,$15+$},
-  ytick={0,20,40,60,80,100},
-  legend style={at={(0.985,0.06)}, anchor=south east, font=\scriptsize}]
-  \addplot[black, mark=*, mark size=1.9]
-    coordinates {(0,100.0)(1,100.0)(2,100.0)(3,100.0)(4,100.0)(5,96.6)(6,84.3)(7,63.9)(8,8.9)};
-  \addlegendentry{SSPMF (compact)}
-  \addplot[black, mark=square, mark size=1.7, densely dotted]
-    coordinates {(0,71.0)(1,76.4)(2,93.2)(3,87.1)(4,90.2)(5,75.0)(6,86.7)(7,96.7)(8,100.0)};
-  \addlegendentry{\texttt{CATZ-F4} (compact)}
-  \addplot[black!55, mark=o, mark size=1.9, dashed]
-    coordinates {(0,94.2)(1,31.1)(2,38.4)(3,42.9)(4,60.7)(5,34.1)(6,47.0)(7,54.1)(8,8.9)};
-  \addlegendentry{\texttt{BBC-LP} (this report)}
-  \node[font=\scriptsize, text=black!55, anchor=west] at (axis cs:0.15,104) {$520$ instances};
-\end{axis}
-\end{tikzpicture}
+\includegraphics[width=\linewidth]{assets/report_figures/tightsplit.pdf}
 \caption{The $1{,}107$ instances of known optimum, grouped by how far the optimum
 exceeds the coverage bound, against the share each method closes. Every bucket uses its
 full class size, with every non-optimal outcome counted as not closed. This is

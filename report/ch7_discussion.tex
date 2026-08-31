@@ -120,22 +120,7 @@ here.
 \end{observation}
 
 \begin{figure}[h]\centering
-\begin{tikzpicture}
-\begin{axis}[reportaxis, height=5.6cm,
-  ybar, bar width=20pt, enlarge x limits=0.09,
-  xlabel={how far the root relaxation rises above the coverage row},
-  ylabel={Benders runs},
-  symbolic x coords={z,a,b,c,d,e,f,g}, xtick=data,
-  xticklabels={{$0$},{$(0,1]$},{$(1,2]$},{$(2,4]$},{$(4,8]$},{$(8,16]$},{$(16,32]$},{$>32$}},
-  ymin=0, ymax=10600, ytick={0,2000,4000,6000,8000,10000},
-  scaled y ticks=false,
-  yticklabel style={/pgf/number format/fixed,/pgf/number format/1000 sep={,}},
-  nodes near coords, nodes near coords style={font=\scriptsize,
-     /pgf/number format/fixed, /pgf/number format/1000 sep={,}}]
-  \addplot[draw=black!70, fill=black!25]
-    coordinates {(z,9067)(a,177)(b,210)(c,258)(d,314)(e,211)(f,104)(g,51)};
-\end{axis}
-\end{tikzpicture}
+\includegraphics[width=\linewidth]{assets/report_figures/rootgap.pdf}
 \caption{Observation~\ref{obs:rootq} drawn over all $10{,}392$ canonical Benders runs that
 recorded a root relaxation. The first bar is every run whose root value is
 \emph{exactly} the coverage row --- $9{,}067$ of them, nearly seven times the whole
@@ -230,27 +215,7 @@ root; plain \texttt{BBC-LP} does so on three.}
 \end{table}
 
 \begin{figure}[h]\centering
-\begin{tikzpicture}
-\begin{axis}[reportaxis, height=6.0cm,
-  xlabel={the $62$ loose sample cases, each family sorted on its own value},
-  ylabel={share of the gap certified},
-  xmin=0, xmax=63, ymin=-4, ymax=76,
-  xtick={1,10,19,30,40,47,62},
-  ytick={0,20,40,60}, yticklabel={\pgfmathprintnumber{\tick}\%},
-  legend pos=north west]
-  \addplot[black, no marks, line width=1.1pt] table[x=i,y=win] {figdata/ceilings.dat};
-  \addlegendentry{window family --- inequality~(\ref{eq:window})}
-  \addplot[black!50, no marks, dashed, line width=1.1pt] table[x=i,y=pair] {figdata/ceilings.dat};
-  \addlegendentry{fixed pairwise row $+$ coverage}
-  \draw[black!25, line width=0.5pt] (axis cs:0,0) -- (axis cs:63,0);
-  \draw[black!45, densely dotted] (axis cs:19,-4) -- (axis cs:19,46);
-  \draw[black!45, densely dotted] (axis cs:47,-4) -- (axis cs:47,64);
-  \node[font=\scriptsize, text=black!60, anchor=south east] at (axis cs:18.5,20)
-    {window: nothing on $18$};
-  \node[font=\scriptsize, text=black!60, anchor=south east] at (axis cs:46.5,4)
-    {pairwise: nothing on $46$};
-\end{axis}
-\end{tikzpicture}
+\includegraphics[width=\linewidth]{assets/report_figures/ceilings.pdf}
 \caption{The integral-sequence value of each construction on each of the $62$ loose
 sample cases, each sorted independently, so the curves answer \emph{how often does this
 construction certify anything, and how much}. Each is the fraction of that instance's
