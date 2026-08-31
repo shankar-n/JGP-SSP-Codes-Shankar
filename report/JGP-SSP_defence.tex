@@ -14,14 +14,14 @@
 % Accent palette used by the diagrams and by the generated figures.
 % navy is aliased to the theme's structure colour so the two agree.
 \definecolor{navy}{HTML}{353E7C}
-\definecolor{orange}{HTML}{C25A1E}
+\definecolor{orange}{HTML}{353E7C}
 \definecolor{blue}{HTML}{2A4E9B}
 \definecolor{muted}{HTML}{444B57}
 \definecolor{srcgray}{HTML}{7A8290}
 \definecolor{linegray}{HTML}{C8CEDA}
 \definecolor{warm}{HTML}{F2F3F7}
 \definecolor{paleteal}{HTML}{E6E9F4}
-\definecolor{paleorange}{HTML}{F8EBE0}
+\definecolor{paleorange}{HTML}{E6E9F4}
 
 \setbeamercolor{structure}{fg=navy}
 \setbeamercolor{block title}{bg=navy,fg=white}
@@ -37,7 +37,7 @@
 \newcommand{\Hwalk}{H_{\mathrm{walk}}}
 \newcommand{\U}{U}
 \newcommand{\theory}[1]{{\color{navy}\bfseries #1}}
-\newcommand{\exact}[1]{{\color{orange}\bfseries #1}}
+\newcommand{\exact}[1]{{\color{navy}\bfseries #1}}
 \newcommand{\quiet}[1]{{\color{muted}#1}}
 \newcommand{\source}[1]{\vfill\hfill{\fontsize{7.6}{9}\selectfont\color{srcgray}#1}}
 % inline citation, centred under the content it supports
@@ -75,7 +75,7 @@
 \section{Problem Definition and Context}
 
 % 2 -------------------------------------------------------------------------
-\begin{frame}{The order decides which tools return}
+\begin{frame}{Why the order matters}
 \centering
 {\large Magazine capacity $b=2$; the machine starts empty.}
 \vspace{.32cm}
@@ -107,7 +107,7 @@
 \end{frame}
 
 % 3 -------------------------------------------------------------------------
-\begin{frame}{Loading is easy; the order is the hard part}
+\begin{frame}{Loading for a fixed order, and the hardness of ordering}
 \begin{columns}[T,onlytextwidth]
 \column{.44\textwidth}
 \theory{Fixed order}
@@ -147,8 +147,8 @@ When a tool must leave, remove the loaded tool whose next use is furthest away.
 \cit{Tang \& Denardo, 1988; Crama et al., 1994}
 \end{frame}
 
-\begin{frame}{Every stop costs production time}
-\centering
+\begin{frame}{Where the problem arises}
+\begingroup\centering
 \begin{tikzpicture}[x=1cm,y=1cm,
   card/.style={draw=navy!30,fill=warm,rounded corners=2pt,minimum width=2.75cm,
                minimum height=1.55cm,align=center,font=\small}]
@@ -156,7 +156,7 @@ When a tool must leave, remove the loaded tool whose next use is furthest away.
   \node[card] at (3.05,0) {\textbf{PCB assembly}\\[2pt]\quiet{feeder slots}};
   \node[card] at (6.10,0) {\textbf{Colour printing}\\[2pt]\quiet{ink cartridges}};
   \node[card] at (9.15,0) {\textbf{Order picking}\\[2pt]\quiet{what a picker carries}};
-\end{tikzpicture}
+\end{tikzpicture}\par\endgroup
 
 \vspace{.55cm}
 \begin{columns}[T,onlytextwidth]
@@ -173,7 +173,7 @@ sequence is chosen once and paid for every shift.
 \end{frame}
 
 % 4 -------------------------------------------------------------------------
-\begin{frame}{Two gaps the literature leaves open}
+\begin{frame}{State of the art}
 \begin{tikzpicture}[x=1cm,y=1cm,>=Stealth]
   \node[font=\large\bfseries,navy,anchor=east] at (2.15,1.55) {Grouping};
   \draw[->,navy,line width=1.2pt] (2.45,1.55)--(11.75,1.55);
@@ -198,7 +198,7 @@ the \theory{instance}, and a relaxation that gets \exact{past the counting bound
 \cit{Crama \& van de Klundert, 1999; Catanzaro et al., 2015; da Silva et al., 2021}
 \end{frame}
 
-\begin{frame}{Two questions, and how the talk is organised}
+\begin{frame}{What is open, and what this work attacks}
 \vspace{.15cm}
 \begin{columns}[T,onlytextwidth]
 \column{.47\textwidth}
@@ -225,8 +225,8 @@ reformulation over configurations -- get past it?
 \exact{Part II} answers the second, and the answer is no --- for a reason worth naming.
 \end{frame}
 
-\begin{frame}{The configuration view, and where $q$ comes from}
-\centering
+\begin{frame}{Configurations and the coverage bound}
+\begingroup\centering
 \begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
   cfg/.style={draw=navy!40,fill=warm,rounded corners=2pt,minimum width=1.85cm,
               minimum height=.90cm,font=\small\bfseries}]
@@ -238,7 +238,7 @@ reformulation over configurations -- get past it?
     \draw[->,navy,line width=1.3pt] (\i)--(\j) node[midway,above,font=\small,navy] {\l};}
   \node[font=\scriptsize,align=center,below=.30cm of c1] {jobs served\\here};
   \node[font=\scriptsize,align=center,below=.30cm of c4] {jobs served\\here};
-\end{tikzpicture}
+\end{tikzpicture}\par\endgroup
 
 \vspace{.42cm}
 \begin{columns}[T,onlytextwidth]
@@ -261,9 +261,9 @@ This single quantity governs \theory{both} halves of the talk.
 
 \section{Structural Results}
 
-\begin{frame}{The two-phase method, and the one place the loss enters}
+\begin{frame}{The two-phase heuristic}
 \vspace{.3cm}
-\centering
+\begingroup\centering
 \begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
   st/.style={draw=navy!40,fill=warm,rounded corners=2pt,minimum width=2.5cm,
              minimum height=1.0cm,align=center,font=\small}]
@@ -273,14 +273,15 @@ This single quantity governs \theory{both} halves of the talk.
   \draw[->,navy,line width=1pt] (a)--(b);
   \draw[->,navy,line width=1pt] (b)--(c);
   \node[font=\scriptsize,navy,align=center,below=.25cm of a] {the commitment\\happens here};
-\end{tikzpicture}
+\end{tikzpicture}\par\endgroup
 
 \vspace{.7cm}
-\begin{block}{Where the loss comes from}
+\textbf{Where the loss comes from.}
 Allowing \emph{all} feasible groupings makes the construction \textbf{exact}: the optimum
 equals the cheapest walk over every grouping. So the loss is not a defect of the method
 --- it is the price of insisting on the \textbf{fewest} groups.
-\end{block}
+
+
 
 \vspace{.35cm}
 \centering\small
@@ -290,11 +291,11 @@ value after KTNS re-optimises. \textbf{They differ.}
 \end{frame}
 
 
-\begin{frame}{The main structural result: the loss is unbounded}
+\begin{frame}{The gap is unbounded on connected instances}
 \vspace{.05cm}
 \begin{columns}[T,onlytextwidth]
 \column{.40\textwidth}
-\centering
+\begingroup\centering
 \begin{tikzpicture}[x=1cm,y=1cm,scale=.92,every node/.style={transform shape},
  job/.style={draw=navy!35,fill=warm,minimum width=1.05cm,minimum height=.56cm,font=\small\bfseries},
  big/.style={job,fill=paleorange,draw=orange!70}]
@@ -308,7 +309,7 @@ value after KTNS re-optimises. \textbf{They differ.}
     \foreach \n in {a,b,c,d}{\draw[navy!22] (u)--(\n);\draw[navy!22] (v)--(\n);}
   \end{scope}
   \node[font=\scriptsize,navy,align=center] at (0,2.35) {$u$ in every job,\\every copy};
-\end{tikzpicture}
+\end{tikzpicture}\par\endgroup
 
 \column{.56\textwidth}
 \vspace{.1cm}
@@ -333,11 +334,11 @@ The \textbf{ratio} tends to $9/8$: the additive loss grows, the factor does not.
 \end{frame}
 
 
-\begin{frame}{Structural results at a glance}
+\begin{frame}{Summary of structural results}
 \vspace{.15cm}
 \centering
 \small
-\begin{tabular}{@{}p{6.9cm}l@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{8.2cm}l@{}}
 \toprule
 \textbf{Result} & \textbf{Status}\\
 \midrule
@@ -372,8 +373,8 @@ Constant-factor bound at $b=3$ & open\\
 
 \section{Exact Methods}
 
-\begin{frame}{Two routes past the counting bound}
-\centering
+\begin{frame}{Two ways past the coverage bound}
+\begingroup\centering
 \begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
   box/.style={draw=navy!35,rounded corners=2pt,minimum width=4.5cm,
               minimum height=1.42cm,align=center,font=\small}]
@@ -385,7 +386,7 @@ Constant-factor bound at $b=3$ & open\\
      {\textbf{Route 2: reformulate}\\ optimise over configurations};
   \draw[->,navy,line width=1.3pt]   (p.south) -- ++(0,-.28) -| (a.north);
   \draw[->,orange,line width=1.3pt] (p.south) -- ++(0,-.28) -| (b.north);
-\end{tikzpicture}
+\end{tikzpicture}\par\endgroup
 
 \vspace{.24cm}
 \begin{columns}[T,onlytextwidth]
@@ -401,9 +402,9 @@ relaxation can provably exceed $q$.
 \cit{da Silva et al., 2021; Rahmaniani et al., 2017}
 \end{frame}
 
-\begin{frame}{Branch-and-Benders-cut: the idea}
+\begin{frame}{A branch-and-Benders-cut algorithm}
 \vspace{.35cm}
-\centering
+\begingroup\centering
 \begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
  blk/.style={draw=navy!40,rounded corners=2pt,minimum width=3.6cm,minimum height=1.35cm,
              align=center,font=\small}]
@@ -411,14 +412,15 @@ relaxation can provably exceed $q$.
   \node[blk,fill=paleorange,draw=orange!70] (s) at (6.4,0) {\textbf{Subproblem} \; (easy)\\load the tools for that\\order, \emph{exactly}};
   \draw[->,navy,line width=1.1pt] (m.north east) to[bend left=18] node[above,font=\scriptsize] {an order $\bar x$} (s.north west);
   \draw[->,orange,line width=1.1pt] (s.south west) to[bend left=18] node[below,font=\scriptsize,align=center] {a cut: $\theta\ge$ true cost} (m.south east);
-\end{tikzpicture}
+\end{tikzpicture}\par\endgroup
 
 \vspace{.75cm}
-\begin{block}{Why this problem invites Benders}
+\textbf{Why this problem invites Benders.}
 For a \textbf{fixed} order the loading is solvable in polynomial time. So the subproblem
 is not relaxed --- it is solved exactly, and the master's bound is built from true
 subproblem values rather than from a weak relaxation of the loading.
-\end{block}
+
+
 \cit{Hooker \& Ottosson, 2003; Codato \& Fischetti, 2006; Rahmaniani et al., 2017}
 \end{frame}
 
@@ -441,15 +443,16 @@ $x$ describe a Hamiltonian path.
 \]
 
 \vspace{.45cm}
-\begin{block}{Two bounds the master starts from}
+\textbf{Two bounds the master starts from.}
 The \textbf{coverage row} $\theta\ge\lvert\U\rvert$, and a \textbf{pairwise row}
 $\theta\ \ge\ \sum_{i,j}w_{ij}x_{ij}+\sum_j\lvert T_j\rvert x_{dj}$ with
 $w_{ij}=\max\bigl(0,\lvert T_i\cup T_j\rvert-b\bigr)$.
-\end{block}
+
+
 \end{frame}
 
 
-\begin{frame}{The subproblem: loading a fixed order}
+\begin{frame}{The subproblem: loading for a fixed order}
 \vspace{.3cm}
 Fix the order $\bar x$. Let $y_{j,t}=1$ if tool $t$ is in the magazine while job $j$
 runs, and $z_{j,t}$ charge an insertion of $t$ at $j$.
@@ -465,7 +468,7 @@ runs, and $z_{j,t}$ charge an insertion of $t$ at $j$.
 \end{aligned}
 \]}
 \vspace{-.15cm}
-\begin{block}{Why the oracle is exact, not a price}
+\begin{block}{Exactness of the loading oracle}
 For fixed $\bar x$ the master variables sit only on the right-hand side. The remaining
 matrix has the consecutive-ones property along the selected path and is totally
 unimodular, so the relaxation is \textbf{integral} and its optimum is exactly the KTNS
@@ -475,7 +478,7 @@ cost of that order.
 \end{frame}
 
 
-\begin{frame}{The Benders cut, in full}
+\begin{frame}{The Benders optimality cut}
 \vspace{.4cm}
 Only $\bar x$ appears on the right-hand side, so in the dual it appears only in the
 objective. Taking an optimal dual $(\bar\lambda,\bar\lambda^{d},\bar\mu,\bar\nu)$:
@@ -501,12 +504,13 @@ in $x$, so fractional separation needs no separate argument.
 \end{frame}
 
 
-\begin{frame}{One term, and 193 lost optima}
+\begin{frame}{A defect found and corrected}
 \vspace{.5cm}
-\begin{block}{A defect found during the campaign}
+\textbf{A defect found during the campaign.}
 The depot sum $\sum_{j,t}\bar\lambda^{d}_{jt}(x_{dj}-1)$ was initially omitted.
 The cut then became \textbf{too tight}: it cut off genuine optima.
-\end{block}
+
+
 
 \vspace{.6cm}
 \begin{columns}[T,onlytextwidth]
@@ -527,7 +531,7 @@ silently assumes the first job's tools are free.
 \end{frame}
 
 
-\begin{frame}{Two cut families, and what the ablation tests}
+\begin{frame}{Cut families and strengthenings}
 \vspace{.4cm}
 \begin{columns}[T,onlytextwidth]
 \column{.47\textwidth}
@@ -540,7 +544,7 @@ solution.}
 \end{columns}
 
 \vspace{.7cm}
-\begin{block}{Four strengthenings, each a standard remedy}
+\textbf{Four strengthenings, each a standard remedy.}
 \begin{itemize}\itemsep2pt
   \item[\texttt{+F}] \textbf{fractional separation} --- cut at fractional master points, not only integer ones
   \item[\texttt{+T}] \textbf{triplet bounds} --- a three-job strengthening of the pairwise row
@@ -548,11 +552,12 @@ solution.}
   \item[\texttt{+P}] \textbf{Pareto-optimal lifting} --- choose the deepest among alternative optimal duals
   \item[\texttt{+H}] \textbf{hybrid incumbent} --- a genetic heuristic run at the root
 \end{itemize}
-\end{block}
+
+
 \end{frame}
 
 
-\begin{frame}{Fractional separation: the remedy that should have worked}
+\begin{frame}{Fractional separation}
 \vspace{.35cm}
 \begin{columns}[T,onlytextwidth]
 \column{.46\textwidth}
@@ -567,7 +572,7 @@ $x$, so this is legitimate.}
 $\mathbf{77{,}439}$ to $\mathbf{3{,}701}$ --- a factor of twenty.}
 
 \column{.48\textwidth}
-\begin{block}{And the bound never moved}
+\textbf{And the bound never moved.}
 Across $1{,}404$ paired runs, the dual bound at termination was
 \vspace{.15cm}
 \begin{center}
@@ -579,16 +584,17 @@ lower  & $178$\\
 \end{center}
 \vspace{.1cm}
 and $\mathbf{69}$ instances were \emph{lost}.
-\end{block}
+
+
 \vspace{.3cm}
 {\small The remedy is applied correctly, to the wrong obstacle.}
 \end{columns}
 \end{frame}
 
 
-\begin{frame}{The other three, and the one that helped}
+\begin{frame}{The ablation}
 \vspace{.45cm}
-\centering
+\begingroup\centering
 \begin{tabular}{@{}llr@{}}
 \toprule
 \textbf{Configuration} & \textbf{What it adds} & \textbf{Solved}\\
@@ -600,14 +606,15 @@ and $\mathbf{69}$ instances were \emph{lost}.
 \texttt{BBC-LP+F+C}  & conflict-graph row         & $654$\\
 \texttt{BBC-LP+F+P}  & Pareto lifting             & $618$\\
 \bottomrule
-\end{tabular}
+\end{tabular}\par\endgroup
 
 \vspace{.6cm}
-\begin{block}{The pattern}
+\textbf{The pattern.}
 Only the strengthening that improves the \textbf{incumbent} helps ($+31$ over its own
 reference). Every strengthening aimed at the \textbf{dual bound} is neutral or harmful.
 A solver whose difficulty was \emph{finding} good solutions would not behave this way.
-\end{block}
+
+
 \end{frame}
 
 
@@ -623,7 +630,7 @@ A solver whose difficulty was \emph{finding} good solutions would not behave thi
 \section{Experimental Results}
 
 % 16 ------------------------------------------------------------------------
-\begin{frame}{The campaign tests 12 solver configurations}
+\begin{frame}{Experimental design}
 \begin{columns}[T,onlytextwidth]
 \column{.36\textwidth}
 \theory{Compact baselines}
@@ -660,7 +667,7 @@ BBC--LP+F+C & BBC--LP+F+P & BBC--LP+ACC
 \end{frame}
 
 % 17 ------------------------------------------------------------------------
-\begin{frame}{Every compact baseline certifies more than Benders}
+\begin{frame}{How far each method gets}
 \centering
 \includegraphics[width=.94\textwidth,height=5.85cm,keepaspectratio]{assets/defence_figures/solve_counts_all.pdf}
 
@@ -669,7 +676,7 @@ BBC--LP+F+C & BBC--LP+F+P & BBC--LP+ACC
 \end{frame}
 
 % 18 ------------------------------------------------------------------------
-\begin{frame}{Benders is quick, with a long tail}
+\begin{frame}{Solving times}
 \centering
 \includegraphics[width=.94\textwidth,height=5.86cm,keepaspectratio]{assets/defence_figures/common_solved_time_boxplot.pdf}
 
@@ -678,7 +685,7 @@ BBC--LP+F+C & BBC--LP+F+P & BBC--LP+ACC
 \end{frame}
 
 % 19 ------------------------------------------------------------------------
-\begin{frame}{Closure drops when the bound misses the optimum}
+\begin{frame}{The coverage bound and what each method closes}
 \begin{columns}[T,onlytextwidth]
 \column{.53\textwidth}
 \centering
@@ -700,7 +707,7 @@ $223/383$ & time-limited, known-optimum BBC--LP incumbents already equal the opt
 \section{Conclusion}
 
 % 20 ------------------------------------------------------------------------
-\begin{frame}{Next: pricing tool residency across a span}
+\begin{frame}{Conclusions and further work}
 \begin{columns}[T,onlytextwidth]
 \column{.47\textwidth}
 \theory{What the theory isolates}
@@ -785,13 +792,14 @@ bibliography is in the report.}
 \end{frame}
 
 
-\begin{frame}{Backup --- Branch-and-price: why reformulate at all}
+\begin{frame}{Backup: position-indexed formulations}
 \vspace{.45cm}
-\begin{block}{The obstacle}
+\textbf{The obstacle.}
 Every compact model surveyed relaxes to the counting bound $q=\lvert\U\rvert-b$ or
 below. A branch-and-cut built on any of them is fast where $q$ is exact and adrift
 where it is not.
-\end{block}
+
+
 
 \vspace{.5cm}
 Reformulating over \textbf{magazine configurations} attacks this from the other side.
@@ -812,7 +820,7 @@ PTF        & \emph{transition} between two & $\ \ge q$, and can exceed it\\
 \end{frame}
 
 
-\begin{frame}{Backup --- PCF: configurations at positions}
+\begin{frame}{Backup: the position--configuration formulation}
 \vspace{.3cm}
 $y_C^{k}=1$ if configuration $C$ occupies position $k$; $w_t^{k}\ge0$ counts an
 insertion of $t$ at position $k$.
@@ -828,7 +836,7 @@ insertion of $t$ at position $k$.
 \end{aligned}
 \]}
 \vspace{-.1cm}
-\begin{block}{The counting rows are load-bearing}
+\begin{block}{Proposition}
 Without (T) the relaxation is \textbf{zero} --- one convex blend of configurations,
 repeated at every position, satisfies (P), (Cov) and (W) at no cost. With (T) it is
 exactly $q$. \emph{Proved, and confirmed on all $2{,}108$ recorded roots.}
@@ -836,7 +844,7 @@ exactly $q$. \emph{Proved, and confirmed on all $2{,}108$ recorded roots.}
 \end{frame}
 
 
-\begin{frame}{Backup --- PTF: transitions as columns}
+\begin{frame}{Backup: the position--transition formulation}
 \vspace{.3cm}
 $z_{C,C'}^{k}\ge0$ is a column for the step from position $k$ to $k+1$ leaving $C$ and
 entering $C'$, at cost $d(C,C')=\lvert C'\setminus C\rvert$.
@@ -852,7 +860,7 @@ entering $C'$, at cost $d(C,C')=\lvert C'\setminus C\rvert$.
 \end{aligned}
 \]}
 \vspace{-.1cm}
-\begin{block}{Why this one can beat the counting bound}
+\begin{block}{Proposition}
 A column \emph{carries a step}, so the relaxation cannot mix configurations without
 paying the transition. Hence $\mathrm{LP}(\mathrm{PTF})\ge q$, and it can be strictly
 greater --- the only construction in this work that provably exceeds $q$.
@@ -860,7 +868,7 @@ greater --- the only construction in this work that provably exceeds $q$.
 \end{frame}
 
 
-\begin{frame}{Backup --- pricing, and what the prototypes measured}
+\begin{frame}{Backup: pricing and measured relaxations}
 \vspace{.4cm}
 \begin{columns}[T,onlytextwidth]
 \column{.46\textwidth}
@@ -874,7 +882,7 @@ collect per-tool duals plus a bonus for each job fully covered. PTF prices
 {\small $O(n\lvert T\rvert)$ and fixed; only the columns are generated.}
 
 \column{.48\textwidth}
-\begin{block}{What was measured}
+\textbf{What was measured.}
 \begin{itemize}\itemsep2pt\small
   \item PCF$'$ root $=q$ on \textbf{all $2{,}108$} recorded runs --- the proposition
   confirmed on the benchmark.
@@ -882,14 +890,15 @@ collect per-tool duals plus a bonus for each job fully covered. PTF prices
   optima are $12$ and $13$.
   \item Nothing above nine jobs was closed: a Python pricer against compiled solvers.
 \end{itemize}
-\end{block}
+
+
 \vspace{.25cm}
 {\small Sound, and as it stands too rare and too small to close the certificate gap.}
 \end{columns}
 \end{frame}
 
 % 21 ------------------------------------------------------------------------
-\begin{frame}{Backup: certified optima by method and family}
+\begin{frame}{Backup: results by instance family}
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3.5pt}
@@ -919,7 +928,7 @@ Family denominators: $160,160,340,330,340,80$; total $1{,}410$.
 \end{frame}
 
 % 22 ------------------------------------------------------------------------
-\begin{frame}{Backup: fractional cuts spend more, certify less}
+\begin{frame}{Backup: the fractional-cut ablation}
 \centering
 \includegraphics[width=.94\textwidth,height=5.48cm,keepaspectratio]{assets/defence_figures/fractional_separation_tradeoff.pdf}
 
@@ -929,7 +938,7 @@ Against BBC--LP+F: $+H$ certifies $31$ more; $+C$ certifies $1$ fewer; $+P$ cert
 \end{frame}
 
 % 23 ------------------------------------------------------------------------
-\begin{frame}{Backup: proof and validation ledger}
+\begin{frame}{Backup: proofs and validation}
 \begin{columns}[T,onlytextwidth]
 \column{.47\textwidth}
 \theory{Connected-family proof}
