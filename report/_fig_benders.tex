@@ -1,0 +1,10 @@
+\begin{tikzpicture}[font=\footnotesize,>=Stealth,
+   blk/.style={draw,semithick,rounded corners,align=center,minimum height=1.6cm,text width=3.7cm}]
+  \node[blk,draw=cBlue!70,fill=white] (m) {\textbf{Master} (hard)\\[2pt] choose the job order,\\ minimising the stand-in $\theta$};
+  \node[blk,right=4.2cm of m,draw=cGreen!70,fill=white] (s) {\textbf{Subproblem} (easy)\\[2pt] load the tools for that\\ order, \emph{exactly}};
+  \draw[-{Stealth[length=3mm]},semithick,black!60] (m.north east) to[bend left=22] node[above,font=\scriptsize]{an order} (s.north west);
+  \draw[-{Stealth[length=3mm]},semithick,black!60] (s.south west) to[bend left=22]
+      node[below,align=center,font=\scriptsize,inner sep=2pt]{Benders cut:\\ $\theta\ge$ true cost} (m.south east);
+  \node[below=1.28cm of $(m.south)!0.5!(s.south)$,text width=9.4cm,align=center,font=\scriptsize,text=black!60]
+     {repeat until $\theta$ equals the loading cost; the order is then a certified optimum};
+\end{tikzpicture}

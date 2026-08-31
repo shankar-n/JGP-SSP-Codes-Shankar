@@ -1,0 +1,50 @@
+\begin{tikzpicture}[x=0.8cm,y=0.8cm,font=\footnotesize]
+ % ---------------- (a) the configuration walk ----------------
+ \begin{scope}
+  \node[font=\footnotesize\bfseries,anchor=west] at (0.15,7.6)
+     {(a) the walk: one magazine per group};
+  \foreach \p/\req in {1/{1{,}2},2/{2{,}3},3/{3{,}4},4/{4{,}5},5/{5{,}6},6/{6{,}1}}{
+    \node[font=\footnotesize] at (\p,6.05) {\p};
+    \node[font=\scriptsize,text=black!55] at (\p,6.7) {$\{\req\}$};}
+  \foreach \t/\y in {1/5,2/4,3/3,4/2,5/1,6/0}{
+    \node[anchor=east,font=\footnotesize] at (0.4,\y) {$t_{\t}$};}
+  \foreach \p/\y in {1/5,2/5,5/5,6/5, 1/4,2/4, 1/3,2/3,3/3,4/3,
+                     3/2,4/2, 3/1,4/1,5/1,6/1, 5/0,6/0}{
+     \fill[cBlue!20] (\p-0.5,\y-0.5) rectangle (\p+0.5,\y+0.5);}
+  \foreach \p/\y in {1/5,1/4,1/3, 3/2,3/1, 5/5,5/0}{
+     \fill[cOrange!90] (\p-0.5,\y-0.5) rectangle (\p+0.5,\y+0.5);
+     \draw[white,line width=0.9pt] (\p-0.17,\y)--(\p+0.17,\y);
+     \draw[white,line width=0.9pt] (\p,\y-0.17)--(\p,\y+0.17);}
+  \draw[black!35,step=1] (0.5,-0.5) grid (6.5,5.5);
+  \draw[black!55,semithick,dashed] (2.5,-0.5) -- (2.5,5.5);
+  \draw[black!55,semithick,dashed] (4.5,-0.5) -- (4.5,5.5);
+  \foreach \x/\g in {1.5/1,3.5/2,5.5/3}{
+    \node[font=\scriptsize,text=black!55] at (\x,-1.05) {$G_{\g}$};}
+  \node[font=\scriptsize,text=black!70,anchor=west] at (0.5,-1.8)
+     {seven insertions};
+ \end{scope}
+ % ---------------- (b) KTNS on the same job order ----------------
+ \begin{scope}[xshift=7.7cm]
+  \node[font=\footnotesize\bfseries,anchor=west] at (0.15,7.6)
+     {(b) KTNS on the same job order};
+  \foreach \p/\req in {1/{1{,}2},2/{2{,}3},3/{3{,}4},4/{4{,}5},5/{5{,}6},6/{6{,}1}}{
+    \node[font=\footnotesize] at (\p,6.05) {\p};
+    \node[font=\scriptsize,text=black!55] at (\p,6.7) {$\{\req\}$};}
+  \foreach \t/\y in {1/5,2/4,3/3,4/2,5/1,6/0}{
+    \node[anchor=east,font=\footnotesize] at (0.4,\y) {$t_{\t}$};}
+  \foreach \p/\y in {1/5,2/5,3/5,4/5,5/5,6/5, 1/4,2/4, 1/3,2/3,3/3,
+                     3/2,4/2, 4/1,5/1,6/1, 5/0,6/0}{
+     \fill[cBlue!20] (\p-0.5,\y-0.5) rectangle (\p+0.5,\y+0.5);}
+  \foreach \p/\y in {1/5,1/4,1/3, 3/2, 4/1, 5/0}{
+     \fill[cOrange!90] (\p-0.5,\y-0.5) rectangle (\p+0.5,\y+0.5);
+     \draw[white,line width=0.9pt] (\p-0.17,\y)--(\p+0.17,\y);
+     \draw[white,line width=0.9pt] (\p,\y-0.17)--(\p,\y+0.17);}
+  \draw[black!35,step=1] (0.5,-0.5) grid (6.5,5.5);
+  \draw[black!55,semithick,dashed] (2.5,-0.5) -- (2.5,5.5);
+  \draw[black!55,semithick,dashed] (4.5,-0.5) -- (4.5,5.5);
+  \foreach \x/\g in {1.5/1,3.5/2,5.5/3}{
+    \node[font=\scriptsize,text=black!55] at (\x,-1.05) {$G_{\g}$};}
+  \node[font=\scriptsize,text=black!70,anchor=west] at (0.5,-1.8)
+     {six insertions};
+ \end{scope}
+\end{tikzpicture}

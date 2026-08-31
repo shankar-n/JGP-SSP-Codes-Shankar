@@ -1,0 +1,44 @@
+\begin{tikzpicture}[
+   font=\small, >=Stealth,
+   slot/.style={draw=black!45, rounded corners=1pt, minimum size=0.62cm,
+                inner sep=0pt, font=\small},
+   fresh/.style={slot, fill=black!72, text=white, draw=black!72},
+   held/.style={slot, fill=black!8},
+   jl/.style={font=\scriptsize\bfseries, text=black!75}]
+
+ % ---------------- row 1 : order 1,2,3 -> cost 4 ----------------
+ \begin{scope}
+   \node[font=\small\bfseries, anchor=west] at (-2.35,1.02) {order $1,2,3$};
+   \node[anchor=west, font=\small] at (2.55,1.02) {four tool insertions \textbf{(optimal)}};
+   \foreach \x/\lab in {0/{job 1},2.3/{job 2},4.6/{job 3}}
+     \node[jl] at (\x+0.31,0.62) {\lab};
+   % job1 {a,b}: both new
+   \node[fresh] (r1a) at (0,0)    {$a$};  \node[fresh] (r1b) at (0.62,0) {$b$};
+   % job2 {b,c}: b held, c new
+   \node[held]  (r2b) at (2.3,0)  {$b$};  \node[fresh] (r2c) at (2.92,0) {$c$};
+   % job3 {c,d}: c held, d new
+   \node[held]  (r3c) at (4.6,0)  {$c$};  \node[fresh] (r3d) at (5.22,0) {$d$};
+   \foreach \a/\b in {r1b/r2b, r2c/r3c}
+     \draw[->, black!45, shorten >=2pt, shorten <=2pt] (\a) to[bend left=38] (\b);
+   \node[font=\scriptsize, text=black!60, anchor=west] at (6.15,0) {$2+1+1=4$};
+ \end{scope}
+
+ % ---------------- row 2 : order 1,3,2 -> cost 5 ----------------
+ \begin{scope}[yshift=-2.15cm]
+   \node[font=\small\bfseries, anchor=west] at (-2.35,1.02) {order $1,3,2$};
+   \node[anchor=west, font=\small] at (2.55,1.02) {five --- one insertion wasted};
+   \foreach \x/\lab in {0/{job 1},2.3/{job 3},4.6/{job 2}}
+     \node[jl] at (\x+0.31,0.62) {\lab};
+   \node[fresh] (s1a) at (0,0)    {$a$};  \node[fresh] (s1b) at (0.62,0) {$b$};
+   \node[fresh] (s2c) at (2.3,0)  {$c$};  \node[fresh] (s2d) at (2.92,0) {$d$};
+   \node[held]  (s3c) at (4.6,0)  {$c$};  \node[fresh] (s3b) at (5.22,0) {$b$};
+   \draw[->, black!45, shorten >=2pt, shorten <=2pt] (s2c) to[bend left=38] (s3c);
+   \node[font=\scriptsize, text=black!60, anchor=west] at (6.15,0) {$2+2+1=5$};
+ \end{scope}
+
+ % ---------------- legend ----------------
+ \node[fresh] (lg1) at (-1.6,-3.35) {};
+ \node[anchor=west, font=\scriptsize, text=black!65] at (-1.25,-3.35) {inserted here (counted)};
+ \node[held]  (lg2) at (2.75,-3.35) {};
+ \node[anchor=west, font=\scriptsize, text=black!65] at (3.1,-3.35) {already loaded (free)};
+\end{tikzpicture}
