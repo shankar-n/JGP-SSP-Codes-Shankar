@@ -1,66 +1,38 @@
-\documentclass[aspectratio=169,11pt,c]{beamer}
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\usefonttheme[onlymath]{serif}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{bibliography item}{\insertbiblabel}
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[scaled=.94]{helvet}
-\renewcommand{\familydefault}{\sfdefault}
-\usefonttheme[onlymath]{serif}
 \usepackage{amsmath,amssymb,mathtools,booktabs,array,graphicx,tikz}
 \usetikzlibrary{arrows.meta,positioning,calc,fit,matrix,backgrounds}
 
-% A restrained academic visual system.  The empirical figures use the same
-% palette and are generated from the audited campaign CSVs.
-\definecolor{navy}{HTML}{25324A}
-\definecolor{teal}{HTML}{16897B}
-\definecolor{orange}{HTML}{E07A3F}
-\definecolor{coral}{HTML}{CF5C5C}
-\definecolor{blue}{HTML}{3066BE}
-\definecolor{muted}{HTML}{4A5568}
-\definecolor{srcgray}{HTML}{8A94A6}
-\definecolor{linegray}{HTML}{D8DEE9}
-\definecolor{warm}{HTML}{F7F5F0}
-\definecolor{paleteal}{HTML}{E7F3F1}
-\definecolor{paleorange}{HTML}{FAEEE5}
+% Accent palette used by the diagrams and by the generated figures.
+% navy is aliased to the theme's structure colour so the two agree.
+\definecolor{navy}{HTML}{353E7C}
+\definecolor{teal}{HTML}{11705F}
+\definecolor{orange}{HTML}{C25A1E}
+\definecolor{coral}{HTML}{B5423F}
+\definecolor{blue}{HTML}{2A4E9B}
+\definecolor{muted}{HTML}{444B57}
+\definecolor{srcgray}{HTML}{7A8290}
+\definecolor{linegray}{HTML}{C8CEDA}
+\definecolor{warm}{HTML}{F2F3F7}
+\definecolor{paleteal}{HTML}{E2EFEB}
+\definecolor{paleorange}{HTML}{F8EBE0}
 
-\setbeamercolor{normal text}{fg=navy,bg=white}
-\setbeamercolor{structure}{fg=teal}
-\setbeamercolor{frametitle}{fg=navy,bg=warm}
-\setbeamercolor{footline}{fg=muted,bg=white}
-\setbeamerfont{normal text}{size=\fontsize{14.2}{17.3}\selectfont}
-\setbeamerfont{frametitle}{series=\bfseries,size=\fontsize{16}{19}\selectfont}
-\setbeamerfont{footline}{size=\fontsize{8.5}{10}\selectfont}
-\setbeamertemplate{navigation symbols}{}
-\setbeamertemplate{itemize item}{\color{teal}\raisebox{.15ex}{\small$\blacktriangleright$}}
-\setbeamertemplate{itemize subitem}{\color{orange}$\bullet$}
-\setlength{\leftmargini}{1.25em}
-\setlength{\leftmarginii}{1.15em}
-\setbeamersize{text margin left=.78cm,text margin right=.78cm}
-
-\setbeamertemplate{frametitle}{%
-  \nointerlineskip
-  \begin{beamercolorbox}[wd=\paperwidth,dp=.22cm,leftskip=.78cm,rightskip=.6cm]{frametitle}
-    \vskip.12cm
-    \usebeamerfont{frametitle}\insertframetitle
-    \vskip.02cm
-  \end{beamercolorbox}%
-  \color{teal}\rule{\paperwidth}{1.05pt}%
-}
-
-\setbeamertemplate{footline}{%
-  \leavevmode
-  \color{linegray}\rule{\paperwidth}{.45pt}\vskip0pt
-  \hbox{%
-    \begin{beamercolorbox}[wd=.34\paperwidth,ht=2.55ex,dp=1.05ex,leftskip=.78cm]{footline}
-      \usebeamerfont{footline}Shankar Narayanan
-    \end{beamercolorbox}%
-    \begin{beamercolorbox}[wd=.42\paperwidth,ht=2.55ex,dp=1.05ex,center]{footline}
-      \usebeamerfont{footline}LIMOS \;$\cdot$\; 2 September 2026
-    \end{beamercolorbox}%
-    \begin{beamercolorbox}[wd=.24\paperwidth,ht=2.55ex,dp=1.05ex,rightskip=.78cm plus1fil]{footline}
-      \usebeamerfont{footline}\insertframenumber/\inserttotalframenumber
-    \end{beamercolorbox}%
-  }%
-}
+\setbeamercolor{structure}{fg=navy}
+\setbeamercolor{block title}{bg=navy,fg=white}
+\setbeamercolor{block body}{bg=warm,fg=black}
+\setbeamercolor{caption name}{fg=navy}
+\setbeamerfont{frametitle}{size=\large}
+\setbeamerfont{block title}{series=\bfseries}
+\setbeamertemplate{itemize item}{\color{navy}$\bullet$}
+\setbeamertemplate{itemize subitem}{\color{teal}--}
 
 \newcommand{\Zst}{Z^{\ast}}
 \newcommand{\Kst}{K^{\ast}}
@@ -69,51 +41,40 @@
 \newcommand{\theory}[1]{{\color{teal}\bfseries #1}}
 \newcommand{\exact}[1]{{\color{orange}\bfseries #1}}
 \newcommand{\quiet}[1]{{\color{muted}#1}}
-\newcommand{\source}[1]{\vfill\hfill{\fontsize{7.8}{9.2}\selectfont\color{srcgray}#1}\vspace{.05cm}}
+\newcommand{\source}[1]{\vfill\hfill{\fontsize{7.6}{9}\selectfont\color{srcgray}#1}}
+% inline citation, centred under the content it supports
+\newcommand{\cit}[1]{\begin{center}\footnotesize\textbf{(#1)}\end{center}}
 
-\title{Job Sequencing and Tool Switching}
-\author{Shankar Narayanan}
-\date{Internship defence}
+\title[SSP: structure and exact methods]{Job Sequencing and Tool Switching}
+\subtitle{Structural results and a branch-and-Benders-cut study}
+\author[Shankar Narayanan]{Shankar Narayanan}
+\institute[LIMOS]{
+  \small Master in Operations Research and Decision Support (M2 ROAD)\\[4pt]
+  \footnotesize Advisors: Prof.~Rafael Colares \quad Prof.~Annegret Wagler\\
+  \footnotesize Academic supervisor: Dr.~Renaud Chicoisne\\[6pt]
+  \footnotesize Laboratory of Informatics, Modelling and Optimisation of Systems (LIMOS)\\
+  \footnotesize ISIMA, Clermont Auvergne INP
+}
+\date[2 September 2026]{2 September 2026}
+
+\titlegraphic{%
+  \includegraphics[height=.85cm]{cover/uca.png}\hspace{1.0cm}
+  \includegraphics[height=.75cm]{cover/inp_isima.png}\hspace{1.0cm}
+  \includegraphics[height=.78cm]{cover/limos.png}}
 
 \begin{document}
 
-% 1 -------------------------------------------------------------------------
 \begin{frame}[plain]
-\begin{tikzpicture}[remember picture,overlay]
-  \fill[warm] (current page.south west) rectangle (current page.north east);
-  \fill[navy] (current page.north west) rectangle ($(current page.north east)+(0,-.18)$);
-  \fill[teal] (current page.south west) rectangle ($(current page.south east)+(0,.12)$);
-\end{tikzpicture}
-\vspace{.20cm}
-\begin{center}
-\begin{tabular}{c@{\hspace{1.15cm}}c@{\hspace{1.15cm}}c}
-  \includegraphics[height=1.00cm]{cover/uca.png} &
-  \includegraphics[height=0.88cm]{cover/inp_isima.png} &
-  \includegraphics[height=0.90cm]{cover/limos.png}
-\end{tabular}
-
-\vspace{.46cm}
-{\fontsize{30}{35}\selectfont\bfseries\color{navy}Job Sequencing and Tool Switching\par}
-\vspace{.16cm}
-{\fontsize{16}{20}\selectfont\color{teal}Structural results and a branch-and-Benders-cut study\par}
-
-\vspace{.20cm}
-{\color{linegray}\rule{5.2cm}{.7pt}\par}
-\vspace{.26cm}
-
-{\fontsize{17}{21}\selectfont\bfseries Shankar Narayanan\par}
-\vspace{.12cm}
-{\fontsize{10.5}{13}\selectfont\color{muted}Internship defence \;$\cdot$\; 2 September 2026\par}
-
-\vfill
-{\fontsize{11}{14}\selectfont
-\begin{tabular}{rl}
-\textbf{Advisors} & Prof.~Rafael Colares \quad Prof.~Annegret Wagler\\[3pt]
-\textbf{Academic supervisor} & Dr.~Renaud Chicoisne
-\end{tabular}}
-\vspace{.30cm}
-\end{center}
+  \titlepage
 \end{frame}
+
+\begin{frame}{Presentation Outline}
+  \tableofcontents
+\end{frame}
+
+
+
+\section{Problem Definition and Context}
 
 % 2 -------------------------------------------------------------------------
 \begin{frame}{The order decides which tools return}
@@ -145,7 +106,6 @@
   \node[font=\small,orange,anchor=west] at (6.45,-1.82) {$b$ was removed, then returned};
 \end{tikzpicture}
 
-\source{Report: Figures 1--2 and Section 1.1.}
 \end{frame}
 
 % 3 -------------------------------------------------------------------------
@@ -186,7 +146,7 @@ When a tool must leave, remove the loaded tool whose next use is furthest away.
   \node[font=\scriptsize,muted] at (7,-.62) {free-initial tool-switch cost};
 \end{tikzpicture}
 \end{columns}
-\source{Tang--Denardo KTNS; Crama et al. hardness; report Figure 3.}
+\cit{Tang \& Denardo, 1988; Crama et al., 1994}
 \end{frame}
 
 \begin{frame}{Every stop costs production time}
@@ -211,7 +171,7 @@ between consecutive jobs.
 A cell running thousands of parts a day repeats the changeover constantly, so the
 sequence is chosen once and paid for every shift.
 \end{columns}
-\source{Report: Section 1.1; industrial study of Burger et al.\ (2015).}
+\cit{Burger et al., 2015}
 \end{frame}
 
 % 4 -------------------------------------------------------------------------
@@ -237,7 +197,7 @@ sequence is chosen once and paid for every shift.
 Two things the timeline does not contain: a bound on the two-phase loss that depends on
 the \theory{instance}, and a relaxation that gets \exact{past the counting bound}.
 
-\source{Report: literature review in Chapter 3.}
+\cit{Crama \& van de Klundert, 1999; Catanzaro et al., 2015; da Silva et al., 2021}
 \end{frame}
 
 \begin{frame}{Two questions, and how the talk is organised}
@@ -265,7 +225,6 @@ reformulation over configurations -- get past it?
 \centering\small
 \theory{Part I} answers the first and finds an unbounded loss. \quad
 \exact{Part II} answers the second, and the answer is no --- for a reason worth naming.
-\source{Report: Section 1.3, questions set by the advisors.}
 \end{frame}
 
 \begin{frame}{The configuration view, and where $q$ comes from}
@@ -300,8 +259,9 @@ the start:
 \vspace{.26cm}
 \centering\small
 This single quantity governs \theory{both} halves of the talk.
-\source{Report: Section 2.4, configuration graph; Corollary 1.}
 \end{frame}
+
+\section{Structural Results}
 
 % 5 -------------------------------------------------------------------------
 \begin{frame}{Grouping commits before it sees the sequence}
@@ -336,7 +296,7 @@ This single quantity governs \theory{both} halves of the talk.
 {\fontsize{21}{25}\selectfont\color{orange}$H-\Zst$}\par
 \small loss that remains even under favourable tie-breaking
 \end{columns}
-\source{Report: Definitions 5--7.}
+\cit{Crama \& van de Klundert, 1999}
 \end{frame}
 
 % 6 -------------------------------------------------------------------------
@@ -370,7 +330,6 @@ The approximation enters when the first phase keeps only the groupings with the 
 $\text{cost}=q+R$}\par
 \small $q=|\U|-b$; $R$ counts reinsertions.
 \end{columns}
-\source{Report: Theorem 1, Corollary 1 and Lemma 1.}
 \end{frame}
 
 % 7 -------------------------------------------------------------------------
@@ -404,7 +363,6 @@ $\text{cost}=q+R$}\par
 \vspace{.20cm}
 {\large One forced adjacency creates one reinsertion.}
 \end{columns}
-\source{Report: Proposition 10.}
 \end{frame}
 
 % 8 -------------------------------------------------------------------------
@@ -442,7 +400,6 @@ $\text{cost}=q+R$}\par
 unique minimum grouping}\par\vspace{.08cm}
 {\fontsize{25}{29}\selectfont $\Kst=3g$}
 \end{columns}
-\source{Report: Theorem 5, construction and first proof step.}
 \end{frame}
 
 % 9 -------------------------------------------------------------------------
@@ -478,7 +435,6 @@ No reinsertion is needed, so the coverage lower bound is attained:
 \boxed{\Zst=q=8g-5}.
 \]
 \end{columns}
-\source{Report: Theorem 5, coverage schedule.}
 \end{frame}
 
 % 10 ------------------------------------------------------------------------
@@ -512,7 +468,6 @@ has exactly one return per copy. Therefore
 \boxed{H=9g-5}.
 \]
 \end{columns}
-\source{Report: Theorem 5, forced-return count and matching schedule.}
 \end{frame}
 
 % 11 ------------------------------------------------------------------------
@@ -545,8 +500,9 @@ The additive loss is unbounded, even though all jobs remain connected through $u
 \]
 \small This family does not prove a universal $9/8$ ratio bound.
 \end{columns}
-\source{Report: connected unbounded heuristic-gap theorem.}
 \end{frame}
+
+\section{Exact Methods}
 
 \begin{frame}{Two routes past the counting bound}
 \centering
@@ -574,7 +530,7 @@ never forms a weak relaxation \emph{of the loading}.
 Columns are magazine configurations. One variant prices \emph{transitions}, and its
 relaxation can provably exceed $q$.
 \end{columns}
-\source{Report: Section 5, opening; Table 3.}
+\cit{da Silva et al., 2021; Rahmaniani et al., 2017}
 \end{frame}
 
 % 12 ------------------------------------------------------------------------
@@ -594,7 +550,7 @@ relaxation can provably exceed $q$.
 \vspace{.55cm}
 
 {\large The decomposition is natural because the fixed-order subproblem is polynomial and exact.}
-\source{Report: Figure 9 and Section 5.2.}
+\cit{Hooker \& Ottosson, 2003; Codato \& Fischetti, 2006}
 \end{frame}
 
 % 13 ------------------------------------------------------------------------
@@ -631,7 +587,6 @@ relaxation can provably exceed $q$.
 \]
 where $w_{ij}=\max(0,|T_i\cup T_j|-b)$.
 \end{columns}
-\source{Report: Benders master formulation, Section 5.2.}
 \end{frame}
 
 % 14 ------------------------------------------------------------------------
@@ -665,7 +620,7 @@ fixed path}\par
 {\large $\Downarrow$}\par
 {\fontsize{18}{22}\selectfont exact KTNS cost}
 \end{columns}
-\source{Report: fixed-order loading formulation and integrality argument.}
+\cit{Tang \& Denardo, 1988}
 \end{frame}
 
 % 15 ------------------------------------------------------------------------
@@ -696,7 +651,6 @@ Every learned coefficient sits on one predecessor arc.
   \draw[->,teal,line width=1.4pt] (n3)--(n4) node[midway,above,font=\small] {$\beta_{34}$};
   \draw[orange,dashed,line width=1.2pt] (n1.south) to[bend right=20] node[below,font=\small] {a tool may leave and return across the span} (n4.south);
 \end{tikzpicture}
-\source{Report: Equation 20 and locality discussion in Chapter 7.}
 \end{frame}
 
 \begin{frame}{Configurations as columns: PCF, PCF$'$ and PTF}
@@ -732,8 +686,9 @@ A column carries a step, so the relaxation cannot avoid paying for it:
 {\small Pricing is NP-hard, and PTF prices coupled \emph{pairs}, so a node costs far
 more. Rows stay $O(n\lvert T\rvert)$ and fixed.}
 \end{columns}
-\source{Report: Section 5.4, Propositions 20--22.}
 \end{frame}
+
+\section{Experimental Results}
 
 % 16 ------------------------------------------------------------------------
 \begin{frame}{The campaign tests 12 solver configurations}
@@ -769,7 +724,7 @@ BBC--LP+F+C & BBC--LP+F+P & BBC--LP+ACC
 \textbf{\color{navy}1\,h}    & per run, fixed denominator
 \end{tabular}
 \end{columns}
-\source{Report: experimental design and Table 5.}
+\cit{Laporte et al., 2004; Catanzaro et al., 2015; da Silva et al., 2021}
 \end{frame}
 
 % 17 ------------------------------------------------------------------------
@@ -779,7 +734,6 @@ BBC--LP+F+C & BBC--LP+F+P & BBC--LP+ACC
 
 \vspace{.04cm}
 {\small Each bar uses the same $1{,}410$-instance denominator.}
-\source{Canonical 16,920-row campaign; report Table 6.}
 \end{frame}
 
 % 18 ------------------------------------------------------------------------
@@ -789,7 +743,6 @@ BBC--LP+F+C & BBC--LP+F+P & BBC--LP+ACC
 
 \vspace{.02cm}
 {\small The same 531 instances appear in every box; the horizontal axis is logarithmic.}
-\source{Canonical campaign; common-solved comparison in report Table 7.}
 \end{frame}
 
 % 19 ------------------------------------------------------------------------
@@ -810,8 +763,9 @@ BBC--LP+F+C & BBC--LP+F+P & BBC--LP+ACC
 $223/383$ & time-limited, known-optimum BBC--LP incumbents already equal the optimum.
 \end{tabular}
 \end{columns}
-\source{Report: Table 10, Observation 13 and the incumbent audit.}
 \end{frame}
+
+\section{Conclusion}
 
 % 20 ------------------------------------------------------------------------
 \begin{frame}{Next: pricing tool residency across a span}
@@ -849,32 +803,55 @@ The tested master often finds the right order but cannot certify those returns.
 \vspace{.06cm}
 \centering
 {\small\bfseries The work narrows the next experiment; it claims no new SOTA solver.}
-\source{Report: Discussion and further work, Chapters 7--8.}
 \end{frame}
 
-\begin{frame}{Selected references}
-\vspace{.10cm}
-{\small
-\begin{columns}[T,onlytextwidth]
-\column{.485\textwidth}
-\theory{Problem and structure}\par\vspace{.12cm}
-{\footnotesize
-Tang \& Denardo (1988). \emph{Manag.\ Sci.} 34(7). \quiet{KTNS optimality.}\par\vspace{.30cm}
-Crama, Kolen, Oerlemans \& Spieksma (1994). \emph{IJFMS} 6. \quiet{NP-hardness for $b\ge2$.}\par\vspace{.30cm}
-Crama \& van de Klundert (1999). \emph{Naval Res.\ Logist.} 46(5). \quiet{$b$-approximation of the two-phase method.}\par\vspace{.30cm}
-Burger, Jacobs, van Vuuren \& Visagie (2015). \emph{J.\ Sched.} 18(2). \quiet{Industrial study; the open trade-off question.}
-}
-\column{.485\textwidth}
-\exact{Exact methods}\par\vspace{.12cm}
-{\footnotesize
-Laporte, Salazar-Gonz\'alez \& Semet (2004). \emph{IIE Trans.} 36. \quiet{Tool-state model (LSS).}\par\vspace{.30cm}
-Catanzaro, Gouveia \& Labb\'e (2015). \emph{EJOR} 244(3). \quiet{Formulations F1--F5.}\par\vspace{.30cm}
-da Silva, Chaves \& Yanasse (2021). \emph{IJPR} 59(12). \quiet{Multicommodity model; LP $=\lvert T\rvert-b$.}\par\vspace{.30cm}
-Hooker \& Ottosson (2003); Codato \& Fischetti (2006). \quiet{Logic-based and combinatorial Benders.}
-}
-\end{columns}}
-\source{Full bibliography: report, References.}
+\section{References}
+
+\begin{frame}[allowframebreaks]{Key References}
+\footnotesize
+\begin{itemize}\itemsep3pt
+  \item Burger, A.~P., Jacobs, C.~G., van Vuuren, J.~H., and Visagie, S.~E. (2015).
+  Scheduling multi-colour print jobs with sequence-dependent setup times.
+  \emph{Journal of Scheduling}, vol.~18, no.~2, pp.~131--145.
+  \item Catanzaro, D., Gouveia, L., and Labb\'e, M. (2015). Improved integer linear
+  programming formulations for the job sequencing and tool switching problem.
+  \emph{European Journal of Operational Research}, vol.~244, no.~3, pp.~766--777.
+  \item Codato, G., and Fischetti, M. (2006). Combinatorial Benders' cuts for
+  mixed-integer linear programming. \emph{Operations Research}, vol.~54, no.~4,
+  pp.~756--766.
+  \item Crama, Y., Kolen, A.~W.~J., Oerlemans, A.~G., and Spieksma, F.~C.~R. (1994).
+  Minimizing the number of tool switches on a flexible machine.
+  \emph{International Journal of Flexible Manufacturing Systems}, vol.~6, pp.~33--54.
+  \item Crama, Y., and van de Klundert, J. (1999). Worst-case performance of
+  approximation algorithms for tool management problems.
+  \emph{Naval Research Logistics}, vol.~46, no.~5, pp.~445--462.
+  \item da Silva, T.~T., Chaves, A.~A., and Yanasse, H.~H. (2021). A new multicommodity
+  flow model for the job sequencing and tool switching problem.
+  \emph{International Journal of Production Research}, vol.~59, no.~12, pp.~3617--3632.
+  \item Hooker, J.~N., and Ottosson, G. (2003). Logic-based Benders decomposition.
+  \emph{Mathematical Programming}, vol.~96, pp.~33--60.
+  \item Laporte, G., Salazar-Gonz\'alez, J.~J., and Semet, F. (2004). Exact algorithms
+  for the job sequencing and tool switching problem. \emph{IIE Transactions},
+  vol.~36, no.~1, pp.~37--45.
+  \item Rahmaniani, R., Crainic, T.~G., Gendreau, M., and Rei, W. (2017). The Benders
+  decomposition algorithm: a literature review. \emph{European Journal of Operational
+  Research}, vol.~259, no.~3, pp.~801--817.
+  \item Tang, C.~S., and Denardo, E.~V. (1988). Models arising from a flexible
+  manufacturing machine, Part I: minimization of the number of tool switches.
+  \emph{Operations Research}, vol.~36, no.~5, pp.~767--777.
+\end{itemize}
+\vspace{.2cm}
+{\scriptsize Every work listed here is cited on a slide of this talk. The full
+bibliography is in the report.}
 \end{frame}
+
+\begin{frame}[plain]
+\vspace{1.6cm}
+\centering
+{\Huge Thank You!}\\[1.0em]
+{\large Questions}
+\end{frame}
+
 
 % 21 ------------------------------------------------------------------------
 \begin{frame}{Backup: certified optima by method and family}
@@ -904,7 +881,6 @@ BBC--LP+F+P        & $31$ & $32$ & $282$ & $155$ & $83$  & $35$ & $618$\\
 \vspace{.34cm}
 \normalsize
 Family denominators: $160,160,340,330,340,80$; total $1{,}410$.
-\source{Report: Table 6.}
 \end{frame}
 
 % 22 ------------------------------------------------------------------------
@@ -915,7 +891,6 @@ Family denominators: $160,160,340,330,340,80$; total $1{,}410$.
 \vspace{.06cm}
 \small
 Against BBC--LP+F: $+H$ certifies $31$ more; $+C$ certifies $1$ fewer; $+P$ certifies $37$ fewer; all three together certify $3$ fewer.
-\source{Report: Tables 8--9.}
 \end{frame}
 
 % 23 ------------------------------------------------------------------------
@@ -946,7 +921,6 @@ $16{,}920$ & canonical campaign outcomes audited
 \vspace{.16cm}
 \centering
 {\small Formal scope and remaining conjectures: \texttt{THEOREM\_AUDIT.md}.}
-\source{Report: Appendices A--C and the independent verification program.}
 \end{frame}
 
 \end{document}
