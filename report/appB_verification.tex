@@ -31,14 +31,15 @@ the statement is labelled an Observation rather than a Proposition.
   random census.
   \item \textbf{Every named instance} in Sections~\ref{sec:prelim} and \ref{sec:gap}:
   the $k$-ring for $k=3,\dots,9$ in both readings; the sliding-window ring; the
-  witness $W$ of Proposition~\ref{prop:refute}; the pair $I_0$, $I_1$ of
-  Proposition~\ref{prop:noclutter}; the $\Kst=4$ instance; the smallest sub-optimal
-  instance of Observation~\ref{obs:smallest}; the copies of
-  Observation~\ref{obs:unbounded-true}; the star and non-matroid instances of
+  witness $W$ of Observation~\ref{obs:refute}; the pair $I_0$, $I_1$ of
+  Observation~\ref{obs:noclutter}; the $\Kst=4$ instance; the smallest sub-optimal
+  instance of Proposition~\ref{prop:seed}; the disconnected copies of
+  Observation~\ref{obs:copies}; the connected construction of
+  Theorem~\ref{thm:connected-gap}; the star and non-matroid instances of
   Propositions~\ref{prop:chromK} and \ref{prop:nonmatroid}.
   \item \textbf{Every bound in Section~\ref{ssec:ratio} and \ref{ssec:law}}, checked
   for violations on a random census of $200$ instances: Theorem~\ref{thm:uncond},
-  Corollaries~\ref{cor:zerogap}, \ref{cor:smallZ} and \ref{cor:z3},
+  Corollaries~\ref{cor:zerogap} and \ref{cor:smallZ},
   Lemma~\ref{lem:transcap}, and Propositions~\ref{prop:k3} and \ref{prop:genk}. No
   violation.
   \item \textbf{The closed form of Proposition~\ref{prop:hk3}}, on instances with
@@ -46,10 +47,11 @@ the statement is labelled an Observation rather than a Proposition.
   \item \textbf{The covering relaxation} of Proposition~\ref{prop:oddring}, by solving
   the fractional cover as a linear program for $k=3,\dots,8$. This is what identified
   that the statement requires $k\ge4$.
-  \item \textbf{The setup-cost collapse} of Theorem~\ref{thm:collapse}, by enumerating
-  all feasible groupings and all orderings of an instance and minimising the augmented
-  objective directly. This is also what identified that the threshold must be read in
-  the walk value.
+  \item \textbf{The fixed-configuration setup-cost collapse} of
+  Theorem~\ref{thm:collapse}, by enumerating all feasible groupings, full configurations
+  and all orderings and minimising the augmented objective directly. This also checks
+  that the threshold is a walk-frame statement; it does not test KTNS post-processing
+  as though it preserved the number of group changes.
   \item \textbf{The PCF relaxation} of Proposition~\ref{prop:pcf}, by building the
   linear program explicitly over all configurations and solving it, with and without
   the counting rows.
@@ -66,7 +68,7 @@ $k$-ring has \emph{zero} gap for the method as specified, and that the published
 are walk values. That is why
 Section~\ref{ssec:frames} exists, why Table~\ref{tab:rings} has two gap columns, and
 why Proposition~\ref{prop:unbounded} is now stated for the walk value with
-Observation~\ref{obs:unbounded-true} supplying a different family for the other
+Theorem~\ref{thm:connected-gap} supplying a different family for the other
 reading.
 
 The second is Proposition~\ref{prop:oddring}, which had been stated for all $k$ and
@@ -75,10 +77,15 @@ fails at $k=3$, where the whole job set forms a single feasible group.
 Both were errors of statement rather than of proof: the arguments were sound for the
 objects they were actually about.
 
-A third finding concerns the campaign analysis rather than the structural results. Two
-properties of the raw result files can silently corrupt any analysis of them; both are
-in the code that reads the results rather than in any solver, and
-Appendix~\ref{app:repro} states them.
+A third finding concerns the campaign harness and analysis rather than the structural
+results. The historical runner's incomplete resume key skipped $58$ planned pairs on
+requeued shards; the full-key correction and completed exact-envelope recovery are stated in
+Section~\ref{ssec:bench} and Appendix~\ref{app:repro}. The source audit also found that
+the raw Catanzaro directory contained ten duplicate files and one ad-hoc test outside
+the published $160$-instance benchmark; the analysis now asserts and excludes exactly
+those eleven identities. Two further properties of the raw result files can silently
+corrupt analysis --- repeated file names and declared but unused tools --- and both are
+handled by the code that reads the results.
 
 \subsection{Where the checking stops}\label{ssec:verify-limits}
 

@@ -40,11 +40,15 @@ per job, where entry $(t,j)$ is $1$ when job $j$ requires tool $t$.
 
 The instance families and the solver configurations are declared in one place, in the
 campaign configuration module, which is the single source of truth for both. The runner
-is resumable: it records one row per completed run and skips runs already recorded. That
-property requires care. If the solver changes, previously recorded rows must be deleted
-before re-running, or the runner will keep the stale results. Both re-runs described in
-this report --- the one following the Benders cut correction and the one following the
-addition of the coverage row --- required exactly that.
+is resumable: it records one row per completed run and skips runs already recorded. Its
+completion key is (family, file name, jobs, tools, capacity, configuration), because
+file name and configuration do not identify a run in collections with repeated names.
+The historical campaign runner used that shorter key, which caused the $58$ skipped
+pairs disclosed in Section~\ref{ssec:bench}; the repository version and its regression
+check contain the correction, and the exact-envelope recovery filled all $58$. If the solver changes, previously recorded rows must also
+be deleted before re-running, or the runner will keep stale results. Both re-runs
+described in this report --- the one following the Benders cut correction and the one
+following the addition of the coverage row --- required exactly that.
 
 On the cluster the campaign is submitted as a SLURM job array with one task per
 configuration and instance shard. Each run is given four dedicated threads,
@@ -54,11 +58,14 @@ $16$ gigabytes of memory and a one-hour limit.
 
 Every table in Section~\ref{sec:comp} is computed from the raw per-instance result
 files by a single analysis pass, which reads the shards, keys each row by the
-five-part identifier (family, file name, jobs, tools, capacity), and derives:
+five-part identifier (family, file name, jobs, tools, capacity), asserts the raw total
+of $17{,}052$ rows, and excludes the $132$ rows attached to the eleven non-canonical
+Catanzaro files identified in Section~\ref{ssec:bench}. It then asserts the canonical
+total of $1{,}410$ instances and $16{,}920$ rows before deriving:
 
 \begin{itemize}[topsep=3pt,itemsep=1pt]
   \item the solved counts of Table~\ref{tab:solves}, per family and in total, against
-  the number of runs that returned a result;
+  the fixed $1{,}410$ planned identities per configuration;
   \item the cross-method agreement check, comparing the empty-start cost of the
   returned sequence across every pair of methods that both solved an instance;
   \item the shifted geometric mean times of Table~\ref{tab:times}, on the subset that
@@ -90,6 +97,14 @@ the coverage bound must be computed from $\lvert\U\rvert$ rather than from the t
 count declared in the instance file, because ten instances of the collection declare a
 tool that no job requires.
 
-Comparisons are made on common subsets rather than on absolute counts wherever the
-denominators differ, which is what makes the conclusions of Section~\ref{sec:disc}
-insensitive to the runs lost as described in Section~\ref{ssec:validation}.
+Headline solve comparisons use the fixed $1{,}410$-instance denominator, so every
+non-optimal outcome counts as unsolved. The historical LSS rerun is separated reproducibly by
+\path{src/BBC/cluster/separate_server_lss_results.py}: it preserves the original
+16-GiB shards, writes the 32-GiB run under a distinct provenance path, and produces a
+$352$-row paired ledger. The sensitivity changes $245$ primary memory outcomes to
+time-limit-feasible and leaves $107$ as memory limits, but certifies no additional
+optimum. The $123$ genuinely retryable primary identities were generated and merged by
+\path{prepare_recovery.py} and \path{merge_recovery_results.py} under the original
+resource envelope. The merger uses the recovery accounting log to normalize its $15$
+SLURM OOM tasks, validates all $16{,}920$ canonical identities, and preserves a hashed
+pre-merge backup under \path{results/provenance/}.

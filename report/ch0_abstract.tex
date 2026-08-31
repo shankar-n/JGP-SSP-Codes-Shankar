@@ -27,9 +27,9 @@ published industrial study.
 On the exact side the obstacle is a single quantity. Of the compact formulations
 surveyed here, the strongest relaxes to the number of tools minus the magazine capacity,
 an elementary counting bound. Two methods are built to get past it: a
-branch-and-Benders-cut algorithm, which settles the loading exactly with a polynomial
-oracle and so never forms a weak relaxation, and position-indexed formulations, one of
-which can provably exceed the counting bound.
+branch-and-Benders-cut algorithm, which settles the loading with an exact
+polynomial-time oracle and so never relaxes the loading problem at all, and
+position-indexed formulations, one of which can provably exceed the counting bound.
 
 Both were benchmarked on $1{,}421$ instances under one protocol against three compact
 models reimplemented here. That baseline is not the literature at its strongest ---
@@ -44,7 +44,7 @@ and a model whose relaxation \emph{is} the counting bound loses only thirteen po
 across it. What it measures is a master carrying that bound and, at the root, little
 else.
 
-The limitation is structural rather than incidental, in this sense. What is proved: the
+The evidence points to a structural rather than incidental limitation. What is proved: the
 objective counts re-insertions produced by the global interleaving of the schedule;
 apart from one constant coverage row every inequality either method carries is supported
 on a single arc or a single position; and two independent configuration relaxations sit

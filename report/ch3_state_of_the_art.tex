@@ -67,7 +67,7 @@ They then solve the model two ways. A linear-programming branch-and-cut, seeded 
 the GENIUS heuristic of \citet{Hertz1998}, and a branch-and-bound that carries no
 linear relaxation at all but two combinatorial bounds on partial sequences, in the
 enumerative spirit later developed by \citet{Yanasse2009}. Their computational tables
-report the branch-and-cut on instances with eight jobs, and the branch-and-bound
+report the branch-and-cut on instances with eight and nine jobs, and the branch-and-bound
 reaching twenty-five. That a search with no relaxation beats a search with one is the
 first concrete evidence that on this problem the bound, not the search, is the
 limiting factor.
@@ -79,7 +79,7 @@ make the problem symmetric, since individual transition costs do differ; it is t
 total that is preserved. The property halves the search space, and they combine it
 with comb inequalities and lower bounds recomputed inside the search.
 
-\citet{Catanzaro2015} produced the tightest compact models to date, a family of five
+\citet{Catanzaro2015} produced what were then the tightest compact models, a family of five
 formulations in arc-based variables. Two of their results are used here. Formulations
 3 and 4 have the same linear relaxation, and Formulation 4 is the smaller of the two;
 their computational section says so explicitly and excludes Formulation 3 on that
@@ -100,13 +100,20 @@ assumes, as they state, that all $M$ tools are required by some job. Under that
 assumption $M=\lvert\U\rvert$, and the bound is exactly the coverage bound $q$ of
 Proposition~\ref{prop:lb2}. They report solving $17.01\%$ more instances than the
 models of \citet{Tang1988}, \citet{Laporte2004} and \citet{Catanzaro2015}, on the
-instance sets of \citet{Yanasse2009}.
+combined benchmark sets of \citet{Yanasse2009} and \citet{Catanzaro2015}.
 
-That is where the compact models reviewed above stop: the strongest relaxation among
-them coincides with a counting argument that fits in one sentence. \citet{daSilva2024}
+For the three compact models reimplemented in this report, that is where the relaxation
+story stops: the strongest of those baselines coincides with a counting argument that
+fits in one sentence. \citet{daSilva2024}
 also record, for the earlier models, that their relaxations fall below $M-C$ in the
 great majority of cases; this is a statement about most instances, not all, and
 Table~\ref{tab:methods} in Section~\ref{sec:exact} is hedged accordingly.
+
+That baseline set is not the whole compact literature. \citet{Akhundov2024} later
+derive symmetry-broken position and job-group arc-flow models and strengthen their
+JGSMF formulation with valid inequalities. Those inequalities improve its linear
+lower bound and the resulting model outperforms SSPMF in their experiments. JGSMF was
+not reimplemented here, so no result below ranks the campaign solvers against it.
 
 \begin{table}[t]\centering
 \scriptsize
@@ -117,7 +124,7 @@ Year & Work & Approach & Contribution used here \\
 \midrule
 1988 & \citet{Tang1988}      & ILP; the KTNS rule           & KTNS optimal for a fixed order; the pairwise bound $w_{ij}$ \\
 1994 & \citet{Crama1994}     & complexity; heuristics       & NP-hard for every fixed $b\ge2$; the seven standard assumptions; KTNS invalid under non-uniform tool costs, the LP is not \\
-2004 & \citet{Laporte2004}   & the LSS model; B\&C and B\&B & the Tang--Denardo relaxation is identically $0$; B\&B to $25$ jobs beats B\&C at $8$ \\
+2004 & \citet{Laporte2004}   & the LSS model; B\&C and B\&B & the Tang--Denardo relaxation is identically $0$; B\&B to $25$ jobs beats B\&C at $9$ \\
 2010 & \citet{Ghiani2010}    & Hamiltonian cycle            & reversal symmetry preserves the total cost \\
 2015 & \citet{Catanzaro2015} & compact F1--F5               & F3 and F4 share a relaxation, F4 is smaller; F5 is strongest and is their recommendation \\
 2021 & \citet{daSilva2024}   & multicommodity flow          & relaxation $=M-C$ when every tool is used; $+17.01\%$ instances solved \\
@@ -125,10 +132,10 @@ Year & Work & Approach & Contribution used here \\
 2025 & \citet{Legrand2025}   & dynamic programming, $A^{*}$ & combinatorial bounds computed inside the search \\
 \bottomrule
 \end{tabular}
-\caption{The exact-method lineage for the SSP. Two decades of compact formulations
-raised the linear relaxation only as far as the coverage bound $q=\lvert\U\rvert-b$
-\citep{daSilva2024}. Moving past it has required leaving the compact
-linear-programming setting.}
+\caption{The exact-method lineage for the SSP. SSPMF reaches the coverage bound
+$q=\lvert\U\rvert-b$ when every declared tool is used \citep{daSilva2024}; the later
+JGSMF model adds symmetry and strengthening inequalities \citep{Akhundov2024}.
+Only the former is among the compact baselines reimplemented here.}
 \label{tab:lineage}
 \end{table}
 
@@ -144,12 +151,13 @@ problems in Section~\ref{ssec:pos}. \citet{Jans2013} give a compact
 asymmetric-representatives alternative, which is what the grouping solver used in
 this work implements.
 
-The configuration view that unifies grouping and sequencing is developed by
-\citet{Colares2026Exact}, work in progress in the advisors' own group. It casts the
-SSP as a generalised travelling-salesman problem whose clusters overlap, and solves
-it by a non-compact integer program with exponentially many transition variables,
-together with generalised subtour-elimination constraints separated as lazy
-constraints. The overlap is what separates the problem from the textbook generalised
+The configuration view that unifies grouping and sequencing is documented by
+\citet{Moreira2026}, who attributes the formulation to a 2024 personal communication
+by Rafael Colares, Mauricio de Souza and Annegret Wagler. It casts the SSP as a
+generalised travelling-salesman problem whose clusters overlap, and solves it by a
+non-compact integer program with exponentially many transition variables, together
+with generalised subtour-elimination constraints separated as lazy constraints. The
+overlap is what separates the problem from the textbook generalised
 travelling-salesman problem with disjoint clusters surveyed by \citet{Pop2024}, whose
 Noon--Bean reduction \citep{Noon1993} and branch-and-cut methods
 \citep{Fischetti1997} therefore do not transfer directly. Where a pricing problem
@@ -157,7 +165,7 @@ generates constraints that depend on the columns already generated, the
 column-and-row framework of \citet{Muter2013} is the relevant methodology.
 
 Two recent theses sit closest to this work, and both come from the same research
-group. \citet{Otiai2024} builds an exact branch-and-price for the Job Grouping
+group. \citet{Otiai2026} builds an exact branch-and-price for the Job Grouping
 Problem using Ryan--Foster branching \citep{Ryan1981}. \citet{Moreira2026} studies
 the SSP through the magazine-configuration formulation and measures its relaxation
 against the compact models. His measurements are directly comparable with those of
@@ -176,10 +184,14 @@ upper bound inside the branch-and-cut of \citet{Laporte2004}. Enumerative scheme
 dominance pruning \citep{Yanasse2009} and the bounding arguments of
 \citet{Ghiani2010} complete the pre-metaheuristic period.
 
-The current state of the art is the hybrid genetic search of \citet{Mecler2021},
-which couples an order-based genetic algorithm with local search and seeds its
-population from grouping solutions. The grouping view is therefore built into the
-best heuristic as well as into the exact methods.
+The hybrid genetic search (HGS) of \citet{Mecler2021} is the established benchmark
+comparator, coupling an order-based genetic algorithm with local search. Its initial
+population consists of random job orders improved by local search; it does not seed
+from grouping solutions. More recently, the parallel-tempering method of
+\citet{Almeida2025} was compared with HGS on twelve large Mecler sets: it improved the
+best value on four, tied it on three, improved the reported mean on nine, and was faster
+on all twelve. It is therefore safer to regard HGS as the benchmark comparator than as
+the current unqualified state of the art.
 
 \subsection{The decomposition in industrial practice}\label{ssec:sota-practice}
 
@@ -202,7 +214,11 @@ Section~\ref{ssec:disc-agree} returns to the agreement.
 Their paper also poses, as an open question in its closing paragraph, the trade-off
 between minimising the number of tools changed and the number of times tools are
 changed, for varying values of the setup time incurred when the machine is stopped.
-Section~\ref{ssec:collapse} answers that question for the uniform model.
+\citet{Furrer2017} subsequently treat the closest fixed-order predecessor: arbitrary
+processing and setup times with the number of stops minimised first and switches
+second. Section~\ref{ssec:collapse} instead analyses variable job order and
+configuration blocks under a scalar setup weight, and states why its high-setup
+exactness result does not transfer automatically to KTNS post-processing.
 
 What the literature does not contain is a worst-case analysis of the decomposition:
 bounds on its gap or ratio, extremal instances, or conditions for exactness. The
@@ -225,20 +241,24 @@ first two.
 
 \subsection{Recent exact developments}\label{ssec:sota-recent}
 
-The exact frontier has moved again recently, by routes that reinforce the reading
-above. \citet{Akhundov2024} exploit the reversal symmetry of \citet{Ghiani2010}
-systematically, deriving symmetry-broken position-based and arc-flow formulations
-from a job-group representation. \citet{Legrand2025}, with Catanzaro among the
+The exact frontier has moved again recently. \citet{Akhundov2024} exploit the reversal
+symmetry of \citet{Ghiani2010} systematically, deriving symmetry-broken position-based
+and arc-flow formulations from a job-group representation and strengthening the latter
+with inequalities that improve its relaxation. \citet{Legrand2025}, with Catanzaro among the
 authors, leave integer programming altogether for a dynamic-programming and $A^{*}$
 search equipped with a new family of lower bounds, reporting the strongest exact
-results to date.
+reproducible published results located for this report. An accepted IFORS~2026
+abstract by \citet{Locatelli2026} claims a newer combinatorial branch-and-bound that
+outperforms the prior frontier and solves open instances, but no archival paper or
+code was available by the report's 30~August~2026 literature cut-off; it is therefore
+recorded but not used as a comparison baseline.
 
-Their bounds are combinatorial and are computed inside the search rather than as a
-linear relaxation. That is the pattern. Several of the strongest recent advances have come from leaving
-the compact linear-programming setting, whether for a search with sharper
-combinatorial bounds, for a decomposition whose subproblem is settled exactly, or for
-a relaxation engineered to exceed the counting bound. The two methods of
-Section~\ref{sec:exact} take the second and third of those routes.
+The latter bounds are combinatorial and are computed inside the search rather than as
+a linear relaxation. Recent progress therefore spans both strengthened compact models
+and methods that leave the compact linear-programming setting: search with sharper
+combinatorial bounds, decomposition with an exactly settled subproblem, and
+relaxations engineered to exceed the counting bound. The two methods of
+Section~\ref{sec:exact} take the last two of those routes.
 
 \subsection{Benders decomposition}\label{ssec:sota-benders}
 
@@ -278,14 +298,16 @@ instance at hand, a characterisation of the instances where the construction is 
 or any separation of the two readings the construction admits.
 Section~\ref{sec:gap} builds one, on top of theirs.
 
-Second, on the exact side the strongest of the compact relaxations reviewed here equals
-the coverage bound $q$ \citep{daSilva2024}, and the configuration relaxation does not improve on it on
-most instances \citep{Moreira2026}. Progress therefore requires either a method that
+Second, on the exact side the strongest of the three compact baselines reimplemented
+here equals the coverage bound $q$ \citep{daSilva2024}, and the configuration
+relaxation does not improve on it on most instances \citep{Moreira2026}. This campaign
+therefore tests either a method that
 does not rely on a linear relaxation at all, which is the Benders route of
 Section~\ref{ssec:bbc}, or a formulation whose relaxation can exceed the bound, which
-is the position--transition route of Section~\ref{ssec:pos}.
+is the position--transition route of Section~\ref{ssec:pos}. The comparison does not
+include the strengthened JGSMF formulation of \citet{Akhundov2024}.
 
 Third, the configuration view that works well for the Job Grouping Problem
-\citep{Otiai2024} has no tractable exact counterpart for the SSP, because the natural
+\citep{Otiai2026} has no tractable exact counterpart for the SSP, because the natural
 model carries exponentially many subtour constraints. That is the opening the
 position-indexed formulations address.

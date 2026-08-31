@@ -2,7 +2,7 @@
 \section{Discussion}\label{sec:disc}
 %==============================================================================
 
-\subsection{Bound-limited, not implementation-limited}\label{ssec:disc-bound}
+\subsection{Certificate-limited in the tested Benders implementation}\label{ssec:disc-bound}
 
 A method can fail to solve an instance for two reasons. It can fail to find a good
 solution, or it can find one and fail to prove that no better one exists. The
@@ -10,20 +10,20 @@ distinction matters because the two failures call for different remedies. The fi
 is answered by better search: heuristics, warm starts, branching rules. The second is
 answered only by a better bound.
 
-For the SSP four independent measurements separate the two cases, and all four point
-the same way.
+For the tested Benders regimes, four independent measurements separate the two cases,
+and all four point the same way.
 
 \emph{The incumbent at the time limit.} On the runs that hit the limit and whose
 optimum is known from elsewhere, the Benders solver's incumbent already equals that
-optimum $66\%$ of the time across its nine configurations, and $59\%$ of the time for
+optimum $65\%$ of the time across its nine configurations, and $58\%$ of the time for
 the plain one. In those runs the solver has found the answer and spends the remaining
 hour failing to certify it.
 
 \emph{The ablation.} Four strengthenings were implemented. The one that improves the
 incumbent, a hybrid genetic search run at the root, gains thirty-one instances. The
 three that aim at the dual bound --- fractional cuts, Pareto-optimal lifting, a
-conflict-graph row --- are neutral or harmful, and the worst of them costs
-thirty-seven. A solver whose difficulty was finding good solutions would not behave
+conflict-graph row --- are neutral or harmful; fractional separation costs sixty-nine
+solved instances and Pareto lifting costs thirty-seven. A solver whose difficulty was finding good solutions would not behave
 this way.
 
 \emph{The split by bound tightness.} The same solver closes $94\%$ of the instances on
@@ -32,14 +32,14 @@ which it does not. The classification is by a single structural property rather 
 size or density, and it is the property Section~\ref{sec:gap} identifies as governing
 the problem. The split is not evidence that the loose instances are intrinsically hard:
 the arc-based \texttt{CATZ-F4}, whose relaxation is not $q$, closes a \emph{larger}
-share of the loose instances than of the tight ones and closes all $43$ of the loosest
+share of the loose instances than of the tight ones and closes all $45$ of the loosest
 (Table~\ref{tab:tightness}). Nor does every method whose relaxation equals $q$ collapse
 --- SSPMF loses only $13$ points across the same split. What the $54$-point loss
 measures is a master that carries $q$ and, at the root, almost nothing else. That makes
 it evidence about this way of building a solver rather than about the SSP.
 
 \emph{The other method.} The branch-and-price prototype reports its root relaxation on
-every run, and on all $2{,}114$ runs of the position--configuration formulation that
+every run, and on all $2{,}108$ runs of the position--configuration formulation that
 value is exactly $q$. A different algorithm, a different formulation and a different
 solver arrive at the same number.
 
@@ -52,7 +52,7 @@ limited by the strength of its bound and not by its implementation.
 
 The fractional-cut result is the strongest form of this conclusion. Separating at
 fractional points is the standard remedy when a Benders scheme tails off, and it does
-what it is supposed to do locally: sixty-seven million cuts reduce the node count by a
+what it is supposed to do locally: almost sixty-seven million cuts reduce the node count by a
 factor of twenty. It nonetheless raises the bound at termination on no instance at all.
 The remedy is being applied correctly, to the wrong obstacle.
 
@@ -60,25 +60,31 @@ The remedy is being applied correctly, to the wrong obstacle.
 
 Section~\ref{ssec:disc-bound} establishes that the methods of this report are limited
 by their bound. That is a diagnosis of the symptom. This subsection asks what causes
-it, and measures what a different family of inequalities could be worth. The cause is
-structural rather than incidental, which is consistent with an ablation in which none
-of the dual-bound strengthenings helped.
+it, and measures what a different family of inequalities could be worth. The evidence
+points to a structural locality mismatch; that is an explanation consistent with the
+ablation, not a theorem of causation.
 
 \paragraph{The cost is not a local quantity.}
 Write $\beta_t$ for the number of maximal blocks of consecutive positions during which
-tool $t$ sits in the magazine. Every insertion of $t$ begins one such block, so
+tool $t$ sits in the magazine. In the empty-start convention every insertion of $t$
+begins one such block. Theory here uses the free-initial convention, so the exact
+identity is
 \[
-  \Zst \;=\; \sum_{t\in\U}\beta_t ,
-\qquad\text{and}\qquad
-  \beta_t\ge 1 \;\text{ for every used tool}
+  \Zst
+  = \sum_{t\in\U}\beta_t-\min(b,\lvert\U\rvert).
 \]
-recovers the coverage bound exactly. Everything above $q$ is therefore a
+When $\lvert\U\rvert\ge b$, as on the nontrivial benchmark instances, this becomes
+\[
+  \Zst=q+\sum_{t\in\U}(\beta_t-1).
+\]
+Thus one block per used tool recovers the coverage bound exactly, and everything above
+$q$ is a
 \emph{re-insertion}: a tool evicted and brought back. A re-insertion happens when the
 jobs needing a tool are pushed apart by other jobs whose requirements cannot sit
 alongside it. That is a property of the global interleaving of the schedule. It is not
 a property of which pairs of jobs happen to be adjacent.
 
-\paragraph{Every inequality in this report is local.}
+\paragraph{The original master information is locally indexed.}
 Against that, consider what the two methods actually give their relaxations.
 
 The Benders master carries one row $\theta\ge\sum_{ij}w_{ij}x_{ij}$, which is indexed
@@ -92,7 +98,7 @@ The position--configuration relaxation prices one configuration per position and
 couples positions only through per-tool presence rows, so its linear relaxation mixes
 configurations fractionally at each position and pays no transition. That is why
 Proposition~\ref{prop:pcf} holds, and it is why the measured root value is $q$ on every
-one of $2{,}114$ runs.
+one of $2{,}108$ runs.
 
 PTF is the one construction here that ever exceeds $q$, and the reason is the same one
 stated positively: a column carries a transition, so the relaxation cannot avoid paying
@@ -103,12 +109,13 @@ that is a conjecture about the formulation, and testing it means building the st
 chaining and measuring.
 
 \begin{observation}[The coverage row is carrying the master alone]\label{obs:rootq}
-On $9{,}084$ of the $10{,}396$ Benders runs for which a root relaxation value was
-recorded --- $87.4\%$ --- that value equals $\lvert\U\rvert$ exactly. The pairwise row
-and the triplet rows contribute nothing at the root on almost nine runs in ten. Where
-the pairwise structure does bite it bites hard, by $7.70$ on average, on the $1{,}312$
+On $9{,}067$ of the $10{,}392$ canonical Benders runs for which a root relaxation value was
+recorded --- $87.2\%$ --- that value equals $\lvert\U\rvert$ exactly. The pairwise row
+and the triplet rows therefore deliver no improvement beyond coverage on almost nine
+runs in ten. Where
+the pairwise structure does bite it bites hard, by $7.71$ on average, on the $1{,}325$
 runs where it moves the root at all. Which instances those are is not characterised
-here; the campaign records no density measure.
+here.
 \end{observation}
 
 \begin{figure}[h]\centering
@@ -125,12 +132,12 @@ here; the campaign records no density measure.
   nodes near coords, nodes near coords style={font=\scriptsize,
      /pgf/number format/fixed, /pgf/number format/1000 sep={,}}]
   \addplot[draw=black!70, fill=black!25]
-    coordinates {(z,9084)(a,176)(b,207)(c,257)(d,311)(e,208)(f,102)(g,51)};
+    coordinates {(z,9067)(a,177)(b,210)(c,258)(d,314)(e,211)(f,104)(g,51)};
 \end{axis}
 \end{tikzpicture}
-\caption{Observation~\ref{obs:rootq} drawn over all $10{,}396$ Benders runs that
+\caption{Observation~\ref{obs:rootq} drawn over all $10{,}392$ canonical Benders runs that
 recorded a root relaxation. The first bar is every run whose root value is
-\emph{exactly} the coverage row --- $9{,}084$ of them, nearly seven times the whole
+\emph{exactly} the coverage row --- $9{,}067$ of them, nearly seven times the whole
 remainder combined. The pairwise row, the triplet rows and every optimality cut
 generated before the first branching decision, taken together, move the relaxation not
 at all on eighty-seven runs in a hundred. This is the diagnosis behind the rest of this
@@ -144,8 +151,9 @@ Let $W=[p,r]$ be a contiguous block of positions with $p\ge2$. Write $w_{t,k}$ f
 insertion of tool $t$ at position $k$ and $a_{t,k}$ for its presence, as in the
 position-indexed formulation of Section~\ref{ssec:pos}.
 
-\begin{proposition}[Window inequality]\label{prop:window}
-For every contiguous block of positions $W=[p,r]$ and every feasible point of PCF,
+\begin{proposition}[Integral window inequality]\label{prop:window}
+For every contiguous block of positions $W=[p,r]$ and every integer-feasible
+trajectory of PCF,
 \begin{equation}\label{eq:window}
   \sum_{t\in\U}\ \sum_{k=p}^{r} w_{t,k}
   \;\;\ge\;\;
@@ -163,54 +171,67 @@ side is at least $\lvert S\setminus A\rvert\ge\lvert S\rvert-\lvert A\rvert$, wh
 the right-hand side.
 \end{proof}
 
-The inequality linearises with one auxiliary variable per tool and window. Two
-properties make the family useful. It constrains a stretch of the schedule rather than
-a single point, so it can charge a re-insertion that no arc-indexed or single-position
-row can see. And it contains only master variables, so it is a \emph{robust} cut in the
-sense of \citet{Poggi2011}: its dual never reaches the pricing problem, and the
-set-union knapsack oracle of Section~\ref{ssec:pos} is unchanged. The per-tool counting
-rows (T) already in the master are the case $W=[2,n]$ summed over tools, so
-Proposition~\ref{prop:window} generalises them.
+This is valid integral accounting, but it does not by itself strengthen the
+fractional master. The implemented robust extension introduces
+$v_{t,W}\ge a_{t,k}$ for $k\in W$ and replaces the cardinality by
+$\sum_t v_{t,W}$. Its best choice is
+$v_{t,W}=\max_{k\in W}a_{t,k}$. The resulting fractional inequality is redundant:
+for every tool and every $h\in W$, the existing rows (W) and $w\ge0$ imply
+\[
+ \sum_{k=p}^{r}w_{t,k}\ \ge\
+ \sum_{k=p}^{h}(a_{t,k}-a_{t,k-1})
+ =a_{t,h}-a_{t,p-1}.
+\]
+Taking the maximum over $h$ and summing over tools gives exactly the implemented
+window row. It therefore cannot raise the PCF relaxation. In particular, it is not a
+fractional generalisation of the counting rows (T), whose right-hand side requires
+every used tool to reach one somewhere rather than merely its fractional maximum.
 
 The implementation was additionally checked against the loading rule at $1{,}200{,}816$
 integer points --- every window of every sequence of a bank of random instances --- with
 no violation. That is a test of the code, not of the proposition.
 
 \paragraph{What it would be worth.}
-A family is worth implementing only if the bound it could deliver is materially better
-than the bound already available. That can be settled before writing any solver code,
-by computing for each family the best bound it could possibly give and comparing it
-against the optimum. On an instance small enough to enumerate, the ceiling of a family
-is the minimum over sequences of the strongest bound that family certifies for that
-sequence: for the arc-supported family this is the pairwise weight solved to optimality
-as a Hamiltonian path, and for the window family it is the best decomposition of the
-sequence into disjoint windows, an $O(n^2)$ dynamic program.
-Table~\ref{tab:ceilings} reports both on the $62$ instances of the Laporte3 family whose
-coverage bound is loose.
+A candidate construction is worth implementing only if its integral-sequence value is
+materially better than the bound already available. That can be screened before writing
+solver code. On an instance small enough to enumerate, the value of the fixed
+Tang--Denardo pairwise row is obtained by solving its Hamiltonian path problem and then
+taking the better of it and coverage. For the window family, the strongest disjoint
+window decomposition of each sequence is found by an $O(n^2)$ dynamic program and then
+minimised over sequences. These are ceilings for those two specific constructions over
+integral sequences. In particular, the pairwise value is \emph{not} a ceiling for every
+arc-supported Benders cut.
+Table~\ref{tab:ceilings} reports both on the $62$ loose cases within the fixed
+$81$-instance Laporte3 diagnostic sample listed in
+\texttt{verification/bound\_probe\_instances.txt}. The sample makes the exact
+enumeration reproducible; it is a probe of the two families, not a census or an
+estimate over all $340$ Laporte3 instances.
 
 \begin{table}[h]\centering
 \footnotesize
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
-Family & mean & median & best case & no gain on\\
+Construction & mean & median & best case & no gain on\\
 \midrule
-arc-supported (what the solvers carry today) & $8.9\%$  & $0\%$  & $60.0\%$ & $46/62$\\
-window                                       & $30.9\%$ & $40\%$ & $66.7\%$ & $18/62$\\
+fixed pairwise row $+$ coverage & $8.9\%$  & $0\%$  & $60.0\%$ & $46/62$\\
+window family                 & $30.9\%$ & $40\%$ & $66.7\%$ & $18/62$\\
 \bottomrule
 \end{tabular}
-\caption{The fraction of the gap $\Zst-q$ that each family could close at best, on the
-$62$ Laporte3 instances with $n=8$ whose coverage bound is loose. In absolute terms the
-arc family accounts for $54$ of the $305$ units of gap and the window family for $116$.
-Both figures are ceilings: a linear relaxation lands below them. The arc ceiling is the
-one that matters, because it says the families now in the solvers have almost no
-headroom left however they are tuned.}
+\caption{The fraction of the gap $\Zst-q$ closed by each integral-sequence
+construction, on the
+$62$ loose cases in the fixed $81$-instance, $n=8$ diagnostic sample. In absolute terms
+the fixed pairwise row plus coverage accounts for $54$ of the $305$ units of gap and the
+window construction for $116$. The first row describes one fixed pairwise surrogate,
+not the class of arc-supported cuts. As a direct guard against that interpretation, a
+recorded Benders root exceeds it on $7$ of the $70$ sample identities with a comparable
+root; plain \texttt{BBC-LP} does so on three.}
 \label{tab:ceilings}
 \end{table}
 
 \begin{figure}[h]\centering
 \begin{tikzpicture}
 \begin{axis}[reportaxis, height=6.0cm,
-  xlabel={the $62$ loose Laporte3 instances, each family sorted on its own value},
+  xlabel={the $62$ loose sample cases, each family sorted on its own value},
   ylabel={share of the gap certified},
   xmin=0, xmax=63, ymin=-4, ymax=76,
   xtick={1,10,19,30,40,47,62},
@@ -218,65 +239,61 @@ headroom left however they are tuned.}
   legend pos=north west]
   \addplot[black, no marks, line width=1.1pt] table[x=i,y=win] {figdata/ceilings.dat};
   \addlegendentry{window family --- inequality~(\ref{eq:window})}
-  \addplot[black!50, no marks, dashed, line width=1.1pt] table[x=i,y=arc] {figdata/ceilings.dat};
-  \addlegendentry{arc-supported --- what both solvers carry today}
+  \addplot[black!50, no marks, dashed, line width=1.1pt] table[x=i,y=pair] {figdata/ceilings.dat};
+  \addlegendentry{fixed pairwise row $+$ coverage}
   \draw[black!25, line width=0.5pt] (axis cs:0,0) -- (axis cs:63,0);
   \draw[black!45, densely dotted] (axis cs:19,-4) -- (axis cs:19,46);
   \draw[black!45, densely dotted] (axis cs:47,-4) -- (axis cs:47,64);
   \node[font=\scriptsize, text=black!60, anchor=south east] at (axis cs:18.5,20)
     {window: nothing on $18$};
   \node[font=\scriptsize, text=black!60, anchor=south east] at (axis cs:46.5,4)
-    {arc: nothing on $46$};
+    {pairwise: nothing on $46$};
 \end{axis}
 \end{tikzpicture}
-\caption{The ceiling of each family on each of the $62$ instances, each family sorted
-independently on its own values, so the two curves answer the question \emph{how often
-does this family certify anything, and how much}. Each is the fraction of that
-instance's gap the family could close at best, computed by enumerating every ordering,
-so both are limits a linear relaxation falls short of. The arc-supported family --- all
-either solver in this report carries --- is flat at zero for the first $46$ instances
-and only then rises; on three quarters of these instances the strongest bound it could
-ever produce is the coverage bound it already has, however it is separated or tuned.
+\caption{The integral-sequence value of each construction on each of the $62$ loose
+sample cases, each sorted independently, so the curves answer \emph{how often does this
+construction certify anything, and how much}. Each is the fraction of that instance's
+gap closed after enumerating every ordering. The fixed pairwise row plus coverage is
+flat at zero for the first $46$ instances and only then rises. This statement does not
+extend to all arc-supported cuts; the campaign-root cross-check in
+Table~\ref{tab:ceilings} shows why.
 The window family is flat at zero for $18$ and then climbs, with its longest flat
 stretch at one half --- $13$ of the $62$ instances --- and only three reaching two
 thirds. The two peaks are similar, $60\%$ against $67\%$, so the difference between the
-families lies in how often each certifies anything at all, rather than in how much it
-certifies when it does.}
+constructions lies in how often each certifies anything at all, rather than in how much
+it certifies when it does.}
 \label{fig:ceilings}
 \end{figure}
 
-Two readings follow. The arc-supported family is exhausted: on three quarters of the
-loose instances the best bound it could ever certify is the coverage bound itself. And
-the window family has real headroom, roughly two fifths of the remaining gap at the
-median. Measured on the same instances, $84\%$ of the windows that carry the bound have
-length at most four and $71\%$ have length two or three, so a static pool of short
-windows captures most of the value and no separation routine is required.
+Two readings follow. The fixed pairwise surrogate is weak on this sample: on three
+quarters of the loose cases it adds nothing to coverage. The window construction has a
+larger integral-sequence value, roughly two fifths of the remaining gap at the median.
+Neither statement predicts the value of a fractional master relaxation; that is tested
+directly next for the window rows.
 
-\begin{observation}[The window family is inactive at the PCF$'$ root]\label{obs:windowroot}
+\begin{observation}[The redundant window extension changes no tested root]\label{obs:windowroot}
 The family of Proposition~\ref{prop:window} was added to the PCF$'$ master --- $15$
 windows of length two to four, which at $n=8$ is $660$ to $1{,}090$ rows and $225$ to
 $375$ auxiliary variables depending on $\lvert T\rvert$ ---
 and the root relaxation recomputed on $38$ of the $62$ loose Laporte3 instances, of
 which $37$ returned a value and one, \texttt{L18-4}, did not. The root
 value equals $q$ on all $37$ with the rows and without them; the family raises the bound
-on none, including instances whose gap is ten or eleven. Every window row is slack at the
-LP optimum, by between $0.5$ and $3.4$. The reason is visible in the solution: the LP
-holds each tool partially present at every position, so $\sum_t \max_{k\in W} a_{t,k}$
-stays near $b$ instead of counting the distinct tools an integral schedule would need
-inside $W$, and no tool ever \emph{enters} a window. The relaxation evades the family in
-the same way it evades the arc-supported ones.
+on none, including instances whose gap is ten or eleven. Every added row is slack at the
+returned LP optimum, by between $0.5$ and $3.4$. This experiment is now a regression
+check of the redundancy argument above, not evidence that the family might strengthen
+some other PCF root.
 \end{observation}
 
-\paragraph{Where the family belongs.}
-In the position-indexed master, not the Benders master. Expressing \eqref{eq:window} in arc space needs a family of job
-sets to be simultaneously contiguous, which is a product of indicators and has no useful
-linear form --- the same obstruction that makes the triplet rows worthless. In the
-position-indexed master the window is a range of position indices and the inequality is
-immediate. That is an argument about expressive power only, and
-Observation~\ref{obs:windowroot} is the reason it must be kept to that: the family was
-expressible there, was added there, and changed nothing. Being able to write a global
-inequality down is necessary for the position-indexed side to have somewhere left to
-go, and this measurement shows it is not sufficient.
+\paragraph{What a real strengthening must add.}
+The implemented max-presence row belongs nowhere: it is already implied. A useful
+position-indexed strengthening must instead encode whether a tool is required
+\emph{somewhere} in a window and tie that union to job coverage strongly enough to
+survive fractional mixing, or enforce configuration-level rather than tool-level
+trajectory consistency. Either route introduces non-robust rows or richer columns and
+therefore changes the pricing problem. Expressing the same idea in the Benders
+arc master is harder still because contiguity of a job set is a product of arc
+indicators. The failed experiment is useful precisely because the redundancy proof
+now rules out the cheap robust version.
 
 \subsection{Where the theory and the measurements meet}\label{ssec:disc-agree}
 
@@ -296,14 +313,14 @@ methods whose bound is $q$ fast. Restricted that way the coincidence still bites
 unpleasantly: the instances on which one would most want a configuration-based exact
 method are exactly the instances on which it is weakest.
 
-\paragraph{The gap opens where the magazine is large.}
-Observation~\ref{obs:census} finds that every instance with a positive heuristic gap
-needs $b\ge3$, and that positive gaps are rare in a random sample. Independently,
+\paragraph{The gap opens when the magazine has slack.}
+Observation~\ref{obs:census} gives an explicit positive-gap witness at $b=3$ and finds
+none in the fixed $1{,}260$-instance sample at three to five jobs. Independently,
 \citet{Burger2015} report from an industrial study that the decomposition does well
 when the largest job nearly fills the magazine, and that its solution quality
-decreases as the gap between the magazine size and the largest job size grows. One of
-these is an exhaustive combinatorial search on small instances and the other is a case
-study on a printing press. They describe the same regime.
+decreases as the gap between the magazine size and the largest job size grows. One is
+an exact witness plus a fixed small-instance census and the other is a case study on a
+printing press. They describe the same regime.
 
 \paragraph{The walk model overstates the weakness of the standard method.}
 This is the least expected of the three. The literature's mental model of the
@@ -316,50 +333,57 @@ did not exist before the two readings were separated.
 
 \subsection{Limitations}\label{ssec:limits}
 
-Six, ordered by how much they threaten the conclusions above.
+Seven, ordered by how much they threaten the conclusions above.
 
 \paragraph{The census of heuristic gaps is on small instances.}
-Observation~\ref{obs:census} says that positive heuristic gaps are rare, equal to one
-wherever a connected instance produced one, and never occur at $b=2$. The census runs
-from three to eight jobs, because the
-optimum there is computed by exhaustion. Nothing in it shows the same holds at
-industrial sizes, and the agreement with \citet{Burger2015} comes from a different
-method rather than a wider range of sizes. An earlier and narrower version of this
-census supported a stronger claim, that positive gaps need $b\ge4$, which the extended
-search refuted (Remark~\ref{rem:census-b3}); the claim now made is correspondingly
-weaker. This remains the least secure empirical statement in the report and the first a
-reader should discount. The structural results of
+Observation~\ref{obs:census} reports one fixed random census: $1{,}260$ instances at
+three to five jobs, with no positive gap. Exploratory searches at larger sizes supplied
+checked witnesses, including one at $b=3$, but their exact random manifests were not
+retained; the report therefore makes no numerical frequency claim from them and no
+absence claim at $b=2$. Nothing in the fixed census shows the frequency at industrial
+sizes, and the qualitative agreement with \citet{Burger2015} comes from a different
+method rather than a wider range of sizes. Theorem~\ref{thm:connected-gap} now settles
+existence and unboundedness on connected instances, but says nothing about how common
+such gaps are. The structural results of
 Sections~\ref{ssec:exact} and \ref{ssec:ratio} do not depend on it; those are proved for
 every instance and every capacity.
 
-\paragraph{A ceiling is not a bound, and for the window family the difference is
-everything.}
-Table~\ref{tab:ceilings} and Figure~\ref{fig:ceilings} give the strongest bound each
-family could certify, found by enumerating every sequence of $62$ instances at eight
-jobs. Both families are measured the same way, so the comparison between them is fair,
-and the arc-supported family being exhausted is a claim about a ceiling and therefore
-safe. The window family's ceiling, however, turns out to be unreachable. Added to the
-PCF$'$ master and measured at the root on $37$ of those instances, the family raises the
-relaxation on \emph{none} of them (Observation~\ref{obs:windowroot}). The ceiling was
-computed over integral sequences; the relaxation is fractional, and the two are not
-comparable. Any future ceiling computation in this line should be read with that in
-mind.
+\paragraph{An integral-sequence ceiling is not an LP bound.}
+Table~\ref{tab:ceilings} and Figure~\ref{fig:ceilings} give two values found by
+enumerating every sequence of the $62$ loose cases in a fixed $81$-instance sample at
+eight jobs. The comparison is reproducible and useful as a screen, but the pairwise row
+is not representative of all arc-supported cuts and the sample is not a family-wide
+estimate.
+The window extension was added to PCF$'$ and raises none of the $37$ roots with paired
+values (Observation~\ref{obs:windowroot}). The theorem audit gives the stronger
+explanation: its fractional row is implied by existing transition rows. The
+integral-sequence ceiling and the implemented LP extension are different objects; a
+future strengthening must first prove that its fractional encoding is not redundant.
 
-\paragraph{Four hundred and twenty-seven runs returned no result.}
-This affects the denominators in Table~\ref{tab:solves} and is the one failure that
-changes a conclusion. Of the $352$ belonging to LSS, each is recorded as a subprocess
-termination with no captured exception, so the proximate cause is not in the result
-files; none occurs before $1{,}063$ seconds, and they are spread evenly over the ten
-shards. The obvious size explanation cannot be ruled out --- the crashed rows record no
-size fields, and $239$ of the $352$ crashes fall in the largest family. The loss is not
-random with respect to difficulty either: SSPMF proves
-optimality on $78\%$ of the instances LSS completed and on $60\%$ of those it lost, so
-LSS never attempted the hard third of the collection. That is why
-Section~\ref{ssec:results-solved} reports the three compact models without ranking them
-against each other. It does not touch the comparison between the compact models as a
-group and the methods built here, which is an order of magnitude larger than the missing
-runs. Of the other $75$, spread across nine configurations, $49$ carry a credential
-expiry error from the cluster filesystem and are infrastructure losses.
+\paragraph{The raw Catanzaro directory was not the published benchmark.}
+The campaign ran $171$ files from that directory, but the cited benchmark defines
+$160$. Ten extra files duplicate canonical cases byte for byte and one is an ad-hoc
+smoke test. Keeping them would give those ten matrices double weight and attach an
+unsupported provenance to the eleventh, so every aggregate in this report filters the
+eleven identities explicitly. The $132$ excluded result rows remain in the raw archive,
+and the analysis checks both the exclusion count and the canonical total before
+computing a figure. No solver result is invented or discarded on its outcome.
+
+\paragraph{Primary outcomes and memory sensitivity are separate ledgers.}
+The completed 16-GiB primary ledger contains $376$ scheduler-confirmed memory-limit
+outcomes: $352$ for LSS and $24$ for Benders. Scheduler evidence establishes the cause,
+including the $15$ recovery tasks that exhausted the same 16-GiB envelope. These
+outcomes remain failures in the primary denominator. A separate 32-GiB LSS sensitivity reran all
+positions; at the $352$ primary OOM identities it produced $245$ time-limit-feasible
+rows and $107$ further memory failures, but no additional optimum. Those rows are
+\emph{not} merged into the primary comparison.
+
+The $123$ primary rows selected for exact-envelope recovery comprised $58$ absent
+identities, $48$ filesystem-credential expiries, and $17$ unexplained worker exits.
+Their manifest-driven 16-GiB rerun is now validated and merged: $17$ certified optima,
+$91$ time-limit-feasible outcomes, and $15$ scheduler-confirmed OOM outcomes. Thus
+Table~\ref{tab:solves} is the balanced final primary comparison. The separate 32-GiB
+sensitivity is not used in it.
 
 \paragraph{The comparison is one hour, one machine, one collection, and F4 rather than F5.}
 Every solve count and time in Section~\ref{sec:comp} comes from a single one-hour limit
@@ -385,5 +409,6 @@ repetition. It shows that the agent learns, and says nothing about this problem.
 therefore reported in Appendix~\ref{app:rl} rather than among the methods. That bears
 on Appendix~\ref{app:rl} and nothing else, and
 Section~\ref{ssec:disc-locality} explains why running it here would not have helped:
-cut selection chooses among cuts a method can already generate, and those cuts have
-almost no headroom left.
+cut selection chooses among cuts a method can already generate. In this campaign the
+available selections did not improve the terminal bound; the fixed-pairwise probe is
+not used as a general ceiling argument.

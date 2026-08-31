@@ -15,6 +15,9 @@ $T_j\subseteq T$ with $1\le\lvert T_j\rvert\le b$. The requirement
 $\lvert T_j\rvert\le b$ is necessary: a job needing more tools than the magazine
 holds could never be run. Write $\U=\bigcup_{j\in J}T_j$ for the set of tools that
 some job requires. Tools outside $\U$ play no part and are ignored.
+If $b>\lvert\U\rvert$, replacing $b$ by $\lvert\U\rvert$ changes no feasible
+schedule or insertion cost. We make that preprocessing convention once and henceforth
+assume $b\le\lvert\U\rvert$; in particular $q=\lvert\U\rvert-b$ is non-negative.
 
 \begin{definition}[Schedule and switch cost]\label{def:ssp}
 A \emph{schedule} is a pair $(\pi,\mathbf{M})$, where $\pi$ is a permutation of $J$
@@ -25,13 +28,14 @@ magazine contents at each position. It is feasible when
   \qquad (i=1,\dots,n),
 \]
 that is, when the magazine never overflows and always holds what the current job
-needs. With $M_0=\varnothing$, the \emph{switch cost} of the schedule is the number
-of tool insertions it makes,
+  needs. With $M_0=\varnothing$, its \emph{empty-start cost} is
 \[
   \sum_{i=1}^{n}\lvert M_i\setminus M_{i-1}\rvert .
 \]
-The SSP asks for a feasible schedule of minimum switch cost. That minimum is
-written $\Zst$.
+The \emph{free-initial cost} omits the $i=1$ term: the first fill is free and every
+later insertion is charged. Throughout the theory $\Zst$ denotes the minimum
+free-initial cost; $\Zempty$ denotes the minimum empty-start cost reported by the
+computational study.
 \end{definition}
 
 Counting insertions rather than removals is the standard cost model. Under a fixed
@@ -58,8 +62,8 @@ denoting $0$, is
  t_6  &   &   &   &   & 1 & 1
 \end{array}
 \]
-Figure~\ref{fig:ring} draws it. Its optimum is $\Zst=6$ in the empty-start cost,
-or $3$ once the first fill is not charged; Section~\ref{ssec:ktns} computes this.
+Figure~\ref{fig:ring} draws it. Its optima are $\Zempty=6$ empty-start and
+$\Zst=3$ free-initial; Section~\ref{ssec:ktns} computes them.
 \end{example}
 
 \begin{figure}[h]\centering
@@ -92,8 +96,9 @@ $O(n\lvert T\rvert)$ time, and no loading policy for $\pi$ costs less.
 \end{proposition}
 
 The proof is in \citet{Tang1988}; \citet{Crama1994} give a second proof through
-interval matrices. Write $\KTNS(\pi)$ for the value the rule returns. Since the
-rule is optimal for every fixed order,
+interval matrices. Write $\KTNS(\pi)$ for its free-initial value (subtracting the
+constant first fill from the empty-start count). Since the rule is optimal for every
+fixed order,
 \[
   \Zst \;=\; \min_{\pi}\ \KTNS(\pi),
 \]
@@ -163,7 +168,7 @@ polynomially solvable caching problem into an NP-hard one.
 The magazine, not the job, is the natural unit for what follows.
 
 \begin{definition}[Configuration, cluster, transition cost]\label{def:config}
-A \emph{configuration} is a set $C\subseteq T$ with exactly $\lvert C\rvert=b$
+A \emph{configuration} is a set $C\subseteq\U$ with exactly $\lvert C\rvert=b$
 tools. The set of all configurations is written $\confs$. For a job $j$, the
 \emph{cluster} $H_j=\rset{C\in\confs : T_j\subseteq C}$ is the set of
 configurations able to serve $j$. For two configurations, the \emph{transition
@@ -185,8 +190,9 @@ of magazines, and what remains is a walk of the same cost that serves every job.
 converse is Theorem~\ref{thm:grouping} in Section~\ref{ssec:exact}.
 
 The SSP is therefore a generalised travelling-salesman problem over $\confs$, in
-which the clusters \emph{overlap}: one configuration can serve many jobs. This
-formulation is due to \citet{Colares2026Exact}. The overlap is what separates it
+which the clusters \emph{overlap}: one configuration can serve many jobs. The
+formulation is documented by \citet{Moreira2026}, who attributes it to a 2024 personal
+communication by Rafael Colares, Mauricio de Souza and Annegret Wagler. The overlap is what separates it
 from the textbook generalised travelling-salesman problem with disjoint clusters
 \citep{Noon1993,Fischetti1997,Pop2024}, and it is why the standard reductions for
 that problem do not transfer.
@@ -474,10 +480,11 @@ $\Zst=5$.\footnote{Verified by exhaustive computation; see
 Appendix~\ref{app:verify}.}
 
 The coverage bound $q$ deserves particular attention, because
-Section~\ref{ssec:compact} shows that the strongest compact formulation in the
-literature has a linear relaxation exactly equal to it. It is therefore both an
-elementary counting argument and the limit that twenty years of formulation work
-has reached.
+Section~\ref{ssec:compact} shows that the SSPMF model---the strongest of the three
+compact baselines reimplemented here---has a linear relaxation exactly equal to it
+when every declared tool is used. It is therefore both an elementary counting
+argument and the limit of the campaign's compact baseline set; more recent compact
+models such as JGSMF \citep{Akhundov2024} are outside that comparison.
 
 \subsection{Cost conventions}\label{ssec:conv}
 
@@ -488,18 +495,23 @@ first fill.
 \end{definition}
 
 \begin{proposition}[Convention identity]\label{prop:conv}
-For every schedule that keeps the magazine as full as possible,
+For every schedule,
 \[
   \text{cost}_{\mathrm{empty}}
-  \;=\;\text{cost}_{\mathrm{free}}+\min(b,\lvert\U\rvert).
+  \;=\;\text{cost}_{\mathrm{free}}+\lvert M_1\rvert.
 \]
+Moreover, an optimum may be chosen with a full first magazine, and therefore
+$\Zempty=\Zst+b$ under the standing preprocessing convention (equivalently, the
+shift is $\min(b,\lvert\U\rvert)$ in the original input notation).
 \end{proposition}
 
 \begin{proof}
-An optimal loading keeps the magazine full, so the first position loads
-$\min(b,\lvert\U\rvert)$ tools. The empty-start count charges these; the
-free-initial count, by definition, does not; and every later insertion is counted
-identically by both.
+The two sums differ only by their $i=1$ term, which is
+$\lvert M_1\setminus M_0\rvert=\lvert M_1\rvert$. For any fixed order, unused slots
+can be filled at the first position with tools chosen by the KTNS next-use rule;
+retaining such a tool cannot create an insertion, so some optimum has
+$\lvert M_1\rvert=b$. Minimising the identity over full-first optimal loadings gives
+the relation between the two optima.
 \end{proof}
 
 The shift is a constant for a given instance. Three consequences are used later.

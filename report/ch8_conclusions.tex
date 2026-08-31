@@ -14,60 +14,59 @@ saying anything correct about it (Section~\ref{ssec:frames}). Within that settin
 
 \begin{itemize}[topsep=3pt,itemsep=2pt]
   \item The optimum equals the cheapest walk over \emph{all} feasible groupings
-  (Theorem~\ref{thm:grouping}), so the best value the two-phase construction can attain
-  differs from the optimum exactly because of the minimum-cardinality restriction
-  (Corollary~\ref{cor:gap}). This bounds the envelope $H$ of
-  Definition~\ref{def:frames}, not the output of a particular tie-breaking
-  implementation.
+  (Theorem~\ref{thm:grouping}), so the fixed-configuration walk value differs from the
+  optimum exactly because of the minimum-cardinality restriction
+  (Corollary~\ref{cor:gap}). This exact identity concerns $\Hwalk$, not the
+  KTNS-postprocessed value $H$.
   \item Zero-gap classes exist for every capacity: two groups, or a tool set barely
   exceeding the magazine, or a small optimum (Corollaries~\ref{cor:zerogap} and
   \ref{cor:smallZ}).
   \item The ratio is bounded for every instance by
   $\min(b,\Kst-1,q)$ (Theorem~\ref{thm:uncond}), which tightens automatically on
-  instances with few groups or a small tool excess.
+  instances with few groups or a small tool excess. Unlike the gap identity, this
+  guarantee holds uniformly for every admissible grouping and tie-breaking order.
   \item At three groups the walk cost has a closed form
   (Proposition~\ref{prop:hk3}), and the gap obeys a counting bound
   (Proposition~\ref{prop:k3}) that is attained by explicit witnesses. The natural
   guess $\mathrm{gap}\le\Kst-2$ is false for the walk value
-  (Proposition~\ref{prop:refute}).
-  \item For the method as actually specified, positive gaps are rare in the censuses,
-  equal to one on every connected instance found, and never occur at $b=2$
-  (Observations~\ref{obs:rings}--\ref{obs:census}). Unboundedness survives, but with a
-  different witness family from the one the walk model suggests. That family is
-  \emph{disconnected}, and its unboundedness is a conjecture supported at $g=1,2$ rather
-  than a theorem (Observation~\ref{obs:unbounded-true} and
-  Conjecture~\ref{conj:unbounded}). Whether the gap is bounded on \emph{connected}
-  instances is open.
+  (Observation~\ref{obs:refute}).
+  \item For the method as actually specified, the fixed reproducible census finds no
+  positive gap at three to five jobs, while exact witnesses prove that gaps do occur
+  (Proposition~\ref{prop:seed} and Observation~\ref{obs:census}). A connected family
+  has $\Zst=8g-5$ and $H=9g-5$, proving an unbounded actual-heuristic gap
+  (Theorem~\ref{thm:connected-gap}). This resolves the earlier connected-gap question.
   \item The circuit clutter of the grouping system computes $\Kst$
   (Proposition~\ref{prop:chromK}) but does not determine the gap
-  (Proposition~\ref{prop:noclutter}), while blocking duality gives a first
+  (Observation~\ref{obs:noclutter}), while covering duality gives a first
   non-integral family for the grouping relaxation
   (Proposition~\ref{prop:oddring}).
-  \item A per-changeover setup cost interpolates between the SSP and the JGP, with the
-  transition confined to an interval whose width is the gap itself
-  (Theorem~\ref{thm:collapse} and Lemma~\ref{lem:lowrho}). This answers a question
-  posed by \citet{Burger2015}.
+  \item In the explicit-configuration model, a per-changeover setup cost interpolates
+  between the SSP and the JGP: sufficiently small values preserve an SSP optimum, while
+  above the walk-gap threshold every optimum has the minimum number of configuration
+  blocks (Theorem~\ref{thm:collapse} and Lemma~\ref{lem:lowrho}). This is a structural
+  threshold for the weighted objective already studied by \citet{Salonen2006}; it does
+  not establish analogous exactness for KTNS post-processing.
 \end{itemize}
 
 \paragraph{On the algorithmic side.}
 A branch-and-Benders-cut solver was built whose subproblem is exact and polynomial,
-together with position-indexed formulations carrying a fixed polynomial row set, among
-which the position--transition model is a configuration relaxation that can provably
-improve on the coverage bound (Proposition~\ref{prop:ptf}), although the campaign finds
-it doing so on three runs out of $233$.
+together with position-indexed formulations carrying a fixed polynomial row set. The
+position--transition relaxation is provably at least $q$
+(Proposition~\ref{prop:ptf}); two recorded roots strictly exceed it
+(Observation~\ref{obs:ptf-strict}).
 
 \paragraph{On the empirical side.}
-A campaign over $1{,}421$ instances and twelve configurations, under a single one-hour
+A campaign over $1{,}410$ canonical instances and twelve configurations, under a single one-hour
 limit, is reported in Section~\ref{sec:comp} and summarised in
 Section~\ref{ssec:results-summary}. Four of its measurements --- the incumbent at the
 time limit, the ablation, the split by whether the coverage bound is tight, and the
 root relaxation reported by the branch-and-price prototypes --- are independent of one
 another and agree. What they agree on is that the obstacle is the bound rather than the
-search: nothing that improves the search closes the loose instances, and nothing built
-here improves the bound. Two further measurements exist to make that reading
+search: search enhancements do not close the loose instances, and nothing built here
+improves the bound materially. Two further measurements exist to make that reading
 trustworthy rather than to support it, and both do: no two methods that proved the same
-optimum disagree on its value, and the reimplemented compact baselines are reported
-without a ranking, because the runs that failed are the ones that would have decided it.
+optimum disagree on its value, and the completed fixed-denominator primary ledger ranks
+the reimplemented compact baselines SSPMF, \texttt{CATZ-F4}, then LSS.
 
 Two things this campaign is not should be said plainly here rather than left to
 Section~\ref{ssec:limits}. The compact baselines close more instances than
@@ -77,60 +76,71 @@ understated, and no claim of a faster solver is being made. And the branch-and-p
 prototypes were run to read their root relaxation, not to compete: their times measure
 a Python pricer.
 
-The methods built here are therefore bound-limited rather than
-implementation-limited: a negative result about a family of methods rather than about
-one solver. Section~\ref{ssec:disc-locality} sets out where a stronger bound could
-come from.
+On the measured sample, the tested Benders and configuration formulations are
+certificate-limited: improving incumbents helped, whereas the tested local bound
+additions did not. This is a scoped empirical diagnosis, not a negative theorem about
+every decomposition method. Section~\ref{ssec:disc-locality} sets out where a stronger
+bound could come from.
 
 \subsection{Further work}\label{ssec:further}
 
 \paragraph{The exact worst case of the heuristic.}
 Section~\ref{ssec:law} settles the extremal behaviour of the walk value at three
-groups. For the value $H$ of Definition~\ref{def:frames}, the question is open and is now the more
-interesting one, because Section~\ref{ssec:ktnsgap} shows that the two differ
-substantially. Two concrete questions: is the heuristic gap ever larger than one on a
-connected instance, and does $\mathrm{gap}\le\Kst-2$ hold for it? Directed searches
-across $b\in\rset{3,4,5}$ found no counterexample to either.
-Problem~\ref{prob:ktns-closes} is the structural question underneath both.
+groups. For the value $H$ of Definition~\ref{def:frames},
+Theorem~\ref{thm:connected-gap} now proves that the additive gap is unbounded even on
+connected instances. The exact ratio, the strongest bound in terms of $\Kst$, and
+Conjecture~\ref{conj:43} at $b=3$ remain open.
+Problem~\ref{prob:ktns-closes} is the structural question underneath them.
+
+\paragraph{Use the grouping insight algorithmically.}
+Theorem~\ref{thm:grouping} suggests searching a transition-aware frontier rather than
+enforcing exactly $\Kst$ groups: generate diverse groupings with
+$\Kst,\Kst+1,\ldots,\Kst+\delta$ groups, sequence and flatten each through KTNS, and
+use the resulting orders as seeds for a full SSP metaheuristic. A credible experiment
+must compare against the official leading implementations under matched time and
+objective-evaluation budgets; this report has not run that experiment.
 
 \paragraph{The polyhedral questions.}
 One of the two questions from Section~\ref{ssec:clutter} is now answered.
 Observation~\ref{obs:starobstruction} enumerates the whole $b=3$ family with two tools
-per job on at most six tools: half of it has a non-integral covering relaxation, eleven
+per job on at most six tools: $80$ of $155$ instances have a non-integral covering
+relaxation, eleven
 of those instances are bipartite, and the smallest obstruction is a three-job star
 rather than a ring. What the star and the odd ring share is odd structure in the
 compatibility hypergraph on \emph{jobs}, not circular structure among the tools, and
 characterising exactly which such structures obstruct integrality is the question that
 replaces the one that has been closed. The second question is unchanged: which facets of
-the position--transition polytope explain the three runs where its bound exceeds $q$.
+the position--transition polytope explain the two runs where its bound exceeds $q$.
 
 \paragraph{A bound that reaches into the loose half.}
 This is the direction the campaign points to most strongly, and
-Section~\ref{ssec:disc-locality} takes the first step along it: the arc-supported
-information the solvers carry today is exhausted, and the window family of
-inequality~\eqref{eq:window} has roughly three and a half times as much room at its
-\emph{ceiling over integral schedules} (Table~\ref{tab:ceilings}). A ceiling is not a
-bound. That family has now been measured inside the master
+Section~\ref{ssec:disc-locality} takes the first step along it: a fixed pairwise row
+plus coverage closes little of the sampled gap, while the window family of
+inequality~\eqref{eq:window} has roughly three and a half times the integral-sequence
+value (Table~\ref{tab:ceilings}). The pairwise experiment is not a ceiling for every
+arc-supported cut, and an integral-sequence ceiling is not an LP bound. The window
+extension has now been measured inside the master
 and it delivers nothing: the root relaxation is unchanged on all $37$ instances for
 which both root values were obtained
-(Observation~\ref{obs:windowroot}). The robust encoding is the reason. Counting the
-tools an integral schedule would need inside a window requires tying the row to the
-column variables, which puts the cut's dual into the pricing problem and forfeits the one
-property that made it cheap. Whether a non-robust encoding pays for itself is open, and
-so is whether the rows help inside the tree despite leaving the root alone. Two further
+(Observation~\ref{obs:windowroot}). The theorem audit explains why: the implemented
+row is implied by the existing transition rows, so it cannot help at the root or
+inside the tree. Counting the tools an integral schedule would need inside a window
+requires new job-union or configuration-level structure, likely putting a cut's dual
+into the pricing problem. Whether such a non-robust encoding pays for itself is open.
+Two further
 families suggest themselves from the same
 reading: chaining PTF per configuration rather than per tool, which is what confines
-its advantage to three runs in Section~\ref{ssec:results-bnp}, and disaggregating the
+its advantage to two runs in Section~\ref{ssec:results-bnp}, and disaggregating the
 Benders master's single $\theta$ into one variable per position, which is the standard
 strengthening the ablation of Section~\ref{ssec:results-bbc} never tested.
 
 \paragraph{Making PTF's advantage large.}
 Section~\ref{ssec:results-bnp} finds the position--transition relaxation above the
-coverage bound on three runs of $233$ --- by one unit on two of them and by $0.0134$ on
-the third. The construction is therefore
-sound and, as it stands, of no practical use. Problem~\ref{prob:ptf-gap} asks whether
+coverage bound on two canonical runs of $232$, by one unit on each. The exact
+formulation is sound, but the measured strengthening is not yet practically useful.
+Problem~\ref{prob:ptf-gap} asks whether
 the excess can be made to grow; the polyhedral question underneath it is which facets
-of the position--transition polytope are responsible for the three cases where it does
+of the position--transition polytope are responsible for the two cases where it does
 exceed $q$. Independently, the prototypes are written in Python with a Python pricer,
 and a compiled pricer would allow the formulations to be measured on instances larger
 than nine jobs, which is where they currently stop.

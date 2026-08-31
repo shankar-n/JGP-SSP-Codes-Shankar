@@ -159,8 +159,8 @@ from sits relative to both.
 switches each requires. Three things are visible at once. A randomly chosen ordering
 costs $18$, and the best costs $13$, so the choice of order is worth about a third of
 the total. Only $180$ orderings out of forty thousand are optimal, which is why the
-outer problem is hard. And the counting bound of $q=10$, which is what the strongest
-compact linear relaxation in the literature returns, lies \emph{below the entire
+outer problem is hard. And the counting bound of $q=10$, which is what the SSPMF
+compact baseline returns, lies \emph{below the entire
 distribution}: no ordering whatsoever attains it. A solver given that bound cannot
 prove any ordering optimal until it has closed a gap of three by branching alone.
 Section~\ref{sec:comp} shows what that costs in practice and Section~\ref{sec:disc} why
@@ -200,23 +200,27 @@ The first is on the practical side. Exact methods for the integrated SSP exist a
 are used as baselines in Section~\ref{sec:comp}, but practice does not generally rely on
 them. The standard
 approach groups the jobs into as few magazine-fitting batches as possible, then
-orders the batches. It is fast, it is what the strongest metaheuristics start from
-\citep{Mecler2021}, and where it has been measured against exact optima it does
-well \citep{Burger2015}. \citet{CramaKlundert1999} analyse this construction and prove
+orders the batches. It is fast, and where it has been measured against exact optima in
+industrial printing it does well \citep{Burger2015}. The leading hybrid genetic search
+instead starts from random job orders improved by local search \citep{Mecler2021}; it
+does not use grouping solutions as seeds. \citet{CramaKlundert1999} analyse the
+group-then-sequence construction and prove
 that it is a $b$-approximation. What has not been done is to sharpen that ratio, to say
 on which instances the method is exact, or to distinguish the two different values the
 method can be read as returning --- and the third of these turns out to change the first
 two. How far
 from optimal it can be, and on which instances it is exact, are open questions.
 
-The second is on the exact side. Every compact integer formulation surveyed in
-Section~\ref{sec:sota} has a weak linear relaxation, and the strongest of them
-\citep{daSilva2024} has a relaxation exactly equal to the number of tools minus the
-magazine capacity, under their assumption that every tool is used. That is an
+The second is on the exact side. The three compact integer formulations reimplemented
+as campaign baselines have weak linear relaxations, and the strongest of that baseline
+set, SSPMF \citep{daSilva2024}, relaxes exactly to the number of tools minus the
+magazine capacity, under its assumption that every tool is used. That is an
 elementary counting bound: every tool that does not fit in the initial magazine must be
-inserted at some point. So the strongest relaxation among the compact formulations
-considered here is this counting argument, and a solver relying on it cannot prove
-optimality where the bound is loose.
+inserted at some point. Thus the best relaxation among the three reimplemented
+baselines is this counting argument, and a solver relying on it cannot prove optimality
+where the bound is loose. This is deliberately not a literature-wide ranking:
+the symmetry-strengthened JGSMF model of \citet{Akhundov2024}, for example, was not
+implemented in this internship.
 
 \subsection{What was done during this internship}\label{ssec:intro-done}
 

@@ -11,7 +11,7 @@ and it overwrites report/figdata/*.dat. If a figure in the report disagrees with
 what this produces, the figure is wrong.
 
 Inputs
-    src/BBC/results/*.csv          the campaign, 16,994 runs
+    src/BBC/results/*.csv          the completed campaign, 17,052 runs
     data/**/Laporte/Tabela3/*.txt  the instance used for the landscape figure
     bound_probe_results.json       per-instance ceilings (produced by bound_probe.py)
 
@@ -19,7 +19,7 @@ Outputs (report/figdata/)
     landscape.dat     Figure 3   every ordering of one instance, by cost
     cactus.dat        Figure 10  instances closed against wall-clock time
     rootgap.dat       Figure 12  root relaxation minus the coverage row
-    ceilings.dat      Figure 13  per-instance ceilings, each family sorted alone
+    ceilings.dat      Figure 13  per-instance fixed-bound values, sorted alone
     solvedvsgap.dat   Figure 11  share closed against how loose the bound is
 """
 import glob, itertools, json, math, os, re, sys
@@ -69,7 +69,8 @@ def landscape(path):
         f.write("cost count\n")
         for v, c in zip(vals, cnts):
             f.write(f"{v} {c}\n")
-    meta = (path, n, T, b, len(U), len(U) - b, int(free.min()),
+    source = os.path.relpath(path, ROOT).replace(os.sep, "/")
+    meta = (source, n, T, b, len(U), len(U) - b, int(free.min()),
             int(np.median(free)), int(free.max()), int((free == free.min()).sum()))
     with open(f"{OUT}/landscape_meta.txt", "w") as f:
         f.write(" ".join(map(str, meta)) + "\n")
@@ -81,7 +82,9 @@ def landscape(path):
 # ------------------------------------------------------- Figures 10, 11, 12
 def campaign():
     m = _analysis()
-    bbc = m.load_shards(os.path.join(ROOT, "src/BBC/results/*.csv"))
+    bbc = m.canonical_rows(
+        m.load_shards(os.path.join(ROOT, "src/BBC/results/*.csv"))
+    )
     bbc["solved"] = bbc.status.astype(str).str.contains("optimal", case=False, na=False)
     bbc = bbc.join(bbc[bbc.solved].groupby(KEY)["obj_ktns"].min().rename("Zstar"), on=KEY)
     U = m.used_tool_counts()
@@ -128,9 +131,12 @@ def campaign():
             r = bbc[bbc.config == cfg].set_index(KEY)
             for x, (lo_, hi_) in enumerate(buckets):
                 idx = gapmap[(gapmap >= lo_) & (gapmap <= hi_)].index
-                sub = r.reindex(r.index.intersection(idx))
+                # Keep a fixed class denominator: missing or failed rows count as
+                # not certified rather than disappearing from the comparison.
+                sub = r.reindex(idx)
                 if len(sub):
-                    f.write(f"{x} {100*sub.solved.mean():.1f} {len(sub)} {cfg}\n")
+                    solved = sub["solved"].fillna(False).astype(bool)
+                    f.write(f"{x} {100*solved.mean():.1f} {len(sub)} {cfg}\n")
     print(f"solvedvsgap.dat {len(k)} instances of known optimum, "
           f"{int((k.gap==0).sum())} bound-tight, {int((k.gap>0).sum())} loose")
 
@@ -141,15 +147,16 @@ def ceilings():
     if not os.path.exists(p):
         p = os.path.join(ROOT, "verification", "bound_probe_results.json")
     d = [r for r in json.load(open(p)) if r["Z"] > r["q"]]
-    arc = sorted(100 * (r["L_arc"] - r["q"]) / (r["Z"] - r["q"]) for r in d)
+    pair = sorted(100 * (r["L_pair_cov"] - r["q"]) / (r["Z"] - r["q"]) for r in d)
     win = sorted(100 * (r["L_win"] - r["q"]) / (r["Z"] - r["q"]) for r in d)
     with open(f"{OUT}/ceilings.dat", "w") as f:
-        f.write("i arc win\n")
-        for i, (a, w) in enumerate(zip(arc, win), 1):
+        f.write("i pair win\n")
+        for i, (a, w) in enumerate(zip(pair, win), 1):
             f.write(f"{i} {a:.2f} {w:.2f}\n")
     z = lambda v: sum(1 for x in v if x < 1e-9)
-    print(f"ceilings.dat    {len(d)} loose instances; arc certifies nothing on {z(arc)}, "
-          f"window on {z(win)}; peaks {max(arc):.0f}% and {max(win):.0f}%")
+    print(f"ceilings.dat    {len(d)} loose instances; fixed pairwise+coverage certifies "
+          f"nothing on {z(pair)}, window on {z(win)}; peaks {max(pair):.0f}% "
+          f"and {max(win):.0f}%")
 
 
 if __name__ == "__main__":

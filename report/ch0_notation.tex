@@ -17,14 +17,15 @@ $\lvert T\rvert$ & number of tools                                             &
 $T_j$            & the tools job $j$ requires                                   & \S\ref{ssec:ssp} \\
 $b$              & magazine capacity, in tool slots                            & \S\ref{ssec:ssp} \\
 $\U$             & the tools required by at least one job, $\U=\bigcup_j T_j$   & \S\ref{ssec:ssp} \\
-$q$              & the tool excess, $q=\lvert\U\rvert-b$                        & \S\ref{ssec:lb} \\
+  $q$              & the tool excess, $q=\lvert\U\rvert-b\ge0$ after preprocessing & \S\ref{ssec:ssp} \\
 $\pi$            & a job order (a permutation of $J$)                           & \S\ref{ssec:ssp} \\
 $M_i$            & the magazine contents at position $i$                        & \S\ref{ssec:ssp} \\
-$\Zst$           & the optimal switch cost of the instance                      & \S\ref{ssec:ssp} \\
+  $\Zst$           & optimal free-initial switch cost                              & \S\ref{ssec:ssp} \\
+  $\Zempty$        & optimal empty-start switch cost                               & \S\ref{ssec:ssp} \\
 $\KTNS(\pi)$     & the cheapest loading cost for the fixed order $\pi$          & \S\ref{ssec:ktns} \\
 $G$              & a group of jobs                                             & \S\ref{ssec:jgp} \\
 $\Kst$           & the fewest feasible groups covering all jobs                 & \S\ref{ssec:jgp} \\
-$C$              & a configuration: a set of exactly $b$ tools                  & \S\ref{ssec:gtsp} \\
+  $C$              & a configuration: a $b$-tool subset of $\U$                  & \S\ref{ssec:gtsp} \\
 $\confs$         & the set of all configurations                                & \S\ref{ssec:gtsp} \\
 $H_j$            & the cluster of configurations able to serve job $j$          & \S\ref{ssec:gtsp} \\
 $d(C,C')$        & transition cost, $d(C,C')=\lvert C'\setminus C\rvert$        & \S\ref{ssec:gtsp} \\

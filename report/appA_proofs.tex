@@ -3,9 +3,9 @@
 %==============================================================================
 
 \begin{proof}[Proof of Theorem~\ref{thm:grouping}]
-Both inequalities are explicit constructions. By Proposition~\ref{prop:ktns} an
-optimal schedule may be assumed to load by KTNS, so every magazine is full and
-$\lvert M_i\rvert=b$.
+Both inequalities are explicit constructions. By the full-magazine argument in
+Proposition~\ref{prop:conv}, an optimal schedule may be chosen with every magazine
+full, so $\lvert M_i\rvert=b$.
 
 \emph{The inequality $\Zst\le\min_{\mathcal{P}}\gamma(\mathcal{P})$.}
 Let $\mathcal{P}=\rset{G_1,\dots,G_p}$ be a feasible grouping with configurations
@@ -56,8 +56,8 @@ every ordering costs at least $4g+3(g-1)=7g-3$, and that value is attained by ke
 each copy's configurations consecutive. Thus $\Hwalk=7g-3$ and $\Hwalk-\Zst=g$.
 \end{proof}
 
-\begin{proof}[Proof of the walk lemma used in Corollaries~\ref{cor:smallZ} and
-\ref{cor:z3}, and of Proposition~\ref{prop:k3}(iv)]
+\begin{proof}[Proof of the walk lemma used in Corollary~\ref{cor:smallZ} and
+Proposition~\ref{prop:k3}(iv)]
 Suppose $\Zst=q$ and take an optimal schedule. Its walk of distinct configurations
 $D_1,\dots,D_p$ may be assumed, after excising configurations that serve no job, to
 have every configuration serve a job: the transition cost obeys the triangle
@@ -66,8 +66,9 @@ zero re-insertions every insertion is a first-time insertion, so the $p-1$ trans
 insert $q$ tools in total and $p\le q+1$. Assigning each job to a configuration
 serving it exhibits a feasible $p$-grouping, so $p\ge\Kst$. If $p=\Kst$ that grouping
 is of minimum cardinality and has cost $\Zst$, forcing $\Hwalk=\Zst$. In particular
-$\Zst=q\le2$ gives $p\le q+1\le3=\Kst$ and the gap vanishes, which is the claim used
-in Proposition~\ref{prop:k3}(i).
+  If $\Zst=q\le2$, the case $\Kst\le2$ is already gap-free; otherwise
+  $3\le\Kst\le p\le q+1\le3$, so $p=\Kst=3$ and the gap again vanishes. This is the
+  walk lemma used in Corollary~\ref{cor:smallZ}.
 
 For part (iv), let $q=3$. If $p=3$ the gap vanishes as above, so let $p=4$. Each
 transition then inserts exactly one fresh tool, say $D_{l+1}\setminus D_l=\rset{x_{l+1}}$
@@ -97,8 +98,8 @@ $\lvert(D_1\cap D_4)\setminus C\rvert\le1$.
 
 \begin{proof}[Proof of Proposition~\ref{prop:pcf}]
 Write $a_t^{k}=\sum_{C\ni t}y_C^{k}$ for the presence of tool $t$ at position $k$, and
-recall that every configuration holds exactly $b$ tools. If $\lvert\U\rvert\le b$ then
-$q=0$ and the second claim is immediate, so assume $\lvert\U\rvert>b$.
+recall that every configuration holds exactly $b$ tools. If $\lvert\U\rvert=b$ then
+$q=0$ and the relaxation claim is immediate, so assume $\lvert\U\rvert>b$.
 
 \emph{Exactness.} In an integer point, (P) places exactly one configuration $C_k$ at
 each position, and (Cov) gives every job $j$ a position whose configuration contains
@@ -150,12 +151,6 @@ PCF, and the summation in the previous proof uses only those rows together with
 $\lvert C\rvert=b$ at the first position. Both hold in PTF, so the same chain of
 inequalities applies unchanged.
 
-\emph{It can be strictly greater}, and this half is established by exhibiting witnesses
-rather than by a general argument. Three appear in the campaign of
-Section~\ref{ssec:results-bnp}, where the root relaxation is recorded on every run: on
-Catanzaro \texttt{A0-0} it is $2.0134$ against $q=2$, and on Laporte3 \texttt{L11-6} and
-\texttt{L11-7} it is $6$ against $q=5$. A witness is all the statement requires; how
-large the excess can be made is Problem~\ref{prob:ptf-gap} and is open.
 \end{proof}
 
 \begin{proof}[Proof of Proposition~\ref{prop:pcfprime}]

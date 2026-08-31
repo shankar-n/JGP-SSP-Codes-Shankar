@@ -102,9 +102,11 @@
              state-of-the-art literature review, classification, and trends},
   author  = {Calmels, Dorothea},
   journal = {International Journal of Production Research},
-  year    = {2018},
-  note    = {Published online 6 August 2018; version of record
-             \emph{Int. J. Prod. Res.} \textbf{57}(15--16), 5052--5068, 2019},
+  volume  = {57},
+  number  = {15--16},
+  pages   = {5005--5025},
+  year    = {2019},
+  note    = {Published online 6 August 2018},
   publisher = {Taylor \& Francis}
 }
 
@@ -128,14 +130,6 @@
   volume    = {35},
   pages     = {9633--9644},
   year      = {2022}
-}
-
-% Colares & Wagler working papers — cite as forthcoming / preprint
-@unpublished{Colares2026Exact,
-  title   = {Exact Formulations for the Job Sequencing and Tool Switching Problem},
-  author  = {Colares, Rafael and Wagler, Annegret},
-  note    = {Working paper, Universit{\'e} Clermont Auvergne, LIMOS},
-  year    = {2026}
 }
 
 @article{Colares2026Tool,
@@ -218,6 +212,18 @@
   publisher = {Elsevier}
 }
 
+@article{Almeida2025,
+  title   = {Revisiting the parallel tempering algorithm: High-performance
+             computing and applications in operations research},
+  author  = {Almeida, Andr{\'e} Lu{\'i}s Barroso and de Castro Lima, Joubert and
+             Carvalho, Marco Antonio Moreira},
+  journal = {Computers \& Operations Research},
+  volume  = {178},
+  pages   = {107000},
+  year    = {2025},
+  doi     = {10.1016/j.cor.2025.107000}
+}
+
 @inproceedings{Gasse2019,
   title     = {Exact Combinatorial Optimization with Graph Convolutional
                Neural Networks},
@@ -253,7 +259,7 @@
 
 @article{Jans2013,
   title   = {Efficient symmetry breaking formulations for the job grouping problem},
-  author  = {Jans, Roel and Desrosiers, Jacques},
+  author  = {Jans, Raf and Desrosiers, Jacques},
   journal = {Computers \& Operations Research},
   volume  = {40},
   number  = {4},
@@ -353,23 +359,19 @@
   year    = {1993}
 }
 
-@mastersthesis{Otiai2024,
+@mastersthesis{Otiai2026,
   title   = {Efficient Tool Management in Flexible Manufacturing:
              A Branch and Price Approach to the Job Grouping Problem},
   author  = {Otiai, Felipe Shoei},
-  school  = {ISIMA, Clermont Auvergne INP},
-  year    = {2024}
-}
-
-@mastersthesis{Otiai2026,
-  title   = {Flexible Manufacturing Systems: Job Grouping and Tool Management},
-  author  = {Otiai, Felipe},
-  school  = {Federal University of Minas Gerais},
-  year    = {2026}
+  school  = {ISIMA, M2--ICS},
+  type    = {Research Project Dissertation},
+  address = {Aubi\`ere, France},
+  year    = {2026},
+  note    = {Year inferred from PDF metadata; the document prints no date}
 }
 
 @article{Pop2024,
-  title   = {The generalized traveling salesman problem: A comprehensive review},
+  title   = {A comprehensive survey on the generalized traveling salesman problem},
   author  = {Pop, Petric{\u{a}} C. and Cosma, Ovidiu and Sabo, Cosmin and
              Pop Sitar, Corina},
   journal = {European Journal of Operational Research},
@@ -562,10 +564,8 @@
 %   daSilva2024 for historical reasons; the printed year is 2021, from the
 %   year field below, and is correct.
 %
-% Salonen et al. (2006)  EXISTS -- it is in the reference list of Burger
-%   et al. (2015), which is where the "remarkably well" claim about the
-%   two-phase decomposition originates. Not cited here: this report takes
-%   that claim from Burger et al., who tested it.
+% Salonen et al. (2006)  CONFIRMED from the journal record and article:
+%   the objective is a weighted sum of setup occasions and feeder changes.
 %
 % Ghiani, Laporte, Semet (2007)  NOT CONFIRMED and NOT CITED. No entry
 %   below, no \cite anywhere in the report.
@@ -581,6 +581,17 @@
   booktitle = {Proceedings of the Thirty-Second International Joint Conference on
                Artificial Intelligence (IJCAI)},
   year      = {2023}
+}
+
+@article{Salonen2006,
+  author  = {Salonen, Kari and Smed, Jouni and Johnsson, Mika and Nevalainen, Olli S.},
+  title   = {Grouping and sequencing {PCB} assembly jobs with minimum feeder setups},
+  journal = {Robotics and Computer-Integrated Manufacturing},
+  volume  = {22},
+  number  = {4},
+  pages   = {297--305},
+  year    = {2006},
+  doi     = {10.1016/j.rcim.2005.07.001}
 }
 
 @article{Rahmaniani2017,
@@ -642,8 +653,9 @@
   journal = {IIE Transactions}, volume = {30}, number = {8}, pages = {689--694}, year = {1998},
 }
 @article{Yanasse2009,
-  author  = {Yanasse, Horacio Hideki and Rodrigues, Ricardo de Carvalho Miranda and Senne, Edson Luiz Fran\c{c}a},
-  title   = {An Enumerative Algorithm Based on Partial Ordering for the Minimization of Tool Switches Problem},
+  author  = {Yanasse, Horacio Hideki and Rodrigues, Rita de C{\'a}ssia Meneses and Senne, Edson Luiz Fran\c{c}a},
+  title   = {Um algoritmo enumerativo baseado em ordenamento parcial para
+             resolu\c{c}\~{a}o do problema de minimiza\c{c}\~{a}o de trocas de ferramentas},
   journal = {Gest\~{a}o \& Produ\c{c}\~{a}o}, volume = {16}, number = {3}, pages = {303--314}, year = {2009},
 }
 @article{Muter2013,
@@ -652,10 +664,13 @@
   journal = {Mathematical Programming}, volume = {142}, number = {1--2}, pages = {47--82}, year = {2013},
 }
 @mastersthesis{Kashou2025,
-  author  = {Kashou, Layth and Rossi, Andr\'{e} and Gurevsky, Evgeny and Shibasaki, Rui S.},
+  author  = {Kashou, Layth},
   title   = {Benders Decomposition for Robust Balancing of Production Lines},
-  school  = {Universit\'{e} Paris-Saclay (LAMSADE, Universit\'{e} Paris-Dauphine--PSL)},
-  type    = {{M2} internship report}, year = {2025},
+  school  = {Universit\'{e} Paris-Saclay (Laboratoire de Math\'{e}matiques d'Orsay)},
+  type    = {{M2} internship report},
+  year    = {2025},
+  note    = {Internship hosted at LAMSADE, Universit\'{e} Paris-Dauphine--PSL;
+             supervised by Andr\'{e} Rossi, Rui Sa Shibasaki and Evgeny Gurevsky}
 }
 
 @inproceedings{Legrand2025,
@@ -664,6 +679,15 @@
   booktitle = {Integration of Constraint Programming, Artificial Intelligence, and Operations Research (CPAIOR 2025)},
   series    = {Lecture Notes in Computer Science}, volume = {15763}, pages = {70--85},
   publisher = {Springer}, year = {2025},
+}
+
+@misc{Locatelli2026,
+  author       = {Locatelli, Alberto and C{\^o}t{\'e}, Jean-Fran{\c c}ois and Coelho, Leandro},
+  title        = {A New Combinatorial Branch-and-Bound Algorithm for the Job Sequencing and Tool Switching Problem},
+  howpublished = {Accepted abstract, 24th IFORS Conference},
+  year         = {2026},
+  url          = {https://www.euro-online.org/conf/ifors2026/treat_abstract?paperid=3747},
+  note         = {Abstract 3747; no archival paper or code located as of 30 August 2026}
 }
 @article{Akhundov2024,
   author  = {Akhundov, Najmaddin and Ostrowski, James},
