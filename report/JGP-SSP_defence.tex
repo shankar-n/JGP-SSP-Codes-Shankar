@@ -1,4 +1,4 @@
-\documentclass[aspectratio=169,11pt]{beamer}
+\documentclass[aspectratio=169,11pt,c]{beamer}
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -6,7 +6,7 @@
 \renewcommand{\familydefault}{\sfdefault}
 \usefonttheme[onlymath]{serif}
 \usepackage{amsmath,amssymb,mathtools,booktabs,array,graphicx,tikz}
-\usetikzlibrary{arrows.meta,positioning,calc,fit,matrix}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,matrix,backgrounds}
 
 % A restrained academic visual system.  The empirical figures use the same
 % palette and are generated from the audited campaign CSVs.
@@ -15,7 +15,8 @@
 \definecolor{orange}{HTML}{E07A3F}
 \definecolor{coral}{HTML}{CF5C5C}
 \definecolor{blue}{HTML}{3066BE}
-\definecolor{muted}{HTML}{667085}
+\definecolor{muted}{HTML}{4A5568}
+\definecolor{srcgray}{HTML}{8A94A6}
 \definecolor{linegray}{HTML}{D8DEE9}
 \definecolor{warm}{HTML}{F7F5F0}
 \definecolor{paleteal}{HTML}{E7F3F1}
@@ -68,7 +69,7 @@
 \newcommand{\theory}[1]{{\color{teal}\bfseries #1}}
 \newcommand{\exact}[1]{{\color{orange}\bfseries #1}}
 \newcommand{\quiet}[1]{{\color{muted}#1}}
-\newcommand{\source}[1]{\vfill\hfill{\fontsize{7.8}{9.2}\selectfont\color{muted}#1}\vspace{.05cm}}
+\newcommand{\source}[1]{\vfill\hfill{\fontsize{7.8}{9.2}\selectfont\color{srcgray}#1}\vspace{.05cm}}
 
 \title{Job Sequencing and Tool Switching}
 \author{Shankar Narayanan}
@@ -83,7 +84,7 @@
   \fill[navy] (current page.north west) rectangle ($(current page.north east)+(0,-.18)$);
   \fill[teal] (current page.south west) rectangle ($(current page.south east)+(0,.12)$);
 \end{tikzpicture}
-\vspace{.46cm}
+\vspace{.20cm}
 \begin{center}
 \begin{tabular}{c@{\hspace{1.15cm}}c@{\hspace{1.15cm}}c}
   \includegraphics[height=1.00cm]{cover/uca.png} &
@@ -91,18 +92,18 @@
   \includegraphics[height=0.90cm]{cover/limos.png}
 \end{tabular}
 
-\vspace{.62cm}
+\vspace{.46cm}
 {\fontsize{30}{35}\selectfont\bfseries\color{navy}Job Sequencing and Tool Switching\par}
 \vspace{.16cm}
 {\fontsize{16}{20}\selectfont\color{teal}Structural results and a branch-and-Benders-cut study\par}
 
 \vspace{.20cm}
 {\color{linegray}\rule{5.2cm}{.7pt}\par}
-\vspace{.34cm}
+\vspace{.26cm}
 
 {\fontsize{17}{21}\selectfont\bfseries Shankar Narayanan\par}
 \vspace{.12cm}
-{\fontsize{10.5}{13}\selectfont\color{muted}Master ROAD internship defence \;$\cdot$\; 2 September 2026\par}
+{\fontsize{10.5}{13}\selectfont\color{muted}Internship defence \;$\cdot$\; 2 September 2026\par}
 
 \vfill
 {\fontsize{11}{14}\selectfont
@@ -110,7 +111,7 @@
 \textbf{Advisors} & Prof.~Rafael Colares \quad Prof.~Annegret Wagler\\[3pt]
 \textbf{Academic supervisor} & Dr.~Renaud Chicoisne
 \end{tabular}}
-\vspace{.50cm}
+\vspace{.30cm}
 \end{center}
 \end{frame}
 
@@ -237,7 +238,7 @@ When a tool must leave, remove the loaded tool whose next use is furthest away.
 \end{tikzpicture}
 
 \vspace{.36cm}
-\color{linegray}\rule{.88\textwidth}{.7pt}
+{\color{linegray}\rule{.88\textwidth}{.7pt}}
 \vspace{.25cm}
 
 \begin{columns}[T,onlytextwidth]
@@ -329,16 +330,18 @@ $\text{cost}=q+R$}\par
 \begin{tikzpicture}[>=Stealth,
  job/.style={draw=navy!35,fill=warm,minimum width=1.15cm,minimum height=.62cm,font=\small\bfseries},
  big/.style={job,fill=paleorange,draw=orange!70}]
-  \node[font=\large\bfseries] at (0,2.15) {copy $i$};
-  \node[job] (a) at (-1.35,.72) {$A_i$};
-  \node[job] (b) at (1.35,.72) {$B_i$};
-  \node[big] (c) at (-1.35,-.72) {$C_i$};
-  \node[big] (d) at (1.35,-.72) {$D_i$};
-  \draw[teal,line width=2pt] (a)--(b) node[midway,above,font=\small] {fits: $6$};
-  \node[draw=teal,fill=paleteal,circle,minimum size=.72cm,font=\bfseries] (u) at (0,1.65) {$u$};
-  \node[draw=navy!45,fill=white,circle,minimum size=.72cm,font=\bfseries] (v) at (0,-1.70) {$v_i$};
-  \foreach \n in {a,b,c,d}{\draw[navy!28] (u)--(\n);\draw[navy!28] (v)--(\n);}
-  \node[font=\scriptsize,teal,align=center] at (0,2.65) {$u$ is in every job\\across every copy};
+  \node[job] (a) at (-1.55,.62) {$A_i$};
+  \node[job] (b) at (1.55,.62) {$B_i$};
+  \node[big] (c) at (-1.55,-.92) {$C_i$};
+  \node[big] (d) at (1.55,-.92) {$D_i$};
+  \node[draw=teal,fill=paleteal,circle,minimum size=.74cm,font=\bfseries] (u) at (0,1.72) {$u$};
+  \node[draw=navy!45,fill=white,circle,minimum size=.74cm,font=\bfseries] (v) at (0,-2.02) {$v_i$};
+  \begin{scope}[on background layer]
+    \foreach \n in {a,b,c,d}{\draw[navy!22] (u)--(\n);\draw[navy!22] (v)--(\n);}
+    \draw[teal,line width=1.8pt] (a)--(b);
+  \end{scope}
+  \node[fill=white,inner sep=1.4pt,font=\small,text=teal] at (0,.62) {fits: $6$};
+  \node[font=\scriptsize,teal,align=center] at (0,2.62) {$u$ is in every job\\across every copy};
 \end{tikzpicture}
 
 \column{.49\textwidth}
@@ -402,8 +405,11 @@ No reinsertion is needed, so the coverage lower bound is attained:
   \node[draw=teal!70,fill=paleteal,minimum width=3.25cm,minimum height=.82cm,font=\large\bfseries] (ab) at (0,1.25) {$[A_i\; B_i]$};
   \node[draw=orange!65,fill=paleorange,minimum width=1.10cm,minimum height=.82cm,font=\large\bfseries] (c) at (-1.18,-.52) {$C_i$};
   \node[draw=orange!65,fill=paleorange,minimum width=1.10cm,minimum height=.82cm,font=\large\bfseries] (d) at (1.18,-.52) {$D_i$};
-  \draw[->,orange,line width=1.5pt] (ab.south west) .. controls (-2.1,.25) and (-2.1,-1.30) .. (d.south east);
-  \node[font=\small\bfseries,orange,align=center] at (0,-1.55) {at least one private tool\\must return};
+  \begin{scope}[on background layer]
+    \draw[->,orange,line width=1.5pt]
+      (ab.west) .. controls (-2.55,.9) and (-2.75,-1.55) .. (0,-1.62) .. controls (1.9,-1.66) and (2.1,-1.0) .. (d.south east);
+  \end{scope}
+  \node[font=\small\bfseries,orange,align=center] at (0,-2.30) {at least one private tool\\must return};
 \end{tikzpicture}
 
 \column{.45\textwidth}
@@ -467,8 +473,9 @@ The additive loss is unbounded, even though all jobs remain connected through $u
   \node[block,fill=paleorange,draw=orange!65,right=of s] (c) {Dual solution\\gives a cut};
   \draw[->,teal,line width=1.5pt] (m)--(s) node[midway,above,font=\small] {$\bar x$};
   \draw[->,orange,line width=1.5pt] (s)--(c) node[midway,above,font=\small] {true cost};
-  \draw[->,navy!70,line width=1.4pt] (c.south) |- ($(m.south)+(0,-1.05)$) -- (m.south);
-  \node[font=\small,navy,align=center] at (4.18,-1.36) {repeat inside branch-and-bound until the lower bound\\meets the cost of the best order};
+  \draw[->,navy!70,line width=1.4pt] (c.south) |- ($(m.south)+(0,-.92)$) -- (m.south);
+  \node[font=\small,navy,align=center,fill=white,inner sep=2.4pt] at (4.18,-1.72)
+    {repeat inside branch-and-bound until the lower bound\\meets the cost of the best order};
 \end{tikzpicture}
 \vspace{.55cm}
 
@@ -605,11 +612,11 @@ BBC--LP+F+C & BBC--LP+F+P & BBC--LP+ACC
 \end{tabular}
 
 \vspace{.52cm}
-\begin{tabular}{@{}>{\bfseries\color{navy}}r@{\ }l@{}}
-$1{,}410$ & canonical benchmark instances\\[3pt]
-$12$ & configurations\\[3pt]
-$16{,}920$ & canonical outcomes\\[3pt]
-$1$ hour & per run; fixed denominator
+\begin{tabular}{@{}r@{\hspace{.42em}}l@{}}
+\textbf{\color{navy}1{,}410} & canonical benchmark instances\\[4pt]
+\textbf{\color{navy}12}      & solver configurations\\[4pt]
+\textbf{\color{navy}16{,}920} & canonical outcomes\\[4pt]
+\textbf{\color{navy}1\,h}    & per run, fixed denominator
 \end{tabular}
 \end{columns}
 \source{Report: experimental design and Table 5.}
@@ -668,7 +675,7 @@ Minimum grouping can force a tool out and back:
 \text{cost}=q+\text{reinsertions}.
 \]
 
-\vspace{.16cm}
+\vspace{.10cm}
 \exact{What the campaign isolates}
 \vspace{.20cm}
 
@@ -682,16 +689,16 @@ The tested master often finds the right order but cannot certify those returns.
   \item test the stronger bound under a matched protocol.
 \end{itemize}
 
-\vspace{.12cm}
+\vspace{.08cm}
 \theory{Use the grouping result}
 \begin{itemize}
   \item search $\Kst,\ldots,\Kst+\delta$ groupings;
   \item flatten each with KTNS; use the orders as seeds.
 \end{itemize}
 \end{columns}
-\vspace{.02cm}
+\vspace{.06cm}
 \centering
-{\bfseries The work narrows the next experiment; it claims no new SOTA solver.}
+{\small\bfseries The work narrows the next experiment; it claims no new SOTA solver.}
 \source{Report: Discussion and further work, Chapters 7--8.}
 \end{frame}
 
@@ -744,7 +751,7 @@ Against BBC--LP+F: $+H$ certifies $31$ more; $+C$ certifies $1$ fewer; $+P$ cert
 \theory{Connected-family proof}
 \vspace{.18cm}
 
-\begin{tabular}{@{}>{\bfseries\color{teal}}l p{4.3cm}@{}}
+\begin{tabular}{@{}>{\bfseries\color{teal}}l >{\raggedright\arraybackslash}p{4.35cm}@{}}
 $\Kst=3g$ & unique feasible pair in each copy\\[6pt]
 $\Zst=8g-5$ & coverage bound plus a schedule with no return\\[6pt]
 $H=9g-5$ & one forced return per copy plus a matching order\\[6pt]
@@ -755,16 +762,16 @@ connected & universal tool $u$ lies in every job
 \exact{Independent checks}
 \vspace{.18cm}
 
-\begin{tabular}{@{}>{\bfseries\color{orange}}r p{4.0cm}@{}}
-$349{,}872$ & fixed-order loading checks against exact dynamic programming\\[6pt]
-$988$ & instances proved optimal by at least two methods\\[6pt]
-$41{,}514$ & pairwise method comparisons, with no objective disagreement\\[6pt]
+\begin{tabular}{@{}>{\bfseries\color{orange}}r >{\raggedright\arraybackslash}p{4.05cm}@{}}
+$349{,}872$ & loading checks against an exact dynamic program\\[6pt]
+$988$ & instances proved optimal by two methods\\[6pt]
+$41{,}514$ & pairwise method comparisons, none disagreeing\\[6pt]
 $16{,}920$ & canonical campaign outcomes audited
 \end{tabular}
 \end{columns}
-\vspace{.28cm}
+\vspace{.16cm}
 \centering
-{\small Formal scope and remaining conjectures are recorded separately in \texttt{THEOREM\_AUDIT.md}.}
+{\small Formal scope and remaining conjectures: \texttt{THEOREM\_AUDIT.md}.}
 \source{Report: Appendices A--C and the independent verification program.}
 \end{frame}
 
