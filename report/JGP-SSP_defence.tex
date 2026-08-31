@@ -189,6 +189,31 @@ When a tool must leave, remove the loaded tool whose next use is furthest away.
 \source{Tang--Denardo KTNS; Crama et al. hardness; report Figure 3.}
 \end{frame}
 
+\begin{frame}{Every stop costs production time}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,
+  card/.style={draw=navy!30,fill=warm,rounded corners=2pt,minimum width=2.75cm,
+               minimum height=1.55cm,align=center,font=\small}]
+  \node[card] at (0,0)    {\textbf{CNC cells}\\[2pt]\quiet{tool magazine}};
+  \node[card] at (3.05,0) {\textbf{PCB assembly}\\[2pt]\quiet{feeder slots}};
+  \node[card] at (6.10,0) {\textbf{Colour printing}\\[2pt]\quiet{ink cartridges}};
+  \node[card] at (9.15,0) {\textbf{Order picking}\\[2pt]\quiet{what a picker carries}};
+\end{tikzpicture}
+
+\vspace{.55cm}
+\begin{columns}[T,onlytextwidth]
+\column{.46\textwidth}
+\theory{Same combinatorial core}\par\vspace{.10cm}
+A capacity-$b$ resource, jobs that need subsets of it, and a changeover cost paid
+between consecutive jobs.
+\column{.46\textwidth}
+\exact{Why the order matters}\par\vspace{.10cm}
+A cell running thousands of parts a day repeats the changeover constantly, so the
+sequence is chosen once and paid for every shift.
+\end{columns}
+\source{Report: Section 1.1; industrial study of Burger et al.\ (2015).}
+\end{frame}
+
 % 4 -------------------------------------------------------------------------
 \begin{frame}{Two gaps the literature leaves open}
 \begin{tikzpicture}[x=1cm,y=1cm,>=Stealth]
@@ -208,14 +233,74 @@ When a tool must leave, remove the loaded tool whose next use is furthest away.
 \end{tikzpicture}
 
 \vspace{.44cm}
-\begin{columns}[T,onlytextwidth]
-\column{.48\textwidth}
-\theory{Question 1}\quad What does minimising the number of groups cost after KTNS?
-\column{.48\textwidth}
-\exact{Question 2}\quad Can an exact loading oracle make Benders competitive with compact models?
-\end{columns}
+\centering\small
+Two things the timeline does not contain: a bound on the two-phase loss that depends on
+the \theory{instance}, and a relaxation that gets \exact{past the counting bound}.
 
 \source{Report: literature review in Chapter 3.}
+\end{frame}
+
+\begin{frame}{Two questions, and how the talk is organised}
+\vspace{.15cm}
+\begin{columns}[T,onlytextwidth]
+\column{.47\textwidth}
+\theory{Question 1 \; -- \; structural}\par\vspace{.16cm}
+Industry does not solve the SSP. It groups jobs into as few magazine-fitting batches
+as possible, then sequences the batches.\par\vspace{.16cm}
+\textbf{What does insisting on the fewest groups cost}, once the final KTNS step is
+allowed to re-optimise the loading?
+
+\column{.47\textwidth}
+\exact{Question 2 \; -- \; algorithmic}\par\vspace{.16cm}
+Every compact model surveyed relaxes to the counting bound $q$, so it is fast where
+$q$ is exact and adrift where it is not.\par\vspace{.16cm}
+\textbf{Can a method that never forms that relaxation} -- an exact loading oracle, or a
+reformulation over configurations -- get past it?
+\end{columns}
+
+\vspace{.42cm}
+{\color{linegray}\rule{.92\textwidth}{.7pt}}
+\vspace{.20cm}
+
+\centering\small
+\theory{Part I} answers the first and finds an unbounded loss. \quad
+\exact{Part II} answers the second, and the answer is no --- for a reason worth naming.
+\source{Report: Section 1.3, questions set by the advisors.}
+\end{frame}
+
+\begin{frame}{The configuration view, and where $q$ comes from}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+  cfg/.style={draw=navy!40,fill=warm,rounded corners=2pt,minimum width=1.85cm,
+              minimum height=.90cm,font=\small\bfseries}]
+  \node[cfg] (c1) at (0,0)    {$\{a,b,c\}$};
+  \node[cfg] (c2) at (3.35,0) {$\{b,c,d\}$};
+  \node[cfg] (c3) at (6.70,0) {$\{c,d,e\}$};
+  \node[cfg,draw=teal!70,fill=paleteal] (c4) at (10.05,0) {$\{d,e,f\}$};
+  \foreach \i/\j/\l in {c1/c2/{$+d$},c2/c3/{$+e$},c3/c4/{$+f$}}{
+    \draw[->,teal,line width=1.3pt] (\i)--(\j) node[midway,above,font=\small,teal] {\l};}
+  \node[font=\scriptsize,align=center,below=.30cm of c1] {jobs served\\here};
+  \node[font=\scriptsize,align=center,below=.30cm of c4] {jobs served\\here};
+\end{tikzpicture}
+
+\vspace{.42cm}
+\begin{columns}[T,onlytextwidth]
+\column{.50\textwidth}
+\theory{A schedule is a walk}\par\vspace{.10cm}
+Magazine configurations are the nodes; the step cost is
+$d(C,C')=\lvert C'\setminus C\rvert$, the tools that must be inserted. Every job must be
+served at some node that contains its requirement.
+\column{.44\textwidth}
+\exact{Hence one counting bound}\par\vspace{.10cm}
+Each used tool enters at least once, and at most $b$ of them can already be loaded at
+the start:
+\[\Zst \;\ge\; q \;=\; \lvert\U\rvert-b.\]
+\end{columns}
+
+\vspace{.26cm}
+\centering\small
+This single quantity governs \theory{both} halves of the talk.
+\source{Report: Section 2.4, configuration graph; Corollary 1.}
 \end{frame}
 
 % 5 -------------------------------------------------------------------------
@@ -463,6 +548,35 @@ The additive loss is unbounded, even though all jobs remain connected through $u
 \source{Report: connected unbounded heuristic-gap theorem.}
 \end{frame}
 
+\begin{frame}{Two routes past the counting bound}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+  box/.style={draw=navy!35,rounded corners=2pt,minimum width=4.5cm,
+              minimum height=1.42cm,align=center,font=\small}]
+  \node[box,fill=warm] (p) at (0,1.50)
+     {\textbf{The obstacle}\\ every compact model surveyed relaxes to $q$ or below};
+  \node[box,fill=paleteal,draw=teal!65] (a) at (-3.1,-.62)
+     {\textbf{Route 1: decompose}\\ never relax the loading at all};
+  \node[box,fill=paleorange,draw=orange!65] (b) at (3.1,-.62)
+     {\textbf{Route 2: reformulate}\\ optimise over configurations};
+  \draw[->,teal,line width=1.3pt]   (p.south) -- ++(0,-.28) -| (a.north);
+  \draw[->,orange,line width=1.3pt] (p.south) -- ++(0,-.28) -| (b.north);
+\end{tikzpicture}
+
+\vspace{.24cm}
+\begin{columns}[T,onlytextwidth]
+\column{.46\textwidth}
+\theory{Branch-and-Benders-cut}\par\vspace{.08cm}
+The loading subproblem is polynomial, so it becomes an exact oracle and the master
+never forms a weak relaxation \emph{of the loading}.
+\column{.46\textwidth}
+\exact{Position-indexed branch-and-price}\par\vspace{.08cm}
+Columns are magazine configurations. One variant prices \emph{transitions}, and its
+relaxation can provably exceed $q$.
+\end{columns}
+\source{Report: Section 5, opening; Table 3.}
+\end{frame}
+
 % 12 ------------------------------------------------------------------------
 \begin{frame}{Order in the master, loading in an exact oracle}
 \centering
@@ -585,6 +699,42 @@ Every learned coefficient sits on one predecessor arc.
 \source{Report: Equation 20 and locality discussion in Chapter 7.}
 \end{frame}
 
+\begin{frame}{Configurations as columns: PCF, PCF$'$ and PTF}
+\vspace{.06cm}
+\begin{columns}[T,onlytextwidth]
+\column{.485\textwidth}
+\theory{PCF} \quad\quiet{one configuration per position}\par\vspace{.06cm}
+{\small
+\[
+\min \sum_{t,k}w_t^{k}
+\quad\text{s.t.}\quad
+\sum_C y_C^{k}=1,\;\;
+\sum_{k\ge2}w_t^{k}+\!\!\sum_{C\ni t}y_C^{1}\ge1 .
+\]}
+\vspace{-.18cm}
+Without the counting rows the relaxation is $\mathbf{0}$; with them it is exactly
+$\mathbf{q}$.\par\vspace{.20cm}
+
+\theory{PCF$'$} \quad\quiet{prefix form}\par\vspace{.06cm}
+Removes the symmetry of empty positions. Same relaxation value.
+
+\column{.455\textwidth}
+\exact{PTF} \quad\quiet{one \emph{transition} per step}\par\vspace{.06cm}
+{\small
+\[
+\min \sum_{k}\sum_{(C,C')} d(C,C')\,z_{C,C'}^{k}
+\]}
+\vspace{-.20cm}
+A column carries a step, so the relaxation cannot avoid paying for it:
+\[\text{LP}(\mathrm{PTF})\;\ge\;q,\quad\text{and can exceed it.}\]
+\vspace{-.12cm}
+\exact{The price}\par\vspace{.06cm}
+{\small Pricing is NP-hard, and PTF prices coupled \emph{pairs}, so a node costs far
+more. Rows stay $O(n\lvert T\rvert)$ and fixed.}
+\end{columns}
+\source{Report: Section 5.4, Propositions 20--22.}
+\end{frame}
+
 % 16 ------------------------------------------------------------------------
 \begin{frame}{The campaign tests 12 solver configurations}
 \begin{columns}[T,onlytextwidth]
@@ -700,6 +850,30 @@ The tested master often finds the right order but cannot certify those returns.
 \centering
 {\small\bfseries The work narrows the next experiment; it claims no new SOTA solver.}
 \source{Report: Discussion and further work, Chapters 7--8.}
+\end{frame}
+
+\begin{frame}{Selected references}
+\vspace{.10cm}
+{\small
+\begin{columns}[T,onlytextwidth]
+\column{.485\textwidth}
+\theory{Problem and structure}\par\vspace{.12cm}
+{\footnotesize
+Tang \& Denardo (1988). \emph{Manag.\ Sci.} 34(7). \quiet{KTNS optimality.}\par\vspace{.30cm}
+Crama, Kolen, Oerlemans \& Spieksma (1994). \emph{IJFMS} 6. \quiet{NP-hardness for $b\ge2$.}\par\vspace{.30cm}
+Crama \& van de Klundert (1999). \emph{Naval Res.\ Logist.} 46(5). \quiet{$b$-approximation of the two-phase method.}\par\vspace{.30cm}
+Burger, Jacobs, van Vuuren \& Visagie (2015). \emph{J.\ Sched.} 18(2). \quiet{Industrial study; the open trade-off question.}
+}
+\column{.485\textwidth}
+\exact{Exact methods}\par\vspace{.12cm}
+{\footnotesize
+Laporte, Salazar-Gonz\'alez \& Semet (2004). \emph{IIE Trans.} 36. \quiet{Tool-state model (LSS).}\par\vspace{.30cm}
+Catanzaro, Gouveia \& Labb\'e (2015). \emph{EJOR} 244(3). \quiet{Formulations F1--F5.}\par\vspace{.30cm}
+da Silva, Chaves \& Yanasse (2021). \emph{IJPR} 59(12). \quiet{Multicommodity model; LP $=\lvert T\rvert-b$.}\par\vspace{.30cm}
+Hooker \& Ottosson (2003); Codato \& Fischetti (2006). \quiet{Logic-based and combinatorial Benders.}
+}
+\end{columns}}
+\source{Full bibliography: report, References.}
 \end{frame}
 
 % 21 ------------------------------------------------------------------------
