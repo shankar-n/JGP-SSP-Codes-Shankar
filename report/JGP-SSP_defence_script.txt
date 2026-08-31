@@ -1,498 +1,338 @@
-JGP--SSP INTERNSHIP DEFENCE: VERBATIM SPEAKER SCRIPT
+JGP--SSP INTERNSHIP DEFENCE: SPEAKER SCRIPT
 
-Main talk: Slides 1--21, target 23.5--25 minutes including transitions.
-Backup material: Slides 22--24, used only in questions.
+Main talk: slides 1--21, about 22--24 minutes. Slides 22--24 are short backups.
+Speak to the picture or plot; do not read every label.
 
-Delivery note: Speak the equations slowly. Do not read every table cell unless it is
-included below. The transition at the end of each slide is part of the script.
 
+SLIDE 1 -- JOB SEQUENCING AND TOOL SWITCHING
 
-SLIDE 1 -- TITLE
-Target: 0:35
+Good morning. This project is about a machine with a limited tool magazine. Each job
+needs a set of tools, and the job order decides which tools have to be loaded again.
+I studied this in two ways: first, the loss created by grouping compatible jobs; and
+second, an exact Benders approach for the full sequencing problem. The common theme
+is reinsertion: a tool was loaded, removed, and is needed again later.
 
-Good morning. This internship studies two linked problems: grouping jobs that can
-share one magazine, and sequencing all jobs so that tools are inserted as few times
-as possible. The main question is whether an exact loading oracle makes Benders
-decomposition effective for the sequencing problem. My answer is structural: the
-solver often finds the schedule, but struggles to certify the reinsertion cost that
-occurs across several positions.
+I will start with a small example, then the grouping result, and finally the exact
+campaign.
 
-Transition: I will begin with the machine model, then prove the connected grouping
-gap, and finally use that same reinsertion lens to read the exact campaign.
 
+SLIDE 2 -- WHY DOES THE JOB ORDER MATTER?
 
-SLIDE 2 -- THE SSP MACHINE AND PROBLEM
-Target: 1:05
+The magazine has capacity b. Before a job starts, every required tool must be inside.
+Missing tools are inserted and, if the magazine is full, another tool must leave.
 
-Each job requires a subset of tools. The machine magazine holds at most b tools, and
-all tools required by a job must be present while that job is processed. If the next
-job requires a missing tool, that tool must be inserted and, when the magazine is
-full, another tool must be removed.
+Here, the same three jobs are run in two orders. In the first order, a useful tool is
+kept until its next use. In the second, it is evicted and must return. The requirements
+are identical; only the order changed, but the insertion count changed with it.
 
-We choose a permutation of the jobs and a feasible magazine state at every position.
-The Tool Switching Problem, or SSP, minimises the total number of insertions. In the
-small example on the slide, neighbouring jobs share tools, so those tools can remain
-loaded. A different order can evict a tool and later require it again. That return is
-a reinsertion, and it is the central quantity in both halves of this defence.
+This is the Shortest Sequence Problem, or SSP: choose the job order and magazine
+states to minimise insertions. The hard part is preserving a useful tool across the
+jobs in between.
 
-Transition: The important asymmetry is that loading and ordering have very different
-complexities.
 
+SLIDE 3 -- FOR ONE FIXED ORDER, KTNS GIVES THE BEST LOADING
 
-SLIDE 3 -- FIXED-ORDER LOADING IS EXACT; ORDERING IS NP-HARD
-Target: 1:00
+For a fixed job order, the loading problem is easy. KTNS means Keep Tool Needed
+Soonest. When a tool must leave, remove one that is not required now and whose next
+use is farthest in the future. Tang and Denardo proved that this rule is optimal. It
+runs in O of n times the number of used tools.
 
-Once the job order is fixed, Keep Tool Needed Soonest, or KTNS, produces an optimal
-loading in O of n times the number of used tools. At every eviction it removes an
-unrequired tool whose next use is furthest in the future. Tang and Denardo proved this
-fixed-order result.
+Choosing the order is the hard part. SSP is NP-hard for every fixed capacity of at
+least two. This separation suggests decomposition: the master chooses the order, and
+an exact loading oracle evaluates it.
 
-Choosing the order is the hard part. Crama and co-authors proved the SSP NP-hard for
-every fixed capacity b at least two. This separation suggests decomposition: let a
-master choose the order, solve loading exactly for that order, and send information
-from the exact loading problem back to the master.
 
-Transition: Before presenting that solver, I will locate it in the exact-method
-literature and explain why lower bounds are the recurring issue.
+SLIDE 4 -- WHERE THIS WORK SITS
 
+The exact SSP literature mainly tries to strengthen the ordering lower bound. LSS is
+an early compact formulation. Catanzaro and co-authors proposed several later compact
+formulations; I use their Formulation 4 as a reference baseline. SSPMF is a
+multicommodity formulation whose relaxation equals the basic coverage bound in the
+relevant setting.
 
-SLIDE 4 -- EXACT-METHOD LITERATURE LINEAGE
-Target: 1:10
+There are stronger and newer methods, including Catanzaro Formulation 5, JGSMF, and
+dynamic-programming or A-star approaches. They are not baselines in this campaign. So
+the computational part is a controlled comparison with three reimplemented reference
+models, not a state-of-the-art ranking.
 
-The exact literature is a sequence of attempts to strengthen the ordering bound.
-Laporte and co-authors showed that the original Tang--Denardo relaxation can have
-value zero on every instance, and introduced the LSS formulation. Catanzaro and
-co-authors later developed five compact formulations; their Formulation 5 is stronger
-than Formulation 4 and is their recommended model.
 
-The multicommodity SSPMF formulation proves that its relaxation is exactly the tool
-count minus capacity when every declared tool is used. In my notation that is the
-coverage bound q. Later work includes the strengthened JGSMF model of Akhundov and
-Ostrowski, and the dynamic-programming and A-star methods of Legrand and co-authors.
+SLIDE 5 -- THE GROUPING HEURISTIC COMMITS BEFORE ORDERING
 
-The campaign here reimplements LSS, Catanzaro Formulation 4, and SSPMF. These are
-reimplemented reference baselines, not the current state of the art. JGSMF,
-Catanzaro Formulation 5, and the latest combinatorial exact algorithms are not
-performance baselines in this study.
+The grouping approach first partitions jobs into groups whose combined tool set fits
+in one magazine. It uses as few groups as possible. It then orders the groups, expands
+each group into jobs, and runs KTNS on the final sequence.
 
-Transition: A parallel literature avoids solving the SSP directly by grouping first.
+It is attractive because each group can be processed without switching tools inside
+the group. It also has a classical approximation guarantee. But that guarantee does
+not answer a more specific question: after insisting on the minimum number of groups,
+how much extra switching can the final KTNS schedule suffer?
 
+The next slides answer that question exactly for a connected family.
 
-SLIDE 5 -- GROUP, SEQUENCE, THEN APPLY KTNS
-Target: 1:10
 
-A group is feasible when the union of the tools required by its jobs fits in one
-magazine. The Job Grouping Problem partitions the jobs into the minimum number K star
-of feasible groups.
+SLIDE 6 -- EVERY COST IS A BASELINE PLUS REINSERTIONS
 
-The standard pipeline has three steps. First, solve the grouping problem. Second,
-choose an order of the resulting group configurations, usually as a small travelling-
-salesman problem. Third, flatten the groups into one job sequence and apply KTNS to
-that sequence.
+Let U be the tools used anywhere, and assume the initial magazine can be filled for
+free. At most b tools fit initially, so at least q equals the size of U minus b tools
+must be inserted later. This is the coverage bound.
 
-This is not only a theoretical construction. Burger and co-authors use it for an
-industrial printing problem. Crama and van de Klundert proved a classical b-
-approximation for the construction. What was missing was an instance-sensitive theory
-for the value after the final KTNS step: exact cases, finite witnesses, and the actual
-gap caused by insisting on the fewest groups.
+Every schedule has a simple accounting identity: cost equals q plus R, where R counts
+reinsertions. First appearances contribute to coverage. Any cost above coverage is a
+tool returning after it was removed.
 
-Transition: That theory starts by separating unavoidable coverage from genuine
-reinsertions.
+For the grouping pipeline, H is the best KTNS cost over every minimum grouping, every
+group order, and every order inside a group. This gives the heuristic every favourable
+tie-break. If H still exceeds the SSP optimum Z star, the gap belongs to grouping
+itself rather than to a poor implementation choice.
 
 
-SLIDE 6 -- COVERAGE, Z STAR, AND THE HEURISTIC ENVELOPE H
-Target: 1:15
+SLIDE 7 -- A FOUR-JOB COUNTEREXAMPLE: GROUPING ALREADY LOSES ONE
 
-Let U be the set of tools required by at least one job, and use the free-initial cost
-convention. At most b tools can be present in the free first fill. Therefore q,
-defined as the cardinality of U minus b, counts tools that must each be inserted at
-least once.
+This small instance has capacity four. Jobs A and B are the only pair that can share a
+group. Any minimum grouping therefore forces A and B to be adjacent in the final
+sequence.
 
-Every feasible full-magazine schedule therefore has the exact identity
+Without that restriction, the order B, C, A, D reaches the coverage bound: three
+insertions after the free initial fill. With the grouping restriction, checking the
+six grouped orders shows that the best cost is four.
 
-cost equals q plus R,
+Thus Z star equals three and H equals four. One forced adjacency creates one
+reinsertion that a free sequence avoids.
 
-where R counts reinsertions of tools that appeared earlier, were removed, and later
-returned. Hence the SSP optimum is Z star equals q plus R opt.
 
-For the grouping pipeline, H is the minimum KTNS cost over every minimum-cardinality
-grouping, every group order, and every order of jobs inside each group. H is an
-optimistic envelope, not the output of a particular tie-breaking implementation. It
-always satisfies H at least Z star. A positive gap therefore isolates a restriction of
-the pipeline itself rather than a poor implementation choice.
+SLIDE 8 -- A CONNECTED FAMILY FORCES THE SAME GROUPING DECISION
 
-Transition: The smallest positive actual gap has only four jobs.
+To make a family, take g private copies of the four-job seed. Add one universal tool
+to every job, add one private marker to each copy, and raise capacity to six.
 
+The universal tool connects all copies: every job shares it. The marker keeps copies
+distinct and prevents small jobs from different copies being packed together. The local
+obstruction from the seed survives, but the whole instance is connected.
 
-SLIDE 7 -- THE FOUR-JOB SEED
-Target: 1:05
+Inside one copy, the two small jobs A and B are the only feasible pair. Each large job
+fills the magazine, and small jobs from different copies need seven tools. The minimum
+grouping is therefore unique and contains three groups per copy, so K star equals
+three g.
 
-Take capacity four and the jobs
 
-A equals {1,2}, B equals {3,4}, C equals {1,3,5,6}, and D equals {2,5,6,7}.
+SLIDE 9 -- UNRESTRICTED ORDERING REACHES THE LOWER BOUND
 
-The only feasible pair is A with B. Therefore every minimum grouping consists of the
-group {A,B} and the two singleton groups C and D, so A and B must be consecutive in
-every sequence admitted by the grouping pipeline.
+The family has eight private tools per copy and one universal tool. With capacity six,
+the coverage bound is q equals eight g minus five.
 
-The unrestricted order B,C,A,D attains the coverage bound q equals three, so Z star
-equals three. Exhausting the six grouped orders up to reversal gives best KTNS cost
-four. Thus K star equals three and H equals four. One forced adjacency creates one
-avoidable reinsertion.
+Process copies one after another, using B, C, A, D inside every copy. Keep the
+universal tool loaded. The remaining slots reproduce the zero-reinsertion order of the
+seed. When moving to the next copy, every private tool is new, so no old tool returns.
 
-Transition: I now amplify this one-unit seed while preventing disconnected copies from
-being a loophole.
+The first copy contributes three paid insertions and each later copy contributes eight.
+The schedule reaches q, so Z star equals eight g minus five.
 
 
-SLIDE 8 -- BUILDING THE CONNECTED FAMILY
-Target: 1:05
+SLIDE 10 -- THE FORCED GROUPING PAYS ONE EXTRA RETURN PER COPY
 
-For every positive integer g, take g private copies of the seven original tools and
-the four seed jobs. Add one universal tool u to every job. For each copy i, also add a
-private marker tool v sub i to all four jobs in that copy. Finally, raise capacity from
-four to six.
+In every minimum grouping, A and B must be consecutive. The universal tool and marker
+already occupy two of the six slots, leaving the same four-slot obstruction as in the
+seed.
 
-The universal tool makes the construction connected: every pair of jobs intersects
-through u, and the bipartite job--tool incidence graph is also connected. The private
-marker identifies each copy and prevents small jobs from different copies from being
-packed together at capacity six.
+Slide 7 showed that no order with A and B adjacent can reach coverage in that
+four-slot seed. Therefore each copy forces at least one tool to return. A matching
+grouped schedule pays exactly one return per copy, so H equals q plus g, or nine g
+minus five.
 
-Transition: The first proof obligation is to determine the minimum grouping exactly.
 
+SLIDE 11 -- THE ADDITIVE LOSS GROWS LINEARLY
 
-SLIDE 9 -- WHY K STAR EQUALS 3g
-Target: 1:10
+The plot puts both exact formulas together. The unrestricted optimum is eight g minus
+five. The grouped value is nine g minus five. Their vertical distance is exactly g.
 
-Each large job C sub i or D sub i now requires its four original tools, the marker v
-sub i, and the universal tool u. It fills all six slots, so it cannot share a group
-with any other job.
+That proves an unbounded additive loss on connected instances. The ratio tends to nine
+eighths. This construction therefore does not prove a universal ratio bound; it proves
+the narrower and fully checked statement that the absolute number of avoidable
+reinsertions can grow without limit.
 
-Within copy i, the two small jobs A sub i and B sub i together require four original
-tools, v sub i, and u, exactly six tools, so they form a feasible pair. Two small jobs
-from different copies require their four private original tools, two different marker
-tools, and u: seven tools. They cannot share a group.
 
-Therefore each copy contributes exactly the three groups {A sub i,B sub i}, {C sub
-i}, and {D sub i}. The minimum grouping is forced, and K star equals 3g.
+SLIDE 12 -- ONE BENDERS ITERATION
 
-Transition: The unrestricted SSP optimum nevertheless reaches coverage exactly.
+I now turn to the exact approach. The master proposes a job order. The loading oracle
+evaluates that exact order. If the master's variable theta understates the loading
+cost, the oracle returns a cut. The master is then solved again with that cut.
 
+This is Benders decomposition in its simplest form: choose a path in the master, price
+that path exactly in the subproblem, and feed a global lower bound back. The cut must
+be valid for every future order, not only for the order that generated it.
 
-SLIDE 10 -- WHY Z STAR EQUALS 8g MINUS 5
-Target: 1:10
+The next slides show where that validity comes from, and why such cuts can still be too
+local to describe a long reinsertion span well.
 
-There are seven original tools and one marker for each copy, plus the universal tool.
-Thus the total number of used tools is 8g plus one. With capacity six, the coverage
-bound is q equals 8g minus five.
 
-Process the copies consecutively. Inside copy i use the seed order B sub i, C sub i,
-A sub i, D sub i. Keep the universal tool loaded throughout. The marker occupies one
-slot, and the four remaining non-universal slots reproduce the capacity-four loading
-of the seed order. On entering a new copy, every new private tool is appearing for the
-first time; no private tool ever has to return.
+SLIDE 13 -- THE MASTER CHOOSES A HAMILTONIAN PATH
 
-This constructs a schedule with no reinsertion, so it attains q. Therefore Z star
-equals 8g minus five.
+The master uses binary arc variables x sub i j. One means that job j follows job i.
+Degree constraints and subtour constraints make these arcs one path through all jobs.
+Theta is the loading-cost lower bound.
 
-Transition: Minimum grouping destroys that zero-reinsertion order once in every copy.
+Before Benders cuts, theta has coverage and local adjacency information. The pair row
+charges switching forced by consecutive jobs. There is also a coverage row, and one
+regime adds triplet rows.
 
+Subtours are separated at integer candidates, which is sufficient for integer path
+feasibility. Fractional subtour cuts were not implemented or tested. Root-bound
+results later are therefore about this implemented relaxation, not the full fractional
+subtour polytope.
 
-SLIDE 11 -- WHY H EQUALS 9g MINUS 5
-Target: 1:20
 
-Every minimum-group sequence makes A sub i and B sub i consecutive. At any job of copy
-i, the required universal tool and marker leave at most four slots for that copy's
-seven original tools. If those original tools had no reinsertion, restricting the
-schedule to this copy would give a capacity-four, zero-reinsertion seed order with A
-and B consecutive. The exact seed table proves that impossible.
+SLIDE 14 -- THE LOADING ORACLE PRICES ONE PATH EXACTLY
 
-So every copy contributes at least one private reinsertion. Counting first appearances
-and these g returns gives H at least q plus g, which is 9g minus five. Processing the
-copies consecutively in a best grouped seed order attains exactly one reinsertion per
-copy, so equality holds.
+For a fixed path, the subproblem decides whether each tool is loaded at each job and
+whether it is inserted on each transition. Requirement constraints keep current-job
+tools present; capacity constraints limit the magazine to b tools.
 
-The theorem is therefore
+This linear program is integral for a fixed order. Its objective equals the KTNS cost
+of that order. So the master is not receiving a heuristic price. It receives the exact
+cost of its proposed sequence.
 
-Z star equals 8g minus five, H equals 9g minus five, and H minus Z star equals g.
+This matters for the results: when Benders has a good incumbent, the sequence itself
+has been evaluated exactly. The remaining question is whether the master has learned a
+strong enough lower bound to prove that no better sequence exists.
 
-The additive gap is unbounded even on connected instances. The ratio tends to nine
-eighths, not infinity, so this does not contradict the classical multiplicative
-b-approximation.
 
-Transition: The theorem identifies the missing cost. I now ask whether the exact
-Benders master represents the same object.
+SLIDE 15 -- ONE DUAL SOLUTION GIVES A GLOBAL CUT
 
+The dual of the loading problem assigns prices to requirement, capacity, and
+transition constraints. From an optimal dual solution for the current path, we collect
+transition prices into coefficients alpha sub i j.
 
-SLIDE 12 -- THE BENDERS LOOP AND THE CONVENTION SHIFT
-Target: 1:05
+This gives a cut of the form theta greater than or equal to beta plus the sum of alpha
+sub i j times x sub i j. It is tight at the current path and valid for every path,
+because the dual feasible region does not depend on the selected path.
 
-The Benders master chooses a job order and uses one continuous variable theta as an
-optimistic loading cost. For a candidate order, the loading subproblem is solved
-exactly. If theta is too low, a valid optimality cut is returned to the master. The
-process runs inside branch and bound until the lower bound meets the incumbent.
+The issue is not validity. The cut sees selected adjacencies well, but a reinsertion
+can depend on a tool disappearing and returning much later. The campaign tests several
+ways of strengthening this mechanism.
 
-The implementation uses the empty-start convention, so the first magazine fill is
-charged. Under the preprocessing assumptions, empty-start cost equals free-initial
-cost plus b. Consequently the free-initial coverage bound q corresponds to the master
-row theta at least the cardinality of U. Every cross-method result is re-evaluated with
-the same empty-start KTNS oracle; native objectives are never compared directly.
 
-Transition: Here is the exact master on which those cuts act.
+SLIDE 16 -- WHAT WAS COMPARED, UNDER ONE COMMON BUDGET
 
+The campaign has nine Benders regimes and three compact reference models. BBC-LP uses
+dual cuts at integer solutions. BBC-K uses a KTNS-based cut. Other regimes add triplet
+rows, fractional separation, a conflict row, a hybrid start, or Pareto lifting.
 
-SLIDE 13 -- THE EXACT MASTER PROBLEM
-Target: 1:15
+There are 1,410 canonical instances and 12 configurations, so 16,920 planned rows.
+All are present after recovery. Each run has a one-hour limit and 16 GiB. Costs are
+rechecked with one common empty-start KTNS oracle.
 
-The master has a depot d, binary arc variables x sub i j, and theta. One incoming and
-one outgoing arc at every node, together with subtour-elimination constraints, encode
-a Hamiltonian path through the jobs.
+Two fairness caveats matter. BBC ran with one CPLEX thread while compact baselines ran
+with four. The fractional-cut setting disables presolve, and the hybrid setting
+includes both a MIP start and a seeded cut before the CPLEX timer. The comparison is
+complete, but it is not thread-balanced or one-factor-at-a-time.
 
-Before any Benders cut, theta has three kinds of lower bound. The pairwise row charges
-the minimum switch forced by each selected adjacent pair and charges the first job on
-the depot arc. The coverage row is theta at least the cardinality of U. Optional
-triplet rows use unions of three consecutive jobs.
 
-Subtour constraints are separated lazily at integer candidate solutions. This is exact
-for integer feasibility. Fractional subtour-elimination constraints were not separated
-or tested in this campaign. Root-bound statements therefore describe the implemented
-degree master with its stated rows and Benders user cuts, not a master strengthened by
-the full fractional subtour closure.
+SLIDE 17 -- CACTUS VIEW: SOLVE COUNTS OVER TIME
 
-Transition: For a valid order, the subproblem supplies an exact cost and an arc-
-supported dual cut.
+This cactus plot shows certified optima over time. The compact models close more
+instances in the stated protocol: SSPMF reaches 1,028, Catanzaro F4 reaches 876, and
+LSS reaches 833. The strongest Benders setting, BBC-LP, reaches 724.
 
+The message is not that Benders is useless. It is that this Benders implementation is
+not yet competitive as a general exact solver against these reference baselines. BBC
+uses one solver thread while compact models use four. This is evidence about the
+implemented methods under this protocol, not a claim about the whole literature.
 
-SLIDE 14 -- THE EXACT LOADING ORACLE AND ITS DUAL CUT
-Target: 1:20
 
-For each job and tool, y records whether the tool is in the magazine, and z records an
-insertion. Requirement rows force required tools present. Capacity rows limit every
-magazine to b tools. Transition rows make z pay when a selected arc enters a state in
-which a tool is newly present, and depot rows charge the initial load.
+SLIDE 18 -- COVERAGE GAP SEPARATES THE METHODS
 
-For a fixed Hamiltonian path, this linear program has the consecutive-ones structure
-and is integral. Its optimum is exactly the KTNS cost of the order. The dual feasible
-region is independent of the candidate order, so any dual-feasible point gives an
-affine Benders cut in the arc variables that is valid for every order and tight at the
-current order when the dual is optimal.
+This plot groups the 1,107 instances with a known optimum by how far that optimum is
+above coverage. The zero-gap group is coverage-tight. The other bins require one or
+more reinsertions.
 
-The depot coefficients are essential. An early implementation omitted them and could
-cut off valid optima; 193 random-instance violations exposed the defect. The term was
-restored before the reported campaign.
+BBC-LP proves 94.2 percent of the tight cases, but its rate drops sharply when the
+optimum needs reinsertion. The compact models do not show the same pattern; for
+example, Catanzaro F4 is strong in several loose bins.
 
-Transition: The campaign varies how and where these valid cuts are generated.
+The bins have different sizes, so the lines are guides to the eye. More importantly,
+this is association, not a causal proof. But it is a precise clue: the cases where
+coverage is exact are the cases where this Benders master closes most reliably.
 
 
-SLIDE 15 -- THE NINE BBC REGIMES
-Target: 1:15
+SLIDE 19 -- MOST BBC ROOT BOUNDS STOP AT THE COVERAGE BOUND
 
-There are nine Benders regimes. BBC-LP uses dual optimality cuts at integer candidates.
-BBC-K uses the cheaper KTNS combinatorial cut. BBC-LP plus F and BBC-K plus F also
-separate dual Benders cuts at fractional relaxation points. BBC-LP plus T adds triplet
-bounds. The three additions on the fractional base are C for the conflict-graph row,
-H for the hybrid-genetic start, and P for Pareto cut lifting. BBC-LP plus ACC combines
-C, H, and P.
+The root data explain why. Across the nine Benders regimes, 87.2 percent of recorded
+roots equal the coverage bound exactly. The small bar chart shows the less common cases
+where a root is higher than coverage.
 
-Two qualifications are essential. Every plus-F regime also disables CPLEX presolve so
-that the user-cut callback remains valid. A plus-F comparison is therefore a regime
-comparison, not a clean causal estimate of fractional cuts alone. Also, plus H supplies
-both a MIP start and a seeded Benders cut. Its roughly two-second heuristic
-preprocessing and seed-cut construction occur before the recorded CPLEX timer.
+There is also evidence that the solver often finds the answer before it proves it.
+Among time-limited BBC-LP runs whose optimum is known elsewhere, 223 of 383 already
+have an incumbent at that optimum. But the median terminal gap across all BBC-LP time
+limits is still 23.1 percent.
 
-Transition: With those regime definitions fixed, I can state exactly what the campaign
-does and does not compare.
+Together, these facts support a cautious diagnosis: the main obstruction is often the
+certificate, not discovery of a good job order.
 
 
-SLIDE 16 -- COMPLETE PROTOCOL AND VALIDATION
-Target: 1:20
+SLIDE 20 -- ABLATION: MORE CUTS DID NOT MEAN MORE SOLVES
 
-The primary campaign contains 1,410 canonical instances and 12 configurations, giving
-16,920 planned canonical method--instance rows. Every row is present after recovery;
-there are zero missing and zero error rows. Every run has a one-hour CPLEX limit and
-16 GiB, and no outcome-dependent early stopping is used.
+The chart uses BBC-LP plus fractional cuts as the reference, at 655 solved instances.
+Removing fractional separation gives plain BBC-LP and adds 69 solves. Adding the
+hybrid incumbent adds 31. The conflict row changes the count by minus one, all three
+strengthenings by minus three, and Pareto lifting by minus 37.
 
-The cluster allocated four cores to each run, but the implementations did not use them
-equally. The Benders solver explicitly ran with one CPLEX thread. The three compact
-baselines ran with four CPLEX threads. Therefore this is not a thread-balanced speed
-comparison, although all methods retain the same planned denominator and nominal
-resource envelope.
+Fractional separation still cuts the median node count from 77,439 to 3,701 and adds
+about 67 million cuts. Yet among 1,404 paired terminal bounds it is higher zero times,
+equal 1,226 times, and lower 178 times.
 
-At least one method proves an optimum on 1,107 instances. On the 988 instances proved
-by at least two methods, all 41,514 pairwise comparisons agree after common KTNS re-
-evaluation. Small exact tests and an independent verifier provide additional checks;
-they do not constitute a proof that the implementations are defect-free.
+The narrow conclusion is that more cuts did not buy more certificates under this
+budget. Fractional separation also disables presolve, and the hybrid run receives a
+seed cut and uncharged preparation, so these are complete-regime comparisons rather
+than isolated causal effects.
 
-Transition: The first result is simply how many optima each reimplemented method
-certifies.
 
+SLIDE 21 -- WHAT THE WORK SHOWS, AND WHAT TO DO NEXT
 
-SLIDE 17 -- UNDER THIS PROTOCOL, COMPACT BASELINES CLOSE MORE
-Target: 1:00
+The theoretical result is complete: minimum grouping can force an unbounded additive
+loss, even on connected instances, because it creates avoidable reinsertions.
 
-The three reimplemented compact baselines certify the most instances: SSPMF closes
-1,028, Catanzaro F4 closes 876, and LSS closes 833. The best Benders regime is BBC-LP
-with 724, followed by BBC-LP plus T with 723 and BBC-K with 722. The remaining Benders
-regimes range from 686 down to 618.
+The computational result is a diagnosis, not a solver victory. BBC-LP works very well
+when coverage is exact. On loose cases it often finds the right sequence but lacks a
+strong enough proof bound. The tested local strengthening ideas did not change that.
 
-Thus the decomposition is not a faster solver in this campaign. These counts compare
-reimplemented baselines under this protocol; they are not a claim against current
-state-of-the-art JGSMF, F5, or the newest dynamic-programming and combinatorial search
-methods. The thread asymmetry also means that runtime rankings must be read with
-caution.
+The next exact model should represent complete magazine configurations across
+positions, rather than only local arcs or per-tool fractional choices. It should first
+be judged by whether it raises loose-case roots above coverage, and then by whether
+that gives more certified optima under a genuinely matched protocol.
 
-Transition: The aggregate ranking is less informative than the structural split by
-whether reinsertion is required.
+The common lesson is simple: coverage counts first appearances; the missing object is
+a tool returning across a span.
 
 
-SLIDE 18 -- CLOSURE IS STRONGLY ASSOCIATED WITH COVERAGE TIGHTNESS
-Target: 1:10
+BACKUP SLIDE 22 -- PROOF LEDGER
 
-Among the 1,107 known optima, 520 are coverage-tight and 587 are coverage-loose.
-BBC-LP certifies 490 of the tight cases, or 94.2 percent, but only 234 of the loose
-cases, or 39.9 percent. That is a 54-point association with whether the optimum needs
-at least one reinsertion.
+If asked for the lower-bound count, let x sub i be the number of seed tools from copy
+i placed in the free initial magazine, and let y count initially loaded universal or
+marker tools. Capacity gives the sum of the x sub i plus y at most six.
 
-The compact controls prevent the stronger interpretation that loose instances are
-intrinsically hard. SSPMF closes all 520 tight cases and 508 loose cases. Catanzaro F4
-closes 369 tight and 507 loose. LSS closes 369 tight and 464 loose.
+The seed forces one reinsertion per copy. Counting remaining first appearances and
+these returns gives at least nine g minus five insertions. The grouped construction
+attains this bound. That is the lower and upper bound for H.
 
-Therefore coverage tightness is a strong predictor of closure for BBC-LP in this
-campaign. This is association, not causation, and it is not a universal hardness label
-for the instance.
 
-Transition: Incumbent and root records show why the association points toward
-certification rather than schedule discovery.
+BACKUP SLIDE 23 -- CAMPAIGN PROVENANCE
 
+The public primary ledger is the 16-GiB, one-hour campaign: 1,410 canonical instances
+times 12 configurations, with all 16,920 rows present. The older server recovery files
+are provenance, not a second denominator.
 
-SLIDE 19 -- THE SOLVER OFTEN HAS THE SCHEDULE BUT NOT THE CERTIFICATE
-Target: 1:10
+The separate 32-GiB LSS sensitivity is not merged into the primary comparison. It
+reruns memory-limited LSS positions under a different memory budget. It helps explain
+memory pressure, but does not make a balanced comparison with the main campaign.
 
-BBC-LP certifies 402 instances within one second and 724 within one hour. Among its 383
-time-limited runs for which an optimum is known from another proof, 223 already hold an
-incumbent of exactly that value. That is 58 percent of the measured unfinished cases.
-Across all 680 time-limited BBC-LP runs, however, the median terminal optimality gap is
-23.1 percent.
 
-The root evidence is consistent with the same diagnosis. Across the nine Benders
-regimes, 9,067 of 10,392 recorded canonical roots equal the coverage row exactly. That
-is 87.2 percent. This does not prove that coverage causes every failure, but it shows
-that the implemented master usually begins with no bound stronger than coverage.
+BACKUP SLIDE 24 -- CONFIGURATION MODELS RARELY LIFT THE COVERAGE BOUND
 
-Transition: The ablation tests whether the attempted search and bound modifications
-change that outcome.
+PCF prime assigns whole magazine configurations to positions. Its relaxation is proved
+to equal the coverage bound q. The implementation confirms that result: none of 2,108
+recorded PCF-prime roots exceeds q.
 
-
-SLIDE 20 -- THE IMPLEMENTED FRACTIONAL REGIME CUT NODES, NOT TERMINAL BOUNDS
-Target: 1:15
-
-The fractional regime BBC-LP plus F certifies 655 instances. Adding the hybrid-
-genetic regime gives 686, a gain of 31. Adding the conflict row gives 654, and Pareto
-lifting gives 618. BBC-LP, which removes fractional separation and restores presolve,
-certifies 724, a difference of 69.
-
-The fractional regime generates 67,047,595 Benders user cuts and reduces median nodes
-from 77,439 to 3,701. Yet among 1,404 paired terminal bounds, the plus-F bound is higher
-zero times, equal 1,226 times, and lower 178 times.
-
-These numbers do not identify the causal effect of fractional cuts, because plus F
-also disables presolve. Likewise, the plus-H gain cannot be assigned only to the
-incumbent: that regime includes a MIP start, a seed cut, and roughly two seconds of
-preprocessing outside the recorded CPLEX timer. The defensible result is narrower:
-none of the tested bound-oriented regimes improves the fixed-budget solve count over
-BBC-LP.
-
-Transition: I can now separate the proved contribution, the measured diagnosis, and
-the next research step.
-
-
-SLIDE 21 -- THE EVIDENCE POINTS TO REINSERTION ACROSS A SPAN
-Target: 1:15
-
-On the structural side, the cost identity says that everything above coverage is
-reinsertion. The four-job seed is smallest, and the connected family proves an
-unbounded additive gap for the best minimum-group-and-KTNS envelope. Its ratio tends to
-nine eighths.
-
-On the exact side, coverage tightness is strongly associated with BBC-LP closure, many
-unfinished runs already contain an optimal schedule, and the tested local bound regimes
-do not improve the number of proofs. Because the experiment has thread, presolve, and
-timer asymmetries, this is a diagnosis of the implemented regimes, not a causal theorem
-and not a state-of-the-art solver claim.
-
-The lower-risk publication route is the audited grouping and KTNS theory. The higher-
-risk exact route is a configuration-consistent model that enforces one whole-magazine
-path across positions. Its success criterion is explicit: raise loose-instance roots
-materially above q and convert that gain into more certified optima under a genuinely
-matched protocol.
-
-Closing line: The missing object is not another local copy of coverage. It is a
-reinsertion across a span.
-
-
-BACKUP SLIDE 22 -- CONNECTED PROOF LEDGER
-
-Use this slide if asked for the lower-bound count in the connected theorem.
-
-For copy i, let x sub i be the number of its seven original tools placed in the free
-initial magazine. Let y be the number of initially loaded tools among the universal
-tool and the g markers. Because the initial magazine has capacity six, the sum of the
-x sub i plus y is at most six.
-
-The seed argument forces one reinsertion in every copy. Copy i therefore needs at least
-seven minus x sub i first appearances plus one reinsertion, which is eight minus x sub
-i later insertions. The universal and marker tools need at least g plus one minus y
-insertions. Summing gives
-
-sum over i of eight minus x sub i, plus g plus one minus y,
-at least 9g minus five.
-
-The consecutive grouped construction attains the same value, so H equals 9g minus
-five. Connectivity follows because every job contains u. The theorem concerns an
-unbounded additive gap; H divided by Z star tends to nine eighths.
-
-
-BACKUP SLIDE 23 -- FULL CAMPAIGN AND PROVENANCE
-
-Use this slide for questions about denominators, memory, recovery, cost conventions, or
-fairness.
-
-The checked-in campaign originally included 1,421 files. Eleven non-canonical
-Catanzaro identities account for 132 rows and are excluded. The canonical campaign is
-1,410 instances times 12 configurations, or 16,920 rows, all present.
-
-The historical primary inventory contained 361 confirmed memory events: 352 LSS and
-nine Benders. The 123-row recovery covered 58 absent identities, 48 credential-expiry
-rows, and 17 unexplained worker exits. Its final outcomes were 17 optima, 91 feasible
-time limits, and 15 additional confirmed memory limits. The final primary ledger has
-376 memory-limit outcomes: 352 LSS and 24 Benders, with zero missing and zero error
-rows.
-
-The separate 32-GiB LSS sensitivity reran the 352 LSS memory positions. It produced
-245 feasible time limits, 107 further memory limits, and no additional optimum. It is
-not merged into the primary 16-GiB comparison.
-
-All runs were allocated four cores. BBC explicitly uses one CPLEX thread; compact
-baselines use four. Plus F disables presolve. Plus H performs its roughly two-second
-heuristic and seed-cut work before the recorded CPLEX timer. Every sequence is compared
-under the common empty-start KTNS cost. The compact models are reimplemented reference
-baselines, not a complete state-of-the-art comparison.
-
-
-BACKUP SLIDE 24 -- WINDOW REDUNDANCY AND PCF/PTF
-
-Use this slide for questions about whether a span-based inequality or a configuration
-formulation already fixes the bound.
-
-The proposed integer window statement is valid: every tool used somewhere in a window
-must either be present at the window start or be inserted inside it. But its robust
-fractional encoding is implied by the existing transition rows tool by tool. Summing
-those implied inequalities gives the implemented window row. It cannot strengthen the
-LP, and the regression experiment confirms identical roots on all 37 paired cases.
-
-The independent position--configuration relaxation PCF prime equals q on all 2,108
-runs with a recorded root. The position--transition formulation PTF exceeds q on only
-two of 232 recorded roots, and only by one unit. These results do not prove that every
-configuration model is limited to coverage. They show that per-tool or per-position
-fractional consistency still permits mixing. A credible next model must enforce one
-capacity-feasible path through complete magazine configurations, and it must be judged
-by both root improvement and additional fixed-budget proofs.
+PTF assigns transitions between configurations and can be stronger. In the campaign it
+exceeds q on only two of 232 recorded roots. On both, the bound rises from five to six,
+while the true optima are twelve and thirteen. So the stronger relaxation is real but,
+on this sample, too rare and too small to close the certificate gap.

@@ -1,7 +1,7 @@
 # Report and defence build notes
 
 The report was rebuilt and received a final source, code, data, and reference audit on
-2026-08-29. The authoritative inputs are the split TeX sources,
+2026-08-31. The authoritative inputs are the split TeX sources,
 `references.bib`, the checked-in campaign CSV files, and the verification programs.
 
 ## Main files
@@ -30,7 +30,8 @@ pdflatex JGP-SSP_defence
 pdflatex JGP-SSP_defence
 ```
 
-The verified outputs from the final build are a 96-page report and a 29-slide defence.
+The verified outputs from the final build are a 96-page report and a 24-slide defence
+(21 main slides and three backups).
 
 ## Verification commands
 
@@ -57,13 +58,13 @@ The final audit made the following material corrections.
 1. The completed campaign archive contains 17,052 raw rows over 1,421 checked-in files. Eleven
    Catanzaro file identities are non-canonical: ten are byte-identical duplicates and
    one is an ad-hoc test file. All reported aggregates therefore use 1,410 canonical
-   instances and all 16,920 planned canonical rows. A hashed pre-recovery copy of every
+   instances and all 16,920 planned canonical rows. A hashed pre-completion copy of every
    affected shard is retained for auditability.
 
 2. The historical campaign resume key used only file name and configuration. Because
    Crama reuses names at different capacities, it silently skipped 58 planned pairs on
    requeue. The BBC and BNP runners now key on family, file name, jobs, tools, capacity,
-   and configuration. The 58 missing pairs were rerun under the original envelope.
+   and configuration. The 58 missing pairs were completed under the same protocol.
 
 3. Every coverage calculation uses `|U| - b`, where `U` contains only tools required
    by at least one job. Ten canonical instance identities contain an unused declared
@@ -81,12 +82,10 @@ The final audit made the following material corrections.
    comparison rather than calling the 2021 HGS the unqualified current state of the
    art.
 
-6. The report separates the primary 16-GiB ledger from the 32-GiB LSS sensitivity and
-   uses a fixed 1,410-instance denominator. The completed primary ledger has 376 confirmed OOM
-   outcomes; the sensitivity changes 245 of the 352 LSS OOMs to time-limit-feasible but
-   certifies no new optimum. The 123 exact-envelope recovery jobs (58 absent,
-   48 credential expiry, 17 unexplained exits) are merged: 17 certified optima, 91
-   time-limit-feasible outcomes, and 15 scheduler-confirmed OOM outcomes.
+6. The report uses a fixed 1,410-instance denominator: every valid non-optimal outcome
+   counts as unsolved. The auxiliary LSS sensitivity is kept separate and certifies no
+   additional optimum. Full-key completion and provenance checks validate all 16,920
+   canonical identities before aggregation.
 
 7. Bibliography identities and metadata were checked against the supplied PDFs,
    including Calmels, Jans, Kashou, Otiai, Pop, and Yanasse.

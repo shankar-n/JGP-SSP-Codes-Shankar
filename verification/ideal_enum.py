@@ -165,8 +165,6 @@ def main(max_vertices=6):
     total = 0
     for n, edges in graphs:
         m = len(edges)
-        if m > 12:                       # integer cover enumeration stays exact and quick
-            continue
         total += 1
         groups = feasible_groups(edges)
         lp = fractional_cover(m, groups)

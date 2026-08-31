@@ -3,6 +3,18 @@
 Window inequalities for the position-indexed master.
 ====================================================
 
+AUDIT STATUS: VALID BUT REDUNDANT
+---------------------------------
+This module is retained to reproduce the internship diagnostic. The implemented
+fractional row cannot strengthen PCF/PCF': for each tool and each h in W, summing the
+existing transition rows gives
+
+    sum_{k=p}^r w[t,k] >= a[t,h] - a[t,p-1].
+
+Maximising the right-hand side over h and summing over tools gives exactly the row
+below. Do not advertise or enable this module as a bound strengthening; a successor
+needs job-window union structure or configuration-level consistency.
+
 WHY THIS EXISTS
 ---------------
 Every inequality in both exact methods of this project is supported on a *local*
@@ -31,7 +43,7 @@ the linear row
 
     sum_t sum_{k in W} w[t,k]  -  sum_t zw[t]  +  sum_t a[t,p-1]  >=  0.
 
-Two properties make it worth having.
+Two properties originally motivated the diagnostic.
 
   * It is not local.  The row talks about a stretch of the schedule, so it can charge
     a re-insertion that no arc-indexed or single-position row can see.
@@ -41,17 +53,15 @@ Two properties make it worth having.
     problem, and the set-union-knapsack oracle is completely unchanged.  Nothing in
     the pricer or the branching rule has to be touched.
 
-The existing per-tool coverage rows T_t are exactly the W = [1, n-1] case summed over
-tools, so this family strictly generalises what the master already carries.  All of
-the strength is in the SHORT windows: measured on 62 loose Laporte3 instances, 84% of
-the windows that carry the bound have length <= 4, and 70% have length 2 or 3.  That
-is why a static pool works and no separator plugin is needed.
+The experiment uses the 15 admissible windows of lengths 2--4 at n=8 as a small,
+static regression pool. The counting rows T_t are stronger than this fractional
+max-presence construction because they require every used tool to appear somewhere.
 
 WHAT IT IS WORTH
 ----------------
-Measured by `verification/bound_probe.py` on the 62 instances of the Laporte3 family
-whose coverage bound is loose, taking for each family the best bound it could possibly
-deliver:
+Measured by `verification/bound_probe.py` on the 62 loose cases in the fixed
+81-instance Laporte3 diagnostic sample, taking for each family the best bound it could
+possibly deliver:
 
     arc-supported family (what both solvers have today)   8.9% of the gap, 0% median
     window family                                        30.9% of the gap, 40% median
@@ -88,7 +98,7 @@ def max_tools_in_window(Tj, length, n_used):
 
 
 def add_window_cuts(m, a, w, n, T, b, Tj, max_len=4, min_len=2, verbose=False):
-    """Add the window family to a PCF' master.
+    """Add the redundant window extension to a PCF' master for reproduction only.
 
     Parameters
     ----------
@@ -97,8 +107,8 @@ def add_window_cuts(m, a, w, n, T, b, Tj, max_len=4, min_len=2, verbose=False):
     w        : dict (t, p) -> insertion variable, p = 1 .. n-1  (these carry obj = 1)
     n, T, b  : jobs, tools, magazine capacity
     Tj       : list of tool requirement sets, one per job
-    max_len  : longest window to create.  4 covers 84% of the windows that carry the
-               bound on the measured family; 5 covers 93%.  Cost grows linearly in it.
+    max_len  : longest window to create.  The reported n=8 experiment uses 4, giving
+               a deliberately small static pool.  Cost grows linearly in this limit.
     min_len  : shortest window.  Length 1 is dominated by the existing W_{t}_{p} rows.
 
     Returns

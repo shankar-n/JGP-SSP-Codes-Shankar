@@ -43,11 +43,11 @@ export OMP_NUM_THREADS="$SLURM_CPUS_PER_TASK"
 export CPLEX_THREADS="$SLURM_CPUS_PER_TASK"          # all 4 solvers honor this (thread pin built in); 0/unset = CPLEX default
 
 # ----------------------------------------------------------------------------
-# 2-D job grid:  15 configs  x  NSHARDS instance-shards  =  15*NSHARDS tasks.
+# 2-D job grid:  12 configs  x  NSHARDS instance-shards  =  12*NSHARDS tasks.
 # Sharding splits each config's ~1400 instances across NSHARDS parallel jobs, so
 # the 1-hour limit still finishes in ~a week.  NSHARDS = how many jobs your
 # cluster runs at once (more = faster, up to your capacity).  If you change it,
-# also change the header:  --array=0..15*NSHARDS-1.  (10 -> --array=0-149.)
+# also change the header:  --array=0..12*NSHARDS-1.  (10 -> --array=0-119.)
 # ----------------------------------------------------------------------------
 NSHARDS=10
 # 12 configs (only the triplet-added crosses pruned): 5 ablation + 4 acceleration
@@ -66,7 +66,7 @@ python3 -c "import cplex, numpy; print('cplex', cplex.__version__, '| numpy', nu
 # Run this config over ITS SHARD of the instances, all families, NO early-stop,
 # to the uniform 1-hour time limit.  Own CSV per (config, shard); the runner
 # appends each result live -- `tail -f results/raw_${CFG}_s${SHARD}.csv` -- and
-# resumes/skips by (instance, config) if requeued.  merge_results.sh globs
+# resumes/skips by (family, instance, J, T, C, config) if requeued.  merge_results.sh globs
 # results/raw_*.csv, so the shards recombine automatically afterwards.
 # ----------------------------------------------------------------------------
 echo "[$(date '+%F %T')] running ALL families, no early-stop, shard $SHARD/$NSHARDS"

@@ -299,13 +299,13 @@ check("Z* = 5 exceeds max(K*-1, |U|-b) = max(3, 4)", "l.723-724",
 print("\n[5] Proposition 3.11, the refutation witness W1 (b = 5)")
 W1 = [{0, 1, 2, 4, 7}, {0, 4, 5}, {1, 5}, {2, 6, 8}, {3, 4, 5, 8}]
 pw = profile(W1, 5)
-check("W1 (K*, q, Z*) = (3, 4, 4)", "prop:refute (l.1355-1361)",
+check("W1 (K*, q, Z*) = (3, 4, 4)", "obs:refute",
       (3, 4, 4), (pw["K"], pw["q"], pw["Z"]))
-check("W1 H_walk = 6, so the WALK gap is 2 > K*-2", "prop:refute (l.1361)",
+check("W1 H_walk = 6, so the WALK gap is 2 > K*-2", "obs:refute",
       (6, 2), (pw["Hwalk"], pw["Hwalk"] - pw["Z"]))
 check("W1 H = 5, so the HEURISTIC gap is 1 and gap<=K*-2 is NOT refuted",
-      "prop:refute (l.1366)", (5, 1), (pw["Htrue"], pw["Htrue"] - pw["Z"]))
-check("W1 lies on the boundary 2b = q + 3R + 6", "prop:refute (l.1362)",
+      "obs:refute", (5, 1), (pw["Htrue"], pw["Htrue"] - pw["Z"]))
+check("W1 lies on the boundary 2b = q + 3R + 6", "obs:refute",
       True, 2 * 5 == pw["q"] + 3 * pw["R"] + 6)
 
 print("\n[6] Proposition 3.14, the clutter pair at b = 4")
@@ -313,7 +313,7 @@ I0 = [{0, 2, 6}, {1, 2, 3}, {2, 3, 4, 5}, {3, 4, 5}]
 I1 = [{0, 1, 3, 6}, {1, 4, 5, 6}, {2, 4}, {3, 5}]
 for nm, inst, gap in (("I0", I0, 0), ("I1", I1, 1)):
     pi = profile(inst, 4)
-    check(f"{nm}: K* = 3, Z* = 3, gap = {gap}", "prop:noclutter (l.1513-1522)",
+    check(f"{nm}: K* = 3, Z* = 3, gap = {gap}", "obs:noclutter",
           (3, 3, gap), (pi["K"], pi["Z"], pi["Htrue"] - pi["Z"]))
 
 print("\n[7] The K* = 4 positive-gap witness at b = 3")
@@ -360,7 +360,7 @@ check("cost_empty = cost_free + min(b, |U|) on every tested instance",
       "prop:conv (l.736)", 0, bad)
 
 print("\n[11] The general bounds on a random census")
-viol = dict(lb=0, uncond=0, zero2=0, zeroU=0, smallZ=0, z3=0, transcap=0, k3=0, genk=0)
+viol = dict(lb=0, uncond=0, zero2=0, zeroU=0, smallZ=0, transcap=0, k3=0, genk=0)
 tested = 0
 random.seed(2026)
 while tested < 200:
@@ -380,17 +380,25 @@ while tested < 200:
     if K == 2 and H != Z:                                       viol["zero2"] += 1
     if p["U"] <= b + 1 and H != Z:                              viol["zeroU"] += 1
     if Z <= 2 and H != Z:                                       viol["smallZ"] += 1
-    if Z <= 3 and H - Z > 1:                                    viol["z3"] += 1
     if Hw > (K - 1) * min(b, q):                                viol["transcap"] += 1
     if K == 3 and Hw - Z > max(0, min(q, (2 * b - q) // 3) - R): viol["k3"] += 1
     if K >= 2 and Hw - Z > max(0, (q * (b * (K - 1) - q)) // (b + q) - R):
         viol["genk"] += 1
 for nm_, where in (("lb", "cor:lb (l.709)"), ("uncond", "thm:uncond (l.1163)"),
                    ("zero2", "cor:zerogap(i) (l.1181)"), ("zeroU", "cor:zerogap(ii)"),
-                   ("smallZ", "cor:smallZ (l.1314)"), ("z3", "cor:z3 (l.1326)"),
+                   ("smallZ", "cor:smallZ"),
                    ("transcap", "lem:transcap (l.1144)"), ("k3", "prop:k3 (l.1256)"),
                    ("genk", "prop:genk (l.1286)")):
     check(f"{nm_}: no violation on {tested} random instances", where, 0, viol[nm_])
+
+z3_counter = [
+    {0, 1, 4}, {0, 2, 3, 5, 6, 7}, {0, 3, 6, 8},
+    {4, 5, 7, 8}, {6, 7, 8}, {1, 5, 6, 7, 8},
+]
+pz3 = profile(z3_counter, 6)
+check("Z*=3 can have walk gap 2",
+      "obs:z3", (3, 3, 3, 5),
+      (pz3["K"], pz3["q"], pz3["Z"], pz3["Hwalk"]))
 
 print("\n[12] Proposition 3.7, the closed form for the walk cost at K* = 3")
 random.seed(77)
@@ -419,7 +427,7 @@ while seen < 45:
 check(f"H_walk = q + min over 3-groupings of min(x_ab, x_bc, x_ca) on {seen} instances",
       "prop:hk3 (l.1219)", 0, bad)
 
-print("\n[13] Theorem 3.16, the setup-cost collapse")
+print("\n[13] Theorem 3.16, fixed-configuration setup-cost collapse")
 def augmented(T, b, rho):
     U = U_of(T)
     best, sizes = None, []
@@ -452,10 +460,10 @@ for inst, b in ((ring(6), 3), (I1, 4), (K4, 3)):
         bad_walk += 1
     if set(st) != {p["K"]}:
         bad_true += 1
-check("collapse holds when the threshold is read in the WALK frame (rho > H_walk - Z*)",
+check("configuration-schedule collapse holds at rho > H_walk - Z*",
       "thm:collapse (l.1588)", 0, bad_walk)
-check("the threshold is frame-dependent: reading it in the heuristic frame does NOT "
-      "give collapse, which is why the report states it in the walk frame",
+check("substituting the KTNS switch value H for H_walk does NOT give the claimed "
+      "configuration-block collapse",
       "thm:collapse", True, bad_true > 0)
 
 print("\n[14] Proposition 4.4, the PCF linear relaxation")
@@ -524,7 +532,11 @@ check("every k-ring, k=3..9, has gap 0 for the heuristic AS DEFINED "
       [H_true(ring(k), 3, Kstar(ring(k), 3)) - Zstar(ring(k), 3) for k in range(3, 10)])
 
 print("\n[16] Can Proposition 3.2 be REPAIRED? g tool-disjoint copies of a true-gap seed")
-seed = I1                                        # n=4, b=4, |U|=7, heuristic gap 1
+# This is the seed in Proposition prop:seed and used to define S_g
+# in the report.  An earlier verifier draft accidentally substituted the isocost I1
+# clutter witness; keeping the stated incidence matrix here matters even though both
+# happen to give the same g=1,2 profile.
+seed = [{0, 1}, {2, 3}, {0, 2, 4, 5}, {1, 4, 5, 6}]
 obs = []
 for g in (1, 2):
     T, off = [], 0
@@ -535,12 +547,12 @@ for g in (1, 2):
     Z, ht = Zstar(T, 4), H_true(T, 4, K)
     obs.append((len(U_of(T)) - 4, Z, ht - Z))
     print(f"      g={g}: |U|={len(U_of(T))}  K*={K}  Z*={Z} (=|U|-b)  H={ht}  gap={ht-Z}")
-check("copies of I1 give heuristic gap = g, so unboundedness survives with a "
+check("copies of the stated four-job seed give heuristic gap = g for g=1,2, so the "
       "different witness family (the 6-ring seed does not work)",
       "prop:unbounded (l.1096)", [1, 2], [o[2] for o in obs])
 
 print("\n[17] The smallest instance with a positive gap for the heuristic as defined")
-tiny = [{0, 1}, {2, 3}, {0, 2, 4, 5}, {1, 4, 5, 6}]
+tiny = seed
 pt = profile(tiny, 4)
 print(f"      n=4, b=4, |U|=7, T={[sorted(s) for s in tiny]}: "
       f"K*={pt['K']} Z*={pt['Z']} H={pt['Htrue']} gap={pt['Htrue']-pt['Z']}")
@@ -576,6 +588,27 @@ for _seed in (0, 1, 2):
 print(f"      heuristic-gap census: {_pos} of 1,260 random instances have H > Z*")
 check("no random instance in the census has a positive heuristic gap", "obs:census",
       0, _pos)
+
+print("\n[19] Connected copies of the four-job seed")
+# Give every job a universal tool, and every job in copy i a private copy-id tool;
+# raise the capacity from four to six.  The universal tool makes the incidence
+# graph connected, while two small jobs from different copies now need seven tools
+# and therefore cannot be grouped together.
+connected_obs = []
+for g in (1, 2):
+    T, universal = [], 10_000
+    for i in range(g):
+        off, copy_id = 7 * i, 20_000 + i
+        for req in seed:
+            T.append({*(off + t for t in req), universal, copy_id})
+    p = profile(T, 6)
+    connected_obs.append((p["U"], p["K"], p["Z"], p["Htrue"], p["Htrue"] - p["Z"]))
+    print(f"      g={g}: |U|={p['U']} K*={p['K']} Z*={p['Z']} H={p['Htrue']} "
+          f"gap={p['Htrue'] - p['Z']}")
+check("connected construction has (|U|, K*, Z*, H, gap) = "
+      "(8g+1, 3g, 8g-5, 9g-5, g) for g=1,2",
+      "candidate connected-gap theorem", [(9, 3, 3, 4, 1), (17, 6, 11, 13, 2)],
+      connected_obs)
 
 print("\n" + "=" * 78)
 npass = sum(1 for *_, ok in RESULTS if ok)

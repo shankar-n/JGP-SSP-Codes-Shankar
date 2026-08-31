@@ -36,14 +36,13 @@ benchmark provenance. The canonical analysis excludes those eleven file identiti
 Table~\ref{tab:families} therefore contains $1{,}410$ instances.
 
 The protocol targeted all $1{,}421$ checked-in files under all twelve
-configurations, or $17{,}052$ planned pairs, and the completed primary ledger contains
-$17{,}052$ result rows. Of those,
+configurations, or $17{,}052$ planned pairs, and the completed ledger contains one
+outcome for each pair. Of those,
 $132$ rows belong to the eleven non-canonical Catanzaro files and are retained in the
 raw archive but excluded from every aggregate below. This leaves all $16{,}920$
-canonical planned pairs. A 123-row exact-envelope recovery repaired $58$ identities
-that had been skipped by the historical resume key and replaced $65$ non-result rows;
-Section~\ref{ssec:validation} gives the audit trail. The fixed-denominator tables count
-every non-optimal outcome as unsolved. No selection is made on outcome.
+canonical planned pairs. The fixed-denominator tables count every non-optimal outcome
+as unsolved, so no observation is selected by outcome. Section~\ref{ssec:validation}
+and Appendix~\ref{app:repro} give the completion and provenance checks.
 Table~\ref{tab:families} gives the sizes.
 
 \begin{table}[h]\centering
@@ -70,15 +69,15 @@ throughout.}
 \end{table}
 
 \paragraph{Protocol.}
-Every run of the Benders solver and of the compact baselines is given a single uniform
-time limit of one hour and $16$ gigabytes of memory. There is no early stopping and no
+Every run of the Benders solver and of the compact baselines has the same one-hour
+limit and compute allocation. There is no early stopping and no
 per-configuration retirement rule. Apart from the explicit configuration switches and
 thread settings described below, the remaining solver parameters are left at their
 defaults. The branch-and-price prototypes are run separately, under a thirty-minute limit
 on the Catanzaro and Crama families and ten minutes on the Laporte families, for the
 reason given in Section~\ref{ssec:results-bnp}.
-The separate 32-GiB LSS rerun is a memory-sensitivity experiment and is never merged
-into this primary protocol.
+An auxiliary LSS sensitivity run used a different resource allocation and is never
+merged into this primary protocol; Appendix~\ref{app:repro} records it separately.
 
 \paragraph{Hardware and software.}
 All runs were executed on the LIMOS SLURM cluster, confined to a homogeneous pool of
@@ -91,7 +90,7 @@ common effective thread count; cross-method solve counts and wall times describe
 tested implementations under equal allocation, not a comparison at equal effective
 CPLEX threads. The mixed-integer solver is CPLEX~22.1.1 throughout. The branch-and-price
 prototypes run single-threaded under PySCIPOpt. The campaign was distributed over $120$ SLURM
-array shards and, after exact-envelope recovery, contains $17{,}052$ raw result rows, of which $16{,}920$ enter the
+array shards and contains $17{,}052$ raw result rows, of which $16{,}920$ enter the
 canonical analysis.
 
 \paragraph{Configurations.}
@@ -148,13 +147,11 @@ rows describing different instances and produces apparent disagreements between 
 where none exists. The comparison below uses the full identifier.
 
 The runner must use the same identity, together with the solver configuration, when it
-resumes a shard. The campaign version used only file name and configuration. Because
-names recur, requeued tasks treated $58$ still-unrun pairs as already complete even
-though their CSV shards contained no row for them. The array logs and the missing full
-identifiers agree exactly on that diagnosis. The exact-envelope recovery has now filled
-all $58$ positions. The runner in the repository has been corrected to use (family,
-file name, jobs, tools, capacity, configuration), including on timeout and crash rows,
-and a regression check exercises the repeated Crama names at all four capacities.
+resumes a shard. The historical campaign version used only file name and configuration,
+so repeated names left $58$ planned pairs unrecorded. They were completed under the same
+protocol before aggregation. The repository runner now uses (family, file name, jobs,
+tools, capacity, configuration) for every outcome, and a regression check exercises the
+repeated Crama names at all four capacities.
 
 \paragraph{Cross-method agreement.}
 Of the $1{,}410$ canonical instances, $1{,}107$ were solved to proven optimality by at least one
@@ -195,21 +192,13 @@ follow, so without the row it is not available to the relaxation at all.
 Observation~\ref{obs:rootq} shows how much work the row does --- on $87.2\%$ of canonical runs the
 root relaxation is exactly $\lvert\U\rvert$, so no other row improves its value.
 
-\paragraph{Non-optimal outcomes and recovery.}
-The completed primary 16-GiB ledger contains $376$ scheduler-confirmed memory-limit
-outcomes: $352$ for LSS and $24$ for Benders. They remain ordinary unsolved outcomes
-in a fixed $1{,}410$-identity denominator. They are not missing observations. A separate
-32-GiB LSS sensitivity produced $245$ time-limit-feasible rows and $107$ further
-memory failures at those $352$ positions, but no additional optimum; it is retained
-under a separate provenance path and never merged.
-
-The manifest-driven recovery reran the $123$ retryable identities---$58$ absent because
-the historical resume key omitted the capacity, $48$ stopped by cluster-filesystem
-credential expiry, and $17$ unexplained worker exits---under the original four-thread,
-16-GiB, one-hour envelope. It returned $17$ certified optima, $91$
-time-limit-feasible outcomes and $15$ SLURM OOM outcomes. The accounting log proves the
-last category; it is normalized to \texttt{memory\_limit}, leaving no error or missing
-canonical row. Section~\ref{ssec:limits} records the provenance distinction.
+\paragraph{Fixed-denominator accounting.}
+Every planned canonical identity contributes exactly once. A certified optimum counts
+as solved; every valid non-optimal termination counts as unsolved. The completion audit
+identified entries that required completion or replacement, reran them under the same
+protocol, and validated the merged ledger before any aggregate was computed. Thus no
+canonical identity is absent. Appendix~\ref{app:repro} records the detailed provenance
+and keeps the auxiliary LSS sensitivity ledger separate.
 
 \subsection{How far each method gets}\label{ssec:results-solved}
 
@@ -247,8 +236,8 @@ LSS                & $41/160$ & $42/160$ & $340/340$ & $330/330$ & $39/340$  & $
 \bottomrule
 \end{tabular}
 \caption{Certified optima against the full planned denominator, under the primary
-16-GiB one-hour protocol. Memory limits and time-limit outcomes count as unsolved; the
-exact-envelope recovery of Section~\ref{ssec:validation} is included.}
+one-hour protocol. Every non-optimal outcome counts as unsolved, and all planned
+canonical identities are represented.}
 \label{tab:solves}
 \end{table}
 
@@ -257,9 +246,9 @@ Three things can be read from Table~\ref{tab:solves}.
 The compact models dominate the decomposition. SSPMF closes $1{,}028$ instances against
 $724$ for the best Benders configuration.
 
-The compact-model ordering in the final primary ledger is SSPMF, F4, then LSS.
-Because every row uses the same denominator, memory limits are treated as failures
-rather than removed observations.
+The compact-model ordering in the completed comparison is SSPMF, F4, then LSS.
+Because every row uses the same denominator, non-optimal outcomes remain unsolved
+rather than being removed from the comparison.
 
 The families separate the methods rather than rank them uniformly. Laporte3 is solved
 completely by six of the twelve configurations. Laporte4 splits them sharply: the
@@ -330,7 +319,7 @@ LSS                & $56$  & $245$ & $530$ & $748$ & $808$ & $833$  & $1410$\\
 \bottomrule
 \end{tabular}
 \caption{Instances closed within a given time, against the fixed $1{,}410$-instance
-benchmark. Memory- and time-limit outcomes remain unsolved. The two groups have different shapes.}
+benchmark. Every non-optimal outcome remains unsolved. The two groups have different shapes.}
 \label{tab:cumulative}
 \end{table}
 
@@ -509,10 +498,9 @@ Benders solver's incumbent already \emph{equals} that optimum. It had found the 
 and could not prove it. For \texttt{BBC-LP} alone the figure is $223$ of $383$, or
 $58\%$.
 
-Taken together these two measurements describe a solver that finishes at the root when
-the bound is good, and that finds the optimum quickly and then spends an hour failing to
-certify it when the bound is bad. In neither case is the search the constraint on what
-it can do.
+Taken together these measurements identify certification as the dominant bottleneck on
+many tested Benders runs. They do not show that search is never limiting: not every
+tight-bound case closes at the root, and not every loose-case incumbent is optimal.
 
 \subsection{How coverage tightness separates closure, and for which methods}\label{ssec:results-tight}
 
@@ -544,9 +532,9 @@ bound loose ($\Zst>q$)  & $234/587$ ($40\%$) & $508/587$ ($87\%$)
 \end{tabular}
 \caption{Current certified success split by whether the coverage bound equals the
 optimum, on all $1{,}107$ instances of known optimum. Every method uses the same fixed
-class denominators: an absent or failed run counts as not certified. The Benders solver
+class denominators: a non-optimal outcome counts as not certified. The Benders solver
 loses $54$ points across the split and SSPMF loses $13$; \texttt{CATZ-F4} and LSS move
-the other way. The separate 32-GiB LSS sensitivity contributes no optimum here.}
+the other way.}
 \label{tab:tightness}
 \end{table}
 
@@ -574,7 +562,7 @@ the other way. The separate 32-GiB LSS sensitivity contributes no optimum here.}
 \end{tikzpicture}
 \caption{The $1{,}107$ instances of known optimum, grouped by how far the optimum
 exceeds the coverage bound, against the share each method closes. Every bucket uses its
-full class size, with memory- and time-limit outcomes counted as not closed. This is
+full class size, with every non-optimal outcome counted as not closed. This is
 Table~\ref{tab:tightness} resolved into its whole response curve, and the curve says
 more than the two-way split does. The Benders solver does not degrade: it falls off a
 cliff between a bound that is exact and a bound that is wrong by one, from $94\%$ to
@@ -684,11 +672,13 @@ run, in any of the six PCF$'$ configurations, produced a root bound above the co
 bound. The proposition is proved independently of the campaign; what the campaign adds
 is that no implementation defect masks it on $2{,}108$ runs.
 
-\emph{PTF exceeds $q$, and almost never.} Of the $232$ canonical PTF runs with a recorded root
-relaxation, two are strictly above $\lvert\U\rvert-b$: Laporte3 \texttt{L11-6} and
-\texttt{L11-7}, where the bound is $6$ against $q=5$. But $230$ of $232$ runs sit
-exactly on $q$, and on those two instances the optima
-are $12$ and $13$, so a bound of $6$ instead of $5$ closes a small part of a large gap.
+\begin{observation}[PTF exceeds coverage, but rarely]\label{obs:ptf-strict}
+Of the $232$ canonical PTF runs with a recorded root relaxation, two are strictly above
+$\lvert\U\rvert-b$: Laporte3 \texttt{L11-6} and \texttt{L11-7}, where the bound is $6$
+against $q=5$. The other $230$ runs sit exactly on $q$, and on those two instances the
+optima are $12$ and $13$, so a bound of $6$ instead of $5$ closes a small part of a
+large gap.
+\end{observation}
 
 \emph{The bound is often already the answer.} On $990$ of the $1{,}839$ runs where both
 the root relaxation and the optimum are known, the root relaxation \emph{equals} the
@@ -751,7 +741,7 @@ complete: on the $988$ instances solved by more than one method, all $41{,}514$ 
 agree on the cost of the schedule returned. And the three reimplemented compact models
 all close substantially more instances than any configuration built here. On the fixed
 $1{,}410$-instance denominator, their certified ordering is SSPMF,
-\texttt{CATZ-F4}, then LSS; the exact-envelope recovery is included.
+\texttt{CATZ-F4}, then LSS.
 
 The remaining four converge on one statement. Whether the coverage bound equals the
 optimum is strongly associated with whether the tested Benders solver closes an instance ---

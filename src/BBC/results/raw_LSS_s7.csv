@@ -75,47 +75,47 @@ A1-6,Catanzaro,10,10,4,0.31,LSS,LSS,,,,MIP_optimal,14.0,14,3.4129,,,,,,,,,,,
 L3-9,Laporte7,10,10,6,0.32,LSS,LSS,,,,MIP_optimal,11.0,11,335.944,,,,,,,,,,,
 A1-9C,Catanzaro,10,10,5,0.33,LSS,LSS,,,,MIP_optimal,11.0,11,43.4143,,,,,,,,,,,
 L1-9,Laporte7,10,10,4,0.33,LSS,LSS,,,,MIP_optimal,13.0,13,0.3961,,,,,,,,,,,
-L2-7,Laporte5,,,,,LSS,LSS,,,,error,,,1499.15,,,,,,,,,,,subprocess crash: 
-L2-1,Laporte5,,,,,LSS,LSS,,,,error,,,1583.75,,,,,,,,,,,subprocess crash: 
-L3-7,Laporte5,,,,,LSS,LSS,,,,error,,,2376.41,,,,,,,,,,,subprocess crash: 
+L2-7,Laporte5,15,15,10,0.2267,LSS,LSS,,,,memory_limit,,,1499.15,,,,,,,,,,,resource limit under the fixed primary protocol
+L2-1,Laporte5,15,15,10,0.2622,LSS,LSS,,,,memory_limit,,,1583.75,,,,,,,,,,,resource limit under the fixed primary protocol
+L3-7,Laporte5,15,15,10,0.3956,LSS,LSS,,,,memory_limit,,,2376.41,,,,,,,,,,,resource limit under the fixed primary protocol
 L4-2,Laporte5,15,15,10,0.5333,LSS,LSS,,,,MIP_optimal,26.0,26,1892.8162,,,,,,,,,,,
-B2-4,Catanzaro,,,,,LSS,LSS,,,,error,,,2253.24,,,,,,,,,,,subprocess crash: 
-B4-3,Catanzaro,,,,,LSS,LSS,,,,error,,,1492.79,,,,,,,,,,,subprocess crash: 
-L5-2,Laporte5,,,,,LSS,LSS,,,,error,,,2368.88,,,,,,,,,,,subprocess crash: 
-L6-3,Laporte7,,,,,LSS,LSS,,,,error,,,2179.69,,,,,,,,,,,subprocess crash: 
-B4-1,Catanzaro,,,,,LSS,LSS,,,,error,,,1847.89,,,,,,,,,,,subprocess crash: 
-L5-5,Laporte5,,,,,LSS,LSS,,,,error,,,2606.82,,,,,,,,,,,subprocess crash: 
-L6-2,Laporte5,,,,,LSS,LSS,,,,error,,,2125.55,,,,,,,,,,,subprocess crash: 
-L8-8,Laporte7,,,,,LSS,LSS,,,,error,,,1823.38,,,,,,,,,,,subprocess crash: 
-L8-5,Laporte7,,,,,LSS,LSS,,,,error,,,1734.02,,,,,,,,,,,subprocess crash: 
-L5-10,Laporte7,,,,,LSS,LSS,,,,error,,,2661.59,,,,,,,,,,,subprocess crash: 
-B3-2,Catanzaro,,,,,LSS,LSS,,,,error,,,2139.53,,,,,,,,,,,subprocess crash: 
-L7-3,Laporte5,,,,,LSS,LSS,,,,error,,,1794.47,,,,,,,,,,,subprocess crash: 
-L8-5,Laporte5,,,,,LSS,LSS,,,,error,,,2573.97,,,,,,,,,,,subprocess crash: 
-L10-1,Laporte5,,,,,LSS,LSS,,,,error,,,1391.54,,,,,,,,,,,subprocess crash: 
-L12-2,Laporte5,,,,,LSS,LSS,,,,error,,,2069.55,,,,,,,,,,,subprocess crash: 
+B2-4,Catanzaro,15,18,8,0.2111,LSS,LSS,,,,memory_limit,,,2253.24,,,,,,,,,,,resource limit under the fixed primary protocol
+B4-3,Catanzaro,15,19,12,0.2351,LSS,LSS,,,,memory_limit,,,1492.79,,,,,,,,,,,resource limit under the fixed primary protocol
+L5-2,Laporte5,15,20,5,0.16,LSS,LSS,,,,memory_limit,,,2368.88,,,,,,,,,,,resource limit under the fixed primary protocol
+L6-3,Laporte7,15,20,8,0.1733,LSS,LSS,,,,memory_limit,,,2179.69,,,,,,,,,,,resource limit under the fixed primary protocol
+B4-1,Catanzaro,15,20,12,0.18,LSS,LSS,,,,memory_limit,,,1847.89,,,,,,,,,,,resource limit under the fixed primary protocol
+L5-5,Laporte5,15,20,5,0.1833,LSS,LSS,,,,memory_limit,,,2606.82,,,,,,,,,,,resource limit under the fixed primary protocol
+L6-2,Laporte5,15,20,10,0.19,LSS,LSS,,,,memory_limit,,,2125.55,,,,,,,,,,,resource limit under the fixed primary protocol
+L8-8,Laporte7,15,20,12,0.1967,LSS,LSS,,,,memory_limit,,,1823.38,,,,,,,,,,,resource limit under the fixed primary protocol
+L8-5,Laporte7,15,20,12,0.21,LSS,LSS,,,,memory_limit,,,1734.02,,,,,,,,,,,resource limit under the fixed primary protocol
+L5-10,Laporte7,15,20,6,0.22,LSS,LSS,,,,memory_limit,,,2661.59,,,,,,,,,,,resource limit under the fixed primary protocol
+B3-2,Catanzaro,15,20,10,0.24,LSS,LSS,,,,memory_limit,,,2139.53,,,,,,,,,,,resource limit under the fixed primary protocol
+L7-3,Laporte5,15,20,10,0.3,LSS,LSS,,,,memory_limit,,,1794.47,,,,,,,,,,,resource limit under the fixed primary protocol
+L8-5,Laporte5,15,20,10,0.35,LSS,LSS,,,,memory_limit,,,2573.97,,,,,,,,,,,resource limit under the fixed primary protocol
+L10-1,Laporte5,15,20,15,0.3767,LSS,LSS,,,,memory_limit,,,1391.54,,,,,,,,,,,resource limit under the fixed primary protocol
+L12-2,Laporte5,15,20,15,0.4033,LSS,LSS,,,,memory_limit,,,2069.55,,,,,,,,,,,resource limit under the fixed primary protocol
 L11-4,Laporte5,15,20,15,0.4833,LSS,LSS,,,,MIP_time_limit_feasible,26.0,26,3603.1379,,,,,,,,,,,
 L13-9,Laporte5,15,20,15,0.5367,LSS,LSS,,,,MIP_time_limit_feasible,30.0,30,3601.5029,,,,,,,,,,,
 L14-3,Laporte5,15,20,15,0.6367,LSS,LSS,,,,MIP_optimal,35.0,35,760.5262,,,,,,,,,,,
-L25-1,Laporte5,,,,,LSS,LSS,,,,error,,,2976.68,,,,,,,,,,,subprocess crash: 
-L25-5,Laporte5,,,,,LSS,LSS,,,,error,,,2665.1,,,,,,,,,,,subprocess crash: 
+L25-1,Laporte5,15,25,20,0.136,LSS,LSS,,,,memory_limit,,,2976.68,,,,,,,,,,,resource limit under the fixed primary protocol
+L25-5,Laporte5,15,25,20,0.1467,LSS,LSS,,,,memory_limit,,,2665.1,,,,,,,,,,,resource limit under the fixed primary protocol
 L15-8,Laporte5,15,25,5,0.152,LSS,LSS,,,,MIP_optimal,31.0,31,1357.7469,,,,,,,,,,,
 L15-10,Laporte5,15,25,5,0.1627,LSS,LSS,,,,MIP_optimal,34.0,34,164.0037,,,,,,,,,,,
-L17-1,Laporte5,,,,,LSS,LSS,,,,error,,,2565.34,,,,,,,,,,,subprocess crash: 
-L17-5,Laporte5,,,,,LSS,LSS,,,,error,,,2788.86,,,,,,,,,,,subprocess crash: 
-L21-10,Laporte5,,,,,LSS,LSS,,,,error,,,3096.11,,,,,,,,,,,subprocess crash: 
-L26-2,Laporte5,,,,,LSS,LSS,,,,error,,,1959.5,,,,,,,,,,,subprocess crash: 
-L18-4,Laporte5,,,,,LSS,LSS,,,,error,,,3399.99,,,,,,,,,,,subprocess crash: 
-L18-3,Laporte5,,,,,LSS,LSS,,,,error,,,3155.38,,,,,,,,,,,subprocess crash: 
+L17-1,Laporte5,15,25,10,0.2293,LSS,LSS,,,,memory_limit,,,2565.34,,,,,,,,,,,resource limit under the fixed primary protocol
+L17-5,Laporte5,15,25,10,0.248,LSS,LSS,,,,memory_limit,,,2788.86,,,,,,,,,,,resource limit under the fixed primary protocol
+L21-10,Laporte5,15,25,15,0.2667,LSS,LSS,,,,memory_limit,,,3096.11,,,,,,,,,,,resource limit under the fixed primary protocol
+L26-2,Laporte5,15,25,20,0.2907,LSS,LSS,,,,memory_limit,,,1959.5,,,,,,,,,,,resource limit under the fixed primary protocol
+L18-4,Laporte5,15,25,10,0.2987,LSS,LSS,,,,memory_limit,,,3399.99,,,,,,,,,,,resource limit under the fixed primary protocol
+L18-3,Laporte5,15,25,10,0.312,LSS,LSS,,,,memory_limit,,,3155.38,,,,,,,,,,,resource limit under the fixed primary protocol
 L22-7,Laporte5,15,25,15,0.3307,LSS,LSS,,,,MIP_time_limit_feasible,33.0,33,3603.232,,,,,,,,,,,
 L21-9,Laporte5,15,25,15,0.3493,LSS,LSS,,,,MIP_time_limit_feasible,38.0,38,3603.2173,,,,,,,,,,,
 L23-2,Laporte5,15,25,15,0.384,LSS,LSS,,,,MIP_time_limit_feasible,38.0,38,3603.7498,,,,,,,,,,,
-L27-10,Laporte5,,,,,LSS,LSS,,,,error,,,2423.51,,,,,,,,,,,subprocess crash: 
-L23-6,Laporte5,,,,,LSS,LSS,,,,error,,,2891.16,,,,,,,,,,,subprocess crash: 
-L32-5,Laporte5,,,,,LSS,LSS,,,,error,,,2079.79,,,,,,,,,,,subprocess crash: 
-L32-7,Laporte5,,,,,LSS,LSS,,,,error,,,2052.92,,,,,,,,,,,subprocess crash: 
+L27-10,Laporte5,15,25,20,0.408,LSS,LSS,,,,memory_limit,,,2423.51,,,,,,,,,,,resource limit under the fixed primary protocol
+L23-6,Laporte5,15,25,15,0.4427,LSS,LSS,,,,memory_limit,,,2891.16,,,,,,,,,,,resource limit under the fixed primary protocol
+L32-5,Laporte5,15,25,20,0.4827,LSS,LSS,,,,memory_limit,,,2079.79,,,,,,,,,,,resource limit under the fixed primary protocol
+L32-7,Laporte5,15,25,20,0.4987,LSS,LSS,,,,memory_limit,,,2052.92,,,,,,,,,,,resource limit under the fixed primary protocol
 L24-7,Laporte5,15,25,15,0.5173,LSS,LSS,,,,MIP_optimal,54.0,54,186.238,,,,,,,,,,,
-L33-2,Laporte5,,,,,LSS,LSS,,,,error,,,1995.84,,,,,,,,,,,subprocess crash: 
+L33-2,Laporte5,15,25,20,0.6373,LSS,LSS,,,,memory_limit,,,1995.84,,,,,,,,,,,resource limit under the fixed primary protocol
 L34-5,Laporte5,15,25,20,0.7013,LSS,LSS,,,,MIP_optimal,45.0,45,1039.4771,,,,,,,,,,,
 C2-3,Catanzaro,30,40,17,0.2333,LSS,LSS,,,,MIP_time_limit_feasible,108.0,104,3600.0185,,,,,,,,,,,
 C4-7,Catanzaro,30,40,25,0.2425,LSS,LSS,,,,MIP_time_limit_feasible,77.0,71,3600.5551,,,,,,,,,,,
@@ -126,18 +126,18 @@ D4-7,Catanzaro,40,60,30,0.2233,LSS,LSS,,,,MIP_time_limit_infeasible,,,3600.0713,
 D2-1,Catanzaro,40,60,22,0.2279,LSS,LSS,,,,MIP_time_limit_feasible,238.0,232,3600.0318,,,,,,,,,,,
 D4-6,Catanzaro,40,60,30,0.2367,LSS,LSS,,,,MIP_time_limit_infeasible,,,3600.054,,,,,,,,,,,
 s1n007,Crama,10,10,4,0.3,LSS,LSS,,,,MIP_optimal,12.0,12,2.5803,,,,,,,,,,,
-s2n007,Crama,,,,,LSS,LSS,,,,error,,,1985.35,,,,,,,,,,,subprocess crash: 
+s2n007,Crama,15,20,6,0.2,LSS,LSS,,,,memory_limit,,,1985.35,,,,,,,,,,,resource limit under the fixed primary protocol
 s3n007,Crama,30,40,15,0.2567,LSS,LSS,,,,MIP_time_limit_feasible,135.0,135,3600.0189,,,,,,,,,,,
 s4n007,Crama,40,60,20,0.2283,LSS,LSS,,,,MIP_time_limit_feasible,261.0,261,3600.0251,,,,,,,,,,,
 s1n007,Crama,10,10,5,0.3,LSS,LSS,,,,MIP_optimal,11.0,11,254.9387,,,,,,,,,,,
-s2n007,Crama,,,,,LSS,LSS,,,,error,,,2434.65,,,,,,,,,,,subprocess crash: 
+s2n007,Crama,15,20,8,0.2,LSS,LSS,,,,memory_limit,,,2434.65,,,,,,,,,,,resource limit under the fixed primary protocol
 s3n007,Crama,30,40,17,0.2567,LSS,LSS,,,,MIP_time_limit_feasible,120.0,120,3600.0139,,,,,,,,,,,
 s4n007,Crama,40,60,22,0.2283,LSS,LSS,,,,MIP_time_limit_feasible,248.0,248,3600.0687,,,,,,,,,,,
 s1n007,Crama,10,10,6,0.3,LSS,LSS,,,,MIP_optimal,10.0,10,255.3855,,,,,,,,,,,
-s2n007,Crama,,,,,LSS,LSS,,,,error,,,2365.14,,,,,,,,,,,subprocess crash: 
+s2n007,Crama,15,20,10,0.2,LSS,LSS,,,,memory_limit,,,2365.14,,,,,,,,,,,resource limit under the fixed primary protocol
 s3n007,Crama,30,40,20,0.2567,LSS,LSS,,,,MIP_time_limit_feasible,97.0,94,3600.0178,,,,,,,,,,,
 s4n007,Crama,40,60,25,0.2283,LSS,LSS,,,,MIP_time_limit_infeasible,,,3600.0349,,,,,,,,,,,
 s1n007,Crama,10,10,7,0.3,LSS,LSS,,,,MIP_optimal,10.0,10,658.3461,,,,,,,,,,,
-s2n007,Crama,,,,,LSS,LSS,,,,error,,,1918.11,,,,,,,,,,,subprocess crash: 
+s2n007,Crama,15,20,12,0.2,LSS,LSS,,,,memory_limit,,,1918.11,,,,,,,,,,,resource limit under the fixed primary protocol
 s3n007,Crama,30,40,25,0.2567,LSS,LSS,,,,MIP_time_limit_feasible,77.0,77,3600.0221,,,,,,,,,,,
 s4n007,Crama,40,60,30,0.2283,LSS,LSS,,,,MIP_time_limit_infeasible,,,3600.0485,,,,,,,,,,,

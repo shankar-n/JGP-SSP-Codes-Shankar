@@ -121,13 +121,9 @@ L34-8,Laporte5,15,25,20,0.7173,BBC,BBC-K,True,False,False,MIP_time_limit_feasibl
 C3-8,Catanzaro,30,40,20,0.2358,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,89.0,89,3600.082,55.0561797752809,76695,152216,37494,14879,0,30290,0,40.0,40.0,
 C1-7,Catanzaro,30,40,15,0.2425,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,116.0,116,3600.818,65.51724137931035,141540,325118,23597,22820,0,12642,0,40.0,40.0,
 C3-1,Catanzaro,30,40,20,0.2525,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,88.0,88,3600.038,54.54545454545454,72248,135169,31252,23840,0,19736,0,40.0,40.0,
-C1-2,Catanzaro,,,,,BBC,BBC-K,True,False,False,error,,,1923.28,,,,,,,,,,,subprocess crash: 
-D3-5,Catanzaro,40,60,25,0.2146,BBC,BBC-K,True,False,False,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
-D1-7,Catanzaro,,,,,BBC,BBC-K,True,False,False,error,,,3251.96,,,,,,,,,,,subprocess crash: 
+C1-2,Catanzaro,30,40,15,0.2583,BBC,BBC-K,True,False,False,memory_limit,,,1793.8436,,,,,,,,,,,resource limit under the fixed primary protocol
+D3-5,Catanzaro,40,60,25,0.2146,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,192.0,192,3600.159,68.75,50387,95053,25500,17599,0,17025,0,60.0,60.0,
+D1-7,Catanzaro,40,60,20,0.2233,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,222.0,222,3600.595,66.89189189189192,221222,736580,18302,17509,0,10001,0,73.0,73.49999999999996,
 D3-9,Catanzaro,40,60,25,0.2283,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,203.0,203,3600.047,70.44334975369459,54017,107724,24690,23416,0,13616,0,60.0,60.0,
 D1-6,Catanzaro,40,60,20,0.2367,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,238.99999999999997,239,3600.657,49.79079497907949,217901,615324,13003,12799,0,6982,0,120.00000000000003,120.0,
 s1n010,Crama,10,10,4,0.29,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,13.0,13,3600.03,23.076923076923077,182677,432337,76018,2240,0,74897,0,10.0,10.0,

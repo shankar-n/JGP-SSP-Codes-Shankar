@@ -114,11 +114,7 @@ L21-1,Laporte5,15,25,15,0.3947,BBC,BBC-K,True,False,False,MIP_time_limit_feasibl
 L23-7,Laporte5,15,25,15,0.416,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,43.0,43,3600.025,41.86046511627907,135938,381289,59672,18560,0,50455,0,25.0,25.0,
 L31-5,Laporte5,15,25,20,0.464,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,32.0,32,3600.025,21.875,139005,298214,66998,9964,0,62040,0,25.0,25.0,
 L32-3,Laporte5,15,25,20,0.4933,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,31.0,31,3600.029,19.35483870967742,133502,285760,64570,8530,0,60338,0,25.0,25.0,
-L24-5,Laporte5,15,25,15,0.5013,BBC,BBC-K,True,False,False,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
+L24-5,Laporte5,15,25,15,0.5013,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,51.0,51,3600.047,19.204942250872993,546083,1288241,38505,11035,0,33015,0,39.0,41.205479452054774,
 L31-8,Laporte5,15,25,20,0.584,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,38.0,38,3600.054,34.21052631578947,147112,373903,65410,14163,0,58368,0,25.0,25.0,
 L34-9,Laporte5,15,25,20,0.6853,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,42.0,42,3600.027,25.82417582417664,494525,1208802,43570,12289,0,37452,0,29.0,31.153846153845812,
 C3-10,Catanzaro,30,40,20,0.2233,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,82.0,82,3600.034,51.21951219512195,74908,142639,33120,22008,0,22490,0,40.0,40.0,
@@ -131,7 +127,7 @@ D3-4,Catanzaro,40,60,25,0.2271,BBC,BBC-K,True,False,False,MIP_time_limit_feasibl
 D1-9,Catanzaro,40,60,20,0.2283,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,223.0,223,3600.112,57.32928860141513,146841,470624,17034,17897,0,8637,0,95.0,95.15568641884427,
 s1n002,Crama,10,10,4,0.33,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,16.0,16,3600.024,12.50000000000031,329477,747785,84117,3553,0,82345,0,12.0,13.99999999999995,
 s2n002,Crama,15,20,6,0.1867,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,29.0,29,3600.027,31.03448275862069,147060,333068,70720,9645,0,65935,0,20.0,20.0,
-s3n002,Crama,,,,,BBC,BBC-K,True,False,False,error,,,2518.81,,,,,,,,,,,subprocess crash: 
+s3n002,Crama,30,40,15,0.2483,BBC,BBC-K,True,False,False,memory_limit,,,2518.81,,,,,,,,,,,resource limit under the fixed primary protocol
 s4n002,Crama,40,60,20,0.2238,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,235.0,235,3600.533,62.97872340425532,209318,574712,13039,12675,0,7045,0,87.0,87.0,
 s1n002,Crama,10,10,5,0.33,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,13.0,13,3600.009,23.076923076923077,167488,367999,82960,2166,0,81877,0,10.0,10.0,
 s2n002,Crama,15,20,8,0.1867,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,24.0,24,3600.049,16.666666666666664,140219,299695,65673,10750,0,60332,0,20.0,20.0,

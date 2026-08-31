@@ -120,15 +120,15 @@ L34-4,Laporte5,15,25,20,0.6987,BBC,BBC-K,True,False,False,MIP_time_limit_feasibl
 C3-3,Catanzaro,30,40,20,0.2333,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,85.0,85,3600.048,52.94117647058824,68994,130251,30590,22318,0,19783,0,40.0,40.0,
 C1-5,Catanzaro,30,40,15,0.24,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,114.0,114,3600.104,64.91228070175438,88694,224478,26471,26830,0,13711,0,40.0,40.0,
 C3-4,Catanzaro,30,40,20,0.2517,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,87.0,87,3600.203,54.02298850574713,71048,129495,31646,23931,0,20109,0,40.0,40.0,
-C1-6,Catanzaro,,,,,BBC,BBC-K,True,False,False,error,,,2335.25,,,,,,,,,,,subprocess crash: 
+C1-6,Catanzaro,30,40,15,0.2567,BBC,BBC-K,True,False,False,memory_limit,,,1957.0222,,,,,,,,,,,resource limit under the fixed primary protocol
 D3-8,Catanzaro,40,60,25,0.2104,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,182.0,182,3600.074,67.03296703296702,62752,133514,31426,11159,0,26101,0,60.0,60.0,
 D1-3,Catanzaro,40,60,20,0.2213,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,229.0,229,3600.067,62.86598343968958,181491,553499,13676,13637,0,7253,0,85.0,85.03689792311089,
 D3-1,Catanzaro,40,60,25,0.2279,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,205.0,205,3600.063,70.73170731707317,66521,163155,30415,11772,0,24729,0,60.0,60.0,
 D1-10,Catanzaro,40,60,20,0.2333,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,235.0,235,3600.659,54.8219632774563,177240,570542,15722,15381,0,8457,0,106.0,106.1683862979777,
 s1n006,Crama,10,10,4,0.34,BBC,BBC-K,True,False,False,MIP_optimal,13.0,13,1207.044,0.0,142458,326114,41785,1562,0,41004,0,10.0,13.0,
 s2n006,Crama,15,20,6,0.23,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,30.0,30,3600.032,33.33333333333333,273942,770962,48563,13395,0,41883,0,20.0,20.0,
-s3n006,Crama,,,,,BBC,BBC-K,True,False,False,error,,,3521.13,,,,,,,,,,,subprocess crash: 
-s4n006,Crama,,,,,BBC,BBC-K,True,False,False,error,,,3177.73,,,,,,,,,,,subprocess crash: 
+s3n006,Crama,30,40,15,0.2408,BBC,BBC-K,True,False,False,memory_limit,,,3189.5913,,,,,,,,,,,resource limit under the fixed primary protocol
+s4n006,Crama,40,60,20,0.2246,BBC,BBC-K,True,False,False,memory_limit,,,3324.6471,,,,,,,,,,,resource limit under the fixed primary protocol
 s1n006,Crama,10,10,5,0.34,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,11.0,11,3600.011,9.090909090909092,161293,337278,79556,2257,0,78436,0,10.0,10.0,
 s2n006,Crama,15,20,8,0.23,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,26.0,26,3600.02,23.076923076923077,142272,306469,69093,10103,0,64070,0,20.0,20.0,
 s3n006,Crama,30,40,17,0.2408,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,108.0,108,3600.17,62.96296296296296,68196,142608,31352,26929,0,18392,0,40.0,40.0,

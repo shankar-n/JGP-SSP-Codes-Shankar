@@ -85,7 +85,10 @@ CLEANUP_PLAN.md
 DEFENCE_PLAN.md
 DEFENCE_PLAN.html
 REPO_*.*
-verification/
+!REPO_HYGIENE.md
+verification/*
+!verification/bound_probe_instances.txt
+!verification/test_resume_keys.py
 references/
 plans-genai/
 skills/
@@ -113,3 +116,33 @@ __pycache__/
 # "git add -A" puts them straight back (it did once, in commit f3c7120).
 src/BBC/logs/
 src/BBC/analysis/output/
+
+# Historical recovery inputs, higher-resource sensitivity data, and raw scheduler
+# diagnostics stay in the local research archive. The merged primary ledger and
+# its read-only checker are the public source of record.
+src/BBC/cluster/manifests/
+src/BBC/cluster/prepare_recovery.py
+src/BBC/cluster/merge_recovery_results.py
+src/BBC/cluster/recovery_runner.py
+src/BBC/cluster/run_recovery_*.sbatch
+src/BBC/cluster/separate_server_lss_results.py
+src/BBC/cluster/rerun_lss_crashes.py
+src/BBC/cluster/RECOVERY_RUNBOOK.md
+src/BBC/results/sensitivity_32gb/
+src/BBC/results/provenance/*
+!src/BBC/results/provenance/primary_ledger_audit.json
+
+# Local cluster-transfer material.  Canonical code, ledgers, manifests, and
+# compact provenance remain under src/BBC/.
+src/BBC-server/
+bbc_primary_recovery_40164.tar.gz
+src/BBC/cluster/bbc_recovery_bundle.zip
+tmp/
+
+# TeX build and render by-products; canonical PDFs and figure data are kept.
+report/*.fdb_latexmk
+report/*.fls
+report/*.synctex.gz
+report/rendered/
+report/_rendered/
+report/test-ref.bib

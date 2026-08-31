@@ -76,11 +76,7 @@ L3-10,Laporte7,10,10,6,0.32,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasi
 A4-9,Catanzaro,10,10,7,0.33,BBC,BBC-LP+F+P,False,True,False,MIP_optimal,10.0,10,0.518,0.0,120,423,84,78,43,0,78,10.0,10.0,
 L1-6,Laporte7,10,10,4,0.33,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,14.0,14,3600.016,7.142857142857219,23833,362942,1601,634,1285,0,74459,12.0,12.99999999999999,
 L2-10,Laporte5,15,15,10,0.2222,BBC,BBC-LP+F+P,False,True,False,MIP_optimal,15.0,15,0.419,0.0,18,169,24,37,9,0,24,15.0,15.0,
-L1-8,Laporte5,15,15,5,0.2533,BBC,BBC-LP+F+P,False,True,False,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
+L1-8,Laporte5,15,15,5,0.2533,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,24.0,24,3600.066,37.5,5997,480396,377,508,151,0,62838,15.0,15.0,
 L3-4,Laporte5,15,15,10,0.3644,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,19.000000000000007,19,3600.059,21.0526315789474,10979,402836,1291,1579,585,0,69457,15.0,15.0,
 L4-5,Laporte5,15,15,10,0.5156,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,27.000000000000004,27,3600.059,44.44444444444445,3976,701520,338,501,125,0,58011,15.0,15.0,
 B4-4,Catanzaro,15,18,12,0.2111,BBC,BBC-LP+F+P,False,True,False,MIP_optimal,18.0,18,2.037,0.0,131,462,93,111,40,0,90,18.0,18.0,
@@ -111,11 +107,7 @@ L20-4,Laporte5,15,25,15,0.264,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_fea
 L29-5,Laporte5,15,25,20,0.288,BBC,BBC-LP+F+P,False,True,False,MIP_optimal,25.0,25,0.124,0.0,0,63,13,27,3,0,1,25.0,25.0,
 L18-5,Laporte5,15,25,10,0.296,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,43.00000000000001,43,3600.037,41.86046511627908,3427,520143,328,464,127,0,61933,25.0,25.0,
 L22-5,Laporte5,15,25,15,0.3093,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,32.00000000000002,32,3600.079,21.875000000000053,11531,281825,1834,2135,865,0,63276,25.0,25.0,
-L27-1,Laporte5,15,25,20,0.3253,BBC,BBC-LP+F+P,False,True,False,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
+L27-1,Laporte5,15,25,20,0.3253,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,26.000000000000004,26,3600.076,3.8461538461538596,45979,193741,15871,6895,12505,0,44236,25.0,25.0,
 L28-5,Laporte5,15,25,20,0.3493,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,26.999999999999964,27,3600.043,7.407407407407287,41435,178964,15107,4930,12701,0,40057,25.0,25.0,
 L28-4,Laporte5,15,25,20,0.384,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,29.000000000000014,29,3600.048,13.793103448275904,26607,217599,6990,4996,4597,0,53308,25.0,25.0,
 L27-8,Laporte5,15,25,20,0.4027,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,28.000000000000014,28,3600.053,10.71428571428576,28897,184544,9664,5083,7201,0,46878,25.0,25.0,

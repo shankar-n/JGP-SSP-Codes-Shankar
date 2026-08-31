@@ -61,11 +61,12 @@ limit, is reported in Section~\ref{sec:comp} and summarised in
 Section~\ref{ssec:results-summary}. Four of its measurements --- the incumbent at the
 time limit, the ablation, the split by whether the coverage bound is tight, and the
 root relaxation reported by the branch-and-price prototypes --- are independent of one
-another and agree. What they agree on is that the obstacle is the bound rather than the
-search: search enhancements do not close the loose instances, and nothing built here
-improves the bound materially. Two further measurements exist to make that reading
+another and agree. For the tested Benders regimes, they indicate that weak
+certification, rather than incumbent quality, is the dominant obstacle: the tested
+search enhancements do not close the loose instances, and nothing built here improves
+the bound materially. Two further measurements exist to make that reading
 trustworthy rather than to support it, and both do: no two methods that proved the same
-optimum disagree on its value, and the completed fixed-denominator primary ledger ranks
+optimum disagree on its value, and the complete fixed-denominator comparison ranks
 the reimplemented compact baselines SSPMF, \texttt{CATZ-F4}, then LSS.
 
 Two things this campaign is not should be said plainly here rather than left to

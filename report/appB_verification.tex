@@ -78,9 +78,10 @@ Both were errors of statement rather than of proof: the arguments were sound for
 objects they were actually about.
 
 A third finding concerns the campaign harness and analysis rather than the structural
-results. The historical runner's incomplete resume key skipped $58$ planned pairs on
-requeued shards; the full-key correction and completed exact-envelope recovery are stated in
-Section~\ref{ssec:bench} and Appendix~\ref{app:repro}. The source audit also found that
+results. The historical runner's incomplete resume key left $58$ planned pairs
+unrecorded; the repository uses the full key, and same-protocol completion restored the
+fixed denominator before aggregation (Section~\ref{ssec:bench} and
+Appendix~\ref{app:repro}). The source audit also found that
 the raw Catanzaro directory contained ten duplicate files and one ad-hoc test outside
 the published $160$-instance benchmark; the analysis now asserts and excludes exactly
 those eleven identities. Two further properties of the raw result files can silently

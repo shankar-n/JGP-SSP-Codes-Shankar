@@ -45,7 +45,7 @@ completion key is (family, file name, jobs, tools, capacity, configuration), bec
 file name and configuration do not identify a run in collections with repeated names.
 The historical campaign runner used that shorter key, which caused the $58$ skipped
 pairs disclosed in Section~\ref{ssec:bench}; the repository version and its regression
-check contain the correction, and the exact-envelope recovery filled all $58$. If the solver changes, previously recorded rows must also
+check contain the correction, and same-protocol completion filled all $58$. If the solver changes, previously recorded rows must also
 be deleted before re-running, or the runner will keep stale results. Both re-runs
 described in this report --- the one following the Benders cut correction and the one
 following the addition of the coverage row --- required exactly that.
@@ -98,13 +98,12 @@ count declared in the instance file, because ten instances of the collection dec
 tool that no job requires.
 
 Headline solve comparisons use the fixed $1{,}410$-instance denominator, so every
-non-optimal outcome counts as unsolved. The historical LSS rerun is separated reproducibly by
-\path{src/BBC/cluster/separate_server_lss_results.py}: it preserves the original
-16-GiB shards, writes the 32-GiB run under a distinct provenance path, and produces a
-$352$-row paired ledger. The sensitivity changes $245$ primary memory outcomes to
-time-limit-feasible and leaves $107$ as memory limits, but certifies no additional
-optimum. The $123$ genuinely retryable primary identities were generated and merged by
-\path{prepare_recovery.py} and \path{merge_recovery_results.py} under the original
-resource envelope. The merger uses the recovery accounting log to normalize its $15$
-SLURM OOM tasks, validates all $16{,}920$ canonical identities, and preserves a hashed
-pre-merge backup under \path{results/provenance/}.
+non-optimal outcome counts as unsolved. For reproducibility, the primary comparison uses
+the resource envelope stated above. An auxiliary LSS sensitivity
+used 32~GiB; it certifies no additional optimum and is never merged with the primary
+ledger. The public campaign analysis in
+\path{verification/analyse_campaign_results.py} validates all $16{,}920$ canonical
+identities, while
+\path{src/BBC/results/provenance/primary_ledger_audit.json} provides a compact SHA-256
+inventory of the pre-merge primary archive. Together they make the denominator and its
+provenance auditable without publishing the private cluster workspace.

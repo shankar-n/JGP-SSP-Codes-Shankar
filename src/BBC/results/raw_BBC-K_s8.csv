@@ -127,11 +127,11 @@ D1-1,Catanzaro,40,60,20,0.2279,BBC,BBC-K,True,False,False,MIP_time_limit_feasibl
 D3-6,Catanzaro,40,60,25,0.2367,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,216.0,216,3600.177,72.22222222222221,49208,112593,24311,23713,0,13006,0,60.0,60.0,
 s1n008,Crama,10,10,4,0.34,BBC,BBC-K,True,False,False,MIP_optimal,15.0,15,43.526,0.0,37015,83913,7806,679,0,7472,0,12.0,15.0,
 s2n008,Crama,15,20,6,0.2333,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,30.0,30,3600.021,32.7687296416938,504747,1299355,60462,18028,0,51491,0,20.0,20.16938110749186,
-s3n008,Crama,,,,,BBC,BBC-K,True,False,False,error,,,2407.49,,,,,,,,,,,subprocess crash: 
+s3n008,Crama,30,40,15,0.2808,BBC,BBC-K,True,False,False,memory_limit,,,2386.9601,,,,,,,,,,,resource limit under the fixed primary protocol
 s4n008,Crama,40,60,20,0.2325,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,231.0,231,3600.642,54.11255411255416,224244,704714,17409,17642,0,9083,0,105.0,105.9999999999999,
 s1n008,Crama,10,10,5,0.34,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,13.0,13,3600.012,23.076923076923077,175395,407531,80077,2414,0,78869,0,10.0,10.0,
 s2n008,Crama,15,20,8,0.2333,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,25.0,25,3600.065,20.0,138581,296450,68590,12233,0,62504,0,20.0,20.0,
-s3n008,Crama,,,,,BBC,BBC-K,True,False,False,error,,,3515.78,,,,,,,,,,,subprocess crash: 
+s3n008,Crama,30,40,17,0.2808,BBC,BBC-K,True,False,False,memory_limit,,,3099.5389,,,,,,,,,,,resource limit under the fixed primary protocol
 s4n008,Crama,40,60,22,0.2325,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,220.9999999999984,221,3600.193,72.85067873303149,77492,217024,21660,22100,0,11228,0,60.0,60.0,
 s1n008,Crama,10,10,6,0.34,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,12.0,12,3600.021,16.666666666666664,159609,329242,81297,2027,0,80284,0,10.0,10.0,
 s2n008,Crama,15,20,10,0.2333,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,22.0,22,3600.032,9.090909090909092,138104,290643,65059,15351,0,57423,0,20.0,20.0,

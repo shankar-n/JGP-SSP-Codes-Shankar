@@ -3,6 +3,41 @@ import itertools
 from pyscipopt import Model, quicksum
 import networkx as nx
 
+
+def _is_hamiltonian_cycle(cycles, node_count):
+    """Return whether ``cycles`` contains one cycle visiting every node."""
+    return len(cycles) == 1 and len(cycles[0]) == node_count
+
+
+def _route_from_depot_cycle(active_edges, num_jobs):
+    """Extract a zero-based job route from a directed cycle through depot 0."""
+    successor = dict(active_edges)
+    if len(successor) != num_jobs + 1 or 0 not in successor:
+        raise RuntimeError("Solver did not return one outgoing edge per node")
+
+    route = []
+    visited = {0}
+    curr = 0
+    while True:
+        next_node = successor.get(curr)
+        if next_node is None:
+            raise RuntimeError(f"Solver cycle has no successor for node {curr}")
+        if next_node == 0:
+            break
+        if next_node in visited:
+            raise RuntimeError("Solver returned a subtour that excludes the depot")
+        if not 1 <= next_node <= num_jobs:
+            raise RuntimeError(f"Solver returned invalid job node {next_node}")
+        visited.add(next_node)
+        route.append(next_node - 1)
+        curr = next_node
+
+    if len(route) != num_jobs:
+        raise RuntimeError(
+            f"Solver cycle contains {len(route)} of {num_jobs} jobs"
+        )
+    return route
+
 def solve_jgp_arf(n_jobs, n_tools, cap, tool_req):
         """
         Solve the Job Grouping Problem via the ARF MILP formulation
@@ -319,8 +354,8 @@ def solve_ssp_laporte(num_jobs, num_tools, b, A, T_j):
     """
 
     # Map the 0-indexed T_j to 1-indexed jobs, leaving 0 for the dummy depot
-    T_req = {j: T_j[j-1] for j in range(1, num_jobs + 1)}
-    T_req = [] 
+    T_req = {0: set()}
+    T_req.update({j: set(T_j[j - 1]) for j in range(1, num_jobs + 1)})
 
     J0 = list(range(num_jobs + 1))
     J = list(range(1, num_jobs + 1))
@@ -362,7 +397,8 @@ def solve_ssp_laporte(num_jobs, num_tools, b, A, T_j):
         G.add_edges_from(active_edges)
         cycles = list(nx.simple_cycles(G))
 
-        if len(cycles) == 1 and len(cycles) == num_jobs + 1: break
+        if _is_hamiltonian_cycle(cycles, num_jobs + 1):
+            break
 
         model.freeTransform() 
         for cycle in cycles:
@@ -370,13 +406,7 @@ def solve_ssp_laporte(num_jobs, num_tools, b, A, T_j):
                 edges_internal = quicksum(x[i, j] for i in cycle for j in cycle if i != j)
                 model.addCons(edges_internal <= len(cycle) - 1)
 
-    route = []
-    curr = 0
-    while True:
-        next_node = [j for (i, j) in active_edges if i == curr]
-        if next_node == 0: break
-        route.append(next_node - 1) # Shift back to 0-indexed for output
-        curr = next_node
+    route = _route_from_depot_cycle(active_edges, num_jobs)
 
     return model.getObjVal(), route
 
@@ -385,8 +415,8 @@ def solve_ssp_catanzaro(num_jobs, num_tools, b, A, T_j):
     Solves the SSP using the tightened Catanzaro Formulation 4.
     """
     # Map the 0-indexed T_j to 1-indexed jobs for the dummy depot
-    T_req = {j: T_j[j-1] for j in range(1, num_jobs + 1)}
-    T_req = [] 
+    T_req = {0: set()}
+    T_req.update({j: set(T_j[j - 1]) for j in range(1, num_jobs + 1)})
 
     J0 = list(range(num_jobs + 1))
     J = list(range(1, num_jobs + 1))
@@ -436,7 +466,8 @@ def solve_ssp_catanzaro(num_jobs, num_tools, b, A, T_j):
         G.add_edges_from(active_edges)
         cycles = list(nx.simple_cycles(G))
 
-        if len(cycles) == 1 and len(cycles) == num_jobs + 1: break
+        if _is_hamiltonian_cycle(cycles, num_jobs + 1):
+            break
 
         model.freeTransform()
         for cycle in cycles:
@@ -444,12 +475,6 @@ def solve_ssp_catanzaro(num_jobs, num_tools, b, A, T_j):
                 edges_internal = quicksum(x[i, j] for i in cycle for j in cycle if i != j)
                 model.addCons(edges_internal <= len(cycle) - 1)
 
-    route = []
-    curr = 0
-    while True:
-        next_node = [j for (i, j) in active_edges if i == curr]
-        if next_node == 0: break
-        route.append(next_node - 1) # Shift back to 0-indexed
-        curr = next_node
+    route = _route_from_depot_cycle(active_edges, num_jobs)
 
     return model.getObjVal(), route

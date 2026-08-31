@@ -1,7 +1,8 @@
 def validate_jgp(batches, n_jobs, cap, tool_req):
         """
         Verify JGP solution feasibility.
-        Checks: (a) each batch fits in cap, (b) all required tools are loaded.
+        Checks: (a) each batch fits in cap, (b) all required tools are loaded,
+        and (c) every job appears exactly once.
         """
         jobs_seen = set()
         for idx, (jobs, tools) in enumerate(batches):
@@ -13,13 +14,17 @@ def validate_jgp(batches, n_jobs, cap, tool_req):
             # Tool coverage
             required = set()
             for j in jobs:
+                if j in jobs_seen:
+                    raise ValueError(
+                        f"Job {j} appears more than once across JGP batches"
+                    )
+                jobs_seen.add(j)
                 required.update(tool_req[j])
             tools_set = set(tools)
             if not required.issubset(tools_set):
                 raise ValueError(
                     f"Batch {idx}: missing tools {required - tools_set}"
                 )
-            jobs_seen.update(jobs)
         # All jobs covered
         if jobs_seen != set(range(n_jobs)):
             raise ValueError(

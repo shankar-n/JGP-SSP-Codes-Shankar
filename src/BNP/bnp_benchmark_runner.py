@@ -4,8 +4,8 @@ BNP Benchmark Runner  (standalone; mirrors src/BBC/benchmark_runner.py)
 
 Runs PCF'/PTF branch-and-price over the configured instance x solver pairs and
 appends one CSV row per pair to bnp_results.csv. Safe to interrupt and restart:
-completed (instance, config) pairs are skipped on resume and seed the early-stop
-counters. Each solve runs in a child process joined with a hard timeout, so a
+completed (family, instance, J, T, C, config) pairs are skipped on resume and seed
+the early-stop counters. Each solve runs in a child process joined with a hard timeout, so a
 hung SCIP solve or an OOM model build can't wedge the campaign.
 
 Usage
@@ -22,6 +22,7 @@ import math
 import multiprocessing
 import sys
 import time
+from functools import lru_cache
 from pathlib import Path
 
 _BNP = Path(__file__).resolve().parent          # src/BNP/
@@ -97,12 +98,33 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue):
 
 
 # ── CSV + ordering helpers ────────────────────────────────────────────────────
+def _as_int(value):
+    """Return a CSV integer field in the same form as an instance header."""
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return None
+
+
+def _row_key(row):
+    """Return a complete persisted-run key, or None for an incomplete row."""
+    benchmark_set = row.get("benchmark_set")
+    instance = row.get("instance")
+    config = row.get("config")
+    J, T, C = (_as_int(row.get(name)) for name in ("J", "T", "C"))
+    if not benchmark_set or not instance or not config or None in (J, T, C):
+        return None
+    return benchmark_set, instance, J, T, C, config
+
+
 def _completed(csv_path):
     done = {}
     if Path(csv_path).exists():
         with open(csv_path, newline="") as f:
             for row in csv.DictReader(f):
-                done[(row["instance"], row["config"])] = str(row.get("status", "")).lower()
+                key = _row_key(row)
+                if key is not None:
+                    done[key] = str(row.get("status", "")).lower()
     return done
 
 
@@ -115,6 +137,7 @@ def _append_row(csv_path, row):
         w.writerow(row)
 
 
+@lru_cache(maxsize=None)
 def _features(path):
     """(J, T, C, density) via a token read (handles Crama's 3-line header)."""
     try:
@@ -124,6 +147,12 @@ def _features(path):
         return J, T, C, (ones / (J * T) if J * T else 0.0)
     except Exception:
         return 10**6, 10**6, 0, 1.0
+
+
+def _work_key(benchmark_set, instance_path, config_label):
+    """Full identity used to decide whether a queued run is already recorded."""
+    J, T, C, _density = _features(instance_path)
+    return benchmark_set, Path(instance_path).stem, J, T, C, config_label
 
 
 def build_work_queue(sets, config_filter=None, only_sets=None,
@@ -168,7 +197,7 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None, output_csv=None
         mine = {uniq[i] for i in range(len(uniq)) if i % num_tasks == task_id}
         work = [w for w in work if (w[0], w[1]) in mine]
     done = _completed(csv_path)
-    pending = [w for w in work if (Path(w[1]).stem, w[2]["label"]) not in done]
+    pending = [w for w in work if _work_key(w[0], w[1], w[2]["label"]) not in done]
     print(f"BNP runner | queue {len(work)} ({len(work)-len(pending)} done, {len(pending)} to run) "
           f"| {n_skip} skipped (J outside [{0 if min_jobs is None else min_jobs},{MAX_JOBS if max_jobs is None else max_jobs}] or |V|>{(MAX_NV if max_nv is None else max_nv):.0e}) | early-stop {mct or 'off'} | CSV {csv_path}")
     if dry_run:
@@ -190,12 +219,14 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None, output_csv=None
     n_run = 0
     for b, p, c, tl in work:
         name, label = Path(p).stem, c["label"]
-        if (name, label) in done:
-            bump(label, done[(name, label)]); continue
+        key = _work_key(b, p, label)
+        if key in done:
+            bump(label, done[key]); continue
         if label in stopped:
             continue
         n_run += 1
         print(f"[{n_run}/{len(pending)}] {b:<11} {name:<30} {label}", flush=True)
+        J, T, C, density = _features(p)
         q = ctx.Queue()
         proc = ctx.Process(target=_worker, args=(p, b, c, tl, q))
         t0 = time.perf_counter(); proc.start(); proc.join(timeout=tl + 60)
@@ -203,6 +234,7 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None, output_csv=None
             proc.terminate(); proc.join(5)
             if proc.is_alive(): proc.kill(); proc.join(5)
             row = {**{k: None for k in COLUMNS}, "instance": name, "benchmark_set": b,
+                   "J": J, "T": T, "C": C, "density": round(density, 4),
                    "solver": c["solver"], "config": label, "status": "time_limit",
                    "time_s": round(time.perf_counter() - t0, 1), "notes": "OS timeout"}
             print(f"      -> TIMEOUT {row['time_s']}s")
@@ -214,6 +246,7 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None, output_csv=None
                 print(f"      -> {row.get('status')} obj_ktns={row.get('obj_ktns')} {row['time_s']}s")
             except Exception as e:
                 row = {**{k: None for k in COLUMNS}, "instance": name, "benchmark_set": b,
+                       "J": J, "T": T, "C": C, "density": round(density, 4),
                        "solver": c["solver"], "config": label, "status": "error",
                        "time_s": round(time.perf_counter() - t0, 2), "notes": f"crash {e}"}
         _append_row(csv_path, row)

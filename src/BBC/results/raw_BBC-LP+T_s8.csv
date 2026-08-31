@@ -68,11 +68,7 @@ L25-5,Laporte4,9,25,20,0.6578,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasi
 L26-1,Laporte4,9,25,20,0.7067,BBC,BBC-LP+T,False,False,True,MIP_optimal,37.0,37,104.872,0.0,33603,76401,9210,784,8818,0,0,31.0,37.0,
 A1-2C,Catanzaro,10,10,5,0.26,BBC,BBC-LP+T,False,False,True,MIP_optimal,10.0,10,0.095,0.0,69,172,62,54,32,0,0,10.0,10.0,
 A2-7,Catanzaro,10,10,5,0.27,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,11.0,11,3600.027,9.090909090909092,188346,406351,73025,2394,71832,0,0,10.0,10.0,
-A1-3,Catanzaro,10,10,4,0.28,BBC,BBC-LP+T,False,False,True,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
+A1-3,Catanzaro,10,10,4,0.28,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,12.0,12,3600.03,16.666666666666664,197060,536006,69718,2275,68589,0,0,10.0,10.0,
 L2-9,Laporte7,10,10,5,0.29,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,11.0,11,3600.059,9.090909090909092,197883,447136,69887,2227,68777,0,0,10.0,10.0,
 A1-10,Catanzaro,10,10,4,0.3,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,12.0,12,3600.025,16.666666666666664,268235,804713,64001,2084,62963,0,0,10.0,10.0,
 L1-4,Laporte7,10,10,4,0.31,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,13.0,13,3600.009,19.23076923077564,241318,689107,62997,2015,61989,0,0,10.0,10.499999999999167,
@@ -99,11 +95,7 @@ L10-8,Laporte5,15,20,15,0.3533,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feas
 L12-8,Laporte5,15,20,15,0.3767,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,24.000000000000004,24,3600.039,16.66666666666668,130814,311629,55898,8635,51624,0,0,20.0,20.0,
 L13-10,Laporte5,15,20,15,0.4033,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,25.0,25,3600.035,20.0,124459,318404,54037,15085,46561,0,0,20.0,20.0,
 L13-4,Laporte5,15,20,15,0.4833,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,30.000000000000007,30,3600.068,33.33333333333335,154457,554363,52269,13586,45543,0,0,20.0,20.0,
-L13-1,Laporte5,15,20,15,0.54,BBC,BBC-LP+T,False,False,True,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
+L13-1,Laporte5,15,20,15,0.54,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,31.0,31,3600.037,35.483870967741936,167539,737840,52473,8408,48328,0,0,20.0,20.0,
 L14-5,Laporte5,15,20,15,0.64,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,35.99999999999999,36,3600.032,25.00000000000049,454592,1200908,52404,17526,43734,0,0,26.0,26.99999999999982,
 L19-2,Laporte5,15,25,15,0.136,BBC,BBC-LP+T,False,False,True,MIP_optimal,25.0,25,0.048,0.0,0,61,7,19,0,0,0,,25.0,
 L19-3,Laporte5,15,25,15,0.1467,BBC,BBC-LP+T,False,False,True,MIP_optimal,25.0,25,0.049,0.0,0,61,7,19,0,0,0,,25.0,
@@ -135,7 +127,7 @@ D1-1,Catanzaro,40,60,20,0.2279,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feas
 D3-6,Catanzaro,40,60,25,0.2367,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,211.99999999999994,212,3600.099,71.69811320754717,59644,300222,16855,20458,7873,0,0,60.0,60.0,
 s1n008,Crama,10,10,4,0.34,BBC,BBC-LP+T,False,False,True,MIP_optimal,15.0,15,51.804,0.0,33414,80245,6618,664,6291,0,0,12.0,15.0,
 s2n008,Crama,15,20,6,0.2333,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,30.999999999999996,31,3600.052,34.8047538200346,422803,1261461,58745,17322,50166,0,0,20.0,20.210526315789274,
-s3n008,Crama,,,,,BBC,BBC-LP+T,False,False,True,error,,,3493.73,,,,,,,,,,,subprocess crash: 
+s3n008,Crama,30,40,15,0.2808,BBC,BBC-LP+T,False,False,True,memory_limit,,,3288.2168,,,,,,,,,,,resource limit under the fixed primary protocol
 s4n008,Crama,40,60,20,0.2325,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,231.99999999999991,232,3600.253,54.310344827586185,189222,776137,11972,15049,5361,0,0,105.0,106.0,
 s1n008,Crama,10,10,5,0.34,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,13.0,13,3600.038,23.076923076923077,221265,698740,69870,2259,68747,0,0,10.0,10.0,
 s2n008,Crama,15,20,8,0.2333,BBC,BBC-LP+T,False,False,True,MIP_time_limit_feasible,26.000000000000004,26,3600.057,23.076923076923087,205607,765227,58064,4982,55611,0,0,20.0,20.0,

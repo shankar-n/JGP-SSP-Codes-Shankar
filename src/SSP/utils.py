@@ -65,6 +65,9 @@ def detect_0blocks(A_matrix):
 
 def compute_switch_cost(cfg_a, cfg_b, cap):
         """Switch cost between two configurations (0 if either is DUMMY)."""
+        if ((isinstance(cfg_a, str) and cfg_a == "DUMMY") or
+                (isinstance(cfg_b, str) and cfg_b == "DUMMY")):
+            return 0
         return cap - len(set(cfg_a).intersection(set(cfg_b)))
 
 def compute_ssp_cost(route, cap):
@@ -132,10 +135,9 @@ def run_brute_force_TSP_on_configs(configs):
                 dist[i][j] = xx
                 dist[j][i] = xx
         
-        possible_routes = list(itertools.combinations(range(n), n))
         min_c = 1e9
         min_routes = []
-        for route in possible_routes:
+        for route in itertools.permutations(range(n)):
             cost = 0
             for i in range(1,n):
                 cost += dist[route[i]][route[i-1]]

@@ -93,11 +93,7 @@ L6-5,Laporte7,15,20,8,0.2333,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,
 L10-2,Laporte5,15,20,15,0.29,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,21.0,21,3600.026,4.761904761904762,140494,300862,67761,9947,0,62830,0,20.0,20.0,
 L12-1,Laporte5,15,20,15,0.3433,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,21.0,21,3600.031,4.761904761904762,137249,294664,65761,10031,0,60788,0,20.0,20.0,
 L7-2,Laporte5,15,20,10,0.3667,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,34.0,34,3600.007,41.17647058823529,198784,601940,53699,14244,0,46605,0,20.0,20.0,
-L8-1,Laporte5,15,20,10,0.39,BBC,BBC-K,True,False,False,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
+L8-1,Laporte5,15,20,10,0.39,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,39.0,39,3600.009,32.96439771259948,495589,1145734,46321,16327,0,38199,0,25.0,26.143884892086206,
 L11-9,Laporte5,15,20,15,0.4533,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,28.0,28,3600.018,28.57142857142857,140369,311344,67493,8079,0,63482,0,20.0,20.0,
 L11-7,Laporte5,15,20,15,0.53,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,35.0,35,3600.032,42.857142857142854,142530,381230,61274,17531,0,52557,0,20.0,20.0,
 L14-7,Laporte5,15,20,15,0.6267,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,34.0,34,3600.053,26.138107416879837,542070,1245563,47111,12801,0,40745,0,24.0,25.113043478260856,
@@ -127,37 +123,21 @@ C1-9,Catanzaro,30,40,15,0.2433,BBC,BBC-K,True,False,False,MIP_time_limit_feasibl
 C3-6,Catanzaro,30,40,20,0.2567,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,96.0,96,3600.079,58.333333333333336,67605,122868,31445,23328,0,20134,0,40.0,40.0,
 D1-2,Catanzaro,40,60,20,0.2004,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,208.0,208,3600.137,71.15384615384616,52620,130798,24518,21139,0,14302,0,60.0,60.0,
 D3-3,Catanzaro,40,60,25,0.2213,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,204.0,204,3600.232,70.58823529411765,47840,101486,24495,24617,0,12907,0,60.0,60.0,
-D1-4,Catanzaro,,,,,BBC,BBC-K,True,False,False,error,,,3341.09,,,,,,,,,,,subprocess crash: 
+D1-4,Catanzaro,40,60,20,0.2271,BBC,BBC-K,True,False,False,memory_limit,,,3341.09,,,,,,,,,,,resource limit under the fixed primary protocol
 D3-10,Catanzaro,40,60,25,0.2333,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,203.0,203,3600.137,70.44334975369459,51233,105677,23343,25472,0,11500,0,60.0,60.0,
 s1n004,Crama,10,10,4,0.3,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,13.0,13,3600.021,22.13500784929476,247661,595547,72804,2194,0,71709,0,10.0,10.122448979591681,
-s2n004,Crama,15,20,6,0.22,BBC,BBC-K,True,False,False,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
-s3n004,Crama,,,,,BBC,BBC-K,True,False,False,error,,,2478.35,,,,,,,,,,,subprocess crash: 
+s2n004,Crama,15,20,6,0.22,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,29.0,29,3600.031,31.03448275862069,184774,503730,49398,20032,0,39417,0,20.0,20.0,
+s3n004,Crama,30,40,15,0.265,BBC,BBC-K,True,False,False,memory_limit,,,2478.35,,,,,,,,,,,resource limit under the fixed primary protocol
 s4n004,Crama,40,60,20,0.2288,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,223.0,223,3600.594,62.331838565022856,237226,745735,20177,19959,0,10739,0,83.0,83.99999999999903,
 s1n004,Crama,10,10,5,0.3,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,11.0,11,3600.058,9.090909090909092,160481,330993,81321,2108,0,80272,0,10.0,10.0,
-s2n004,Crama,15,20,8,0.22,BBC,BBC-K,True,False,False,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
+s2n004,Crama,15,20,8,0.22,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,25.0,25,3600.031,20.0,139083,298617,65260,11921,0,59334,0,20.0,20.0,
 s3n004,Crama,30,40,17,0.265,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,115.0,115,3600.072,65.21739130434783,62944,161428,30995,24459,0,19068,0,40.0,40.0,
 s4n004,Crama,40,60,22,0.2288,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,205.0,205,3600.279,70.73170731707317,73822,191258,22293,23168,0,11362,0,60.0,60.0,
 s1n004,Crama,10,10,6,0.3,BBC,BBC-K,True,False,False,MIP_optimal,10.0,10,0.067,0.0,231,501,142,120,0,80,0,10.0,10.0,
-s2n004,Crama,15,20,10,0.22,BBC,BBC-K,True,False,False,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
+s2n004,Crama,15,20,10,0.22,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,22.0,22,3600.031,9.090909090909092,131909,287062,64506,11176,0,58956,0,20.0,20.0,
 s3n004,Crama,30,40,20,0.265,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,96.0,96,3600.17,58.333333333333336,71465,131883,32642,23908,0,21065,0,40.0,40.0,
 s4n004,Crama,40,60,25,0.2288,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,201.0,201,3600.06,70.1492537313433,63524,141328,32152,7941,0,28379,0,60.0,60.0,
 s1n004,Crama,10,10,7,0.3,BBC,BBC-K,True,False,False,MIP_optimal,10.0,10,0.007,0.0,0,53,9,6,0,5,0,10.0,10.0,
-s2n004,Crama,15,20,12,0.22,BBC,BBC-K,True,False,False,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
+s2n004,Crama,15,20,12,0.22,BBC,BBC-K,True,False,False,MIP_optimal,20.0,20,154.101,0.0,28973,58915,14172,4516,0,11934,0,20.0,20.0,
 s3n004,Crama,30,40,25,0.265,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,69.0,69,3600.071,42.028985507246375,74225,135306,31523,25296,0,19255,0,40.0,40.0,
 s4n004,Crama,40,60,30,0.2288,BBC,BBC-K,True,False,False,MIP_time_limit_feasible,155.0,155,3600.138,61.29032258064516,53729,98586,25706,21014,0,15655,0,60.0,60.0,

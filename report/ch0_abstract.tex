@@ -1,58 +1,47 @@
 \begin{abstract}
 \setstretch{1.0}
 \noindent
-A machine that makes many different parts needs many different tools but can hold only a
-few at a time, so running a set of jobs means stopping to change tools, and each stop
-costs production time. The Job Sequencing and Tool Switching Problem (SSP) asks for the
-order of jobs, and the loading at each step, that makes the total number of tool changes
-smallest. The loading for a fixed order is easy; the order is NP-hard, and it is where
-all of the difficulty sits.
+The Job Sequencing and Tool Switching Problem (SSP) asks for an order of jobs and a
+feasible sequence of tool magazines that minimise tool insertions. Loading is
+polynomially solvable once the order is fixed, but choosing the order is NP-hard. A
+common practical alternative first partitions the jobs into the fewest
+magazine-feasible groups and then sequences those groups.
 
-In practice the SSP is not attacked directly: jobs are first grouped into as few
-magazine-fitting batches as possible, and the batches are then sequenced.
-\citet{CramaKlundert1999} showed this two-phase method to be a $b$-approximation, for
-$b$ the magazine capacity. This report sharpens that into an instance-sensitive theory.
-The method admits two readings the literature has not separated --- the cost of a walk
-through one fixed magazine per group, and the cost once its final step re-optimises the
-loading --- and the two differ on the instances most often used as examples. Within that
-setting the optimum equals the cheapest walk over \emph{all} groupings, so the gap ---
-measured on the best value the construction can reach, not on one implementation of it
---- is exactly the price of insisting on the fewest groups. Zero-gap classes follow for
-every capacity, upper bounds for every instance, and the extremal behaviour at three
-groups. In the censuses run here positive gaps are rare, every one observed equals one,
-and none occurs at capacity two; the only larger-gap construction found is
-disconnected, and its unboundedness remains conjectural. That regime agrees with the one
-published industrial study.
+This report gives an instance-sensitive account of that two-phase method. It separates
+the cost of a fixed-configuration walk through the groups from the cost obtained after
+the final job order is reloaded optimally by Keep Tool Needed Soonest (KTNS). The SSP
+optimum is proved to equal the cheapest configuration walk over all feasible groupings;
+the walk gap is therefore exactly the price of restricting the first phase to a
+minimum-cardinality grouping. The resulting theory gives zero-gap classes and
+instance-dependent upper bounds. For the KTNS-postprocessed method itself, a connected
+family with capacity six is constructed for every $g\ge1$ with
+\[
+  \lvert\U\rvert=8g+1,\qquad \Kst=3g,\qquad
+  \Zst=8g-5,\qquad H=9g-5.
+\]
+Hence its additive loss is $g$ and is unbounded even on connected instances. The exact
+worst-case ratio remains open.
 
-On the exact side the obstacle is a single quantity. Of the compact formulations
-surveyed here, the strongest relaxes to the number of tools minus the magazine capacity,
-an elementary counting bound. Two methods are built to get past it: a
-branch-and-Benders-cut algorithm, which settles the loading with an exact
-polynomial-time oracle and so never relaxes the loading problem at all, and
-position-indexed formulations, one of which can provably exceed the counting bound.
+On the exact side, the report develops a branch-and-Benders-cut solver whose subproblem
+optimises loading exactly, and two position-indexed configuration formulations. The
+position--configuration relaxation is proved to equal the coverage bound
+$q=\lvert\U\rvert-b$. The position--transition relaxation is at least $q$, but exceeds
+it on only two of the $232$ recorded canonical roots.
 
-Both were benchmarked on $1{,}421$ instances under one protocol against three compact
-models reimplemented here. That baseline is not the literature at its strongest ---
-Formulation~4 of \citet{Catanzaro2015} stands in for the Formulation~5 its authors
-recommend --- and it closes more instances than anything built here regardless, so the
-campaign yields a diagnosis and not a faster solver. Whether the counting bound equals
-the optimum is the dominant predictor of what the Benders solver closes: $94\%$ of the
-instances where it is tight against $40\%$ of the rest, and where it fails it has
-usually already found the optimum and cannot certify it. That split is not evidence that
-the loose instances are hard --- an arc-based compact model closes every one of them,
-and a model whose relaxation \emph{is} the counting bound loses only thirteen points
-across it. What it measures is a master carrying that bound and, at the root, little
-else.
-
-The evidence points to a structural rather than incidental limitation. What is proved: the
-objective counts re-insertions produced by the global interleaving of the schedule;
-apart from one constant coverage row every inequality either method carries is supported
-on a single arc or a single position; and two independent configuration relaxations sit
-exactly on the counting bound. That this locality is what defeats the search is the
-reading those facts support, not a further theorem. A family that is not local is
-derived and proved valid, with a ceiling over integral schedules several times that of
-the family the solvers carry today --- but the ceiling is not reached. Measured inside
-the master it leaves the root relaxation unchanged on all $37$ instances for which both
-root values were obtained. The obstacle is the encoding of a global inequality, not the
-absence of one.
+The completed campaign contains $1{,}410$ canonical instances, twelve tested
+configurations, and all $16{,}920$ planned outcomes under a common one-hour protocol.
+Using the fixed planned denominator,
+the reimplemented compact baselines SSPMF, Catanzaro F4, and LSS solve respectively
+$1{,}028$, $876$, and $833$ instances; the strongest tested Benders setting solves
+$724$. These figures compare the implementations in this repository, with different
+effective thread settings, and are not a literature-wide state-of-the-art ranking.
+For Benders, the coverage row equals the recorded root value on
+$9{,}067/10{,}392$ runs ($87.2\%$), and coverage tightness is the strongest measured
+separator of closure: the plain solver closes $94\%$ of known-optimum tight cases and
+$40\%$ of loose ones. Fractional separation generates about $67$ million cuts and
+reduces the search tree, but in the paired records improves no terminal bound and
+closes fewer instances; the comparison is confounded by its required presolve change.
+The evidence therefore diagnoses a certificate bottleneck in the tested Benders
+implementation and motivates stronger global bounds. The contribution is a corrected
+structural theory and a reproducible algorithmic diagnosis, not a faster solver claim.
 \end{abstract}

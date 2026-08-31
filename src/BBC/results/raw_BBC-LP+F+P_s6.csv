@@ -74,11 +74,7 @@ A2-10,Catanzaro,10,10,5,0.3,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasi
 L2-6,Laporte7,10,10,5,0.31,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,12.000000000000005,12,3600.041,16.666666666666703,38826,340674,7619,1261,6999,0,77633,10.0,10.0,
 L3-6,Laporte7,10,10,6,0.32,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,11.0,11,3600.056,9.090909090909092,56802,276137,17616,2070,16587,0,63192,10.0,10.0,
 A3-9,Catanzaro,10,10,6,0.33,BBC,BBC-LP+F+P,False,True,False,MIP_optimal,10.0,10,0.877,0.0,200,663,111,104,57,0,140,10.0,10.0,
-L1-8,Laporte7,10,10,4,0.33,BBC,BBC-LP+F+P,False,True,False,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
+L1-8,Laporte7,10,10,4,0.33,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,14.000000000000002,14,3600.007,12.797619047619065,33024,450361,3076,1219,2477,0,101270,11.0,12.208333333333332,
 L1-2,Laporte5,15,15,5,0.2222,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,22.000000000000007,22,3600.066,31.81818181818184,1790,1444862,338,506,127,0,69482,15.0,15.0,
 L2-9,Laporte5,15,15,10,0.2578,BBC,BBC-LP+F+P,False,True,False,MIP_optimal,15.0,15,215.533,0.0,8094,35776,3164,2452,1996,0,9204,15.0,15.0,
 L3-5,Laporte5,15,15,10,0.3689,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,19.0,19,3600.095,21.052631578947366,13932,368322,2015,2204,1003,0,72313,15.0,15.0,
@@ -95,11 +91,7 @@ B1-5,Catanzaro,15,20,6,0.2067,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_fea
 L5-1,Laporte7,15,20,6,0.22,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,31.999999999999993,32,3600.079,37.499999999999986,5924,467629,413,556,175,0,64528,20.0,20.0,
 L8-4,Laporte7,15,20,12,0.24,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,21.000000000000004,21,3600.081,4.761904761904779,37874,198249,12598,5498,9929,0,50355,20.0,20.0,
 L10-5,Laporte5,15,20,15,0.3,BBC,BBC-LP+F+P,False,True,False,MIP_optimal,20.0,20,7.401,0.0,408,1431,190,235,82,0,312,20.0,20.0,
-L12-4,Laporte5,15,20,15,0.35,BBC,BBC-LP+F+P,False,True,False,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
+L12-4,Laporte5,15,20,15,0.35,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,22.999999999999996,23,3600.024,13.04347826086955,27887,233926,7273,4540,5090,0,58250,20.0,20.0,
 L7-8,Laporte5,15,20,10,0.3733,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,36.999999999999986,37,3600.125,45.94594594594593,2066,671804,222,364,74,0,56224,20.0,20.0,
 L12-10,Laporte5,15,20,15,0.4,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,24.0,24,3600.102,16.666666666666664,20441,264471,4092,3199,2586,0,61685,20.0,20.0,
 L11-2,Laporte5,15,20,15,0.48,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,28.999999999999993,29,3600.085,31.034482758620673,5358,649817,529,783,205,0,65025,20.0,20.0,
@@ -118,11 +110,7 @@ L18-1,Laporte5,15,25,10,0.312,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_fea
 L22-1,Laporte5,15,25,15,0.3253,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,31.000000000000007,31,3600.035,19.354838709677438,14046,259048,2640,2436,1504,0,60414,25.0,25.0,
 L30-4,Laporte5,15,25,20,0.3493,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,26.000000000000007,26,3600.081,3.846153846153873,39109,189453,13307,7468,9645,0,47103,25.0,25.0,
 L28-8,Laporte5,15,25,20,0.384,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,28.000000000000007,28,3600.056,10.714285714285737,29450,214088,7606,4375,5490,0,52591,25.0,25.0,
-L30-6,Laporte5,15,25,20,0.4027,BBC,BBC-LP+F+P,False,True,False,error,,,,,,,,,,,,,,"Traceback (most recent call last):
-  File ""<repo>/src/BBC/benchmark_runner.py"", line 157, in _worker
-    _lf.close()
-OSError: [Errno 127] Key has expired
-"
+L30-6,Laporte5,15,25,20,0.4027,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,28.0,28,3600.033,10.714285714285714,23779,225030,5308,4534,3174,0,57698,25.0,25.0,
 L28-10,Laporte5,15,25,20,0.44,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,32.0,32,3600.028,21.875,10998,380372,1642,1864,807,0,61298,25.0,25.0,
 L32-6,Laporte5,15,25,20,0.48,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,32.0,32,3600.115,21.875,13082,326351,2111,1962,1205,0,61007,25.0,25.0,
 L32-2,Laporte5,15,25,20,0.4987,BBC,BBC-LP+F+P,False,True,False,MIP_time_limit_feasible,32.00000000000002,32,3600.048,21.875000000000053,9895,460344,1273,1577,569,0,59957,25.0,25.0,

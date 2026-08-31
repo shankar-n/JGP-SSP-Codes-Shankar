@@ -1,0 +1,17 @@
+Defence figure provenance
+=========================
+
+Canonical inputs: src/BBC/results/raw_*.csv
+Audit definitions: verification/analyse_campaign_results.py
+Generator: report/make_defence_figures.py
+Raw rows: 17,052; canonical rows: 16,920; configurations: 12; instances: 1,410.
+Run `python verification/analyse_campaign_results.py --check` for the independent numeric audit.
+
+Generated vector PDFs:
+- solve_counts_all.pdf
+- coverage_tightness_closure.pdf
+- benders_root_bound_share.pdf
+- fractional_separation_tradeoff.pdf
+- common_solved_time_boxplot.pdf
+
+Figure-specific denominators are printed in the plots or embedded PDF metadata.

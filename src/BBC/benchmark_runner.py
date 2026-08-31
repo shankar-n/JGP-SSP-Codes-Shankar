@@ -4,7 +4,9 @@ BBC Full Benchmark Runner
 
 Runs all configured solver × instance pairs and appends results to
 raw_results.csv one row at a time.  Safe to interrupt and restart:
-already-completed (instance, config) pairs are skipped on resume.
+already-completed (family, instance, J, T, C, config) pairs are skipped on
+resume.  The full identity is essential because Crama reuses file names at
+several capacities.
 
 Architecture
 ------------
@@ -44,6 +46,7 @@ import multiprocessing
 import os
 import sys
 import time
+from functools import lru_cache
 from pathlib import Path
 
 # ── sys.path: add src/ and src/SSP/ so imports work from any working directory
@@ -147,7 +150,14 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue, verb
             import os as _os
             _ldir = _os.path.join("logs", config["label"])
             _os.makedirs(_ldir, exist_ok=True)
-            _lf = open(_os.path.join(_ldir, Path(instance_path).stem + ".log"), "w")
+            # Crama reuses each instance stem at four capacities.  The old
+            # stem-only name let concurrent shards overwrite one another's
+            # CPLEX logs; include the full persisted identity instead.
+            _log_name = (
+                f"{benchmark_set}__{Path(instance_path).stem}__"
+                f"J{J}_T{T}_C{C}.log"
+            )
+            _lf = open(_os.path.join(_ldir, _log_name), "w")
             for _stream in ("set_results_stream", "set_log_stream", "set_warning_stream"):
                 try:
                     getattr(solver.cpx, _stream)(_lf)
@@ -231,14 +241,35 @@ def _worker(instance_path, benchmark_set, config, time_limit, result_queue, verb
 # CSV helpers
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _as_int(value):
+    """Return a CSV integer field in the same form as an instance header."""
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return None
+
+
+def _row_key(row):
+    """Return a complete persisted-run key, or None for an incomplete row."""
+    benchmark_set = row.get("benchmark_set")
+    instance = row.get("instance")
+    config = row.get("config")
+    J, T, C = (_as_int(row.get(name)) for name in ("J", "T", "C"))
+    if not benchmark_set or not instance or not config or None in (J, T, C):
+        return None
+    return benchmark_set, instance, J, T, C, config
+
+
 def _load_completed(csv_path):
-    """Return a set of completed (instance_stem, config_label) pairs."""
+    """Return completed full-instance keys from an existing result CSV."""
     done = set()
     if not csv_path.exists():
         return done
     with open(csv_path, newline="") as f:
         for row in csv.DictReader(f):
-            done.add((row["instance"], row["config"]))
+            key = _row_key(row)
+            if key is not None:
+                done.add(key)
     return done
 
 
@@ -253,32 +284,63 @@ def _append_row(csv_path, row):
 
 
 def _load_completed_status(csv_path):
-    """Return {(instance_stem, config_label): status_lower} from an existing CSV."""
+    """Return {full-instance key: status_lower} from an existing result CSV."""
     status = {}
     if not csv_path.exists():
         return status
     with open(csv_path, newline="") as f:
         for row in csv.DictReader(f):
-            status[(row["instance"], row["config"])] = str(row.get("status", "")).lower()
+            key = _row_key(row)
+            if key is not None:
+                status[key] = str(row.get("status", "")).lower()
     return status
 
 
+@lru_cache(maxsize=None)
 def _instance_features(path):
-    """Cheap (J, T, C, density) read from an instance file, for difficulty sorting."""
+    """Cheap token-based feature read (also handles Crama's 3-line header)."""
     try:
         with open(path) as f:
-            J, T, C = (int(v) for v in f.readline().split()[:3])
-            ones = sum(line.count('1') for line in f)
+            tokens = f.read().split()
+        J, T, C = (int(v) for v in tokens[:3])
+        ones = sum(1 for value in tokens[3:3 + J * T] if value == "1")
         density = ones / (J * T) if J * T else 0.0
         return J, T, C, density
     except Exception:
         return 10**6, 10**6, 0, 1.0      # unparseable -> sort last (treat as hardest)
 
 
+@lru_cache(maxsize=None)
+def _campaign_difficulty_key(path):
+    """Return the immutable ordering key used by the 2026-08 campaign.
+
+    The original campaign parser read ``J T C`` from one physical line.  The
+    Crama files store those values on three lines, so they deliberately fell
+    into the sentinel bucket and were then ordered by their already-sorted
+    paths.  Correcting the feature parser later changed which identities
+    belonged to each persisted shard.  Resume compatibility is more important
+    than rebalancing an existing campaign, so sharding retains the historical
+    key while :func:`_instance_features` supplies the correct six-field identity.
+    """
+    try:
+        with open(path) as handle:
+            J, T, C = (int(v) for v in handle.readline().split()[:3])
+            ones = sum(line.count("1") for line in handle)
+        density = ones / (J * T) if J * T else 0.0
+        return J, T, round(density, 4), -int(C)
+    except Exception:
+        return 10**6, 10**6, 1.0, 0
+
+
+def _work_key(benchmark_set, instance_path, config_label):
+    """Full identity used to decide whether a queued run is already recorded."""
+    J, T, C, _density = _instance_features(instance_path)
+    return benchmark_set, Path(instance_path).stem, J, T, C, config_label
+
+
 def _difficulty_key(path):
-    """Easiest-first ordering key: small J, small T, sparse, then loosest capacity."""
-    J, T, C, density = _instance_features(path)
-    return (J, T, round(density, 4), -int(C))
+    """Stable campaign ordering key (kept separate from identity parsing)."""
+    return _campaign_difficulty_key(path)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -340,7 +402,7 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None,
         work = [w for w in work if (w[0], w[1]) in inst_set]
 
     pending = [w for w in work
-               if (Path(w[1]).stem, w[2]["label"]) not in completed_status]
+               if _work_key(w[0], w[1], w[2]["label"]) not in completed_status]
     n_already_done = len(work) - len(pending)
 
     print(f"\nBBC Benchmark Runner")
@@ -375,7 +437,7 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None,
     for bset, ipath, cfg, tl in work:
         inst_name = Path(ipath).stem
         label     = cfg["label"]
-        key       = (inst_name, label)
+        key       = _work_key(bset, ipath, label)
 
         # Already in CSV: seed the counter from its recorded status; don't re-run.
         if key in completed_status:
@@ -390,6 +452,7 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None,
         n_run += 1
         print(f"[{n_run:>5}/{len(pending)}]  {bset:<12}  {inst_name:<35}  {label}", flush=True)
 
+        J, T, C, density = _instance_features(ipath)
         q = ctx.Queue()
         p = ctx.Process(target=_worker, args=(ipath, bset, cfg, tl, q, verbose))
         t_start = time.perf_counter()
@@ -406,7 +469,7 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None,
             elapsed = time.perf_counter() - t_start
             row = {
                 "instance": inst_name, "benchmark_set": bset,
-                "J": None, "T": None, "C": None, "density": None,
+                "J": J, "T": T, "C": C, "density": round(density, 4),
                 "solver": cfg["solver"], "config": label,
                 "comb_cuts": cfg.get("comb_cuts"), "frac_cuts": cfg.get("frac_cuts"),
                 "triplet_bounds": cfg.get("triplet_bounds"),
@@ -428,7 +491,7 @@ def run_benchmark(sets=None, config_filter=None, only_sets=None,
                 # Subprocess crashed without putting anything in the queue
                 row = {
                     "instance": inst_name, "benchmark_set": bset,
-                    "J": None, "T": None, "C": None, "density": None,
+                    "J": J, "T": T, "C": C, "density": round(density, 4),
                     "solver": cfg["solver"], "config": label,
                     "comb_cuts": cfg.get("comb_cuts"), "frac_cuts": cfg.get("frac_cuts"),
                     "triplet_bounds": cfg.get("triplet_bounds"),

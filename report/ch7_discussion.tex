@@ -43,18 +43,19 @@ every run, and on all $2{,}108$ runs of the position--configuration formulation 
 value is exactly $q$. A different algorithm, a different formulation and a different
 solver arrive at the same number.
 
-The natural objection is that this is a statement about one implementation. It is not,
-and Proposition~\ref{prop:pcf} is why: the position--configuration relaxation, arrived
-at from a completely different direction, equals $q$ exactly. So does the multicommodity
-relaxation of \citet{daSilva2024}, proved by its own authors. Three independent routes
-reach the same value. A configuration-based exact method for the SSP is therefore
-limited by the strength of its bound and not by its implementation.
+The natural objection is that this is only a statement about one implementation.
+Proposition~\ref{prop:pcf} shows that part of the diagnosis is broader: the
+position--configuration relaxation, reached from a different direction, equals $q$
+exactly. So does the multicommodity relaxation of \citet{daSilva2024}, proved by its own
+authors. These independent results show that the coverage bound recurs across several
+formulations. They do not establish an implementation-independent limitation for every
+configuration-based exact method.
 
-The fractional-cut result is the strongest form of this conclusion. Separating at
-fractional points is the standard remedy when a Benders scheme tails off, and it does
-what it is supposed to do locally: almost sixty-seven million cuts reduce the node count by a
-factor of twenty. It nonetheless raises the bound at termination on no instance at all.
-The remedy is being applied correctly, to the wrong obstacle.
+The fractional-cut setting supplies the strongest evidence within the tested
+implementation. It adds almost sixty-seven million cuts and explores about twenty times
+fewer median nodes, but improves no paired terminal bound and closes sixty-nine fewer
+instances. Because enabling it also disables presolve, the campaign does not isolate
+the cause of those changes.
 
 \subsection{Where a stronger bound could come from}\label{ssec:disc-locality}
 
@@ -303,9 +304,9 @@ drawing out, because each was arrived at independently.
 \paragraph{The bound governs both sides.}
 Section~\ref{sec:gap} shows that $q$ equals the optimum on a large part of the
 instance space, and that where it does the two-phase heuristic tends to be exact.
-Section~\ref{sec:comp} shows that where it does, the methods built here close at the
-root, and where it does not they branch without closing. The same quantity sits on both
-sides. The association is what is measured; the wording should not promote it to a
+Section~\ref{sec:comp} shows that where $q$ is tight, the tested Benders solver closes
+much more often, and where it is loose, it closes much less often. The same quantity
+sits on both sides. The association is what is measured; the wording should not promote it to a
 mechanism, and Section~\ref{ssec:results-tight} shows why: \texttt{CATZ-F4}, whose
 relaxation is not $q$, closes a larger share of the loose instances than of the tight
 ones, so a tight $q$ does not make an exact method fast in general --- it makes the
@@ -369,21 +370,13 @@ eleven identities explicitly. The $132$ excluded result rows remain in the raw a
 and the analysis checks both the exclusion count and the canonical total before
 computing a figure. No solver result is invented or discarded on its outcome.
 
-\paragraph{Primary outcomes and memory sensitivity are separate ledgers.}
-The completed 16-GiB primary ledger contains $376$ scheduler-confirmed memory-limit
-outcomes: $352$ for LSS and $24$ for Benders. Scheduler evidence establishes the cause,
-including the $15$ recovery tasks that exhausted the same 16-GiB envelope. These
-outcomes remain failures in the primary denominator. A separate 32-GiB LSS sensitivity reran all
-positions; at the $352$ primary OOM identities it produced $245$ time-limit-feasible
-rows and $107$ further memory failures, but no additional optimum. Those rows are
-\emph{not} merged into the primary comparison.
-
-The $123$ primary rows selected for exact-envelope recovery comprised $58$ absent
-identities, $48$ filesystem-credential expiries, and $17$ unexplained worker exits.
-Their manifest-driven 16-GiB rerun is now validated and merged: $17$ certified optima,
-$91$ time-limit-feasible outcomes, and $15$ scheduler-confirmed OOM outcomes. Thus
-Table~\ref{tab:solves} is the balanced final primary comparison. The separate 32-GiB
-sensitivity is not used in it.
+\paragraph{The comparison uses a fixed, audited denominator.}
+Every planned canonical identity remains in the denominator whether or not it is
+certified. A completion and provenance audit established one validated outcome per
+identity before Table~\ref{tab:solves} was computed. An auxiliary LSS sensitivity run
+used a different resource allocation, produced no additional certified optimum, and is
+kept outside the primary comparison. Appendix~\ref{app:repro} records the exact protocol
+and the scripts that enforce this separation.
 
 \paragraph{The comparison is one hour, one machine, one collection, and F4 rather than F5.}
 Every solve count and time in Section~\ref{sec:comp} comes from a single one-hour limit

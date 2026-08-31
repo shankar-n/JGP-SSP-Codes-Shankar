@@ -91,10 +91,9 @@ formula for the original tool-disjoint copy family. Neither is used as a conclus
 
 - Ring values, finite witnesses, the 1,260-instance heuristic census, root-bound
   counts, and solver performance are observations, not proofs.
-- The main 16-GiB campaign and the 32-GiB LSS sensitivity are separate ledgers.
-  The 123-case exact-envelope recovery has been validated and merged; final solve
-  counts use all 16,920 canonical method--instance identities and fixed planned
-  denominators. The higher-memory sensitivity is not merged.
+- The primary campaign and the auxiliary LSS sensitivity are separate ledgers. Final
+  solve counts use all 16,920 canonical method--instance identities and fixed planned
+  denominators; the sensitivity is not merged.
 - A solver agreeing with another solver is validation, not a proof of a general
   algorithmic claim.
 
@@ -104,7 +103,8 @@ Run:
 
     python verification/verify_report_independent.py
     python verification/ideal_enum.py 6
-    python -m unittest verification.test_recovery_workflow verification.test_resume_keys
+    python verification/test_resume_keys.py
+    python -m unittest src.SSP.test_legacy_regressions
 
 The verifier uses a magazine-state DP and a job-subset DP independent of the campaign
 solvers. Its connected-family checks at \(g=1,2\) supplement, but do not replace, the

@@ -1,0 +1,764 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[scaled=.94]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usefonttheme[onlymath]{serif}
+\usepackage{amsmath,amssymb,mathtools,booktabs,array,graphicx,tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,matrix}
+
+% A restrained academic visual system.  The empirical figures use the same
+% palette and are generated from the audited campaign CSVs.
+\definecolor{navy}{HTML}{25324A}
+\definecolor{teal}{HTML}{16897B}
+\definecolor{orange}{HTML}{E07A3F}
+\definecolor{coral}{HTML}{CF5C5C}
+\definecolor{blue}{HTML}{3066BE}
+\definecolor{muted}{HTML}{667085}
+\definecolor{linegray}{HTML}{D8DEE9}
+\definecolor{warm}{HTML}{F7F5F0}
+\definecolor{paleteal}{HTML}{E7F3F1}
+\definecolor{paleorange}{HTML}{FAEEE5}
+
+\setbeamercolor{normal text}{fg=navy,bg=white}
+\setbeamercolor{structure}{fg=teal}
+\setbeamercolor{frametitle}{fg=navy,bg=warm}
+\setbeamercolor{footline}{fg=muted,bg=white}
+\setbeamerfont{normal text}{size=\fontsize{14.2}{17.3}\selectfont}
+\setbeamerfont{frametitle}{series=\bfseries,size=\fontsize{23}{27}\selectfont}
+\setbeamerfont{footline}{size=\fontsize{8.5}{10}\selectfont}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\color{teal}\raisebox{.15ex}{\small$\blacktriangleright$}}
+\setbeamertemplate{itemize subitem}{\color{orange}$\bullet$}
+\setlength{\leftmargini}{1.25em}
+\setlength{\leftmarginii}{1.15em}
+\setbeamersize{text margin left=.78cm,text margin right=.78cm}
+
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \begin{beamercolorbox}[wd=\paperwidth,ht=.83cm,dp=.19cm,leftskip=.78cm,rightskip=.6cm]{frametitle}
+    \usebeamerfont{frametitle}\insertframetitle
+  \end{beamercolorbox}%
+  \color{teal}\rule{\paperwidth}{1.05pt}%
+}
+
+\setbeamertemplate{footline}{%
+  \leavevmode
+  \color{linegray}\rule{\paperwidth}{.45pt}\vskip0pt
+  \hbox{%
+    \begin{beamercolorbox}[wd=.34\paperwidth,ht=2.55ex,dp=1.05ex,leftskip=.78cm]{footline}
+      \usebeamerfont{footline}Shankar Narayanan
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.42\paperwidth,ht=2.55ex,dp=1.05ex,center]{footline}
+      \usebeamerfont{footline}JGP--SSP
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.24\paperwidth,ht=2.55ex,dp=1.05ex,rightskip=.78cm plus1fil]{footline}
+      \usebeamerfont{footline}\insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}%
+  }%
+}
+
+\newcommand{\Zst}{Z^{\ast}}
+\newcommand{\Kst}{K^{\ast}}
+\newcommand{\Hwalk}{H_{\mathrm{walk}}}
+\newcommand{\U}{U}
+\newcommand{\theory}[1]{{\color{teal}\bfseries #1}}
+\newcommand{\exact}[1]{{\color{orange}\bfseries #1}}
+\newcommand{\quiet}[1]{{\color{muted}#1}}
+\newcommand{\source}[1]{\vfill\hfill{\fontsize{7.8}{9.2}\selectfont\color{muted}#1}}
+
+\title{Job Sequencing and Tool Switching}
+\author{Shankar Narayanan}
+\date{Internship defence}
+
+\begin{document}
+
+% 1 -------------------------------------------------------------------------
+\begin{frame}[plain]
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[warm] (current page.south west) rectangle (current page.north east);
+  \fill[navy] (current page.north west) rectangle ($(current page.north east)+(0,-.18)$);
+  \fill[teal] (current page.south west) rectangle ($(current page.south east)+(0,.12)$);
+\end{tikzpicture}
+\vspace{.38cm}
+\begin{center}
+\begin{tabular}{ccc}
+  \includegraphics[height=.80cm]{cover/uca.png} &
+  \includegraphics[height=.70cm]{cover/inp_isima.png} &
+  \includegraphics[height=.72cm]{cover/limos.png}
+\end{tabular}
+
+\vspace{.74cm}
+{\fontsize{31}{36}\selectfont\bfseries\color{navy}Job Sequencing and Tool Switching\par}
+\vspace{.20cm}
+{\fontsize{18}{22}\selectfont\color{teal}Structural results and a branch-and-Benders-cut study\par}
+
+\vspace{.67cm}
+{\fontsize{18}{22}\selectfont\bfseries Shankar Narayanan\par}
+
+\vfill
+{\fontsize{11.5}{14}\selectfont
+\begin{tabular}{rl}
+\textbf{Advisors} & Prof.~Rafael Colares \quad Prof.~Annegret Wagler\\[3pt]
+\textbf{Academic supervisor} & Dr.~Renaud Chicoisne
+\end{tabular}}
+\vspace{.42cm}
+\end{center}
+\end{frame}
+
+% 2 -------------------------------------------------------------------------
+\begin{frame}{The order decides which tools return}
+\centering
+{\large Magazine capacity $b=2$; the machine starts empty.}
+\vspace{.32cm}
+
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+ job/.style={draw=navy!35,fill=warm,minimum width=2.05cm,minimum height=.92cm,align=center,font=\small},
+ lab/.style={font=\small\bfseries,anchor=east}]
+  \node[lab] at (-.30,1.40) {order $1,2,3$};
+  \node[job] (a1) at (1.05,1.40) {$J_1$\\$\{a,b\}$};
+  \node[job] (a2) at (4.25,1.40) {$J_2$\\$\{b,c\}$};
+  \node[job] (a3) at (7.45,1.40) {$J_3$\\$\{c,d\}$};
+  \draw[->,line width=1.1pt,teal] (a1)--(a2) node[midway,above,font=\small] {$+c$};
+  \draw[->,line width=1.1pt,teal] (a2)--(a3) node[midway,above,font=\small] {$+d$};
+  \node[font=\small,teal] at (1.05,.67) {start: $+a,+b$};
+  \node[font=\fontsize{19}{22}\selectfont\bfseries,teal,anchor=west] at (8.75,1.40) {$4$ insertions};
+
+  \node[lab] at (-.30,-.90) {order $1,3,2$};
+  \node[job] (b1) at (1.05,-.90) {$J_1$\\$\{a,b\}$};
+  \node[job] (b2) at (4.25,-.90) {$J_3$\\$\{c,d\}$};
+  \node[job] (b3) at (7.45,-.90) {$J_2$\\$\{b,c\}$};
+  \draw[->,line width=1.1pt,orange] (b1)--(b2) node[midway,above,font=\small] {$+c,+d$};
+  \draw[->,line width=1.1pt,orange] (b2)--(b3) node[midway,above,font=\small] {$+b$};
+  \node[font=\small,orange] at (1.05,-1.63) {start: $+a,+b$};
+  \node[font=\fontsize{19}{22}\selectfont\bfseries,orange,anchor=west] at (8.75,-.90) {$5$ insertions};
+  \draw[orange,line width=1.5pt] (6.73,-1.22) -- (8.15,-1.22);
+  \node[font=\small,orange,anchor=west] at (6.45,-1.82) {$b$ was removed, then returned};
+\end{tikzpicture}
+
+\source{Report: Figures 1--2 and Section 1.1.}
+\end{frame}
+
+% 3 -------------------------------------------------------------------------
+\begin{frame}{KTNS settles loading; finding the order remains hard}
+\begin{columns}[T,onlytextwidth]
+\column{.44\textwidth}
+\theory{Fixed order}
+\vspace{.15cm}
+
+When a tool must leave, remove the loaded tool whose next use is furthest away.
+
+\vspace{.28cm}
+\[
+\operatorname{KTNS}(\pi)
+\quad\text{in}\quad O(n|\U|).
+\]
+
+\vspace{.18cm}
+\exact{Choosing the order} is NP-hard for every fixed $b\ge2$.
+
+\column{.52\textwidth}
+\centering
+{\fontsize{28}{32}\selectfont\bfseries\color{navy}$40{,}320$}\par
+{\small orders of the eight-job instance \texttt{L1-1}}\par
+\vspace{.28cm}
+{\fontsize{27}{31}\selectfont\bfseries\color{teal}$180$}\par
+{\small are optimal}\par
+\vspace{.38cm}
+\begin{tikzpicture}[x=.42cm,y=1cm]
+  \draw[navy!45,line width=1pt] (0,0)--(14,0);
+  \foreach \x/\v in {0/10,3/13,8/18,14/24}{\draw[navy!35] (\x,-.09)--(\x,.09);\node[font=\scriptsize,below] at (\x,-.10) {\v};}
+  \draw[dashed,navy,line width=1pt] (0,-.28)--(0,.65);
+  \node[font=\small,navy,anchor=south west] at (.12,.37) {$q=10$};
+  \fill[teal] (3,0) circle (4pt);
+  \node[font=\small\bfseries,teal,anchor=south] at (3,.18) {$\Zst=13$};
+  \fill[orange] (8,0) circle (4pt);
+  \node[font=\small\bfseries,orange,anchor=south] at (8,.18) {median $18$};
+  \node[font=\scriptsize,muted] at (7,-.62) {free-initial tool-switch cost};
+\end{tikzpicture}
+\end{columns}
+\source{Tang--Denardo KTNS; Crama et al. hardness; report Figure 3.}
+\end{frame}
+
+% 4 -------------------------------------------------------------------------
+\begin{frame}{The literature leaves one theory gap and one exact-method gap}
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth]
+  \node[font=\large\bfseries,teal,anchor=east] at (2.15,1.55) {Grouping};
+  \draw[->,teal,line width=1.2pt] (2.45,1.55)--(11.75,1.55);
+  \foreach \x/\yr/\txt in {3.0/1999/{$b$-approximation},6.1/2015/{industrial evidence},9.25/open/{instance-sensitive gap}}{
+    \fill[teal] (\x,1.55) circle (3.5pt);
+    \node[font=\scriptsize,above=.10cm,align=center] at (\x,1.55) {\yr};
+    \node[font=\small,below=.20cm,align=center,text width=2.4cm] at (\x,1.55) {\txt};}
+
+  \node[font=\large\bfseries,orange,anchor=east] at (2.15,-.45) {Exact};
+  \draw[->,orange,line width=1.2pt] (2.45,-.45)--(11.75,-.45);
+  \foreach \x/\yr/\txt in {3.0/2004/{LSS},4.8/2015/{CATZ F4--F5},6.8/2021/{SSPMF},8.75/2024/{JGSMF},10.65/2025/{DP / $A^*$}}{
+    \fill[orange] (\x,-.45) circle (3.5pt);
+    \node[font=\scriptsize,above=.10cm,align=center] at (\x,-.45) {\yr};
+    \node[font=\small,below=.20cm,align=center,text width=1.75cm] at (\x,-.45) {\txt};}
+\end{tikzpicture}
+
+\vspace{.44cm}
+\begin{columns}[T,onlytextwidth]
+\column{.48\textwidth}
+\theory{Question 1}\quad What does minimising the number of groups cost after KTNS?
+\column{.48\textwidth}
+\exact{Question 2}\quad Can an exact loading oracle make Benders competitive with compact models?
+\end{columns}
+
+\source{Report: literature review in Chapter 3.}
+\end{frame}
+
+% 5 -------------------------------------------------------------------------
+\begin{frame}{Grouping commits to $\Kst$ before it sees the best sequence}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+ stage/.style={font=\large\bfseries,align=center,text width=2.3cm},
+ note/.style={font=\small,align=center,text width=2.45cm,text=muted}]
+  \node[stage] (j) at (1.0,1.25) {Jobs};
+  \node[stage,teal] (g) at (4.15,1.25) {Minimum\grouping};
+  \node[stage] (s) at (7.35,1.25) {Group and\job order};
+  \node[stage,orange] (k) at (10.55,1.25) {KTNS\cost $H$};
+  \draw[->,line width=1.2pt,navy!55] (j)--(g);
+  \draw[->,line width=1.2pt,navy!55] (g)--(s);
+  \draw[->,line width=1.2pt,navy!55] (s)--(k);
+  \node[note] at (1.0,.25) {$T_j\subseteq\U$};
+  \node[note] at (4.15,.25) {$\left|\bigcup_{j\in G}T_j\right|\le b$\\fewest groups $=\Kst$};
+  \node[note] at (7.35,.25) {best choices over every tie};
+  \node[note] at (10.55,.25) {best final loading for that order};
+\end{tikzpicture}
+
+\vspace{.36cm}
+\color{linegray}\rule{.88\textwidth}{.7pt}
+\vspace{.25cm}
+
+\begin{columns}[T,onlytextwidth]
+\column{.47\textwidth}
+\centering
+{\fontsize{21}{25}\selectfont\color{navy}$\Zst$}\par
+\small best KTNS cost over every job order
+\column{.47\textwidth}
+\centering
+{\fontsize{21}{25}\selectfont\color{orange}$H-\Zst$}\par
+\small loss that remains even under favourable tie-breaking
+\end{columns}
+\source{Report: Definitions 5--7.}
+\end{frame}
+
+% 6 -------------------------------------------------------------------------
+\begin{frame}{Without the $\Kst$ restriction, grouping is exact}
+\begin{columns}[T,onlytextwidth]
+\column{.60\textwidth}
+\vspace{.12cm}
+\[
+  \Zst=\min_{\mathcal P\ \mathrm{feasible}}\gamma(\mathcal P)
+\]
+\[
+  \Hwalk=\min_{\substack{\mathcal P\ \mathrm{feasible}\\|\mathcal P|=\Kst}}
+  \gamma(\mathcal P),
+  \qquad H\le\Hwalk.
+\]
+\vspace{.25cm}
+
+The approximation enters when the first phase keeps only the groupings with the fewest groups.
+
+\column{.36\textwidth}
+\centering
+\begin{tikzpicture}
+  \draw[navy!35,fill=warm,line width=1pt] (0,0) ellipse (2.05cm and 1.48cm);
+  \draw[teal,fill=paleteal,line width=1.2pt] (.25,-.08) ellipse (1.22cm and .78cm);
+  \node[font=\small,align=center] at (-.15,1.08) {all feasible\\groupings};
+  \node[font=\small\bfseries,teal,align=center] at (.25,-.08) {$|\mathcal P|=\Kst$};
+\end{tikzpicture}
+\vspace{.22cm}
+
+{\fontsize{20}{24}\selectfont
+$\text{cost}=q+R$}\par
+\small $q=|\U|-b$; $R$ counts reinsertions.
+\end{columns}
+\source{Report: Theorem 1, Corollary 1 and Lemma 1.}
+\end{frame}
+
+% 7 -------------------------------------------------------------------------
+\begin{frame}{Four jobs are enough for a genuine grouping loss}
+\begin{columns}[T,onlytextwidth]
+\column{.50\textwidth}
+\centering
+{\small Required tools; capacity $b=4$}\par\vspace{.12cm}
+\begin{tikzpicture}[x=.52cm,y=.52cm]
+  \foreach \x/\t in {1/1,2/2,3/3,4/4,5/5,6/6,7/7}{\node[font=\small\bfseries] at (\x,1) {\t};}
+  \foreach \y/\j in {0/A,-1/B,-2/C,-3/D}{\node[font=\small\bfseries,anchor=east] at (.28,\y) {\j};}
+  \foreach \x in {1,...,7}{\foreach \y in {0,-1,-2,-3}{\draw[navy!16] (\x-.38,\y-.38) rectangle (\x+.38,\y+.38);}}
+  \foreach \x/\y in {1/0,2/0,3/-1,4/-1,1/-2,3/-2,5/-2,6/-2,2/-3,5/-3,6/-3,7/-3}{\fill[teal] (\x,\y) circle (4.3pt);}
+\end{tikzpicture}
+\vspace{.18cm}
+
+\theory{$A$ and $B$ are the only feasible pair.}
+
+\column{.46\textwidth}
+\vspace{.18cm}
+\theory{Unrestricted order}
+\[
+ B,C,A,D \quad\Longrightarrow\quad \Zst=q=3.
+\]
+\vspace{.28cm}
+\exact{Every minimum grouping}
+\[
+ A\text{ and }B\text{ consecutive}
+ \quad\Longrightarrow\quad H=4.
+\]
+\vspace{.20cm}
+{\large One forced adjacency creates one reinsertion.}
+\end{columns}
+\source{Report: Proposition 10.}
+\end{frame}
+
+% 8 -------------------------------------------------------------------------
+\begin{frame}{One shared tool makes the lifted family connected and uniquely grouped}
+\begin{columns}[T,onlytextwidth]
+\column{.47\textwidth}
+\centering
+\begin{tikzpicture}[>=Stealth,
+ job/.style={draw=navy!35,fill=warm,minimum width=1.15cm,minimum height=.62cm,font=\small\bfseries},
+ big/.style={job,fill=paleorange,draw=orange!70}]
+  \node[font=\large\bfseries] at (0,2.15) {copy $i$};
+  \node[job] (a) at (-1.35,.72) {$A_i$};
+  \node[job] (b) at (1.35,.72) {$B_i$};
+  \node[big] (c) at (-1.35,-.72) {$C_i$};
+  \node[big] (d) at (1.35,-.72) {$D_i$};
+  \draw[teal,line width=2pt] (a)--(b) node[midway,above,font=\small] {fits: $6$};
+  \node[draw=teal,fill=paleteal,circle,minimum size=.72cm,font=\bfseries] (u) at (0,1.65) {$u$};
+  \node[draw=navy!45,fill=white,circle,minimum size=.72cm,font=\bfseries] (v) at (0,-1.70) {$v_i$};
+  \foreach \n in {a,b,c,d}{\draw[navy!28] (u)--(\n);\draw[navy!28] (v)--(\n);}
+  \node[font=\scriptsize,teal,align=center] at (0,2.65) {$u$ is in every job\\across every copy};
+\end{tikzpicture}
+
+\column{.49\textwidth}
+\vspace{.08cm}
+\begin{itemize}
+  \item $C_i$ and $D_i$ fill all six slots.
+  \item $A_i\cup B_i$ uses exactly six tools.
+  \item Small jobs from different copies use seven.
+\end{itemize}
+\vspace{.28cm}
+\centering
+{\fontsize{23}{27}\selectfont\bfseries\color{teal}
+unique minimum grouping}\par\vspace{.08cm}
+{\fontsize{25}{29}\selectfont $\Kst=3g$}
+\end{columns}
+\source{Report: Theorem 5, construction and first proof step.}
+\end{frame}
+
+% 9 -------------------------------------------------------------------------
+\begin{frame}{The unrestricted order reaches coverage: $\Zst=8g-5$}
+\begin{columns}[T,onlytextwidth]
+\column{.58\textwidth}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,
+ job/.style={draw=teal!60,fill=paleteal,minimum width=1.35cm,minimum height=.72cm,font=\large\bfseries}]
+  \node[job] (b) at (0,1.1) {$B_i$};
+  \node[job] (c) at (2.1,1.1) {$C_i$};
+  \node[job] (a) at (4.2,1.1) {$A_i$};
+  \node[job] (d) at (6.3,1.1) {$D_i$};
+  \draw[->,teal,line width=1.3pt] (b)--(c);
+  \draw[->,teal,line width=1.3pt] (c)--(a);
+  \draw[->,teal,line width=1.3pt] (a)--(d);
+  \draw[teal,line width=2pt] (-.55,-.05)--(6.85,-.05);
+  \node[font=\small,teal,above] at (3.15,-.05) {$u$ remains loaded};
+  \node[font=\small,align=center] at (3.15,-.82) {repeat copy by copy; every newly loaded private tool\\is appearing for the first time};
+\end{tikzpicture}
+
+\column{.38\textwidth}
+\vspace{.28cm}
+\[
+ |\U|=8g+1,\qquad b=6
+\]
+\[
+ q=|\U|-b=8g-5.
+\]
+\vspace{.28cm}
+No reinsertion is needed, so the coverage lower bound is attained:
+\[
+\boxed{\Zst=q=8g-5}.
+\]
+\end{columns}
+\source{Report: Theorem 5, coverage schedule.}
+\end{frame}
+
+% 10 ------------------------------------------------------------------------
+\begin{frame}{Every minimum grouping forces one return per copy}
+\begin{columns}[T,onlytextwidth]
+\column{.51\textwidth}
+\centering
+\begin{tikzpicture}[>=Stealth]
+  \node[draw=teal!70,fill=paleteal,minimum width=3.25cm,minimum height=.82cm,font=\large\bfseries] (ab) at (0,1.25) {$[A_i\; B_i]$};
+  \node[draw=orange!65,fill=paleorange,minimum width=1.10cm,minimum height=.82cm,font=\large\bfseries] (c) at (-1.18,-.52) {$C_i$};
+  \node[draw=orange!65,fill=paleorange,minimum width=1.10cm,minimum height=.82cm,font=\large\bfseries] (d) at (1.18,-.52) {$D_i$};
+  \draw[->,orange,line width=1.5pt] (ab.south west) .. controls (-2.1,.25) and (-2.1,-1.30) .. (d.south east);
+  \node[font=\small\bfseries,orange,align=center] at (0,-1.55) {at least one private tool\\must return};
+\end{tikzpicture}
+
+\column{.45\textwidth}
+\theory{Lower bound}
+\[
+H\ge q+g=(8g+1-6)+g=9g-5.
+\]
+\vspace{.25cm}
+\exact{Matching grouped order}
+\[
+A_i,B_i,C_i,D_i
+\]
+has exactly one return per copy. Therefore
+\[
+\boxed{H=9g-5}.
+\]
+\end{columns}
+\source{Report: Theorem 5, forced-return count and matching schedule.}
+\end{frame}
+
+% 11 ------------------------------------------------------------------------
+\begin{frame}{The additive gap is $g$, although the ratio tends to $9/8$}
+\begin{columns}[T,onlytextwidth]
+\column{.66\textwidth}
+\centering
+\begin{tikzpicture}[x=.92cm,y=.071cm,>=Stealth]
+  \draw[->,navy!70] (.55,0)--(7.15,0) node[below,font=\small] {$g$};
+  \draw[->,navy!70] (.80,0)--(.80,54) node[left,font=\small] {cost};
+  \foreach \x in {1,...,6}{\draw[navy!20] (\x+.55,0)--(\x+.55,2);\node[font=\scriptsize,below] at (\x+.55,0) {\x};}
+  \foreach \y in {10,20,30,40,50}{\draw[navy!12] (.80,\y)--(6.75,\y);\node[font=\scriptsize,anchor=east] at (.68,\y) {\y};}
+  \draw[teal,line width=2.2pt] plot coordinates {(1.55,3)(2.55,11)(3.55,19)(4.55,27)(5.55,35)(6.55,43)};
+  \draw[orange,line width=2.2pt] plot coordinates {(1.55,4)(2.55,13)(3.55,22)(4.55,31)(5.55,40)(6.55,49)};
+  \node[font=\small\bfseries,teal,anchor=west] at (4.25,25) {$\Zst=8g-5$};
+  \node[font=\small\bfseries,orange,anchor=west] at (4.25,46) {$H=9g-5$};
+  \draw[<->,orange,line width=1pt] (6.55,43)--(6.55,49);
+  \node[font=\small,orange,anchor=west] at (6.67,46) {$g$};
+\end{tikzpicture}
+
+\column{.30\textwidth}
+\vspace{.40cm}
+{\fontsize{24}{28}\selectfont\bfseries\color{teal}
+$H-\Zst=g$}\par
+\vspace{.35cm}
+The additive loss is unbounded, even though all jobs remain connected through $u$.
+\vspace{.35cm}
+\[
+\frac{H}{\Zst}\longrightarrow\frac98.
+\]
+\small This family does not prove a universal $9/8$ ratio bound.
+\end{columns}
+\source{Report: connected unbounded heuristic-gap theorem.}
+\end{frame}
+
+% 12 ------------------------------------------------------------------------
+\begin{frame}{Benders puts the hard order in the master and exact loading in the oracle}
+\centering
+\begin{tikzpicture}[node distance=1.15cm,>=Stealth,
+ block/.style={draw=navy!35,minimum width=3.0cm,minimum height=1.22cm,align=center,font=\large\bfseries}]
+  \node[block,fill=warm] (m) {Master\\chooses an order};
+  \node[block,fill=paleteal,draw=teal!65,right=of m] (s) {Loading LP\\prices it exactly};
+  \node[block,fill=paleorange,draw=orange!65,right=of s] (c) {Dual solution\\gives a cut};
+  \draw[->,teal,line width=1.5pt] (m)--(s) node[midway,above,font=\small] {$\bar x$};
+  \draw[->,orange,line width=1.5pt] (s)--(c) node[midway,above,font=\small] {true cost};
+  \draw[->,navy!70,line width=1.4pt] (c.south) |- ($(m.south)+(0,-1.05)$) -- (m.south);
+  \node[font=\small,navy,align=center] at (4.18,-1.36) {repeat inside branch-and-bound until the lower bound\\meets the cost of the best order};
+\end{tikzpicture}
+\vspace{.55cm}
+
+{\large The decomposition is natural because the fixed-order subproblem is polynomial and exact.}
+\source{Report: Figure 9 and Section 5.2.}
+\end{frame}
+
+% 13 ------------------------------------------------------------------------
+\begin{frame}{The master searches paths, but starts from local and coverage bounds}
+\begin{columns}[T,onlytextwidth]
+\column{.36\textwidth}
+\centering
+\begin{tikzpicture}[>=Stealth]
+  \foreach \x/\n in {0/d,1.45/1,2.9/2,4.35/3}{\node[circle,draw=navy!45,fill=warm,minimum size=.69cm,font=\small\bfseries] (n\n) at (\x,1.25) {$\n$};}
+  \draw[->,teal,line width=1.5pt] (nd)--(n1);
+  \draw[->,teal,line width=1.5pt] (n1)--(n2);
+  \draw[->,teal,line width=1.5pt] (n2)--(n3);
+  \draw[->,navy!30] (n3) to[bend left=37] (nd);
+  \node[font=\small,align=center] at (2.18,.20) {$x_{ij}=1$ if $j$ follows $i$\\$d$ marks the start and end};
+\end{tikzpicture}
+
+\column{.60\textwidth}
+\small
+\[
+\min\ \theta,\qquad
+\sum_{i\ne j}x_{ij}=1,\qquad
+\sum_{j\ne i}x_{ij}=1,
+\]
+\[
+\sum_{i,j\in S}x_{ij}\le |S|-1\qquad(S\subseteq J).
+\]
+\vspace{.05cm}
+\theory{Starting lower bounds}
+\[
+\theta\ge|\U|,
+\qquad
+\theta\ge\sum_{i,j\in J}w_{ij}x_{ij}
+       +\sum_{j\in J}|T_j|x_{dj},
+\]
+where $w_{ij}=\max(0,|T_i\cup T_j|-b)$.
+\end{columns}
+\source{Report: Benders master formulation, Section 5.2.}
+\end{frame}
+
+% 14 ------------------------------------------------------------------------
+\begin{frame}{The loading LP is integral on a fixed path}
+\begin{columns}[T,onlytextwidth]
+\column{.61\textwidth}
+\small
+\[
+\begin{aligned}
+\min\quad &\sum_{j,t}z_{jt}\\
+\text{s.t.}\quad
+&y_{jt}\ge1 &&(t\in T_j),\\
+&\sum_ty_{jt}\le b &&(j\in J),\\
+&z_{jt}\ge y_{jt}-y_{it}-(1-x_{ij}) &&(i\ne j),\\
+&z_{jt}\ge y_{jt}-(1-x_{dj}) &&(j\in J),\\
+&y,z\ge0.
+\end{aligned}
+\]
+
+\column{.35\textwidth}
+\vspace{.18cm}
+$y_{jt}$ records whether tool $t$ is loaded at job $j$.
+
+\vspace{.28cm}
+$z_{jt}$ charges an insertion when the selected path moves into $j$.
+
+\vspace{.42cm}
+\centering
+{\fontsize{20}{24}\selectfont\bfseries\color{teal}
+fixed path}\par
+{\large $\Downarrow$}\par
+{\fontsize{18}{22}\selectfont exact KTNS cost}
+\end{columns}
+\source{Report: fixed-order loading formulation and integrality argument.}
+\end{frame}
+
+% 15 ------------------------------------------------------------------------
+\begin{frame}{A dual solution gives a global cut supported only on arcs}
+\vspace{.05cm}
+\[
+\boxed{\quad \theta\ge \alpha+\sum_{i\ne j}\beta_{ij}x_{ij},
+\qquad \beta_{ij}=\sum_t\bar\lambda_{ijt}.\quad}
+\]
+\vspace{.28cm}
+\begin{columns}[T,onlytextwidth]
+\column{.31\textwidth}
+\theory{Valid globally}\par\vspace{.08cm}
+The dual feasible region does not depend on the proposed order.
+\column{.31\textwidth}
+\theory{Tight locally}\par\vspace{.08cm}
+An optimal dual solution prices the order that generated it exactly.
+\column{.31\textwidth}
+\exact{Arc-supported}\par\vspace{.08cm}
+Every learned coefficient is attached to an immediate predecessor arc.
+\end{columns}
+\vspace{.47cm}
+\centering
+\begin{tikzpicture}[>=Stealth]
+  \foreach \x/\n in {0/1,2.2/2,4.4/3,6.6/4}{\node[circle,draw=navy!40,fill=warm,minimum size=.60cm,font=\small] (n\n) at (\x,0) {$\n$};}
+  \draw[->,teal,line width=1.4pt] (n1)--(n2) node[midway,above,font=\small] {$\beta_{12}$};
+  \draw[->,teal,line width=1.4pt] (n2)--(n3) node[midway,above,font=\small] {$\beta_{23}$};
+  \draw[->,teal,line width=1.4pt] (n3)--(n4) node[midway,above,font=\small] {$\beta_{34}$};
+  \draw[orange,dashed,line width=1.2pt] (n1.south) to[bend right=20] node[below,font=\small] {a tool may leave and return across the whole span} (n4.south);
+\end{tikzpicture}
+\source{Report: Equation 20 and locality discussion in Chapter 7.}
+\end{frame}
+
+% 16 ------------------------------------------------------------------------
+\begin{frame}{The campaign tests 12 solver configurations}
+\begin{columns}[T,onlytextwidth]
+\column{.36\textwidth}
+\theory{Compact baselines}
+\vspace{.18cm}
+
+\begin{tabular}{@{}l@{}}
+SSPMF\\[4pt]
+CATZ--F4\\[4pt]
+LSS
+\end{tabular}
+
+\vspace{.48cm}
+\small Reimplementations used for a controlled comparison, not a literature-wide ranking.
+
+\column{.60\textwidth}
+\exact{Benders regimes}
+\vspace{.18cm}
+
+\begin{tabular}{@{}lll@{}}
+BBC--LP & BBC--LP+T & BBC--K\\[5pt]
+BBC--LP+F & BBC--K+F & BBC--LP+F+H\\[5pt]
+BBC--LP+F+C & BBC--LP+F+P & BBC--LP+ACC
+\end{tabular}
+
+\vspace{.52cm}
+\begin{tabular}{@{}>{\bfseries\color{navy}}r@{\ }l@{}}
+$1{,}410$ & canonical benchmark instances\\[3pt]
+$12$ & configurations\\[3pt]
+$16{,}920$ & canonical outcomes\\[3pt]
+$1$ hour & per run; fixed denominator
+\end{tabular}
+\end{columns}
+\source{Report: experimental design and Table 5.}
+\end{frame}
+
+% 17 ------------------------------------------------------------------------
+\begin{frame}{Every compact baseline certifies more instances than every tested Benders regime}
+\centering
+\includegraphics[width=.94\textwidth,height=5.85cm,keepaspectratio]{assets/defence_figures/solve_counts_all.pdf}
+
+\vspace{.04cm}
+{\small Each bar uses the same $1{,}410$-instance denominator.}
+\source{Canonical 16,920-row campaign; report Table 6.}
+\end{frame}
+
+% 18 ------------------------------------------------------------------------
+\begin{frame}{On common solved cases, Benders is often quick but has a long tail}
+\centering
+\includegraphics[width=.94\textwidth,height=5.86cm,keepaspectratio]{assets/defence_figures/common_solved_time_boxplot.pdf}
+
+\vspace{.02cm}
+{\small The same 531 instances appear in every box; the horizontal axis is logarithmic.}
+\source{Canonical campaign; common-solved comparison in report Table 7.}
+\end{frame}
+
+% 19 ------------------------------------------------------------------------
+\begin{frame}{BBC closure drops when the coverage bound misses the optimum}
+\begin{columns}[T,onlytextwidth]
+\column{.53\textwidth}
+\centering
+\includegraphics[width=\linewidth,height=4.72cm,keepaspectratio]{assets/defence_figures/coverage_tightness_closure.pdf}
+
+\small $1{,}107$ instances with a known optimum.
+
+\column{.43\textwidth}
+\centering
+\includegraphics[width=\linewidth,height=3.72cm,keepaspectratio]{assets/defence_figures/benders_root_bound_share.pdf}
+
+\vspace{.16cm}
+\begin{tabular}{@{}>{\bfseries\color{orange}}r@{\ }p{3.25cm}@{}}
+$223/383$ & time-limited, known-optimum BBC--LP incumbents already equal the optimum.
+\end{tabular}
+\end{columns}
+\source{Report: Table 10, Observation 13 and the incumbent audit.}
+\end{frame}
+
+% 20 ------------------------------------------------------------------------
+\begin{frame}{The next question is how to price tool residency across a span}
+\begin{columns}[T,onlytextwidth]
+\column{.47\textwidth}
+\theory{What the theory isolates}
+\vspace{.20cm}
+
+Minimum grouping can force a tool to leave and return:
+\[
+\text{cost}=q+\text{reinsertions}.
+\]
+
+\vspace{.42cm}
+\exact{What the campaign isolates}
+\vspace{.20cm}
+
+The tested arc-supported master often finds the right order but cannot certify those returns.
+
+\column{.49\textwidth}
+\theory{Next exact tests}
+\begin{itemize}
+  \item disaggregate $\theta$ by position;
+  \item encode job-union or configuration-level structure over a window;
+  \item test the stronger bound under a matched implementation protocol.
+\end{itemize}
+
+\vspace{.38cm}
+\theory{Use the grouping result}
+\begin{itemize}
+  \item search $\Kst,\Kst+1,\ldots,\Kst+\delta$ groupings;
+  \item flatten each with KTNS and use the orders as SSP seeds.
+\end{itemize}
+\end{columns}
+\vspace{.26cm}
+\centering
+{\large\bfseries The work narrows the next algorithmic experiment; it does not claim a new SOTA solver.}
+\source{Report: Discussion and further work, Chapters 7--8.}
+\end{frame}
+
+% 21 ------------------------------------------------------------------------
+\begin{frame}{Backup: certified optima by method and family}
+\centering
+\fontsize{8.3}{10.2}\selectfont
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+Configuration & Cat. & Crama & Lap.3 & Lap.4 & Lap.5 & Lap.7 & All\\
+\midrule
+SSPMF              & $62$ & $68$ & $340$ & $330$ & $162$ & $66$ & $1028$\\
+CATZ--F4           & $44$ & $44$ & $340$ & $330$ & $74$  & $44$ & $876$\\
+LSS                & $41$ & $42$ & $340$ & $330$ & $39$  & $41$ & $833$\\
+\midrule
+BBC--LP+T          & $34$ & $34$ & $340$ & $192$ & $84$  & $39$ & $723$\\
+BBC--LP            & $34$ & $35$ & $340$ & $192$ & $84$  & $39$ & $724$\\
+BBC--K             & $35$ & $35$ & $340$ & $190$ & $83$  & $39$ & $722$\\
+BBC--LP+F+H        & $39$ & $37$ & $316$ & $157$ & $97$  & $40$ & $686$\\
+BBC--LP+F          & $33$ & $32$ & $313$ & $156$ & $85$  & $36$ & $655$\\
+BBC--LP+F+C        & $33$ & $32$ & $311$ & $157$ & $85$  & $36$ & $654$\\
+BBC--LP+ACC        & $39$ & $37$ & $286$ & $154$ & $97$  & $39$ & $652$\\
+BBC--K+F           & $33$ & $31$ & $316$ & $156$ & $86$  & $35$ & $657$\\
+BBC--LP+F+P        & $31$ & $32$ & $282$ & $155$ & $83$  & $35$ & $618$\\
+\bottomrule
+\end{tabular}
+
+\vspace{.34cm}
+\normalsize
+Family denominators: $160,160,340,330,340,80$; total $1{,}410$.
+\source{Report: Table 6.}
+\end{frame}
+
+% 22 ------------------------------------------------------------------------
+\begin{frame}{Backup: the tested fractional regime spends more and certifies less}
+\centering
+\includegraphics[width=.94\textwidth,height=5.48cm,keepaspectratio]{assets/defence_figures/fractional_separation_tradeoff.pdf}
+
+\vspace{.06cm}
+\small
+Against BBC--LP+F: $+H$ certifies $31$ more; $+C$ certifies $1$ fewer; $+P$ certifies $37$ fewer; all three together certify $3$ fewer.
+\source{Report: Tables 8--9.}
+\end{frame}
+
+% 23 ------------------------------------------------------------------------
+\begin{frame}{Backup: proof and validation ledger}
+\begin{columns}[T,onlytextwidth]
+\column{.47\textwidth}
+\theory{Connected-family proof}
+\vspace{.18cm}
+
+\begin{tabular}{@{}>{\bfseries\color{teal}}l p{4.3cm}@{}}
+$\Kst=3g$ & unique feasible pair in each copy\\[6pt]
+$\Zst=8g-5$ & coverage bound plus a schedule with no return\\[6pt]
+$H=9g-5$ & one forced return per copy plus a matching order\\[6pt]
+connected & universal tool $u$ lies in every job
+\end{tabular}
+
+\column{.49\textwidth}
+\exact{Independent checks}
+\vspace{.18cm}
+
+\begin{tabular}{@{}>{\bfseries\color{orange}}r p{4.0cm}@{}}
+$349{,}872$ & fixed-order loading checks against exact dynamic programming\\[6pt]
+$988$ & instances proved optimal by at least two methods\\[6pt]
+$41{,}514$ & pairwise method comparisons, with no objective disagreement\\[6pt]
+$16{,}920$ & canonical campaign outcomes audited
+\end{tabular}
+\end{columns}
+\vspace{.28cm}
+\centering
+{\small Formal scope and remaining conjectures are recorded separately in \texttt{THEOREM\_AUDIT.md}.}
+\source{Report: Appendices A--C and the independent verification program.}
+\end{frame}
+
+\end{document}
