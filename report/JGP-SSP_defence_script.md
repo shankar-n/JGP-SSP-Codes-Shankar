@@ -2,297 +2,299 @@
 
 **Shankar Narayanan · LIMOS, Université Clermont Auvergne · 2 September 2026**
 
-Main talk: slides 1–29, target 24–25 minutes. Backup: 30–32, for questions only.
-Slide 2 is the outline (name the five parts, 15 seconds). Slide 29 is Thank You.
+35 slides. Main talk 1–26, target 24–25 minutes. Thank-you on 27. Backup 28–34:
+the full branch-and-price is 28–31, then per-family results, the ablation and the
+validation ledger.
 
-The slides are a guide. What is written here is what to *say*; the slide carries only the
-picture and the numbers. Speak the equations slowly. Never read a table cell aloud unless it
-is quoted below.
+The slides are a guide. What is below is what to **say**; the slide carries the picture
+and the numbers only. Speak equations slowly. Never read a table aloud.
 
 ---
 
-## Part 0 — Setting up (slides 1–8, ~7 min)
+## Part 0 — Problem, context, questions (slides 1–8, ~7 min)
 
 ### Slide 1 · Title — 0:35
-Good morning. This internship is about a machine that can hold only a few tools at a time.
-Every job needs its own subset of tools, so running a set of jobs means stopping to change
-them, and each stop costs production time. I will ask two questions about that: one
-structural, one algorithmic.
+Good morning. This internship is about a machine that holds only a few tools at a time.
+Every job needs its own subset, so running a set of jobs means stopping to change tools,
+and each stop costs production time. I will ask two questions: one structural, one
+algorithmic.
 
-> *Transition:* let me show you why the order of the jobs is the whole problem.
+### Slide 2 · Outline — 0:15
+Context and the two questions; a summary of the structural results; then the exact
+methods in detail, which is where most of the work went; results; conclusion.
 
 ### Slide 3 · The order decides which tools return — 1:10
-Magazine capacity two, machine starts empty. Run the jobs one, two, three and you pay four
-insertions. Run them one, three, two and you pay five — because tool *b* is removed and then
-comes back. Same jobs, same magazine, same loading rule. Only the order changed.
+Capacity two, machine starts empty. Jobs one, two, three costs four insertions. Jobs
+one, three, two costs five — because tool *b* is removed and comes back. Same jobs, same
+loading rule; only the order changed.
 
-That returning tool is the object this entire talk is about. Remember the word **reinsertion**.
+That returning tool is what this whole talk is about. The word is **reinsertion**.
 
-> *Transition:* so how hard is each of the two decisions?
+### Slide 4 · Loading is easy; the order is hard — 1:10
+For a fixed order the best loading is known in closed form — evict the tool needed
+furthest in the future. Keep Tool Needed Soonest, Tang and Denardo, 1988, linear time.
 
-### Slide 4 · Loading is easy; the order is the hard part — 1:15
-For a **fixed** order the best loading is known in closed form: when a tool must go in and the
-magazine is full, evict the one needed furthest in the future. That is Keep Tool Needed
-Soonest, Tang and Denardo, 1988. Linear time.
+The order is the opposite: forty thousand orderings of an eight-job instance, and the
+problem is NP-hard for every capacity of two or more. All the difficulty is in sequencing.
 
-The order is the opposite. Forty thousand three hundred and twenty orderings of an eight-job
-instance, one hundred and eighty of them optimal, and the problem is NP-hard for every fixed
-capacity of two or more. So all the difficulty sits in the sequencing.
+### Slide 5 · Every stop costs production time — 0:45
+The same core appears in CNC cells, circuit-board assembly, colour printing and
+warehouse picking: a capacity-*b* resource, jobs needing subsets, a changeover between
+consecutive jobs. It matters because the sequence is decided once and paid every shift.
 
-> *Transition:* and this is not a toy.
+### Slide 6 · State of the art — 1:00
+Two threads. Grouping: Crama and van de Klundert proved the industrial two-phase method
+is a *b*-approximation in 1999; Burger and co-authors gave an industrial study in 2015.
+Exact: the tool-state model, Catanzaro's formulations, the multicommodity model.
 
-### Slide 5 · Every stop costs production time — 0:50
-The same core appears in CNC cells with a tool magazine, in circuit-board assembly with
-feeder slots, in colour printing with ink cartridges, and in warehouse picking. A capacity-*b*
-resource, jobs needing subsets, a changeover paid between consecutive jobs.
-
-It matters because the sequence is decided once and then paid for on every shift.
-
-> *Transition:* here is what the literature has settled.
-
-### Slide 6 · State of the art — 1:05
-Two threads. On the grouping side: Crama and van de Klundert proved in 1999 that the
-industrial two-phase method is a *b*-approximation, and Burger and co-authors gave an
-industrial study in 2015. On the exact side: Laporte's tool-state model, Catanzaro's
-formulations, the multicommodity model, and more recent dynamic-programming work.
-
-Two things the timeline does not contain. A bound on the two-phase loss that depends on the
-instance in front of you. And a relaxation that gets past the elementary counting bound.
-
-> *Transition:* those two absences are my two questions.
+Two things absent. A bound on the two-phase loss that depends on **your** instance. And
+a relaxation that beats the counting bound.
 
 ### Slide 7 · Two questions — 1:00
-**Question one, structural.** Industry does not solve this problem. It groups jobs into as few
-magazine-fitting batches as possible, then sequences the batches. What does insisting on the
-*fewest* groups actually cost — after the final KTNS step is allowed to re-optimise?
+**Structural:** industry does not solve this problem — it groups into the fewest
+magazine-fitting batches, then sequences. What does insisting on the fewest groups cost?
 
-**Question two, algorithmic.** Every compact model I surveyed relaxes to the counting bound.
-Can a method that never forms that relaxation get past it?
+**Algorithmic:** every compact model surveyed relaxes to the counting bound. Can a
+method that never forms that relaxation get past it?
 
-Part one answers the first, and finds an unbounded loss. Part two answers the second, and the
-answer is no — for a reason worth naming.
+### Slide 8 · The configuration view — 1:20
+This is the idea both halves run on. A magazine configuration is a set of *b* tools.
+Make configurations the nodes of a graph; the step cost from *C* to *C-prime* is the
+number of tools you must insert; a schedule is a **walk**, and each job must be served
+at a node containing its requirement.
 
-> *Transition:* both halves run on one idea, so let me put it up first.
+Two consequences. The optimum is a shortest covering walk. And every used tool enters at
+least once while at most *b* start loaded — so the optimum is at least the number of used
+tools minus the capacity. That is **q**. Watch it; it governs everything that follows.
 
-### Slide 8 · The configuration view — 1:15
-A magazine configuration is a set of *b* tools. Make those the nodes of a graph. The cost of
-stepping from *C* to *C-prime* is the number of tools you must insert. A schedule is then a
-**walk** through configurations, and every job must be served at some node containing its
+---
+
+## Part I — Structural results, in summary (slides 9–11, ~3 min)
+
+*Keep this brisk. It is a summary; the detail is in the report and in questions.*
+
+### Slide 9 · Where the loss enters — 1:00
+The method groups, orders, then re-optimises with KTNS. The commitment happens at step
+one, before anything knows the cost.
+
+The key fact: if you allow **all** feasible groupings, the construction is exact — the
+optimum equals the cheapest walk over every grouping. So the method is not wrong in
+kind. The loss is precisely the price of insisting on the **fewest** groups.
+
+One caution: two readings must be separated — the walk through one fixed magazine per
+group, and the value after KTNS re-optimises. They differ, and the published worst cases
+belong to the first.
+
+### Slide 10 · The main result — 1:20
+Take *g* copies of a four-job seed, add one universal tool in every job and a private
+marker per copy. The universal tool makes the instance **connected**; the markers make
+the minimum grouping **unique**.
+
+Then the optimum is eight *g* minus five, the construction reaches nine *g* minus five,
+and the loss is *g* — unbounded, on connected instances. That answers the question the
+walk reading leaves open.
+
+Be precise: the **additive** loss is unbounded; the **ratio** tends to nine over eight,
+so this does not disprove a constant factor.
+
+### Slide 11 · At a glance — 0:45
+Everything proved: the grouping identity, zero-gap classes for every capacity, an
+instance-sensitive ratio bound that holds uniformly over tie-breaking, four jobs
+necessary and sufficient, and the connected unbounded family. One thing open: a
+constant-factor bound at capacity three.
+
+> *Transition:* that is the structural half. The rest of the talk is the exact side,
+> where most of the implementation went.
+
+---
+
+## Part II — Exact methods (slides 12–20, ~9 min)
+
+### Slide 12 · Two routes — 0:50
+The obstacle: every compact model surveyed relaxes to *q* or below. Two classical routes
+around a weak relaxation — **decompose**, never forming it; or **reformulate** over
+configurations. I built both. The first is the main line; the second is in backup.
+
+### Slide 13 · Benders: the idea — 1:00
+The master picks a job order. For that fixed order the loading is polynomial, so the
+subproblem is solved **exactly** and returns a cut. The master's bound is therefore built
+from true subproblem values, not from a relaxation of the loading. Logic-based and
+combinatorial Benders lineage.
+
+### Slide 14 · The master — 1:00
+Arc variables over jobs plus a depot marking start and end, so *x* describes a
+Hamiltonian path, minimising a stand-in theta. It starts from two lower bounds: the
+coverage row, and a pairwise row from how much two adjacent jobs must differ.
+
+### Slide 15 · The subproblem — 1:20
+Fix the order. *y* says a tool is in the magazine while a job runs; *z* charges an
+insertion. Four constraint families: requirement, capacity, the link across a selected
+arc, and the depot link for the first job.
+
+Why it is exact rather than a price: for fixed *x-bar* the master variables sit only on
+the right-hand side, the remaining matrix has consecutive ones along the selected path
+and is totally unimodular, so the relaxation is integral and its value is the KTNS cost.
+
+### Slide 16 · The cut, in full — 1:20
+Because *x-bar* appears only in the objective of the dual, an optimal dual gives this
+cut directly. Four multiplier families: the arc links, the depot links, capacity, and
 requirement.
 
-Two consequences. The optimum is a shortest covering walk. And every used tool must enter at
-least once, while at most *b* can be loaded before the first job — so the optimum is at least
-the number of used tools minus the capacity. Call that **q**, the coverage bound.
+Valid globally, because the dual feasible region does not depend on the order. Tight
+locally. And affine in *x*, which is why fractional separation needs no separate
+argument.
 
-Watch *q*. It governs both halves of this talk.
+### Slide 17 · One term, and 193 lost optima — 1:10
+This is worth telling. The depot sum was initially omitted. The cut then became **too
+tight** and cut off genuine optima. Random instances solved both by brute force and by
+the solver disagreed on **193** of them.
 
----
+The term was restored, the derivation rewritten from the implementation, and the whole
+campaign re-run. The machine starts empty, so the first magazine must be charged in
+full; dropping that term silently assumes the first job's tools are free.
 
-## Part I — The structural question (slides 9–15, ~7 min)
+*If asked "how do you know your solver is right?" — this is the answer. It wasn't, I
+found out how, and I fixed it.*
 
-### Slide 9 · Grouping commits before it sees the sequence — 1:00
-The method has three steps: group into the fewest magazine-fitting batches; order the groups
-and the jobs; then re-optimise the loading with KTNS. The commitment happens at step one,
-before anything knows what the sequence will cost.
+### Slide 18 · Cut families and the ablation — 0:50
+Two families: dual cuts from the loading LP, and combinatorial cuts from the KTNS value
+directly. Then four standard strengthenings — fractional separation, triplet bounds, a
+conflict-graph row, Pareto-optimal lifting — plus a hybrid genetic incumbent.
 
-Write **Z-star** for the true optimum, and **H** for the best the construction can reach. The
-question is the difference.
+### Slide 19 · Fractional separation — 1:30
+The most informative negative result in the work. When a Benders scheme tails off, the
+textbook fix is to separate at fractional points. The cut is affine, so this is
+legitimate.
 
-> *Transition:* first, is the fewest-groups rule the thing that costs you?
+And it does exactly what it should, locally: sixty-seven and a half million cuts, median
+node count down from seventy-seven thousand to three thousand seven hundred — a factor
+of twenty.
 
-### Slide 10 · Drop the fewest-groups rule and grouping is exact — 1:00
-If you allow **all** feasible groupings rather than only the minimum-cardinality ones, the
-cheapest walk equals the optimum exactly. So the two-phase construction is not wrong in kind.
-The loss enters at exactly one place: the insistence on the fewest groups.
+Now the other column. Across one thousand four hundred and four paired runs the dual
+bound at termination was higher **zero** times. Equal twelve hundred and twenty-six.
+Lower a hundred and seventy-eight. And sixty-nine instances were lost.
 
-Note the careful bit — that identity is about the fixed-configuration walk value, not about
-what the method returns after KTNS re-optimises. They differ, and separating them is what
-makes the rest correct.
+The remedy is being applied correctly, to the wrong obstacle.
 
-> *Transition:* so does the loss ever actually occur?
+### Slide 20 · The rest, and the one that helped — 1:00
+Triplet bounds: neutral. Conflict row: costs one — the coverage row already dominates it.
+Pareto lifting: costs thirty-seven, a deeper cut inside the wrong family. Only the
+hybrid incumbent helps, and it is the only one aimed at the **primal** side.
 
-### Slide 11 · Four jobs are enough — 1:00
-Yes, and four jobs suffice. Seven tools, capacity four. The only feasible pair is A with B, so
-every minimum grouping is forced. The optimum is three; the best the construction reaches is
-four. Four jobs are also necessary — with three, every grouping leaves the order free.
-
-> *Transition:* one witness is not a theorem about growth.
-
-### Slide 12 · One shared tool makes the family connected — 1:10
-Take *g* private copies of that seed. Add one universal tool in every job, and a private marker
-per copy. Now the two large jobs of a copy fill all six slots, small jobs from *different*
-copies need seven tools and cannot share, so the minimum grouping is **unique**: three groups
-per copy, three *g* in total.
-
-The universal tool is what makes this connected, which matters — a disconnected family would
-prove much less.
-
-### Slide 13 · The unrestricted order reaches coverage — 0:50
-Unrestricted, you can attain the bound. Process copy by copy in the order B, C, A, D, holding
-the universal tool throughout. Every newly loaded tool is a first occurrence, nothing is ever
-reinserted, so the optimum equals *q*, which is eight *g* minus five.
-
-### Slide 14 · Every minimum grouping forces one return — 1:00
-Now constrain to a minimum grouping. A and B must be consecutive. Counting what can sit in the
-free initial magazine, each copy needs one private tool to leave and come back. That is one
-forced reinsertion per copy, and the grouped order attains exactly that.
-
-### Slide 15 · The additive gap grows without bound — 1:00
-Putting the two together: the optimum is eight *g* minus five, the construction reaches nine *g*
-minus five, so the gap is *g*. It grows without bound, on **connected** instances.
-
-Be precise about the two measures. The additive loss is unbounded. The **ratio** tends to nine
-over eight, so this family does not disprove a constant-factor bound.
+That is the pattern: everything aimed at the dual bound is neutral or harmful. A solver
+whose difficulty was finding good solutions would not behave like this.
 
 ---
 
-## Part II — The algorithmic question (slides 16–22, ~6 min)
+## Results and close (slides 21–26, ~4 min)
 
-### Slide 16 · Two routes past the counting bound — 0:55
-The obstacle: every compact model surveyed relaxes to *q* or below. Two classical routes get
-around a weak relaxation. **Decompose** — never form the relaxation at all. Or **reformulate** —
-optimise over configurations directly. I built both.
+### Slide 21 · The campaign — 0:45
+Nine Benders regimes, three compact baselines, one thousand four hundred and ten
+canonical instances, sixteen thousand nine hundred and twenty outcomes, one hour per run
+against a fixed denominator. One caveat up front: Benders ran on one thread, the compact
+models on four, and Catanzaro F4 stands in for the stronger F5.
 
-### Slide 17 · Order in the master, loading in an exact oracle — 1:05
-Benders. The master picks a job order. The loading subproblem for that fixed order is
-polynomial, so it is solved **exactly** and returns a cut. The master's bound is therefore
-assembled from true subproblem values rather than from a linear relaxation of the loading.
+### Slide 22 · The baselines certify more — 0:55
+This does not go my way and I will say so plainly. The multicommodity model certifies one
+thousand and twenty-eight, Catanzaro eight hundred and seventy-six, the tool-state model
+eight hundred and thirty-three. My best Benders regime, seven hundred and twenty-four.
+With those caveats the margin is if anything understated.
 
-This puts it in the logic-based and combinatorial Benders lineage.
+The rest is about **why**, and the reason is not the search.
 
-### Slide 18 · The master starts from local and coverage bounds — 0:50
-The master is a Hamiltonian path over jobs with a depot marking start and end, minimising a
-stand-in theta. It starts with two lower bounds: the coverage bound, and a pairwise bound from
-how much two adjacent jobs must differ.
+### Slide 23 · Quick, with a long tail — 0:45
+On the five hundred and thirty-one instances everyone solves, the Benders medians are
+orders of magnitude below the compact ones. So it is not slow. It closes almost at once
+or not within the hour — the signature of a bound that is either exactly right or useless.
 
-### Slide 19 · The loading LP is integral on a fixed path — 0:55
-For a fixed order the loading linear program has the consecutive-ones structure and is totally
-unimodular, so its relaxation is integral and its value is exactly the KTNS cost. That is why
-the oracle is exact rather than a heuristic price.
+### Slide 24 · Closure drops when the bound misses — 1:10
+Where coverage is exact, ninety-four per cent. One unit above, thirty-one, then no trend.
 
-### Slide 20 · The dual cut is supported only on arcs — 1:10
-From an optimal dual we collect transition prices into arc coefficients, giving a cut that is
-tight at the current path and valid for every path. Validity is not the issue.
+Two guards. It is a fact about this master, not the instances — Catanzaro moves the
+**other** way and closes all forty-five of the loosest. And not every method whose
+relaxation is *q* collapses: the multicommodity model's is also *q* and it loses only
+thirteen points. What loses fifty-four is a master carrying coverage and, at the root,
+almost nothing else.
 
-Here is the issue, and it is the intellectual centre of the talk. A reinsertion depends on a
-tool leaving and returning **across a span** of positions. Every coefficient in this cut is
-attached to a single adjacency. The cut cannot see the thing that creates the cost.
+And it is a certificate failure, not a discovery failure: two hundred and twenty-three of
+three hundred and eighty-three time-limited runs already hold the optimum.
 
-### Slide 21 · Configurations as columns — 1:10
-The other route. PCF puts one configuration at each position. Without the per-tool counting
-rows its relaxation collapses to zero; with them it is exactly *q* — proved, and confirmed on
-every one of two thousand one hundred and eight recorded roots. PCF-prime removes the symmetry
-of empty positions and does not change the value.
+### Slide 25 · What next — 1:00
+The through-line: cost is coverage plus reinsertions; every inequality either method
+carries sits on one arc or one position; a reinsertion is created across a span.
 
-PTF is the one that can do better: a column carries a **transition**, so the relaxation cannot
-avoid paying for it, and its bound provably can exceed *q*. The price is that pricing is
-NP-hard, and PTF prices coupled pairs, so a node costs far more.
+I tested the obvious repair — a window family counting tools across a stretch. Valid, much
+larger ceiling, but its fractional row is **implied** by rows the formulation already has,
+and it raised none of the thirty-seven roots measured. Writing a global inequality down is
+necessary; it is not sufficient.
 
-### Slide 22 · The campaign — 0:50
-Nine Benders regimes and three compact baselines. One thousand four hundred and ten canonical
-instances, twelve configurations, sixteen thousand nine hundred and twenty outcomes, one hour
-per run against a fixed denominator. Costs rechecked against one common KTNS oracle.
-
-One fairness caveat, stated up front: Benders ran on one solver thread, the compact models on
-four, and Catanzaro F4 stands in for the stronger F5.
-
----
-
-## Results and close (slides 23–28, ~4 min)
-
-### Slide 23 · Every compact baseline certifies more than Benders — 0:55
-This does not go my way, and I want to say so plainly. Against the same denominator the
-multicommodity model certifies one thousand and twenty-eight, Catanzaro F4 eight hundred and
-seventy-six, the tool-state model eight hundred and thirty-three. My best Benders regime
-reaches seven hundred and twenty-four. With the thread and F5 caveats, the margin is if
-anything understated.
-
-The rest of this section is about *why*, and the reason is not the search.
-
-### Slide 24 · Benders is quick, with a long tail — 0:50
-Restricted to the five hundred and thirty-one instances everyone solves, the picture inverts:
-the Benders medians are orders of magnitude below the compact ones. So it is not slow. It
-either closes almost at once or not within the hour — the signature of a bound that is either
-exactly right or useless.
-
-### Slide 25 · Closure drops when the bound misses — 1:10
-Group by how far the optimum sits above coverage. Where coverage is exact, ninety-four per
-cent. One unit above, thirty-one, and then no trend.
-
-Two guards. It is a fact about this master, not about the instances — Catanzaro F4 moves the
-*other* way and closes all forty-five of the loosest. And it is not true of every method whose
-relaxation is *q*: the multicommodity model's relaxation is also *q* and it loses only thirteen
-points. What loses fifty-four is a master carrying coverage and, at the root, almost nothing
-else — eighty-seven per cent of roots sit exactly on that row.
-
-And it is a certificate failure, not a discovery failure: among time-limited runs whose
-optimum is known, two hundred and twenty-three of three hundred and eighty-three already hold
-it.
-
-### Slide 26 · What next — 1:00
-The through-line: cost is coverage plus reinsertions; every inequality either method carries is
-attached to one arc or one position; a reinsertion is created across a span.
-
-I tested the obvious repair. A window family counting tools across a stretch of positions is
-valid and has a much larger ceiling — but its fractional row turns out to be **implied** by rows
-the formulation already has, and it raised none of the thirty-seven roots measured. Being able
-to write a global inequality down is necessary; it is not sufficient.
-
-So: disaggregate theta by position; encode job-union structure over a window; test under a
-matched protocol. And the grouping result is usable directly — search slightly more than the
-minimum number of groups, flatten with KTNS, and use those as seeds.
+Next: disaggregate theta by position; encode job-union structure over a window; test under
+a matched protocol. And the grouping result is usable directly — search slightly above the
+minimum number of groups, flatten with KTNS, use those as seeds.
 
 The work narrows the next experiment. It does not claim a new state-of-the-art solver.
 
-### Slides 27–28 · Key References — 0:15
-Leave this up while you take questions.
+### Slide 26 · Key References — 0:15
+Leave up during questions. Every work listed is cited on a slide.
 
 ---
 
-## Backup (only if asked)
+## Backup
 
-### Slide 30 · Certified optima by method and family
-Per-family denominators are one six zero, one six zero, three four zero, three three zero,
-three four zero and eighty — one thousand four hundred and ten for every row, so the columns
-are comparable. Laporte three and four are closed by almost everything; Catanzaro, Crama and
-Laporte five are where the methods separate.
+### Slides 28–31 · Branch-and-price, in full
+**28 — why reformulate.** Configurations become the columns. PCF puts one at each
+position; PCF-prime is its prefix form; PTF prices transitions.
 
-### Slide 31 · Fractional cuts spend more and certify less
-Reference is Benders with fractional separation at six hundred and fifty-five. Removing it
-adds sixty-nine. The hybrid incumbent adds thirty-one; the conflict row costs one; Pareto
-lifting costs thirty-seven.
+**29 — PCF.** Four row families. The counting rows are load-bearing: without them the
+relaxation is **zero**, because one convex blend repeated at every position satisfies
+everything at no cost. With them it is exactly *q* — proved, and confirmed on all two
+thousand one hundred and eight recorded roots.
 
-Fractional separation does work locally — median nodes fall from seventy-seven thousand to
-three thousand seven hundred, using about sixty-seven million cuts. But across one thousand
-four hundred and four paired terminal bounds it is higher **zero** times, equal one thousand
-two hundred and twenty-six, lower one hundred and seventy-eight.
+**30 — PTF.** Columns carry a step, so the relaxation cannot mix configurations without
+paying the transition. Hence at least *q*, and it can be strictly greater — the only
+construction here that provably exceeds the counting bound.
 
-### Slide 32 · Proof and validation ledger
-For the connected family: capacity limits what sits in the free initial magazine, the seed
-forces one reinsertion per copy, and counting first appearances plus those returns gives the
-lower bound; the grouped construction attains it.
+**31 — pricing.** Choosing the entering configuration is NP-hard, and PTF prices coupled
+pairs, so nodes are expensive. Measured: PTF exceeds *q* on two of two hundred and
+thirty-two roots, five to six, where the optima are twelve and thirteen. Sound; too rare
+and too small to matter yet. Nothing above nine jobs closed — a Python pricer against
+compiled solvers.
 
-For the campaign: three hundred and forty-nine thousand loading checks against an independent
-dynamic program, nine hundred and eighty-eight instances proved by two methods, forty-one
+### Slide 32 · Per-family results
+Denominators are one thousand four hundred and ten for every row, so columns are
+comparable. Laporte three and four are closed by almost everything; Catanzaro, Crama and
+Laporte five separate the methods.
+
+### Slide 33 · The ablation
+Reference is Benders with fractional separation at six hundred and fifty-five. Removing
+it adds sixty-nine; the hybrid incumbent adds thirty-one; the conflict row costs one;
+Pareto lifting costs thirty-seven.
+
+### Slide 34 · Validation ledger
+Three hundred and forty-nine thousand loading checks against an independent dynamic
+program; nine hundred and eighty-eight instances proved by two methods; forty-one
 thousand pairwise comparisons, none disagreeing.
 
 ---
 
 ## Questions to expect
 
-**"What exactly does your approximation result guarantee?"**
-It bounds the best value the construction can attain over the choices the procedure leaves
-open. It is not automatically a guarantee for one deterministic tie-breaking implementation.
+**"What does your approximation result guarantee?"** It bounds the best value the
+construction can attain over the choices the procedure leaves open — not a guarantee for
+one deterministic tie-breaking implementation.
 
-**"Why isn't this implied by Crama and van de Klundert?"**
-Their *b*-approximation is the starting point. This refines it to a bound depending on *b*,
-*K-star* and *q*, identifies zero-gap classes, and separates the walk reading from the
-KTNS-refined one.
+**"Why isn't this implied by Crama and van de Klundert?"** Their *b*-approximation is the
+starting point. This refines it to a bound depending on *b*, *K-star* and *q*, adds
+zero-gap classes, and separates the walk reading from the KTNS-refined one.
 
-**"Does ninety-four versus forty prove that *q* causes difficulty?"**
-No. It is a strong method-specific association, and the F4 control shows the loose instances
-are not intrinsically hard.
+**"Does ninety-four versus forty prove *q* causes difficulty?"** No. Strong
+method-specific association; the Catanzaro control shows the loose instances are not
+intrinsically hard.
 
-**"Did your Benders implementation work first time?"**
-No. The depot term was initially omitted, which produced invalid cuts; one hundred and
-ninety-three violations were found, the term was restored, and the campaign was re-run.
+**"Did the Benders implementation work first time?"** No — slide 17. The depot term was
+omitted, one hundred and ninety-three violations were found, it was fixed and the
+campaign re-run.
+
+**"Why is branch-and-price only in backup?"** Because its conclusions rest on the root
+relaxation value, which slide 24 already reports; its solve times measure a Python
+pricer, not the formulation.
