@@ -256,6 +256,41 @@ three compact models solve all $330$, and the Benders solver solves between $154
 $192$. Catanzaro and Crama are hard for everything, and no method closes more than
 half of either.
 
+\paragraph{Half the denominator does not discriminate.}
+Laporte3 and Laporte4 together are $670$ of the $1{,}410$ canonical instances, and all
+three compact baselines certify $100\%$ of both. Those two families therefore contribute
+$670$ to every compact count and cannot distinguish between methods at all. Restricting
+Table~\ref{tab:solves} to the $740$ instances of the remaining four families gives a
+different reading of the same data:
+
+\begin{table}[h]\centering
+\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Configuration & certified & share of $740$\\
+\midrule
+SSPMF               & $358$ & $48.4\%$\\
+\texttt{BBC-LP+F+H} & $213$ & $28.8\%$\\
+\texttt{CATZ-F4}    & $206$ & $27.8\%$\\
+\texttt{BBC-LP}     & $192$ & $25.9\%$\\
+\texttt{BBC-K}      & $192$ & $25.9\%$\\
+LSS                 & $163$ & $22.0\%$\\
+\bottomrule
+\end{tabular}
+\caption{Certified optima on the $740$ instances of Catanzaro, Crama, Laporte5 and
+Laporte7 --- the families on which the methods separate. Every entry is the corresponding
+row of Table~\ref{tab:solves} with the Laporte3 and Laporte4 columns removed.}
+\label{tab:discriminating}
+\end{table}
+
+On this restriction the best Benders regime certifies a larger share than two of the three
+compact baselines, and does so on one effective solver thread against their four. Only
+SSPMF remains clearly ahead. This does not overturn the comparison of
+Table~\ref{tab:solves}, which is reported against the full planned denominator as
+specified; it locates where the margin in that table comes from. The statement that
+survives both readings is that SSPMF certifies more than anything built here, on either
+denominator.
+
 Among the Benders variants, the three that do not separate at fractional points
 (\texttt{BBC-LP}, \texttt{BBC-LP+T}, \texttt{BBC-K}) are the three best, within two
 instances of one another. Every configuration carrying \texttt{+F} is worse than all
@@ -643,6 +678,17 @@ against $q=5$. The other $230$ runs sit exactly on $q$, and on those two instanc
 optima are $12$ and $13$, so a bound of $6$ instead of $5$ closes a small part of a
 large gap.
 \end{observation}
+
+The status of that measurement should be stated precisely, because
+Proposition~\ref{prop:ptf} is the only construction in this report claimed to exceed the
+coverage bound. Its first clause, that the relaxation is at least $q$, is proved in
+Appendix~\ref{app:proofs}. Its second clause, that the relaxation can be strictly greater,
+is established by these two runs and by nothing else: the root value of $6$ is reported by
+the branch-and-price prototype, and neither Appendix~\ref{app:verify} nor the independent
+verifier recomputes it. The instances and their optima are independently checked --- both
+are eight-job, twenty-tool instances at $b=15$, so $q=5$, with optima $12$ and $13$ in the
+free-initial convention --- but the linear-programming value itself rests on the
+implementation that produced it.
 
 \emph{The bound is often already the answer.} On $990$ of the $1{,}839$ runs where both
 the root relaxation and the optimum are known, the root relaxation \emph{equals} the

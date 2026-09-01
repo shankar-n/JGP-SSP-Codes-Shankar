@@ -13,5 +13,6 @@ Generated vector PDFs:
 - benders_root_bound_share.pdf
 - fractional_separation_tradeoff.pdf
 - common_solved_time_boxplot.pdf
+- unbounded_family.pdf
 
 Figure-specific denominators are printed in the plots or embedded PDF metadata.

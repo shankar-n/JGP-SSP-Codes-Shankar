@@ -185,8 +185,9 @@ keeps the magazine full at every position whenever $\lvert\U\rvert\ge b$.
 Under this view a schedule is a walk $C_{(1)},\dots,C_{(r)}$ through $\confs$ that
 visits at least one configuration of every cluster $H_j$, and its cost is
 $\sum_l d(C_{(l)},C_{(l+1)})$. That a schedule and such a walk have equal cost is
-immediate in one direction: take any schedule, delete repetitions from its sequence
-of magazines, and what remains is a walk of the same cost that serves every job. The
+immediate in one direction: take any schedule and collapse each run of \emph{consecutive}
+equal magazines to a single representative; what remains is a walk of the same cost that
+serves every job. The
 converse is Theorem~\ref{thm:grouping} in Section~\ref{ssec:exact}.
 
 The SSP is therefore a generalised travelling-salesman problem over $\confs$, in

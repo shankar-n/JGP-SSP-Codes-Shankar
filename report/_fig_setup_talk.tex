@@ -1,0 +1,26 @@
+\begin{tikzpicture}[
+   font=\small, >=Stealth,
+   job/.style={draw=cBlue!70, fill=white, rounded corners, semithick,
+               minimum width=2.7cm, minimum height=1.0cm, align=center},
+   chip/.style={draw=black!25, rounded corners=1pt, minimum size=0.72cm,
+                inner sep=0pt, font=\bfseries, text=white},
+   swaparr/.style={->, line width=1.1pt, cRed}]
+  \node[job] (j1) at (0,2)   {\textbf{job 1} needs\\ {\color{cRed}$a$}, {\color{cBlue}$b$}};
+  \node[job] (j2) at (5,2)   {\textbf{job 2} needs\\ {\color{cBlue}$b$}, {\color{cGreen}$c$}};
+  \node[job] (j3) at (10,2)  {\textbf{job 3} needs\\ {\color{cGreen}$c$}, {\color{cOrange}$d$}};
+  \node[chip,fill=cRed]    (m1a) at (-0.42,0) {$a$};
+  \node[chip,fill=cBlue]   (m1b) at ( 0.42,0) {$b$};
+  \node[chip,fill=cBlue]   (m2a) at ( 4.58,0) {$b$};
+  \node[chip,fill=cGreen]  (m2b) at ( 5.42,0) {$c$};
+  \node[chip,fill=cGreen]  (m3a) at ( 9.58,0) {$c$};
+  \node[chip,fill=cOrange] (m3b) at (10.42,0) {$d$};
+  \node[draw=black!45, rounded corners, fit=(m1a)(m1b), inner sep=2.5pt] (m1) {};
+  \node[draw=black!45, rounded corners, fit=(m2a)(m2b), inner sep=2.5pt] (m2) {};
+  \node[draw=black!45, rounded corners, fit=(m3a)(m3b), inner sep=2.5pt] (m3) {};
+  \draw[->,black!45] (j1) -- (m1);  \draw[->,black!45] (j2) -- (m2);  \draw[->,black!45] (j3) -- (m3);
+  \draw[swaparr] (m1) -- (m2)
+     node[midway,above,font=\scriptsize,align=center]{swap\\ $-a$, $+c$};
+  \draw[swaparr] (m2) -- (m3)
+     node[midway,above,font=\scriptsize,align=center]{swap\\ $-b$, $+d$};
+  \node[font=\scriptsize,text=black!55] at (5,-1.05) {the magazine (the grey box) holds only two tools at a time};
+\end{tikzpicture}

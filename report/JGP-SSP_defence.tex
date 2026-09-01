@@ -1,4 +1,4 @@
-\documentclass[aspectratio=169,11pt]{beamer}
+\documentclass[aspectratio=169,10pt]{beamer}
 
 \usetheme{Madrid}
 \usefonttheme[onlymath]{serif}
@@ -6,8 +6,12 @@
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{tgheros}                 % even, readable bold
+\renewcommand{\familydefault}{\sfdefault}
 \usepackage{amsmath,amssymb,mathtools,booktabs,array,graphicx,tikz}
-\usetikzlibrary{arrows.meta,positioning,calc,fit,matrix,backgrounds}
+\usepackage{appendixnumberbeamer}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,matrix,backgrounds,decorations.pathreplacing}
 
 \definecolor{navy}{HTML}{353E7C}
 \definecolor{warm}{HTML}{F2F3F7}
@@ -24,7 +28,21 @@
 \setbeamercolor{block title}{bg=navy,fg=white}
 \setbeamercolor{block body}{bg=warm,fg=black}
 \setbeamerfont{frametitle}{size=\large}
-\setbeamersize{text margin left=6mm,text margin right=6mm}
+\setbeamerfont{title}{size=\Large}
+
+% show where we are at the start of every section
+\AtBeginSection[]{%
+  \begin{frame}[plain]
+    \vfill
+    \begingroup\centering
+    {\scriptsize\color{muted}PART \insertsectionnumber\ OF 6}\\[0.45cm]
+    {\Large\color{navy}\bfseries\insertsectionhead}\\[0.6cm]
+    \begin{minipage}{0.62\linewidth}\centering\small\color{muted}\sectionblurb\end{minipage}
+    \par\endgroup
+    \vfill
+  \end{frame}}
+\newcommand{\sectionblurb}{}
+\setbeamersize{text margin left=7mm,text margin right=7mm}
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{itemize item}{\color{navy}$\bullet$}
 \setbeamertemplate{itemize subitem}{\color{navy}--}
@@ -34,6 +52,11 @@
 \newcommand{\U}{U}
 \newcommand{\KTNS}{\mathrm{KTNS}}
 \newcommand{\rset}[1]{\{#1\}}
+
+% ---- inline citation: italic, muted, never bold --------------------------
+\newcommand{\cit}[1]{{\itshape\color{muted}(#1)}}
+% ---- a headline number with a small caption under it ---------------------
+\newcommand{\keyfig}[2]{{\color{navy}\large\bfseries #1}\\[1.5pt]{\scriptsize\color{muted}#2}}
 
 \title[Job Sequencing and Tool Switching]{Job Sequencing and Tool Switching}
 \subtitle{Structural results and a branch-and-Benders-cut study}
@@ -52,1063 +75,109 @@
 
 \begin{document}
 
-\begin{frame}[plain]\titlepage\end{frame}
+\input{JGP-SSP_defence_main}
 
-\begin{frame}{Outline}\tableofcontents\end{frame}
-\section{The problem}
+\appendix
 
-\begin{frame}{A machine, a magazine, and a set of jobs}
-\vspace{0.12cm}
-\begingroup\centering
-\input{_fig_setup}
-\par\endgroup
-\vspace{0.3cm}
-\begin{itemize}
-  \item A machine can hold only $b$ tools at a time. Each job needs its own subset.
-  \item Running the jobs in some order means \textbf{stopping to change tools}, and each
-        stop costs production time.
-  \item \textbf{The problem.} Choose the order of the jobs, and the tools loaded at each
-        step, so that the total number of tool insertions is smallest.
-\end{itemize}
-\end{frame}
+\section*{Key references}
 
-
-\begin{frame}{The order decides how many tools come back}
-\vspace{0.09cm}
-\begingroup\centering
-\scalebox{.90}{\input{_fig_twoorders}}
-\par\endgroup
-\vspace{0.27cm}
-Same three jobs, same magazine, same loading rule. Only the order changed.
-Running job~2 in the middle keeps its tool loaded; running it last forces that tool to
-be \textbf{removed and inserted again}.
-\vspace{0.15cm}
-
-\textbf{That second insertion is called a reinsertion.} Everything in this talk is about
-where reinsertions come from and why they are hard to rule out.
-\end{frame}
-
-
-\begin{frame}{One decision is easy, the other is not}
-\vspace{0.21cm}
-\textbf{Loading is easy.} Once the order is fixed, the cheapest loading is known in
-closed form: when a tool must enter a full magazine, remove the one whose next use lies
-furthest ahead. This is the \emph{Keep Tool Needed Soonest} rule, it is optimal, and it
-runs in $O(n\lvert T\rvert)$ time \textbf{(Tang \& Denardo, 1988)}.
-
-\vspace{0.27cm}
-\textbf{Ordering is hard.} The problem is NP-hard for every fixed magazine capacity
-$b\ge2$ \textbf{(Crama et al., 1994)}. A good order puts jobs with similar requirements
-next to one another --- but ``similar'' means only \emph{overlapping sets}, with no
-natural distance, and the capacity couples jobs that are far apart in the order.
-
-\vspace{0.3cm}
-\begin{block}{Why this shape matters}
-An \textbf{easy inner problem inside a hard outer one} is exactly what decomposition
-methods are built for. That is the reason this problem has attracted exact methods for
-four decades, and it is the starting point of the second half of this talk.
-\end{block}
-\end{frame}
-
-
-\begin{frame}{How hard is the ordering, concretely?}
-\vspace{0.12cm}
-\begingroup\centering
-\includegraphics[height=.60\textheight,width=.92\linewidth,keepaspectratio]{assets/report_figures/landscape.pdf}
-\par\endgroup
-\vspace{0.12cm}
-Every one of the $40{,}320$ orderings of one eight-job benchmark instance, by cost.
-The optimum is $13$ and only $180$ orderings attain it. The elementary counting bound
-$q$ is $10$ --- three below the optimum, and no ordering ever reaches it.
-\end{frame}
-
-
-\section{State of the art, and what was open}
-
-\begin{frame}{Where the exact methods stop}
-\vspace{0.12cm}
-\begingroup\centering
-\scalebox{.72}{\input{_fig_gtsp}}
-\par\endgroup
-\vspace{0.24cm}
-{\small Compact integer models have been proposed for four decades
-\textbf{(Laporte et al., 2004; Catanzaro et al., 2015)}. The strongest of those surveyed
-here relaxes to $q=\lvert\U\rvert-b$: the number of tools used minus the magazine
-capacity \textbf{(da Silva et al., 2021)}.}
-
-\vspace{0.15cm}
-{\small That is an \textbf{elementary counting argument} --- every tool must enter at
-least once, and at most $b$ can be there before the first job. A solver relying on it
-cannot prove optimality where that count is wrong.}
-\end{frame}
-
-
-\begin{frame}{What practice does, and what was not known about it}
-\vspace{0.18cm}
-\textbf{Industry does not solve this problem directly.} It groups the jobs into as few
-magazine-fitting batches as possible, then orders the batches. It is fast, and where it
-has been measured against exact optima in industrial printing it does well
-\textbf{(Burger et al., 2015)}.
-
-\vspace{0.27cm}
-The construction is known to be a $b$-approximation
-\textbf{(Crama \& van de Klundert, 1999)}. What had \emph{not} been done:
-\begin{itemize}
-  \item sharpen that ratio to something that depends on the instance in front of you;
-  \item say on which instances the construction is \textbf{exact};
-  \item distinguish the two different values the method can be read as returning.
-\end{itemize}
-\vspace{0.18cm}
-The third turns out to change the first two.
-\end{frame}
-
-
-\begin{frame}{Two questions, and why only these two}
-\vspace{0.21cm}
-\begin{columns}[T,onlytextwidth]
-\column{.46\textwidth}
-\textbf{Question 1 --- structural}\\[.25cm]
-{\small What does insisting on the \emph{fewest} groups cost, once the final loading
-step is allowed to re-optimise?\\[.3cm]
-Answering it needs no solver: it is a question about the construction itself.}
-
-\column{.46\textwidth}
-\textbf{Question 2 --- algorithmic}\\[.25cm]
-{\small Every compact model surveyed stops at the counting bound $q$. Can a method that
-\emph{never forms} that relaxation get past it?\\[.3cm]
-Two classical routes qualify, for opposite reasons.}
-\end{columns}
-
-\vspace{0.36cm}
-\begin{block}{Why these two and no others}
-The first is the gap the literature left open about the method industry actually uses.
-The second follows from the problem's shape --- an easy loading problem inside a hard
-ordering problem --- which is precisely the precondition for \textbf{decomposition}.
-Everything else in the exact literature already sits below $q$.
-\end{block}
-\end{frame}
-\section{Structural results}
-
-\begin{frame}{The construction admits two different readings}
-\vspace{0.09cm}
-\begingroup\centering
-\scalebox{.55}{\input{_fig_frames}}
-\par\endgroup
-\vspace{0.21cm}
-\begin{columns}[T,onlytextwidth]
-\column{.46\textwidth}
-\textbf{(a) One magazine per group.}\\[.15cm]
-{\small The reading the literature's worst cases are built on.}
-\column{.46\textwidth}
-\textbf{(b) Re-optimise at the end.}\\[.15cm]
-{\small What the method as specified actually returns.}
-\end{columns}
-
-\vspace{0.22cm}
-\begingroup\centering\noindent
-On the family most often used as an example, (a) pays one extra insertion and (b) pays
-\textbf{none}. Separating the two is a prerequisite for saying anything correct here.\par\endgroup
-\end{frame}
-
-
-\begin{frame}{What the structural half established}
-\vspace{0.18cm}
-\textbf{The loss has a single cause.} Allowing \emph{all} feasible groupings makes the
-construction exact --- the optimum equals the cheapest walk over every grouping. So the
-loss is not a defect of the method; it is the price of insisting on the fewest groups.
-
-\vspace{0.24cm}
-\textbf{Guarantees that depend on the instance.} A ratio bound
-$\min(b,\Kst-1,q)$ holding uniformly over every admissible grouping and tie-breaking
-order, families where the construction is provably exact for every capacity, and the
-extremal behaviour settled at three groups.
-
-\vspace{0.24cm}
-\textbf{The headline.} There is a \textbf{connected} family with
-\[
-\lvert\U\rvert=8g+1,\qquad \Kst=3g,\qquad \Zst=8g-5,\qquad H=9g-5,
-\]
-so the additive loss is $g$ and grows without bound. The \emph{ratio} tends to $9/8$,
-so a constant factor is not disproved.
-
-\vspace{0.21cm}
-\centering\small
-This answers the question left open by \textbf{(Crama \& van de Klundert, 1999)} for the
-method as it is actually specified.
-\end{frame}
-\section{A branch-and-Benders-cut algorithm}
-
-\begin{frame}{The decomposition}
-\vspace{0.15cm}
-\begingroup\centering
-\scalebox{.84}{\input{_fig_benders}}
-\par\endgroup
-\vspace{0.27cm}
-The master chooses a job order using an optimistic stand-in $\theta$ for the loading
-cost. The subproblem returns the \textbf{exact} loading cost of that order. If $\theta$
-undershot, one cut lifts it --- and that cut is valid for \emph{every} order, not only
-the current one.
-
-\vspace{0.18cm}
-Because the subproblem is polynomial, the master's bound is assembled from true
-subproblem values, never from a relaxation of the loading --- the logic-based
-\textbf{(Hooker \& Ottosson, 2003)} and combinatorial \textbf{(Codato \& Fischetti, 2006)}
-Benders lineage.
-\end{frame}
-
-
-\begin{frame}{The master problem}
-\vspace{0.18cm}
-Introduce a depot $d$ with no requirement and arc variables $x_{ij}\in\rset{0,1}$, so
-the $x$ describe a Hamiltonian path through the jobs.
-\vspace{0.09cm}
-\[
-\min\;\theta \qquad\text{s.t.}\qquad
-\sum_{i\ne j}x_{ij}=1\ \ (\forall j),\qquad
-\sum_{j\ne i}x_{ij}=1\ \ (\forall i),
-\]
-\[
-\sum_{i,j\in S}x_{ij}\le\lvert S\rvert-1 \quad (S\subseteq J).
-\]
-
-\vspace{0.21cm}
-\textbf{Two bounds the master starts from.} The \emph{coverage row}
-$\theta\ge\lvert\U\rvert$, and a \emph{pairwise row}
-\[
-\theta\ \ge\ \sum_{i,j\in J}w_{ij}x_{ij}+\sum_{j\in J}\lvert T_j\rvert x_{dj},
-\qquad w_{ij}=\max\bigl(0,\lvert T_i\cup T_j\rvert-b\bigr),
-\]
-counting what two adjacent jobs must differ by. Both are visible to the linear
-relaxation; keep that in mind for later.
-\end{frame}
-
-
-\begin{frame}{The subproblem: loading for a fixed order}
-\vspace{0.12cm}
-Fix a candidate order $\bar x$. Let $y_{j,t}=1$ if tool $t$ sits in the magazine while
-job $j$ runs, and let $z_{j,t}$ charge an insertion of $t$ at $j$.
-\vspace{0.06cm}
-{\small
-\[
-\begin{aligned}
-\min\;\; & \textstyle\sum_{j,t} z_{j,t} && \\
- & y_{j,t}\ \ge\ 1 && t\in T_j &&(\nu_{jt})\\
- & \textstyle\sum_t y_{j,t}\ \le\ b && \forall j &&(\mu_j)\\
- & z_{j,t}\ \ge\ y_{j,t}-y_{i,t}-(1-\bar x_{ij}) && \forall i\ne j,\ t &&(\lambda_{ijt})\\
- & z_{j,t}\ \ge\ y_{j,t}-(1-\bar x_{dj}) && \forall j,\ t &&(\lambda^{d}_{jt})
-\end{aligned}
-\]}
-\vspace{-0.09cm}
-The third row charges an insertion when a tool is present at $j$ but absent at its
-predecessor $i$. The fourth does the same for the first job, charging its whole
-requirement, \textbf{because the machine starts empty}.
-\end{frame}
-
-
-\begin{frame}{Why the oracle is exact, and not a price}
-\vspace{0.3cm}
-\begin{block}{Integrality}
-For fixed $\bar x$ the master variables appear only on the right-hand side, so what
-remains is a linear program in $y$ and $z$ alone. Its constraint matrix has the
-\textbf{consecutive-ones property} along the path $\bar x$ selects, and is therefore
-totally unimodular. The relaxation is integral, and its optimum is exactly
-$\KTNS(\bar x)$ \textbf{(Tang \& Denardo, 1988)}.
-\end{block}
-
-\vspace{0.36cm}
-\textbf{Why this matters for the whole method.} A Benders scheme is only as good as its
-subproblem. Here the subproblem is not approximated and not relaxed --- it returns the
-true cost of the proposed sequence. So when the solver holds a good incumbent, that
-incumbent has been evaluated \emph{exactly}.
-
-\vspace{0.21cm}
-What remains in question is whether the master accumulates a strong enough
-\textbf{lower bound} to prove no better order exists. That is the rest of this talk.
-\end{frame}
-
-
-\begin{frame}{The optimality cut, in full}
-\vspace{0.18cm}
-Only $\bar x$ appears on the right-hand side, so in the dual it appears only in the
-objective. Taking an optimal dual solution
-$(\bar\lambda,\bar\lambda^{d},\bar\mu,\bar\nu)$:
-\vspace{0.15cm}
-\[
-\boxed{\;\;
-\theta\;\ge\;
-\sum_{i\ne j}\sum_{t}\bar\lambda_{ijt}\,(x_{ij}-1)
-\;+\;\sum_{j}\sum_{t}\bar\lambda^{d}_{jt}\,(x_{dj}-1)
-\;-\;b\sum_{j}\bar\mu_j
-\;+\;\sum_{j}\sum_{t\in T_j}\bar\nu_{jt}\;\;}
-\]
-
-\vspace{0.3cm}
-\begin{columns}[T,onlytextwidth]
-\column{.46\textwidth}
-\textbf{Valid for every order.}\\[.15cm]
-{\small The dual feasible region does not depend on $\bar x$, so the same cut holds at
-every point of the master.}
-\column{.46\textwidth}
-\textbf{Tight at this one.}\\[.15cm]
-{\small At $\bar x$ it reproduces the exact loading cost. It is affine in $x$, so
-separating it at fractional points needs no extra argument.}
-\end{columns}
-\end{frame}
-
-
-\begin{frame}{A defect found and corrected}
-\vspace{0.27cm}
-\begin{block}{The depot term was initially omitted}
-Dropping $\sum_{j,t}\bar\lambda^{d}_{jt}(x_{dj}-1)$ makes the cut \textbf{too tight}: it
-silently assumes the first job's tools are free, and it cuts off genuine optima.
-\end{block}
-
-\vspace{0.33cm}
-\begin{columns}[T,onlytextwidth]
-\column{.46\textwidth}
-\textbf{How it surfaced}\\[.2cm]
-{\small Random instances were solved twice --- once by brute force, once by the solver.
-The two disagreed on \textbf{193} of them, always with the solver's answer too high.}
-\column{.46\textwidth}
-\textbf{What was done}\\[.2cm]
-{\small The term was restored, the derivation was rewritten from the implementation
-rather than from the draft, and the \textbf{entire campaign was re-run}.}
-\end{columns}
-
-\vspace{0.33cm}
-\centering\small
-This is why the validation described later runs against an \emph{independent}
-implementation, not against the solver itself.
-\end{frame}
-\section{Strengthening the solver}
-
-\begin{frame}{Four strengthenings, each a standard remedy}
-\vspace{0.24cm}
-All four are classical elements of the Benders toolbox surveyed by
-\textbf{(Rahmaniani et al., 2017)}. Each is an independent switch, checked against brute
-force \emph{before} any campaign run, so a strengthening can never silently return a
-wrong optimum.
-
-\vspace{0.33cm}
-\begin{itemize}\itemsep5pt
-  \item \textbf{Fractional Benders cuts} --- separate the same cut at fractional points,
-        not only at integer orders.
-  \item \textbf{A strong incumbent at the root} --- a hybrid genetic search, used both as
-        a warm start and to seed a cut.
-  \item \textbf{A conflict-graph bound} --- a combinatorial row the linear relaxation
-        cannot see.
-  \item \textbf{Pareto-optimal cut lifting} --- when the dual has many optima, choose the
-        deepest cut.
-\end{itemize}
-
-\vspace{0.27cm}
-\centering
-Two attack the \textbf{dual bound}. One attacks the \textbf{incumbent}. One chooses
-\emph{among} cuts. Watch which kind helps.
-\end{frame}
-
-
-\begin{frame}{Fractional Benders cuts}
-\vspace{0.21cm}
-\textbf{The intention.} An integer-only scheme learns about the loading cost only once
-an order is fully committed. A fractional cut extracts the same dual information from a
-\emph{partial} order and removes it from the relaxation at once. This is the standard
-remedy for tailing-off, and it is legitimate here because the cut is affine in $x$.
-
-\vspace{0.3cm}
-\begin{columns}[T,onlytextwidth]
-\column{.46\textwidth}
-\textbf{It did what it should, locally}\\[.25cm]
-{\small $67.5$ million cuts generated.\\[.2cm]
-Median node count fell from $\mathbf{77{,}439}$ to $\mathbf{3{,}701}$ --- a factor of
-twenty.}
-
-\column{.48\textwidth}
-\textbf{And the bound never moved}\\[.25cm]
-{\small Across $1{,}404$ paired runs the dual bound at termination was\\[.2cm]
-\begin{tabular}{@{}lr@{}}
-higher & \textbf{0}\\
-equal  & $1{,}226$\\
-lower  & $178$\\
-\end{tabular}\\[.25cm]
-and \textbf{69} instances were lost.}
-\end{columns}
-
-\vspace{0.27cm}
-\centering
-The remedy is being applied correctly, to the wrong obstacle.
-\end{frame}
-
-
-\begin{frame}{A strong incumbent at the root}
-\vspace{0.21cm}
-\textbf{The intention.} A branch-and-bound search prunes in proportion to the quality of
-its incumbent. A compact form of the hybrid genetic search of
-\textbf{(Mecler et al., 2021)} is run once, at the root.
-
-\vspace{0.24cm}
-{\small
-Constructive seeds --- nearest-neighbour orders on the pairwise weights $w_{ij}$, and a
-largest-tool-first order --- each improved by a variable-neighbourhood local search using
-adjacent swaps and short segment relocations, every candidate scored by the exact
-loading oracle, evolved under order crossover with a diversity guard.}
-
-\vspace{0.3cm}
-\textbf{The order is then used twice.} As a warm start it gives the solver an incumbent
-from node zero. And it seeds a cut: the loading dual is solved once for the heuristic
-order and its cut added before the first relaxation --- the initial-cut-pool acceleration
-of \textbf{(Rahmaniani et al., 2017)}.
-
-\vspace{0.24cm}
-\centering
-This is the only strengthening aimed at the \textbf{primal} side, and the only one that
-helps: $\mathbf{+31}$ instances.
-\end{frame}
-
-
-\begin{frame}{A conflict-graph bound}
-\vspace{0.21cm}
-\textbf{The intention.} The master's root bound is pairwise plus coverage, and both are
-visible to the linear relaxation. The combinatorial structure they miss lives in the
-\emph{conflict graph} $G$: vertices are jobs, edges join pairs that cannot share a
-magazine.
-
-\vspace{0.24cm}
-A clique of $G$ is a set of pairwise incompatible jobs, which must occupy that many
-distinct configurations, so $\Kst\ge\omega(G)$; more generally $\Kst\ge\chi(G)$, and
-where $G$ is non-bipartite $\chi(G)\ge3$ even when $\omega(G)=2$. The resulting row
-\[
-\theta\ \ge\ (\chi_{\mathrm{lb}}-1)+\min(b,\lvert\U\rvert)
-\]
-is added whenever it strictly exceeds the coverage row. This is the simplest of the
-conflict-graph inequalities studied by \textbf{(Atamt\"urk et al., 2000)}.
-
-\vspace{0.24cm}
-\textbf{Its reach is narrow by construction.} On most instances the coverage row already
-dominates it. It can bite only where the \emph{grouping} structure, rather than the tool
-count, forces the switches. Measured effect: $-1$ instance.
-\end{frame}
-
-
-\begin{frame}{Pareto-optimal cut lifting}
-\vspace{0.21cm}
-\textbf{The intention.} When the loading dual has several optimal solutions --- which a
-degenerate transportation-type problem routinely does --- the cuts they yield are not
-equally strong. Choosing the deepest is the Pareto-optimal cut of
-\textbf{(Magnanti \& Wong, 1981)}: among alternative dual optima, select the one
-maximising the cut's value at a fixed interior core point of the master.
-
-\vspace{0.24cm}
-\textbf{(Papadakos, 2008)} makes this practical by observing that the core point need not
-be tied to the current relaxation, and may simply be updated as a convex combination of
-the points visited. That form is used here: a core point is kept in the relative
-interior, initialised from the heuristic order blended with the barycentre, and drawn
-halfway towards the current relaxation point after each separation.
-
-\vspace{0.27cm}
-The core-point cut is added \emph{in addition to}, never instead of, the ordinary cut,
-which keeps the scheme valid by construction.
-
-\vspace{0.21cm}
-\centering
-Measured effect: $\mathbf{-37}$ instances --- a deeper cut inside the wrong family.
-\end{frame}
-\section{Computational results}
-
-\begin{frame}{Experimental design}
-\vspace{0.24cm}
-\begin{columns}[T,onlytextwidth]
-\column{.44\textwidth}
-\textbf{What was compared}\\[.25cm]
-{\small Nine Benders regimes and three reimplemented compact baselines: the tool-state
-model \textbf{(Laporte et al., 2004)}, Formulation~4 \textbf{(Catanzaro et al., 2015)},
-and the multicommodity model \textbf{(da Silva et al., 2021)}.}
-
-\column{.50\textwidth}
-\textbf{Under one protocol}\\[.25cm]
-{\small $1{,}410$ canonical instances $\times$ $12$ configurations $=16{,}920$ planned
-outcomes, all present. One hour per run, one homogeneous node type, and a
-\emph{fixed} denominator: every planned pair counts once, and any non-optimal outcome
-counts as not closed.}
-\end{columns}
-
-\vspace{0.36cm}
-\begin{block}{Two caveats stated before the numbers}
-Benders ran on one solver thread while the compact models ran on four; and F4 stands in
-for the stronger Formulation~5 that its authors recommend. Both run \emph{against} this
-report's own conclusion, not for it.
-\end{block}
-\end{frame}
-
-
-\begin{frame}{How far each method gets}
-\vspace{0.12cm}
-\begingroup\centering
-\includegraphics[height=.60\textheight,width=.92\linewidth,keepaspectratio]{assets/defence_figures/solve_counts_all.pdf}
-\par\endgroup
-\vspace{0.15cm}
-Against the same $1{,}410$-instance denominator the compact baselines certify more than
-every Benders regime. \textbf{This does not go the way I hoped}, and with the two caveats
-above the margin is if anything understated.
-
-\vspace{0.12cm}
-\centering
-The rest of this section is about \emph{why}, and the reason is not the search.
-\end{frame}
-
-
-\begin{frame}{Solving times}
-\vspace{0.12cm}
-\begingroup\centering
-\includegraphics[height=.60\textheight,width=.92\linewidth,keepaspectratio]{assets/defence_figures/common_solved_time_boxplot.pdf}
-\par\endgroup
-\vspace{0.15cm}
-Restricted to the $531$ instances every method solves, the picture inverts: the Benders
-medians sit orders of magnitude below the compact ones. The axis is logarithmic.
-
-\vspace{0.12cm}
-So this is not a slow method. It closes an instance almost at once, or it does not close
-it within the hour --- the signature of a bound that is either exactly right or of no use.
-\end{frame}
-
-
-\begin{frame}{What separates the two cases}
-\vspace{0.12cm}
-\begingroup\centering
-\includegraphics[height=.48\textheight,width=.84\linewidth,keepaspectratio]{assets/report_figures/tightsplit.pdf}
-\par\endgroup
-\vspace{0.12cm}
-{\small Group the $1{,}107$ instances of known optimum by how far the optimum sits above
-the counting bound. Where the bound is exact the Benders solver certifies $94\%$; one
-unit above, $31\%$; then no trend at all.}
-\vspace{0.09cm}
-
-{\small \textbf{But this is a fact about the method, not the instances.} F4 moves the
-\emph{other} way and closes all $45$ of the loosest. And the multicommodity model's
-relaxation is also $q$, yet it loses only $13$ points. What loses $54$ is a master
-carrying the coverage row and, at the root, almost nothing else.}
-\end{frame}
-
-
-\begin{frame}{And the failure is a certificate failure}
-\vspace{0.3cm}
-\begin{block}{The solver usually already has the answer}
-Among time-limited runs whose optimum is known from elsewhere, the Benders incumbent
-\textbf{already equals that optimum} in $223$ of $383$ cases. The median remaining gap is
-nonetheless $23.1\%$.
-\end{block}
-
-\vspace{0.33cm}
-Put beside the ablation, the pattern is consistent:
-
-\vspace{0.18cm}
-\begin{itemize}\itemsep4pt
-  \item the one strengthening aimed at the \textbf{incumbent} gains instances;
-  \item every strengthening aimed at the \textbf{dual bound} is neutral or harmful;
-  \item $67.5$ million fractional cuts raise the bound at termination on \emph{no}
-        instance.
-\end{itemize}
-
-\vspace{0.27cm}
-\centering
-A solver whose difficulty was \emph{finding} good orders would not behave like this.
-\end{frame}
-
-
-\section{Why the bound does not move}
-
-\begin{frame}{The cost is not a local quantity}
-\vspace{0.24cm}
-Write $\beta_t$ for the number of maximal stretches during which tool $t$ sits in the
-magazine. Every insertion of $t$ begins one, so
-\[
-\Zst=\sum_{t\in\U}\beta_t,
-\qquad\text{and}\qquad
-\beta_t\ge1 \text{ for every used tool}
-\]
-recovers exactly the counting bound $q$. \textbf{Everything above $q$ is a reinsertion}:
-a tool evicted and brought back.
-
-\vspace{0.27cm}
-A reinsertion happens when the jobs needing a tool are pushed apart by other jobs whose
-requirements cannot sit alongside it. That is a property of the \textbf{global
-interleaving} of the schedule. It is not a property of which pairs of jobs happen to be
-adjacent.
-\end{frame}
-
-
-\begin{frame}{And every inequality the solver carries is local}
-\vspace{0.12cm}
-\begingroup\centering
-\includegraphics[height=.48\textheight,width=.83\linewidth,keepaspectratio]{assets/report_figures/rootgap.pdf}
-\par\endgroup
-\vspace{0.12cm}
-{\small The master carries one row indexed by \emph{arcs}, triplet rows that are the weak
-linearisation of a product, and a constant coverage row. Every optimality cut it generates
-is also arc-supported, with coefficient $\sum_t\lambda_{ijt}$ on $x_{ij}$.}
-
-\vspace{0.12cm}
-{\small So the master learns only \textbf{adjacency-indexed} facts about a cost that is not
-adjacency-indexed. Measured: on $87.2\%$ of runs the root relaxation equals the coverage
-row exactly --- the pairwise and triplet rows contribute nothing at all.}
-\end{frame}
-
-
-\begin{frame}{A family that is not local, and what it was worth}
-\vspace{0.21cm}
-For a stretch of positions $W=[p,r]$, every tool needed inside $W$ is either already
-loaded at $p-1$ or inserted within $W$:
-\[
-\sum_{t}\sum_{k\in W} w_{t,k}\ \ \ge\ \ \bigl\lvert\{t \text{ needed in } W\}\bigr\rvert
-\;-\;\sum_{t} a_{t,p-1}.
-\]
-Valid, and it counts across a \emph{span} rather than an arc. Its ceiling over integral
-schedules is several times that of the family the solvers carry today.
-
-\vspace{0.27cm}
-\begin{block}{And it delivered nothing}
-Implemented and measured inside the master, it left the root relaxation unchanged on all
-$37$ instances for which both values were obtained --- because its fractional row turns
-out to be \textbf{implied} by rows the formulation already has.
-\end{block}
-
-\vspace{0.18cm}
-\centering
-Writing a global inequality down is necessary. It is not sufficient.
-\end{frame}
-\section{Limitations}
-
-\begin{frame}{What this study does not show}
-\vspace{0.21cm}
-Ordered by how much each threatens the conclusions just drawn.
-
-\vspace{0.24cm}
-\begin{itemize}\itemsep6pt
-  \item \textbf{The census of heuristic gaps is small.} The one fixed random census is
-        $1{,}260$ instances at three to five jobs. The connected family settles
-        \emph{existence} and unboundedness; it says nothing about how often such gaps
-        occur at industrial sizes.
-  \item \textbf{A ceiling over integral schedules is not a bound.} The window family's
-        headroom was measured by enumerating every sequence of $62$ loose cases at eight
-        jobs. That is a screen, not an estimate --- and the implemented row raised no
-        root.
-  \item \textbf{The benchmark directory was not the published benchmark.} It held $171$
-        files against the $160$ defined; ten duplicate canonical cases byte for byte and
-        one is a smoke test. All eleven are filtered explicitly, and the count is
-        checked before any figure is computed.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{What this study does not show, continued}
-\vspace{0.21cm}
-\begin{itemize}\itemsep6pt
-  \item \textbf{One hour, one machine, one collection --- and F4, not F5.} Every solve
-        count comes from a single limit on one node type, and the compact baseline is
-        weaker than the best available. Both cut \emph{against} the conclusion drawn
-        here, and neither touches the relaxation values.
-  \item \textbf{The branch-and-price prototypes are Python; the baselines are C.} A
-        pricing node costs orders of magnitude more than a node inside a commercial
-        solver. Nothing above nine jobs was closed, and that carries no information
-        about the formulations --- which is why no conclusion here rests on a
-        branch-and-price solve count, only on a root value recorded before any search.
-  \item \textbf{The learned cut-selection prototype was never run on this problem.} It
-        was trained on knapsack cover cuts. It shows that the agent learns; it says
-        nothing about the SSP, and it is reported as an appendix for that reason.
-\end{itemize}
-\end{frame}
-
-
-\section{Conclusions and further work}
-
-\begin{frame}{What was established}
-\vspace{0.15cm}
-{\small One equivalence organises the whole report: a schedule is a \textbf{walk through
-magazine configurations}, and its cost is the length of that walk.}
-
-\vspace{0.15cm}
-\begin{columns}[T,onlytextwidth]
-\column{.47\textwidth}
-\textbf{Structural}\\[.18cm]
-{\footnotesize
-The two-phase construction has two readings; separating them is a prerequisite for
-saying anything correct about it.\\[.14cm]
-The optimum is the cheapest walk over \emph{all} groupings --- the gap is exactly the
-price of minimum cardinality.\\[.14cm]
-A ratio bound $\min(b,\Kst-1,q)$ holds for \emph{every} instance, and zero-gap classes
-exist at every capacity.\\[.14cm]
-For the method as specified: four jobs are necessary and sufficient for a positive gap,
-and a \emph{connected} family proves it unbounded.}
-
-\column{.47\textwidth}
-\textbf{Algorithmic}\\[.18cm]
-{\footnotesize
-A branch-and-Benders-cut solver whose subproblem is exact, polynomial, and never
-relaxed.\\[.14cm]
-Position-indexed formulations with a fixed polynomial row set, one of which
-\emph{provably} exceeds the coverage bound.\\[.14cm]
-Across $16{,}920$ outcomes, four independent measurements agree: the obstacle is the
-\textbf{bound}, not the search.\\[.14cm]
-Bound-limited, not implementation-limited --- a negative result about a family of
-methods, not one solver.}
-\end{columns}
-\end{frame}
-
-
-\begin{frame}{Further work}
-\vspace{0.21cm}
-\begin{block}{The direction the campaign points to hardest}
-A bound that reaches into the loose half. The arc-supported information is exhausted;
-the honest next step is a global family whose \emph{fractional} encoding is not implied
-by rows the formulation already has --- which is exactly where the window family failed.
-\end{block}
-
-\vspace{0.35cm}
-\begin{itemize}\itemsep7pt
-  \item \textbf{Two concrete strengthenings, both untested.} Chain PTF per configuration
-        rather than per tool --- that is what confines its advantage to two runs. And
-        disaggregate the master's single $\theta$ into one variable per position, the
-        standard remedy the ablation never tried.
-  \item \textbf{The exact worst case of the heuristic as specified.} Settled at three
-        groups for the walk value; open for the method itself. Two concrete questions:
-        is the gap ever larger than one on a connected instance, and does
-        $\mathrm{gap}\le\Kst-2$ hold? Directed searches at $b\in\{3,4,5\}$ found no
-        counterexample to either.
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}{Further work, continued}
-\vspace{0.45cm}
-\begin{itemize}\itemsep10pt
-  \item \textbf{Non-uniform tool costs, for free.} The subproblem is the loading linear
-        program, not the KTNS rule, and that program stays exact when tools have
-        different setup times while the rule does not \textbf{(Crama et al., 1994)}. The
-        solver therefore extends unchanged to a regime the whole SSP literature assumes
-        away, and testing it there would broaden the method's scope.
-  \item \textbf{Beyond the SSP.} Nothing in the position--transition construction is
-        specific to tool switching except the transition metric; it applies to any
-        generalised travelling-salesman problem with overlapping clusters
-        \textbf{(Pop et al., 2024)}. Whether the relaxation strength observed here
-        survives that generality is open.
-  \item \textbf{Where a learned component could pay.} Not cut selection --- a selector
-        cannot select a cut that does not exist. Column selection for the position-indexed
-        pricers, whose coupled-pair oracle is the measured bottleneck, is the target with
-        a chance of helping.
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}{Key references --- the problem and the heuristic}
+\begin{frame}{Key references --- the problem, the heuristic, the models}
 \vspace{0.2cm}
-{\footnotesize
-\textbf{The cheapest loading for a fixed order is known in closed form}, and the rule that
-computes it is optimal in $O(n\lvert T\rvert)$ time.\\
-{\scriptsize Tang, C.\,S. \& Denardo, E.\,V. (1988). Models arising from a flexible
-manufacturing machine, Part~I. \emph{Operations Research} 36(5), 767--777.}
-
-\vspace{0.3cm}
-\textbf{The ordering is NP-hard for every fixed capacity $b\ge2$}, and the loading linear
-program stays exact when tool costs differ while the rule does not --- which is why the
-solver built here extends to that case.\\
-{\scriptsize Crama, Y., Kolen, A.\,W.\,J., Oerlemans, A.\,G. \& Spieksma, F.\,C.\,R. (1994).
-Minimizing the number of tool switches on a flexible machine. \emph{IJFMS} 6, 33--54.}
-
-\vspace{0.3cm}
-\textbf{The two-phase construction industry uses is a $b$-approximation} --- the worst-case
-result this report sharpens into an instance-sensitive theory.\\
-{\scriptsize Crama, Y. \& van de Klundert, J. (1999). Worst-case performance of
-approximation algorithms for tool management. \emph{Naval Research Logistics} 46, 763--783.}
-
-\vspace{0.3cm}
-\textbf{The one industrial study measuring that construction against exact optima} found it
-performing well in multi-colour printing --- the study the censuses here agree with.\\
-{\scriptsize Burger, A.\,P., Jacobs, C.\,G., van Vuuren, J.\,H. \& Visagie, S.\,E. (2015).
-Scheduling multi-colour print jobs with sequence-dependent setup times.
-\emph{Journal of Scheduling} 18, 131--145.}
-}
-\end{frame}
-
-
-\begin{frame}{Key references --- the compact formulations}
-\vspace{0.35cm}
-{\small
-\textbf{The tool-state model}, the first exact treatment and one of the three baselines
-reimplemented here.\\
-{\footnotesize Laporte, G., Salazar-Gonz\'alez, J.\,J. \& Semet, F. (2004). Exact algorithms
-for the job sequencing and tool switching problem. \emph{IIE Transactions} 36, 37--45.}
-
-\vspace{0.45cm}
-\textbf{The strongest compact family surveyed, and the source of the counting bound $q$}
-that governs everything in the second half of this talk. Formulation~4 stands in here for
-the Formulation~5 its authors recommend, so the baseline is weaker than the best available.\\
-{\footnotesize Catanzaro, D., Gouveia, L. \& Labb\'e, M. (2015). Improved integer linear
-programming formulations for the job sequencing and tool switching problem.
-\emph{EJOR} 244, 766--777.}
-
-\vspace{0.45cm}
-\textbf{The multicommodity model, whose relaxation is also $q$ --- yet which loses only
-thirteen points across the loose instances.} That is the measurement showing the coverage
-bound alone does not explain the Benders solver's failure.\\
-{\footnotesize da Silva, T.\,T., Chaves, A.\,A. \& Yanasse, H.\,H. (2021). A new
-multicommodity flow model for the job sequencing and tool switching problem.
-\emph{International Journal of Production Research} 59, 3617--3632.}
-}
-\end{frame}
-
-
-\begin{frame}{Key references --- the decomposition and its strengthenings}
-\vspace{0.15cm}
 {\scriptsize
-\textbf{Benders cuts over a combinatorial subproblem} --- the lineage this solver belongs to,
-and the cut form it uses.\\
+\textbf{Loading a fixed order is solved in closed form, and the rule is optimal.}\\
+Tang, C.\,S. \& Denardo, E.\,V. (1988). Models arising from a flexible manufacturing
+machine, Part~I. \emph{Operations Research} 36(5), 767--777.
+
+\vspace{0.26cm}
+\textbf{Ordering is NP-hard for every capacity $b\ge2$; the loading LP stays exact when
+tool costs differ, which is why the solver extends to that case.}\\
+Crama, Y., Kolen, A.\,W.\,J., Oerlemans, A.\,G. \& Spieksma, F.\,C.\,R. (1994). Minimizing
+the number of tool switches on a flexible machine. \emph{IJFMS} 6, 33--54.
+
+\vspace{0.26cm}
+\textbf{The two-phase construction industry uses is a $b$-approximation} --- the result
+this report sharpens into an instance-sensitive theory --- \textbf{and it performs well in
+the one industrial study that measures it against exact optima.}\\
+Crama, Y. \& van de Klundert, J. (1999). Worst-case performance of approximation algorithms
+for tool management. \emph{Naval Research Logistics} 46, 763--783. \quad
+Burger, A.\,P., Jacobs, C.\,G., van Vuuren, J.\,H. \& Visagie, S.\,E. (2015). Scheduling
+multi-colour print jobs with sequence-dependent setup times. \emph{J.\ Scheduling} 18, 131--145.
+
+\vspace{0.26cm}
+\textbf{The three compact baselines reimplemented here: the tool-state model, the strongest
+compact arc family and the source of the counting bound $q$, and the multicommodity model
+whose relaxation is also $q$ yet which loses only thirteen points.}\\
+Laporte, G., Salazar-Gonz\'alez, J.\,J. \& Semet, F. (2004). Exact algorithms for the job
+sequencing and tool switching problem. \emph{IIE Transactions} 36, 37--45. \quad
+Catanzaro, D., Gouveia, L. \& Labb\'e, M. (2015). Improved ILP formulations for the SSP.
+\emph{EJOR} 244, 766--777. \quad
+da Silva, T.\,T., Chaves, A.\,A. \& Yanasse, H.\,H. (2021). A new multicommodity flow model
+for the SSP. \emph{IJPR} 59, 3617--3632.
+}
+\end{frame}
+
+
+\begin{frame}{Key references --- the decomposition, and the backup material}
+\vspace{0.2cm}
+{\scriptsize
+\textbf{Benders cuts over a combinatorial subproblem --- the lineage this solver belongs to,
+and the cut form it uses.}\\
 Hooker, J.\,N. \& Ottosson, G. (2003). Logic-based Benders decomposition.
 \emph{Mathematical Programming} 96, 33--60. \quad
-Codato, G. \& Fischetti, M. (2006). Combinatorial Benders' cuts for mixed-integer linear
-programming. \emph{Operations Research} 54(4), 756--766.
+Codato, G. \& Fischetti, M. (2006). Combinatorial Benders' cuts for MILP.
+\emph{Operations Research} 54(4), 756--766.
 
-\vspace{0.24cm}
-\textbf{The survey all four strengthenings come from}, including the initial cut pool seeded
-from the heuristic order.\\
+\vspace{0.26cm}
+\textbf{The survey all four strengthenings come from, including the initial cut pool.}\\
 Rahmaniani, R., Crainic, T.\,G., Gendreau, M. \& Rei, W. (2017). The Benders decomposition
 algorithm: a literature review. \emph{EJOR} 259, 801--817.
 
-\vspace{0.24cm}
-\textbf{Choosing the deepest cut when the dual has many optima} --- and the free core point
-that makes it practical, which is the form implemented here.\\
+\vspace{0.26cm}
+\textbf{The deepest cut among alternative dual optima, and the free core point that makes it
+practical --- the form implemented here.}\\
 Magnanti, T.\,L. \& Wong, R.\,T. (1981). Accelerating Benders decomposition.
 \emph{Operations Research} 29(3), 464--484. \quad
 Papadakos, N. (2008). Practical enhancements to the Magnanti--Wong method.
-\emph{Operations Research Letters} 36, 444--449.
+\emph{ORL} 36, 444--449.
 
-\vspace{0.24cm}
-\textbf{The conflict-graph inequalities} the combinatorial row is the simplest case of.\\
+\vspace{0.26cm}
+\textbf{The conflict-graph inequalities, and the hybrid genetic search used as the root
+incumbent --- the only strengthening that gained instances.}\\
 Atamt\"urk, A., Nemhauser, G.\,L. \& Savelsbergh, M.\,W.\,P. (2000). Conflict graphs in
-solving integer programming problems. \emph{EJOR} 121, 40--55.
-
-\vspace{0.24cm}
-\textbf{The hybrid genetic search used as the root incumbent} --- the only strengthening
-that gained instances.\\
+solving integer programming problems. \emph{EJOR} 121, 40--55. \quad
 Mecler, J., Subramanian, A. \& Vidal, T. (2021). A simple and effective hybrid genetic
-search for the job sequencing and tool switching problem. \emph{C\&OR} 127, 105132.
+search for the SSP. \emph{C\&OR} 127, 105132.
+
+\vspace{0.26cm}
+\textbf{Backup material: what the PCF pricing problem is, dual stabilisation, the
+cut-selection framework the learned prototype follows, and where the construction
+generalises.}\\
+Goldschmidt, O., Nehme, D. \& Yu, G. (1994). Note on the set-union knapsack problem.
+\emph{NRL} 41, 833--842. \quad
+Crama, Y. \& Oerlemans, A.\,G. (1994). A column generation approach to job grouping.
+\emph{EJOR} 78, 58--80. \quad
+L\"ubbecke, M.\,E. \& Desrosiers, J. (2005). Selected topics in column generation.
+\emph{Operations Research} 53(6), 1007--1023. \quad
+Tang, Y., Agrawal, S. \& Faenza, Y. (2020). Reinforcement learning for integer programming:
+learning to cut. \emph{ICML}. \quad
+Pop, P.\,C., Cosma, O., Sabo, C. \& Pop Sitar, C. (2024). A comprehensive survey on the
+generalized traveling salesman problem. \emph{EJOR} 314, 819--835.
 }
 \end{frame}
 
 
-\begin{frame}{Key references --- column generation, and the backup material}
-\vspace{0.25cm}
-{\footnotesize
-\textbf{The pricing problem for the position--configuration model is a set-union knapsack
-problem}, the same class as the classical grouping pricer.\\
-{\scriptsize Goldschmidt, O., Nehme, D. \& Yu, G. (1994). Note on the set-union knapsack
-problem. \emph{Naval Research Logistics} 41, 833--842. \quad
-Crama, Y. \& Oerlemans, A.\,G. (1994). A column generation approach to job grouping for
-flexible manufacturing systems. \emph{EJOR} 78, 58--80.}
-
-\vspace{0.45cm}
-\textbf{Dual stabilisation}, the acceleration that damps the oscillation degenerate masters
-produce.\\
-{\scriptsize L\"ubbecke, M.\,E. \& Desrosiers, J. (2005). Selected topics in column
-generation. \emph{Operations Research} 53(6), 1007--1023.}
-
-\vspace{0.45cm}
-\textbf{The cut-selection framework the learned prototype follows.}\\
-{\scriptsize Tang, Y., Agrawal, S. \& Faenza, Y. (2020). Reinforcement learning for
-integer programming: learning to cut. \emph{ICML}.}
-
-\vspace{0.45cm}
-\textbf{Where the position--transition construction generalises} --- any generalised
-travelling-salesman problem with overlapping clusters.\\
-{\scriptsize Pop, P.\,C., Cosma, O., Sabo, C. \& Pop Sitar, C. (2024). A comprehensive
-survey on the generalized traveling salesman problem. \emph{EJOR} 314, 819--835.}
-}
-\end{frame}
-
-
-\begin{frame}[plain]
-\vfill
-\begingroup\centering
-{\Large\color{navy}\textbf{Thank you}}\\[.7cm]
-{\large Questions welcome}\\[1.1cm]
-{\footnotesize\color{muted}
-Shankar Narayanan\\[.2cm]
-Advisors: Prof.~Rafael Colares \quad Prof.~Annegret Wagler\\
-Academic supervisor: Dr.~Renaud Chicoisne\\[.4cm]
-LIMOS --- ISIMA, Clermont Auvergne INP}
-\par\endgroup
-\vfill
-\end{frame}
-\appendix
 \section*{Backup}
 
 \begin{frame}[plain]
 \vfill
 \begingroup\centering
 {\Large\color{navy}\textbf{Backup slides}}\\[.55cm]
-{\normalsize The other exact methods explored, and the validation}
+{\normalsize Supplementary evidence and alternative paths}
 \par\endgroup
 \vfill
 \end{frame}
-\begin{frame}{Backup --- Branch-and-price: why reformulate at all}
-\vspace{0.27cm}
-\begin{block}{The obstacle}
-Every compact model surveyed relaxes to the counting bound $q=\lvert\U\rvert-b$ or
-below. A branch-and-cut built on any of them is fast where $q$ is exact and adrift
-where it is not.
-\end{block}
 
-\vspace{0.3cm}
-Reformulating over \textbf{magazine configurations} attacks this from the other side.
-A configuration is a set $C\subseteq\U$ with $\lvert C\rvert=b$; these become the
-columns, generated on demand. Three formulations were built.
-
-\vspace{0.3cm}
-\centering
-\begin{tabular}{@{}lll@{}}
-\toprule
-& \textbf{Column} & \textbf{Linear relaxation}\\
-\midrule
-PCF        & configuration at a position & $=q$ with the counting rows, $0$ without\\
-PCF$'$     & prefix form of PCF          & $=q$, symmetry removed\\
-PTF        & \emph{transition} between two & $\ \ge q$, and can exceed it\\
-\bottomrule
-\end{tabular}
-\end{frame}
-
-
-\begin{frame}{Backup --- PCF: configurations at positions}
-\vspace{0.18cm}
-$y_C^{k}=1$ if configuration $C$ occupies position $k$; $w_t^{k}\ge0$ counts an
-insertion of $t$ at position $k$.
-\vspace{0.15cm}
-{\small
-\[
-\begin{aligned}
-\min\;\; & \textstyle\sum_{t,k}w_t^{k} &&\\
-\text{(P)}\;\; & \textstyle\sum_C y_C^{k}=1, & k&=1,\dots,n\\
-\text{(Cov)}\; & \textstyle\sum_k\sum_{C\supseteq T_j}y_C^{k}\ \ge\ 1, & j&\in J\\
-\text{(W)}\;\; & w_t^{k}\ \ge\ \textstyle\sum_{C\ni t}\bigl(y_C^{k}-y_C^{k-1}\bigr), & t&\in T,\ k\ge2\\
-\text{(T)}\;\; & \textstyle\sum_{k\ge2}w_t^{k}+\sum_{C\ni t}y_C^{1}\ \ge\ 1, & t&\in\U
-\end{aligned}
-\]}
-\vspace{-0.06cm}
-\begin{block}{The counting rows are load-bearing}
-Without (T) the relaxation is \textbf{zero} --- one convex blend of configurations,
-repeated at every position, satisfies (P), (Cov) and (W) at no cost. With (T) it is
-exactly $q$. \emph{Proved, and confirmed on all $2{,}108$ recorded roots.}
-\end{block}
-\end{frame}
-
-
-\begin{frame}{Backup --- PTF: transitions as columns}
-\vspace{0.18cm}
-$z_{C,C'}^{k}\ge0$ is a column for the step from position $k$ to $k+1$ leaving $C$ and
-entering $C'$, at cost $d(C,C')=\lvert C'\setminus C\rvert$.
-\vspace{0.12cm}
-{\small
-\[
-\begin{aligned}
-\min\;\; & \textstyle\sum_{k}\sum_{(C,C')}d(C,C')\,z_{C,C'}^{k} &&\\
-\text{(S)}\;\; & \textstyle\sum_{(C,C')}z_{C,C'}^{k}=1, & k&=1,\dots,n-1\\
-\text{(F)}\;\; & \textstyle\sum_{(C,C'):t\in C'}z^{k}_{C,C'}=\sum_{(D,D'):t\in D}z^{k+1}_{D,D'}, & t&\in T\\
-\text{(Cov)}\; & \text{every job served at the head or tail of some step} &&\\
-\text{(T)}\;\; & \textstyle\sum_{k}\sum_{(C,C'):t\notin C,\,t\in C'}z^{k}_{C,C'}+\sum_{(C,C'):t\in C}z^{1}_{C,C'}\ \ge\ 1, & t&\in\U
-\end{aligned}
-\]}
-\vspace{-0.06cm}
-\begin{block}{Why this one can beat the counting bound}
-A column \emph{carries a step}, so the relaxation cannot mix configurations without
-paying the transition. Hence $\mathrm{LP}(\mathrm{PTF})\ge q$, and it can be strictly
-greater --- the only construction in this work that provably exceeds $q$.
-\end{block}
-\end{frame}
-
-
-\begin{frame}{Backup --- pricing, and what the prototypes measured}
-\vspace{0.24cm}
-\begin{columns}[T,onlytextwidth]
-\column{.46\textwidth}
-\textbf{The pricing problem}\\[.25cm]
-{\small Choosing the entering configuration is \textbf{NP-hard}: pick $b$ tools to
-collect per-tool duals plus a bonus for each job fully covered. PTF prices
-\emph{coupled pairs}, so a node costs far more again.}
-\vspace{0.24cm}
-
-\textbf{Rows stay small}\\[.25cm]
-{\small $O(n\lvert T\rvert)$ and fixed; only the columns are generated.}
-
-\column{.48\textwidth}
-\begin{block}{What was measured}
-\begin{itemize}\itemsep2pt\small
-  \item PCF$'$ root $=q$ on \textbf{all $2{,}108$} recorded runs --- the proposition
-  confirmed on the benchmark.
-  \item PTF exceeds $q$ on \textbf{2 of 232} roots, rising from $5$ to $6$ where the
-  optima are $12$ and $13$.
-  \item Nothing above nine jobs was closed: a Python pricer against compiled solvers.
-\end{itemize}
-\end{block}
-\vspace{0.15cm}
-{\small Sound, and as it stands too rare and too small to close the certificate gap.}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Backup --- a learned policy for choosing cuts}
-\vspace{0.21cm}
-{\small\textbf{The question, raised by Prof.~Colares.} At a node the master has several
-admissible cuts: one per candidate order evaluated, the coverage row, and one per
-violated fractional point. A fixed rule decides. Would a learned policy do better?}
-
-\vspace{0.2cm}
-{\small A prototype was built following the cut-selection framework of
-\textbf{(Tang et al., 2020)}: selection as a Markov decision process --- state is the
-relaxation point plus a candidate pool summarised by violation, support size, right-hand
-side and mean coefficient; reward is the rise in the dual bound; the policy is a linear
-softmax trained by REINFORCE.}
-
-\vspace{0.2cm}
-\begin{columns}[T,onlytextwidth]
-\column{.44\textwidth}
-{\footnotesize Trained and evaluated on \textbf{knapsack cover cuts}, not on the SSP:
-the Benders solver needs a commercial solver the development environment did not have.
-$2{,}000$ episodes at each of six sizes, one seed each, held-out evaluation.}
-
-\column{.50\textwidth}
-\centering\footnotesize
-\begin{tabular}{@{}rrrr@{}}
-\toprule
-$n$ & learned & random & gain\\
-\midrule
-$10$ & $1.3855$ & $0.8734$ & $+58.6\%$\\
-$20$ & $0.7482$ & $0.5021$ & $+49.0\%$\\
-$26$ & $0.5661$ & $0.3279$ & $+72.7\%$\\
-\bottomrule
-\end{tabular}
-\end{columns}
-
-\vspace{0.2cm}
-\centering
-{\small Two things follow and only two: \textbf{the machinery learns}, and that is a
-statement \textbf{about knapsack cover cuts}. An appendix, not a method.}
-\end{frame}
-
-
-\begin{frame}{Backup --- and why running it here would not have helped}
-\vspace{0.3cm}
-\begin{block}{The reason is the same one the whole talk turns on}
-Cut selection chooses \emph{among cuts a method can already generate}. Its established
-role in the literature is to pick well, not to make a family stronger.
-\end{block}
-
-\vspace{0.3cm}
-In this campaign the available selections did not improve the terminal bound on a single
-instance --- $67.5$ million fractional cuts raised it on none. A selector cannot select a
-strong cut that does not exist.
-
-\vspace{0.3cm}
-\textbf{Where learning would be worth trying instead.} Column selection for the
-position-indexed pricers, whose coupled-pair oracle is the measured bottleneck. The
-non-learned version of the same idea is automatic dual stabilisation.
-\end{frame}
-
+\section*{BBC evidence}
 
 \begin{frame}{Backup --- certified optima by family}
 \vspace{0.09cm}
@@ -1142,9 +211,8 @@ $192$ for Benders. And every configuration carrying \texttt{+F} sits below all t
 do not separate at fractional points.}
 \end{frame}
 
-
 \begin{frame}{Backup --- how the numbers were made trustworthy}
-\vspace{0.25cm}
+\vspace{0.18cm}
 \small
 \begin{itemize}\itemsep6pt
   \item \textbf{No two methods disagree.} $988$ instances were closed by at least two
@@ -1166,7 +234,6 @@ do not separate at fractional points.}
 \end{itemize}
 \end{frame}
 
-
 \begin{frame}{Backup --- would a longer time limit change the story?}
 \vspace{0.12cm}
 \begingroup\centering
@@ -1177,7 +244,6 @@ do not separate at fractional points.}
 is why the comparison is reported at one fixed limit and the conclusions rest on
 relaxation values rather than on solve counts.}
 \end{frame}
-
 
 \begin{frame}{Backup --- the ceiling measurement, in full}
 \vspace{0.12cm}
@@ -1194,6 +260,167 @@ pairwise rows.}
 {\small That is a ceiling, not a bound --- and the fractional row that implements it was
 then proved redundant. The gap between those two sentences is the honest result of this
 part of the work.}
+\end{frame}
+
+\section*{Learned cut selection}
+
+\begin{frame}{Backup --- a learned policy for choosing cuts}
+\vspace{0.02cm}
+{\small\textbf{The question.} At a node the master has several
+admissible cuts: one per candidate order evaluated, the coverage row, and one per
+violated fractional point. A fixed rule decides. Would a learned policy do better?}
+
+\vspace{0.14cm}
+{\small A prototype was built following the cut-selection framework of
+\cit{Tang et al., 2020}: selection as a Markov decision process --- state is the
+relaxation point plus a candidate pool summarised by violation, support size, right-hand
+side and mean coefficient; reward is the rise in the dual bound; the policy is a linear
+softmax trained by REINFORCE.}
+
+\vspace{0.2cm}
+\begin{columns}[T,onlytextwidth]
+\column{.44\textwidth}
+{\footnotesize Trained and evaluated on \textbf{knapsack cover cuts}, not on the SSP:
+the Benders solver needs a commercial solver the development environment did not have.
+$2{,}000$ episodes at each of six sizes, one seed each, held-out evaluation.}
+
+\column{.50\textwidth}
+\centering\scriptsize
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+$n$ & learned & random & gain\\
+\midrule
+$10$ & $1.3855$ & $0.8734$ & $+58.6\%$\\
+$20$ & $0.7482$ & $0.5021$ & $+49.0\%$\\
+$26$ & $0.5661$ & $0.3279$ & $+72.7\%$\\
+\bottomrule
+\end{tabular}
+\end{columns}
+
+\vspace{0.14cm}
+\centering
+{\small Two things follow and only two: \textbf{the machinery learns}, and that is a
+statement \textbf{about knapsack cover cuts}. An appendix, not a method.}
+\end{frame}
+
+\begin{frame}{Backup --- and why running it here would not have helped}
+\vspace{0.3cm}
+\begin{block}{The reason is the same one the whole talk turns on}
+Cut selection chooses \emph{among cuts a method can already generate}. Its established
+role in the literature is to pick well, not to make a family stronger.
+\end{block}
+
+\vspace{0.3cm}
+In this campaign the available selections did not improve the terminal bound on a single
+instance --- $67$ million fractional cuts raised it on none. A selector cannot select a
+strong cut that does not exist.
+
+\vspace{0.3cm}
+\textbf{Where learning would be worth trying instead.} Column selection for the
+position-indexed pricers, whose coupled-pair oracle is the measured bottleneck. The
+non-learned version of the same idea is automatic dual stabilisation.
+\end{frame}
+
+\section*{Branch-and-price}
+
+\begin{frame}{Backup --- Branch-and-price: why reformulate at all}
+\vspace{0.27cm}
+\begin{block}{The obstacle}
+Among the three reimplemented compact baselines, even the strongest relaxation equals
+$q=\lvert\U\rvert-b$; the other two are generally below it. The campaign therefore
+compares closure when $q$ is exact and when it is loose.
+\end{block}
+
+\vspace{0.3cm}
+Reformulating over \textbf{magazine configurations} attacks this from the other side.
+A configuration is a set $C\subseteq\U$ with $\lvert C\rvert=b$; these become the
+columns, generated on demand. Three formulations were built.
+
+\vspace{0.3cm}
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+& \textbf{Column} & \textbf{Linear relaxation}\\
+\midrule
+PCF        & configuration at a position & $=q$ with the counting rows, $0$ without\\
+PCF$'$     & prefix form of PCF          & $=q$, symmetry removed\\
+PTF        & \emph{transition} between two & $\ \ge q$, and can exceed it\\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+\begin{frame}{Backup --- PCF: configurations at positions}
+\vspace{0.18cm}
+$y_C^{k}=1$ if configuration $C$ occupies position $k$; $w_t^{k}\ge0$ counts an
+insertion of $t$ at position $k$.
+\vspace{0.15cm}
+{\small
+\[
+\begin{aligned}
+\min\;\; & \textstyle\sum_{t,k}w_t^{k} &&\\
+\text{(P)}\;\; & \textstyle\sum_C y_C^{k}=1, & k&=1,\dots,n\\
+\text{(Cov)}\; & \textstyle\sum_k\sum_{C\supseteq T_j}y_C^{k}\ \ge\ 1, & j&\in J\\
+\text{(W)}\;\; & w_t^{k}\ \ge\ \textstyle\sum_{C\ni t}\bigl(y_C^{k}-y_C^{k-1}\bigr), & t&\in T,\ k\ge2\\
+\text{(T)}\;\; & \textstyle\sum_{k\ge2}w_t^{k}+\sum_{C\ni t}y_C^{1}\ \ge\ 1, & t&\in\U
+\end{aligned}
+\]}
+\vspace{-0.06cm}
+\begin{block}{The counting rows are load-bearing}
+Without (T) the relaxation is \textbf{zero} --- one convex blend of configurations,
+repeated at every position, satisfies (P), (Cov) and (W) at no cost. With (T) it is
+exactly $q$. \emph{Proved, and confirmed on all $2{,}108$ recorded roots.}
+\end{block}
+\end{frame}
+
+\begin{frame}{Backup --- PTF: transitions as columns}
+\vspace{0.18cm}
+$z_{C,C'}^{k}\ge0$ is a column for the step from position $k$ to $k+1$ leaving $C$ and
+entering $C'$, at cost $d(C,C')=\lvert C'\setminus C\rvert$.
+\vspace{0.12cm}
+{\small
+\[
+\begin{aligned}
+\min\;\; & \textstyle\sum_{k}\sum_{(C,C')}d(C,C')\,z_{C,C'}^{k} &&\\
+\text{(S)}\;\; & \textstyle\sum_{(C,C')}z_{C,C'}^{k}=1, & k&=1,\dots,n-1\\
+\text{(F)}\;\; & \textstyle\sum_{(C,C'):t\in C'}z^{k}_{C,C'}=\sum_{(D,D'):t\in D}z^{k+1}_{D,D'}, & t&\in T\\
+\text{(Cov)}\; & \text{every job served at the head or tail of some step} &&\\
+\text{(T)}\;\; & \textstyle\sum_{k}\sum_{(C,C'):t\notin C,\,t\in C'}z^{k}_{C,C'}+\sum_{(C,C'):t\in C}z^{1}_{C,C'}\ \ge\ 1, & t&\in\U
+\end{aligned}
+\]}
+\vspace{-0.06cm}
+\begin{block}{What transition columns add}
+The counting rows give $\mathrm{LP}(\mathrm{PTF})\ge q$, while each column carries a
+transition between configurations. On \textbf{2 of 232} recorded roots the exact LP
+value was $6$ rather than $q=5$; this is an observation, not a family-wide guarantee.
+\end{block}
+\end{frame}
+
+\begin{frame}{Backup --- pricing, and what the prototypes measured}
+\vspace{0.24cm}
+\begin{columns}[T,onlytextwidth]
+\column{.46\textwidth}
+\textbf{The pricing problem}\\[.25cm]
+{\small Choosing the entering configuration is \textbf{NP-hard}: pick $b$ tools to
+collect per-tool duals plus a bonus for each job fully covered. PTF prices
+\emph{coupled pairs}, so a node costs far more again.}
+\vspace{0.24cm}
+
+\textbf{Rows stay small}\\[.25cm]
+{\small $O(n\lvert T\rvert)$ and fixed; only the columns are generated.}
+
+\column{.48\textwidth}
+\begin{block}{What was measured}
+\begin{itemize}\itemsep2pt\small
+  \item PCF$'$ root $=q$ on \textbf{all $2{,}108$} recorded runs --- the proposition
+  confirmed on the benchmark.
+  \item PTF exceeds $q$ on \textbf{2 of 232} roots, rising from $5$ to $6$ where the
+  optima are $12$ and $13$.
+  \item Nothing above nine jobs was closed: a Python pricer against compiled solvers.
+\end{itemize}
+\end{block}
+\vspace{0.15cm}
+{\small Sound, and as it stands too rare and too small to close the certificate gap.}
+\end{columns}
 \end{frame}
 
 \end{document}

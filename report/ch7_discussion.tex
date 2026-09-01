@@ -52,7 +52,7 @@ formulations. They do not establish an implementation-independent limitation for
 configuration-based exact method.
 
 The fractional-cut setting supplies the strongest evidence within the tested
-implementation. It adds almost sixty-seven million cuts and explores about twenty times
+implementation. It adds just over sixty-seven million cuts and explores about twenty times
 fewer median nodes, but improves no paired terminal bound and closes sixty-nine fewer
 instances. Because enabling it also disables presolve, the campaign does not isolate
 the cause of those changes.
@@ -279,14 +279,15 @@ methods whose bound is $q$ fast. Restricted that way the coincidence still bites
 unpleasantly: the instances on which one would most want a configuration-based exact
 method are exactly the instances on which it is weakest.
 
-\paragraph{The gap opens when the magazine has slack.}
+\paragraph{Capacity slack is external context, not an established criterion.}
 Observation~\ref{obs:census} gives an explicit positive-gap witness at $b=3$ and finds
-none in the fixed $1{,}260$-instance sample at three to five jobs. Independently,
-\citet{Burger2015} report from an industrial study that the decomposition does well
-when the largest job nearly fills the magazine, and that its solution quality
-decreases as the gap between the magazine size and the largest job size grows. One is
-an exact witness plus a fixed small-instance census and the other is a case study on a
-printing press. They describe the same regime.
+none in the fixed $1{,}260$-instance sample at three to five jobs. The retained
+witnesses do not identify magazine slack as the relevant threshold: the $b=3$ witness,
+the $b=4$ seed of Proposition~\ref{prop:seed}, and the connected $b=6$ family of
+Theorem~\ref{thm:connected-gap} all contain capacity-filling jobs. Independently,
+\citet{Burger2015} report from an industrial study that solution quality decreases as
+the difference between the magazine size and the largest job size grows. That result
+is useful empirical context, but it is not a criterion or mechanism established here.
 
 \paragraph{The walk model overstates the weakness of the standard method.}
 This is the least expected of the three. The literature's mental model of the
@@ -299,7 +300,7 @@ did not exist before the two readings were separated.
 
 \subsection{Limitations}\label{ssec:limits}
 
-Seven, ordered by how much they threaten the conclusions above.
+Eight, ordered by how much they threaten the conclusions above.
 
 \paragraph{The census of heuristic gaps is on small instances.}
 Observation~\ref{obs:census} reports one fixed random census: $1{,}260$ instances at
@@ -313,6 +314,20 @@ existence and unboundedness on connected instances, but says nothing about how c
 such gaps are. The structural results of
 Sections~\ref{ssec:exact} and \ref{ssec:ratio} do not depend on it; those are proved for
 every instance and every capacity.
+
+\paragraph{The ablation does not contain its own best-looking configuration.}
+Every strengthening in Table~\ref{tab:ablation} was measured against a base that already
+had fractional separation enabled, and the effect of removing fractional separation was
+measured only on that same unstrengthened base. The two largest measured effects therefore
+never appear together: removing fractional separation is worth $+69$ certified instances
+and the root heuristic is worth $+31$, but the configuration combining them --- integer-cut
+Benders with the hybrid-genetic incumbent and no fractional separation --- was never run.
+It should have been a tenth regime. Nothing above depends on it, because every
+bound-side conclusion rests on relaxation values rather than on solve counts: the terminal
+dual bound is higher on none of the $1{,}404$ paired runs, and the root relaxation equals
+the coverage row on $87.2\%$ of runs, neither of which the missing regime can affect. What
+it would change is the certified count of the best Benders configuration, which is reported
+here as $724$ and is therefore an understatement of what this solver can do.
 
 \paragraph{An integral-sequence ceiling is not an LP bound.}
 Table~\ref{tab:ceilings} and Figure~\ref{fig:ceilings} give two values found by

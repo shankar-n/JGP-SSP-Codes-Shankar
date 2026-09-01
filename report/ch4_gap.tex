@@ -508,12 +508,14 @@ shows absence from that sample is not a structural threshold. No claim about the
 frequency at $b=3$, or about general absence at $b=2$, is made.
 \end{remark}
 
-The capacity condition matters. A positive heuristic gap
-needs the magazine to be large relative to the jobs. That is the regime
-in which \citet{Burger2015} report the decomposition degrading: as the difference
-between the magazine size and the largest job size grows, the quality of the
-heuristic's solutions decreases. Their finding is empirical and industrial, while
-Proposition~\ref{prop:seed} is an exact combinatorial witness, and the regimes agree.
+The retained witnesses do not support a threshold based on slack between the magazine
+and the largest job. In Proposition~\ref{prop:seed}, jobs $C$ and $D$ have size four and
+fill the $b=4$ magazine; the $b=3$ witness above also contains a capacity-filling job;
+and the connected $b=6$ family of Theorem~\ref{thm:connected-gap} contains jobs that
+fill all six slots. \citet{Burger2015} report empirically, in an industrial setting,
+that the decomposition degrades as this slack grows. That observation is useful
+external context, but it is not a criterion or mechanism established by the witnesses
+in this report.
 
 The walk gap and the actual heuristic gap are both unbounded, but require different
 families.
@@ -928,9 +930,11 @@ the third. For general $\Kst$, characterising the groupings that attain
 $\min_{\mathcal{P}}\gamma(\mathcal{P})$, or giving an efficient rule that improves on
 the minimum-cardinality choice, is open.
 
-Two things follow from Section~\ref{ssec:ktnsgap}. The
-first is that the practical value of such a rule is smaller than the walk model
-suggests, since the KTNS step already recovers the optimum on most instances where
-the walk model loses it. The second is that the instances where a rule would help are
-identifiable in advance by the same criterion that identifies positive gaps: a
-magazine large relative to the jobs.
+Two things follow from Section~\ref{ssec:ktnsgap}. The first is that the practical value
+of such a rule is smaller than the walk model suggests, since the KTNS step already
+recovers the optimum on most instances where the walk model loses it. The second is
+that a useful rule must target the still-uncharacterised structure of positive-gap
+instances. The retained witnesses do not justify using magazine slack as that
+criterion: the $b=3$ witness, the $b=4$ seed, and the connected $b=6$ family all
+contain capacity-filling jobs. The empirical trend reported by \citet{Burger2015}
+therefore remains external context rather than a criterion established here.

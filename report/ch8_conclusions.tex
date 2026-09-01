@@ -113,6 +113,15 @@ characterising exactly which such structures obstruct integrality is the questio
 replaces the one that has been closed. The second question is unchanged: which facets of
 the position--transition polytope explain the two runs where its bound exceeds $q$.
 
+\paragraph{The regime the ablation omits.}
+The single cheapest experiment this report leaves undone is integer-cut Benders with the
+hybrid-genetic incumbent and without fractional separation. Both components were measured
+in isolation and both are positive relative to the regime they were measured against, but
+the combination was never run. It requires no new implementation --- only a tenth entry in
+the existing configuration matrix --- and it is the first thing a continuation should do,
+because the certified count of $724$ reported here is the best this solver was
+\emph{measured} at rather than the best it was \emph{built} to reach.
+
 \paragraph{A bound that reaches into the loose half.}
 This is the direction the campaign points to most strongly, and
 Section~\ref{ssec:disc-locality} takes the first step along it: a fixed pairwise row

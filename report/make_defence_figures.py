@@ -68,6 +68,29 @@ mpl.rcParams.update(
 )
 
 
+
+# ---------------------------------------------------------------------------
+# Plain-English labels. The internal codes (BBC-LP+F+H and friends) are
+# unreadable on a slide, so every figure prints the descriptive name instead.
+# ---------------------------------------------------------------------------
+NICE = {
+    "SSPMF":       "Multicommodity",
+    "CATZ-F4":     "Arc-flow (F4)",
+    "LSS":         "Tool-state",
+    "BBC-LP":      "Benders \u2014 base",
+    "BBC-LP+T":    "Benders + triplet rows",
+    "BBC-K":       "Benders \u2014 KTNS oracle",
+    "BBC-LP+F":    "Benders + fractional cuts",
+    "BBC-LP+F+H":  "Benders + fractional + heuristic",
+    "BBC-K+F":     "Benders KTNS + fractional",
+    "BBC-LP+F+C":  "Benders + fractional + conflict",
+    "BBC-LP+ACC":  "Benders + all three",
+    "BBC-LP+F+P":  "Benders + fractional + Pareto",
+}
+def nice(c):
+    return NICE.get(c, c)
+
+
 def audited_analysis_module():
     spec = importlib.util.spec_from_file_location("campaign_audit", AUDIT_SCRIPT)
     if spec is None or spec.loader is None:
@@ -159,7 +182,7 @@ def figure_solve_counts(bbc):
     fig, ax = plt.subplots(figsize=(11.8, 6.3))
     y = np.arange(len(ordered))
     ax.barh(y, values, color=colors, height=0.68, zorder=2)
-    ax.set_yticks(y, ordered)
+    ax.set_yticks(y, [nice(c) for c in ordered])
     ax.set_xlim(0, 1_130)
     ax.set_xlabel("Instances certified optimal (fixed denominator: 1,410)")
     ax.set_xticks(np.arange(0, 1_101, 200))
@@ -220,7 +243,7 @@ def figure_coverage_tightness(audit, bbc, instances, used):
     b2 = ax.bar(x + width / 2, loose_pct, width, color=ORANGE, label="Coverage bound loose")
     ax.set_ylim(0, 112)
     ax.set_ylabel("Certified optima (%)")
-    ax.set_xticks(x, methods)
+    ax.set_xticks(x, [nice(m) for m in methods])
     ax.set_yticks(np.arange(0, 101, 20))
     clean_axis(ax, ygrid=True)
     ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.01), ncol=2, frameon=False)
@@ -325,8 +348,9 @@ def figure_fractional_tradeoff(audit, bbc):
     methods = ["BBC-LP", "BBC-LP+F"]
     colors = [TEAL, CORAL]
 
+    labels = ["Without\nfractional cuts", "With\nfractional cuts"]
     solve_ax, node_ax, bound_ax = axes
-    solve_bars = solve_ax.bar(methods, [724, 655], color=colors, width=0.62)
+    solve_bars = solve_ax.bar(labels, [724, 655], color=colors, width=0.62)
     solve_ax.set_title("Certified optima")
     solve_ax.set_ylabel("Instances (of 1,410)")
     solve_ax.set_ylim(0, 810)
@@ -334,7 +358,7 @@ def figure_fractional_tradeoff(audit, bbc):
     for bar, value in zip(solve_bars, [724, 655]):
         solve_ax.text(bar.get_x() + bar.get_width() / 2, value + 18, str(value), ha="center", fontweight="bold")
 
-    node_bars = node_ax.bar(methods, [77_439, 3_701], color=colors, width=0.62)
+    node_bars = node_ax.bar(labels, [77_439, 3_701], color=colors, width=0.62)
     node_ax.set_title("Median nodes")
     node_ax.set_yscale("log")
     node_ax.set_ylim(1_000, 160_000)
@@ -365,7 +389,7 @@ def figure_fractional_tradeoff(audit, bbc):
     fig.text(
         0.5,
         0.015,
-        "BBC-LP+F generated 67.0 million fractional cuts.  The +F regime also disables presolve.",
+        "Fractional separation generated 67.0 million cuts, and also disables presolve.",
         ha="center",
         color=MUTED,
         fontsize=12,
@@ -410,7 +434,7 @@ def figure_common_solved_times(audit, bbc):
     boxes = ax.boxplot(
         values,
         vert=False,
-        tick_labels=display_order,
+        tick_labels=[nice(c) for c in display_order],
         patch_artist=True,
         showfliers=False,
         widths=0.58,
@@ -430,12 +454,14 @@ def figure_common_solved_times(audit, bbc):
     ax.set_xticks([0.001, 0.01, 0.1, 1, 10, 100, 1000, 3600])
     ax.set_xticklabels(["0.001", "0.01", "0.1", "1", "10", "100", "1,000", "3,600"])
     clean_axis(ax, xgrid=True)
+    # Medians go in a dedicated column outside the axes, so no label ever sits on a box.
+    ax.text(1.015, 1.035, "median", transform=ax.transAxes, fontsize=10.5,
+            color=MUTED, fontweight="bold", ha="left", va="bottom")
     for yi, median in enumerate(medians, 1):
-        label = f"median {median:.3g}s"
-        x = min(max(median * 1.35, 0.0018), 1_900)
-        ax.text(x, yi - 0.26, label, fontsize=10.5, color=INK, va="center")
+        ax.text(1.015, yi, f"{median:.3g} s", transform=ax.get_yaxis_transform(),
+                fontsize=10.5, color=INK, ha="left", va="center", clip_on=False)
     ax.invert_yaxis()
-    fig.subplots_adjust(left=0.18, right=0.99, bottom=0.13, top=0.90)
+    fig.subplots_adjust(left=0.16, right=0.87, bottom=0.13, top=0.90)
     return save(
         fig,
         "common_solved_time_boxplot",
@@ -462,6 +488,114 @@ def write_provenance(paths):
     (OUT / "PROVENANCE.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+
+def figure_unbounded_family():
+    """The connected family: why the grouping is forced, and how the gap grows.
+
+    Closed-form construction, not campaign data: |U| = 8g+1, K* = 3g,
+    Z* = 8g-5, H = 9g-5.  Verified by exhaustive enumeration at g = 1, 2.
+    """
+    from matplotlib.patches import FancyBboxPatch
+
+    fig, (left, right) = plt.subplots(
+        1, 2, figsize=(12.6, 4.5), gridspec_kw={"width_ratios": [1.30, 1.0]}
+    )
+
+    # ---------------- left: why the grouping is forced ---------------------
+    left.set_xlim(0, 10.2)
+    left.set_ylim(0, 5.0)
+    left.axis("off")
+
+    def box(x, y, w, h, face, edge, label, sub, bold=False):
+        left.add_patch(FancyBboxPatch(
+            (x, y), w, h, boxstyle="round,pad=0.02,rounding_size=0.10",
+            facecolor=face, edgecolor=edge, linewidth=1.1, zorder=3))
+        left.text(x + w / 2, y + h * 0.62, label, ha="center", va="center",
+                  fontsize=11, fontweight="bold" if bold else "normal",
+                  color=INK, zorder=4)
+        left.text(x + w / 2, y + h * 0.24, sub, ha="center", va="center",
+                  fontsize=8, color=MUTED, zorder=4)
+
+    # the universal tool, spanning everything
+    left.add_patch(FancyBboxPatch(
+        (0.25, 3.86), 9.7, 0.52, boxstyle="round,pad=0.02,rounding_size=0.10",
+        facecolor=PALE_BLUE, edgecolor=BLUE, linewidth=1.0, alpha=0.55, zorder=2))
+    left.text(5.10, 4.12, "tool $u$  —  in every job, of every copy",
+              ha="center", va="center", fontsize=9.5, color=INK, zorder=4)
+
+    for k, (x0, mark, tick) in enumerate([(0.25, "$v_1$", ""), (5.30, "$v_2$", "'")]):
+        # per-copy marker band
+        left.add_patch(FancyBboxPatch(
+            (x0, 3.20), 4.42, 0.46, boxstyle="round,pad=0.02,rounding_size=0.10",
+            facecolor=PALE_ORANGE, edgecolor=ORANGE, linewidth=1.0, alpha=0.55, zorder=2))
+        left.text(x0 + 2.21, 3.43, f"marker {mark}  —  in all four jobs of copy {k+1}",
+                  ha="center", va="center", fontsize=8.5, color=INK, zorder=4)
+        t = tick
+        jobs = [(f"$A_{k+1}$", f"$1{t},2{t}$",       "white"),
+                (f"$B_{k+1}$", f"$3{t},4{t}$",       "white"),
+                (f"$C_{k+1}$", f"$1{t},3{t},5{t},6{t}$", "#E8EDF6"),
+                (f"$D_{k+1}$", f"$2{t},5{t},6{t},7{t}$", "#E8EDF6")]
+        for j, (lab, sub, face) in enumerate(jobs):
+            box(x0 + j * 1.10, 2.28, 1.00, 0.78, face, BLUE, lab, sub)
+
+        # the forced grouping, drawn as brackets
+        for (xa, xb, txt) in [(x0, x0 + 2.10, "one group"),
+                              (x0 + 2.20, x0 + 3.20, "alone"),
+                              (x0 + 3.30, x0 + 4.30, "alone")]:
+            left.plot([xa, xa, xb, xb], [2.10, 1.90, 1.90, 2.10],
+                      color=PURPLE, linewidth=1.2, zorder=3)
+            left.text((xa + xb) / 2, 1.62, txt, ha="center", va="center",
+                      fontsize=8.5, color=PURPLE)
+
+    left.text(10.05, 3.43, "$\cdots$  g copies", ha="right", va="center",
+              fontsize=9, color=MUTED)
+
+    left.text(0.25, 1.10,
+              "$C_i$ and $D_i$ already fill all six slots, so each must sit alone.\n"
+              "$A_i$ and $B_i$ together need exactly six — but $A_i$ with any job of\n"
+              "another copy needs seven. The minimum grouping is forced and unique.",
+              ha="left", va="top", fontsize=9, color=INK, linespacing=1.55)
+
+    # ---------------- right: the gap grows without bound -------------------
+    g = np.arange(1, 9)
+    opt = 8 * g - 5
+    heur = 9 * g - 5
+
+    right.fill_between(g, opt, heur, color=CORAL, alpha=0.20, zorder=1,
+                       label="the loss")
+    right.plot(g, heur, "-o", color=CORAL, linewidth=2.2, markersize=5.5,
+               zorder=3, label="what the heuristic returns,  $9g-5$")
+    right.plot(g, opt, "-o", color=TEAL, linewidth=2.2, markersize=5.5,
+               zorder=3, label="the true optimum,  $8g-5$")
+
+    for gi in (4, 8):
+        right.annotate("", xy=(gi, heur[gi - 1]), xytext=(gi, opt[gi - 1]),
+                       arrowprops=dict(arrowstyle="<->", color=INK, linewidth=1.1))
+        right.text(gi - 0.30, (heur[gi - 1] + opt[gi - 1]) / 2, f"gap {gi}",
+                   ha="right", va="center", fontsize=9.5, fontweight="bold", color=INK,
+                   bbox=dict(boxstyle="round,pad=0.16", facecolor="white",
+                             edgecolor="none", alpha=0.85))
+
+    right.set_xlabel("number of copies $g$")
+    right.set_ylabel("tool insertions")
+    right.set_xticks(g)
+    right.set_xlim(0.6, 8.6)
+    right.set_ylim(0, 72)
+    right.set_title("The loss is exactly $g$, and never stops growing", pad=10)
+    clean_axis(right, ygrid=True)
+    right.legend(loc="upper left", frameon=False, fontsize=9.5)
+    right.text(8.45, 5.0,
+               "ratio $\\to 9/8$: unbounded loss,\nbut a constant factor survives",
+               ha="right", va="bottom", fontsize=9, color=MUTED)
+
+    fig.subplots_adjust(left=0.01, right=0.985, bottom=0.13, top=0.90, wspace=0.14)
+    return save(
+        fig,
+        "unbounded_family",
+        "Connected family with |U|=8g+1, K*=3g, Z*=8g-5, H=9g-5; verified at g=1,2.",
+    )
+
+
 def main():
     audit, bbc, instances, used = load_campaign()
     paths = [
@@ -470,6 +604,7 @@ def main():
         figure_root_bounds(bbc, used),
         figure_fractional_tradeoff(audit, bbc),
         figure_common_solved_times(audit, bbc),
+        figure_unbounded_family(),
     ]
     write_provenance(paths)
     print("Generated audited vector figures:")
