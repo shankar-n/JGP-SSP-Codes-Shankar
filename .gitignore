@@ -76,6 +76,12 @@ _trash_2026-07/
 *.cut
 
 # ---- private working layer (kept local, not published) ----
+_to_delete/
+report/_to_delete/
+report/DESIGN_AUDIT.md
+report/THEOREM_AUDIT.md
+AUDIT_BRIEF_*.md
+
 CLAUDE.md
 README_PROOFREAD_BEFORE_RUN.md
 RUNBOOK_NEXT.md
@@ -85,7 +91,6 @@ CLEANUP_PLAN.md
 DEFENCE_PLAN.md
 DEFENCE_PLAN.html
 REPO_*.*
-!REPO_HYGIENE.md
 verification/*
 !verification/bound_probe_instances.txt
 !verification/test_resume_keys.py
