@@ -2,21 +2,20 @@
 
 **Shankar Narayanan · LIMOS, ISIMA / Université Clermont Auvergne · 2 September 2026**
 
-Main talk: **slides 1–35, target 29:00** for a 25–30 minute slot.
+Main talk: **slides 1–35, target 29:20** for a 25–30 minute slot.
 Quoted paragraphs are the verbatim speech. *Italic lines are delivery cues, not spoken.*
 Slides 36–37 are references; 38–48 are backup. Neither is part of the timed talk.
 
-**Slides 3, 10, 13, 20, 25 and 29 are section dividers.** Each carries one line. Read it,
+**Slides 3, 10, 13, 20, 25 and 30 are section dividers.** Each carries one line. Read it,
 do not elaborate, move on — about 10 seconds each, 1:00 in total.
 
 Running total after each slide, so you can tell mid-talk whether you are ahead or behind.
 
 ---
 
-## Part 1 — The problem (slides 1–9, 7:20)
+## Part 1 — The problem (slides 1–9, 7:10)
 
 ### Slide 1 · Title — 0:35 *(0:35)*
-
 > Good morning. This internship was carried out at LIMOS under Professor Colares and
 > Professor Wagler, with Doctor Chicoisne as academic supervisor. The subject is a
 > scheduling problem that comes from flexible manufacturing: the job sequencing and tool
@@ -26,7 +25,6 @@ Running total after each slide, so you can tell mid-talk whether you are ahead o
 > computational work.
 
 ### Slide 2 · Outline — 0:20 *(0:55)*
-
 > Six parts. The problem and the two questions; the structural results, which I will keep
 > short; then the branch-and-Benders-cut algorithm and its strengthenings, which is where
 > most of the time goes; the computational results; and what they say about the limits of
@@ -34,8 +32,7 @@ Running total after each slide, so you can tell mid-talk whether you are ahead o
 
 *Do not read the list aloud item by item. Point at it once and move on.*
 
-### Slide 4 · A machine, a magazine, and a set of jobs — 1:10 *(2:05)*
-
+### Slide 4 · A machine, a magazine, and a set of jobs — 1:10 *(2:15)*
 > Here is the whole setting, and it needs no mathematics.
 >
 > A machine makes many different parts. Each part is a job, and each job needs its own
@@ -56,8 +53,7 @@ Running total after each slide, so you can tell mid-talk whether you are ahead o
 *This is the slide that decides whether the rest lands. Do not rush it. Point at the
 grey box when you say "magazine", and at a red arrow when you say "stops the machine".*
 
-### Slide 5 · Why the order matters — 1:00 *(3:05)*
-
+### Slide 5 · Why the order matters — 1:00 *(3:15)*
 > Now watch what the order does. Same three jobs, same magazine of two, same rule for
 > deciding what to keep.
 >
@@ -74,8 +70,7 @@ grey box when you say "magazine", and at a red arrow when you say "stops the mac
 > is some version of: where do reinsertions come from, and can we prove a schedule has as
 > few as possible?
 
-### Slide 6 · Schedules as walks through configurations — 1:20 *(4:25)*
-
+### Slide 6 · Schedules as walks through configurations — 1:10 *(4:25)*
 > One more picture, and then the notation, which is all I will need.
 >
 > Call a full magazine a configuration. Then a schedule is nothing but a walk: you stand
@@ -99,7 +94,6 @@ grey box when you say "magazine", and at a red arrow when you say "stops the mac
 *Say "q" as "the count q" the first few times so the audience keeps hold of it.*
 
 ### Slide 7 · One decision is easy, the other is not — 1:00 *(5:25)*
-
 > With that in place, here is why this problem is interesting.
 >
 > If somebody hands you the order, the loading is easy. There is a rule: when a tool has
@@ -120,7 +114,6 @@ grey box when you say "magazine", and at a red arrow when you say "stops the mac
 > are built for. Hold on to that; it is why the second half of the talk exists.
 
 ### Slide 8 · Where the literature stops — 1:00 *(6:25)*
-
 > Two lines of work, and each leaves something open.
 >
 > On the practical side, industry does not attack this problem directly. It first packs
@@ -137,7 +130,6 @@ grey box when you say "magazine", and at a red arrow when you say "stops the mac
 > q is not the answer.
 
 ### Slide 9 · The two questions — 0:45 *(7:10)*
-
 > So, two questions.
 >
 > First, the structural one. The grouping construction insists on the fewest possible
@@ -153,13 +145,12 @@ grey box when you say "magazine", and at a red arrow when you say "stops the mac
 
 ---
 
-## Part 2 — Structural results (slides 10–12, 3:30)
+## Part 2 — Structural results (slides 10–12, 3:10)
 
 *Divider slide 10, then two slides. This is the part of the work I would lead with if I
 only had five minutes.*
 
-### Slide 11 · The standard worst-case example is not a worst case — 1:45 *(11:40)*
-
+### Slide 11 · The standard worst-case example is not a worst case — 1:30 *(8:50)*
 > This is the result I would put first, and it needs no notation at all.
 >
 > The construction produces groups of jobs. But what does it actually return? There are two
@@ -185,8 +176,7 @@ only had five minutes.*
 three jobs to nine, the left-hand value separates from the optimum and the right-hand value
 never does. Table is in the report.*
 
-### Slide 12 · So the loss is real — but you need a different construction — 1:45 *(13:25)*
-
+### Slide 12 · So the loss is real — but you need a different construction — 1:30 *(10:20)*
 > The obvious next question is whether the loss was ever real, or whether the whole
 > worst-case story was an artefact of drawing the wrong picture. It is real. But you need a
 > genuinely different construction, and the left-hand panel is it.
@@ -217,10 +207,9 @@ never does. Table is in the report.*
 *Verified by exhaustive enumeration at $g=1$ and $g=2$ by a program sharing no code with
 the solvers.*
 
-## Part 3 — The branch-and-Benders-cut algorithm (slides 13–19, 6:30)
+## Part 3 — The branch-and-Benders-cut algorithm (slides 13–19, 6:20)
 
-### Slide 14 · The decomposition — 1:00 *(10:55)*
-
+### Slide 14 · The decomposition — 1:00 *(11:30)*
 > Now to the main computational work, and it starts from the observation I flagged
 > earlier: an easy problem sitting inside a hard one.
 >
@@ -237,8 +226,7 @@ the solvers.*
 > logic-based and combinatorial Benders lineage of Hooker and Ottosson and of Codato and
 > Fischetti.
 
-### Slide 15 · The master problem — 1:10 *(12:05)*
-
+### Slide 15 · The master problem — 1:10 *(12:40)*
 > The master is a Hamiltonian path model. Introduce a depot with no tool requirement to
 > mark the start and the end, and let x-i-j be one when job j runs immediately after job
 > i. The assignment constraints and the subtour elimination constraints make the x
@@ -256,8 +244,7 @@ the solvers.*
 >
 > Both of these are visible to the linear relaxation from the start. Remember that.
 
-### Slide 16 · The subproblem: loading for a fixed order — 1:10 *(13:15)*
-
+### Slide 16 · The subproblem: loading for a fixed order — 1:00 *(13:40)*
 > The subproblem has to be written in the master's own variables, or the inequality it
 > produces cannot be added back.
 >
@@ -272,8 +259,7 @@ the solvers.*
 > The Greek letters in the right margin are the dual variables. They are what the cut is
 > built from, and they are the only reason I am showing you this model at all.
 
-### Slide 17 · Why the oracle is exact — 1:00 *(14:15)*
-
+### Slide 17 · Why the oracle is exact — 1:00 *(14:40)*
 > This is the slide that makes the method honest, so I want to be precise.
 >
 > Once x-bar fixes a path, the master's variables sit only on the right-hand side. What
@@ -288,8 +274,7 @@ the solvers.*
 > What remains in question — and this is the whole rest of the talk — is whether the
 > master accumulates a strong enough lower bound to prove that no better order exists.
 
-### Slide 18 · The optimality cut — 1:10 *(15:25)*
-
+### Slide 18 · The optimality cut — 1:00 *(15:40)*
 > Here is the cut in full. Take any optimal dual solution of that loading program and
 > substitute; weak duality gives you this inequality on theta.
 >
@@ -309,8 +294,7 @@ the solvers.*
 > duals over tools. Every cut this master ever receives is supported on arcs. Please hold
 > on to that observation — it is the punchline of the talk.
 
-### Slide 19 · A defect found and corrected — 1:00 *(16:25)*
-
+### Slide 19 · A defect found and corrected — 1:00 *(16:40)*
 > I want to show one thing that went wrong, because it changed the results and because it
 > is the kind of error that hides.
 >
@@ -332,10 +316,9 @@ the solvers.*
 
 ---
 
-## Part 4 — Strengthening the solver (slides 20–24, 3:50)
+## Part 4 — Strengthening the solver (slides 20–24, 3:55)
 
-### Slide 21 · Four strengthenings — 0:50 *(17:15)*
-
+### Slide 21 · Four strengthenings — 0:50 *(17:40)*
 > Four strengthenings, all classical, all from the Benders toolbox surveyed by Rahmaniani
 > and co-authors. Each was implemented as an independent switch and checked against brute
 > force before any campaign run, so that a strengthening can never silently return a wrong
@@ -348,8 +331,7 @@ the solvers.*
 >
 > Three different targets. Watch which kind helps.
 
-### Slide 22 · Fractional Benders cuts — 1:10 *(18:25)*
-
+### Slide 22 · Fractional Benders cuts — 1:05 *(18:45)*
 > The first one, and the most instructive failure in the whole project.
 >
 > The intention is standard. An integer-only scheme learns about loading cost only once an
@@ -375,8 +357,7 @@ the solvers.*
 *If pushed: the missing control is the base solver with presolve disabled and no
 fractional cuts. It was never run. One more configuration would settle it.*
 
-### Slide 23 · A strong incumbent at the root — 0:55 *(19:20)*
-
+### Slide 23 · A strong incumbent at the root — 0:55 *(19:40)*
 > The second one is the only strengthening that aims at the primal side.
 >
 > A branch-and-bound search prunes in proportion to how good its incumbent is, so a
@@ -392,8 +373,7 @@ fractional cuts. It was never run. One more configuration would settle it.*
 > It gains thirty-one instances. It is the only one of the four that gains anything, and it
 > is the only one aimed at the incumbent rather than the bound.
 
-### Slide 24 · The conflict-graph row, and Pareto lifting — 0:55 *(20:15)*
-
+### Slide 24 · The conflict-graph row, and Pareto lifting — 0:55 *(20:35)*
 > The remaining two, quickly, because they behave the same way.
 >
 > The conflict-graph row looks for combinatorial structure the linear relaxation cannot
@@ -413,10 +393,9 @@ fractional cuts. It was never run. One more configuration would settle it.*
 
 ---
 
-## Part 5 — Computational results (slides 25–29, 4:40)
+## Part 5 — Computational results (slides 25–29, 4:25)
 
-### Slide 26 · How far each method gets — 1:05 *(21:20)*
-
+### Slide 26 · How far each method gets — 1:00 *(21:45)*
 > The campaign. Fourteen hundred and ten canonical instances, twelve configurations,
 > sixteen thousand nine hundred and twenty planned outcomes, all present. One hour per run.
 > And a fixed denominator: every planned pair counts once, and any outcome that is not a
@@ -435,8 +414,7 @@ fractional cuts. It was never run. One more configuration would settle it.*
 
 *Do not soften this. Owning it here is what makes the diagnosis credible later.*
 
-### Slide 27 · Half the benchmark cannot tell the methods apart — 1:20
-
+### Slide 27 · Half the benchmark cannot tell the methods apart — 1:10 *(22:55)*
 > Look at where the margin comes from. Laporte3 and Laporte4 are six hundred and seventy of
 > the fourteen hundred and ten instances — nearly half — and all three compact models close
 > a hundred per cent of both. Those families contribute six hundred and seventy to every
@@ -457,8 +435,7 @@ fractional cuts. It was never run. One more configuration would settle it.*
 *Every number here is arithmetic on the per-family table already in the report. Nothing new
 was run.*
 
-### Slide 28 · Solving times — 0:55 *(22:15)*
-
+### Slide 28 · Solving times — 0:55 *(23:50)*
 > Now restrict to the five hundred and thirty-one instances that every method solves, so we
 > are comparing like with like. The picture inverts. The Benders medians sit orders of
 > magnitude below the compact ones — note the axis is logarithmic, so those are factors of
@@ -471,8 +448,7 @@ was run.*
 > That shape is the signature of a bound that is either exactly right or of no use at all.
 > Which is exactly what the next slide measures.
 
-### Slide 29 · What separates the two cases — 1:20 *(23:35)*
-
+### Slide 29 · What separates the two cases — 1:10 *(25:00)*
 > So take the eleven hundred and seven instances whose optimum we know, and split them by a
 > single structural property: is the elementary count q equal to the optimum, or not?
 >
@@ -496,10 +472,9 @@ was run.*
 
 ---
 
-## Part 6 — Limitations and conclusions (slides 30–35, 3:25)
+## Part 6 — Limitations and conclusions (slides 30–35, 4:20)
 
-### Slide 31 · The cost is not a local quantity — 1:15 *(24:50)*
-
+### Slide 31 · The cost is not a local quantity — 1:05 *(26:15)*
 > Why does the bound not move? I think there is a structural reason, and here it is.
 >
 > For each tool, count the separate stretches during which it sits in the magazine. Every
@@ -520,8 +495,7 @@ was run.*
 > adjacency-indexed. I want to be careful about the status of this: it is the reading the
 > measurements support, not a theorem of causation.
 
-### Slide 32 · A family that is not local — 1:10 *(26:00)*
-
+### Slide 32 · A family that is not local — 1:00 *(27:15)*
 > If that reading is right, the fix is to find an inequality that counts across a span
 > rather than an arc. So I derived one.
 >
@@ -540,8 +514,7 @@ was run.*
 > necessary. It is not sufficient — the encoding has to survive fractional mixing, and mine
 > did not.
 
-### Slide 33 · What this study does not show — 1:20
-
+### Slide 33 · What this study does not show — 1:10 *(28:25)*
 > Before I conclude, four things this study does not show, ordered by how much each
 > threatens what I have just said.
 >
@@ -564,8 +537,7 @@ was run.*
 *Do not hurry this slide. Stating the limits yourself is what stops the jury having to
 find them.*
 
-### Slide 34 · Conclusions — 1:00 *(28:20)*
-
+### Slide 34 · Conclusions — 0:55 *(29:20)*
 > To close.
 >
 > On the structural side: the grouping construction has two distinct values and the
@@ -595,7 +567,7 @@ find them.*
 
 ---
 
-## References and backup (slides 35–47) — not part of the timed talk
+## References and backup (slides 36–48) — not part of the timed talk
 
 Reach for these only if asked. Know which slide number each lives on.
 
